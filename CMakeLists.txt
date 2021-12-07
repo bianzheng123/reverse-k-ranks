@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(t1 test.cpp)
 add_executable(bfon OnlineBruteForce.cpp)
+add_executable(bfi IndexBruteForce.cpp)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     SET(CMAKE_CXX_FLAGS "-Ofast -DNDEBUG -std=c++11 -DHAVE_CXX0X -openmp -march=native -fpic -ftree-vectorize")

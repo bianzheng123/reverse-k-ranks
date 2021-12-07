@@ -4,17 +4,17 @@ namespace ReverseMIPS {
     class RankElement {
 
     public:
-        int index;
-        int rank;
+        int index_;
+        int rank_;
 
-        inline RankElement(){
-            this->index = 0;
-            this->rank = 0;
+        inline RankElement() {
+            this->index_ = 0;
+            this->rank_ = 0;
         }
 
-        inline RankElement(int _index, int _rank) {
-            this->index = _index;
-            this->rank = _rank;
+        inline RankElement(int index, int rank) {
+            this->index_ = index;
+            this->rank_ = rank;
         }
 
         inline ~RankElement() {}
@@ -22,29 +22,29 @@ namespace ReverseMIPS {
         inline bool operator==(const RankElement &other) const {
             if (this == &other)
                 return true;
-            return rank == other.rank && index == other.index;
+            return rank_ == other.rank_ && index_ == other.index_;
         };
 
         inline bool operator!=(const RankElement &other) const {
             if (this == &other)
                 return false;
-            return rank != other.rank || index != other.index;
+            return rank_ != other.rank_ || index_ != other.index_;
         };
 
         inline bool operator<(const RankElement &other) const {
-            return rank < other.rank;
+            return rank_ < other.rank_;
         }
 
         inline bool operator<=(const RankElement &other) const {
-            return rank <= other.rank;
+            return rank_ <= other.rank_;
         }
 
         inline bool operator>(const RankElement &other) const {
-            return rank > other.rank;
+            return rank_ > other.rank_;
         }
 
         inline bool operator>=(const RankElement &other) const {
-            return rank >= other.rank;
+            return rank_ >= other.rank_;
         }
 
     };

@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     q.push(RankElement(10, 2));
     while (!q.empty()) {
         RankElement tmp = q.top();
-        printf("%d ", tmp.rank);
+        printf("%d ", tmp.rank_);
         q.pop();
     }
     printf("\n");

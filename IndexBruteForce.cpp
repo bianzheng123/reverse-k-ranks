@@ -3,7 +3,7 @@
 #include "src/util/FileIO.hpp"
 #include "src/struct/RankElement.hpp"
 #include "src/struct/VectorMatrix.hpp"
-#include "src/OnlineBruteForce.hpp"
+#include "src/IndexBruteForce.hpp"
 #include <iostream>
 #include <vector>
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
 
-    OnlineBruteForce obf(data_item, user);
+    IndexBruteForce obf(data_item, user);
     obf.Preprocess();
     float preprocessed_time = record.get_elapsed_time_micro() * 1e-6;
     record.reset();
@@ -49,8 +49,8 @@ int main(int argc, char **argv) {
     float retrieval_time = record.get_elapsed_time_micro() * 1e-6;
 
     printf("preprocessed time %.3fs, retrieval time %.3fs\n", preprocessed_time, retrieval_time);
-    writeRank(result, dataset_name, "OnlineBruteForce");
-    writeConfig(dataset_name, "OnlineBruteForce", preprocessed_time, retrieval_time);
+    writeRank(result, dataset_name, "IndexBruteForce");
+    writeConfig(dataset_name, "IndexBruteForce", preprocessed_time, retrieval_time);
 
     return 0;
 }

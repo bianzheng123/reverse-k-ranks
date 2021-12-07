@@ -21,7 +21,7 @@ namespace ReverseMIPS {
             this->data_item_ = data_item;
             this->user_ = user;
 
-            vec_dim_ = user.vec_dim;
+            vec_dim_ = user.vec_dim_;
         }
 
         inline ~OnlineBruteForce() {}
@@ -29,8 +29,8 @@ namespace ReverseMIPS {
         void Preprocess() {}
 
         std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
-            int n_query_item = query_item.n_vector;
-            int n_user = user_.n_vector;
+            int n_query_item = query_item.n_vector_;
+            int n_user = user_.n_vector_;
 
             std::vector<std::vector<RankElement>> results(n_query_item, std::vector<RankElement>());
 
@@ -51,7 +51,7 @@ namespace ReverseMIPS {
                 for (int userID = topk; userID < n_user; userID++) {
                     int tmpRank = getRank(query_item_vec, user_.getVector(userID));
                     RankElement rankElement(userID, tmpRank);
-                    if (minHeapEle.rank > rankElement.rank) {
+                    if (minHeapEle.rank_ > rankElement.rank_) {
                         std::pop_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
                         minHeap.pop_back();
                         minHeap.push_back(rankElement);
@@ -63,13 +63,12 @@ namespace ReverseMIPS {
                 std::sort_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
 
                 if (qID % report_every_ == 0) {
-                    std::cout << qID / (0.01 * n_query_item) << " %, "
+                    std::cout << "retrieval " << qID / (0.01 * n_query_item) << " %, "
                               << 1e-6 * single_query_record.get_elapsed_time_micro() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
                     single_query_record.reset();
                 }
             }
-
 
             return results;
         }
@@ -77,13 +76,14 @@ namespace ReverseMIPS {
         int getRank(float *query_item_vec, float *user_vec) {
 
             float query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
-            int n_data_item = data_item_.n_vector;
+            int n_data_item = data_item_.n_vector_;
             int rank = 1;
 
             for (int i = 0; i < n_data_item; i++) {
                 float data_dist = InnerProduct(data_item_.getVector(i), user_vec, vec_dim_);
                 rank += data_dist > query_dist ? 1 : 0;
             }
+
             return rank;
         }
 

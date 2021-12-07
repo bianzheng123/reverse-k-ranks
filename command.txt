@@ -1,1 +1,5 @@
-./bfo fake 10
+./bfon fake 10
+./bfi fake 10
+
+./bfon movielens-small 10
+./bfi movielens-small 10
