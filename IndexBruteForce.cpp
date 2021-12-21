@@ -6,12 +6,31 @@
 #include "src/IndexBruteForce.hpp"
 #include <iostream>
 #include <vector>
+#include <string>
 
 //预处理时不做任何动作, 在线计算全部的向量, 然后返回最大的k个rank
 
 using namespace std;
 using namespace ReverseMIPS;
 
+
+void writeConfig(const char *dataset_name, const char *method_name, double preprocess_time, double retrieval_time,
+                 double ip_calc_time, double binary_search_time) {
+    char resPath[256];
+    std::sprintf(resPath, "../result/%s-%s-config.txt", dataset_name, method_name);
+    std::ofstream file(resPath);
+    if (!file) {
+        std::printf("error in write result\n");
+    }
+
+    file << "preprocess time: " << std::fixed << std::setprecision(5) << preprocess_time << "s" << std::endl;
+    file << "retrieval time: " << std::fixed << std::setprecision(5) << retrieval_time << "s" << std::endl;
+    file << "inner product calculation time: " << std::fixed << std::setprecision(5) << ip_calc_time << "s"
+         << std::endl;
+    file << "binary search time: " << std::fixed << std::setprecision(5) << binary_search_time << "s" << std::endl;
+
+    file.close();
+}
 
 int main(int argc, char **argv) {
     if (!(argc == 3 or argc == 4)) {
@@ -39,18 +58,24 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
 
-    IndexBruteForce obf(data_item, user);
-    obf.Preprocess();
-    float preprocessed_time = record.get_elapsed_time_micro() * 1e-6;
+    IndexBruteForce ibf(data_item, user);
+    ibf.Preprocess();
+    ibf.ResetTime();
+    double preprocessed_time = record.get_elapsed_time_micro() * 1e-6;
     record.reset();
     printf("finish preprocess\n");
 
-    vector<vector<RankElement>> result = obf.Retrieval(query_item, topk);
-    float retrieval_time = record.get_elapsed_time_micro() * 1e-6;
+    vector<vector<RankElement>> result = ibf.Retrieval(query_item, topk);
+
+    double ip_calc_time = ibf.inner_product_calculation_time_;
+    double binary_search_time = ibf.binary_search_time_;
+    double retrieval_time = record.get_elapsed_time_micro() * 1e-6;
 
     printf("preprocessed time %.3fs, retrieval time %.3fs\n", preprocessed_time, retrieval_time);
+    printf("inner product calculation time %.3fs, binary search time %.3fs\n", ip_calc_time, binary_search_time);
     writeRank(result, dataset_name, "IndexBruteForce");
-    writeConfig(dataset_name, "IndexBruteForce", preprocessed_time, retrieval_time);
+    writeConfig(dataset_name, "IndexBruteForce", preprocessed_time, retrieval_time, ip_calc_time,
+                binary_search_time);
 
     return 0;
 }

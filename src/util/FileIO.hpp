@@ -44,17 +44,4 @@ namespace ReverseMIPS {
         file.close();
     }
 
-    void writeConfig(const char *dataset_name, const char *method_name, float preprocess_time, float retrieval_time) {
-        char resPath[256];
-        std::sprintf(resPath, "../result/%s-%s-config.txt", dataset_name, method_name);
-        std::ofstream file(resPath);
-        if (!file) {
-            std::printf("error in write result\n");
-        }
-
-        file << "preprocess time: " << std::fixed << std::setprecision(5) << preprocess_time << "s" << std::endl;
-        file << "retrieval time: " << std::fixed << std::setprecision(5) << retrieval_time << "s" << std::endl;
-
-        file.close();
-    }
 }

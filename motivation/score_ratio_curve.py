@@ -43,20 +43,20 @@ def ip_gnd(base, query, k):
 
 if __name__ == '__main__':
     # item_name_l = ['correlated', 'independent']
-    item_name_l = ['movielens-20m']
+    item_name_l = ['netflix']
     # n_dim_l = [2, 3, 4, 5, 10, 15, 20, 25, 30]
-    n_dim_l = [5, 10, 15, 20, 25, 30, 40, 50]
+    n_dim_l = [10, 15, 20, 25, 30, 40, 50, 100, 150, 200, 250, 300]
     for i, item_name in enumerate(item_name_l, 0):
         print(item_name)
         user_l, dim = vecs_io.fvecs_read('data/%s/%s_user.fvecs' % (item_name, item_name))
         item_l, dim = vecs_io.fvecs_read('data/%s/%s_item.fvecs' % (item_name, item_name))
 
         rand_idx_l = np.random.permutation(len(user_l))
-        rand_idx_l = rand_idx_l[:10]
+        rand_idx_l = rand_idx_l[:20000]
         user_l = user_l[rand_idx_l, :]
 
-        # user_l = np.abs(user_l)
-        # item_l = np.abs(item_l)
+        user_l = np.abs(user_l)
+        item_l = np.abs(item_l)
 
         curve_y_l = []
         for eval_dim in n_dim_l:

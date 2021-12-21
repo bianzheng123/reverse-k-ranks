@@ -12,6 +12,20 @@
 using namespace std;
 using namespace ReverseMIPS;
 
+void writeConfig(const char *dataset_name, const char *method_name, double preprocess_time, double retrieval_time) {
+    char resPath[256];
+    std::sprintf(resPath, "../result/%s-%s-config.txt", dataset_name, method_name);
+    std::ofstream file(resPath);
+    if (!file) {
+        std::printf("error in write result\n");
+    }
+
+    file << "preprocess time: " << std::fixed << std::setprecision(5) << preprocess_time << "s" << std::endl;
+    file << "retrieval time: " << std::fixed << std::setprecision(5) << retrieval_time << "s" << std::endl;
+
+    file.close();
+}
+
 
 int main(int argc, char **argv) {
     if (!(argc == 3 or argc == 4)) {
@@ -41,12 +55,12 @@ int main(int argc, char **argv) {
 
     OnlineBruteForce obf(data_item, user);
     obf.Preprocess();
-    float preprocessed_time = record.get_elapsed_time_micro() * 1e-6;
+    double preprocessed_time = record.get_elapsed_time_micro() * 1e-6;
     record.reset();
     printf("finish preprocess\n");
 
     vector<vector<RankElement>> result = obf.Retrieval(query_item, topk);
-    float retrieval_time = record.get_elapsed_time_micro() * 1e-6;
+    double retrieval_time = record.get_elapsed_time_micro() * 1e-6;
 
     printf("preprocessed time %.3fs, retrieval time %.3fs\n", preprocessed_time, retrieval_time);
     writeRank(result, dataset_name, "OnlineBruteForce");

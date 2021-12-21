@@ -39,7 +39,9 @@ namespace ReverseMIPS {
         Index index_;
         int vec_dim_;
         int preprocess_report_every_ = 100;
-        int retrieval_report_every_ = 100;
+        double inner_product_calculation_time_;
+        double binary_search_time_;
+        TimeRecord record_;
 
         IndexBruteForce() {}
 
@@ -52,6 +54,11 @@ namespace ReverseMIPS {
             this->vec_dim_ = user.vec_dim_;
         }
 
+        void ResetTime() {
+            this->inner_product_calculation_time_ = 0;
+            this->binary_search_time_ = 0;
+        }
+
         ~IndexBruteForce() {}
 
         void Preprocess() {
@@ -59,7 +66,7 @@ namespace ReverseMIPS {
             int n_user = user_.n_vector_;
             std::vector<DistancePair> preprocess_matrix(n_user * n_data_item);
 
-            TimeRecord single_query_record;
+            record_.reset();
             for (int userID = 0; userID < n_user; userID++) {
 
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -74,9 +81,9 @@ namespace ReverseMIPS {
 
                 if (userID % preprocess_report_every_ == 0) {
                     std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                              << 1e-6 * single_query_record.get_elapsed_time_micro() << " s/iter" << " Mem: "
+                              << 1e-6 * record_.get_elapsed_time_micro() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
-                    single_query_record.reset();
+                    record_.reset();
                 }
 
             }
@@ -90,7 +97,6 @@ namespace ReverseMIPS {
 
             std::vector<std::vector<RankElement>> results(n_query_item, std::vector<RankElement>());
 
-            TimeRecord single_query_record;
             for (int qID = 0; qID < n_query_item; qID++) {
                 float *query_item_vec = query_item.getVector(qID);
                 std::vector<RankElement> &minHeap = results[qID];
@@ -98,6 +104,7 @@ namespace ReverseMIPS {
 
                 for (int userID = 0; userID < topk; userID++) {
                     int tmp_rank = getRank(query_item_vec, userID);
+
                     RankElement rankElement(userID, tmp_rank);
                     minHeap[userID] = rankElement;
                 }
@@ -106,6 +113,7 @@ namespace ReverseMIPS {
                 RankElement minHeapEle = minHeap.front();
                 for (int userID = topk; userID < n_user; userID++) {
                     int tmpRank = getRank(query_item_vec, userID);
+
                     RankElement rankElement(userID, tmpRank);
                     if (minHeapEle.rank_ > rankElement.rank_) {
                         std::pop_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
@@ -118,23 +126,22 @@ namespace ReverseMIPS {
                 std::make_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
                 std::sort_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
 
-                if (qID % retrieval_report_every_ == 0) {
-                    std::cout << "retrieval " << qID / (0.01 * n_query_item) << " %, "
-                              << 1e-6 * single_query_record.get_elapsed_time_micro() << " s/iter" << " Mem: "
-                              << get_current_RSS() / 1000000 << " Mb \n";
-                    single_query_record.reset();
-                }
             }
 
+//            this->inner_product_calculation_time_ /= (double) n_query_item;
+//            this->binary_search_time_ /= (double) n_query_item;
             return results;
         }
 
         int getRank(float *query_item_vec, int userID) {
             float *user_vec = user_.getVector(userID);
+            record_.reset();
             float query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
+            this->inner_product_calculation_time_ += record_.get_elapsed_time_micro() * 1e-6;
             int n_data_item = data_item_.n_vector_;
             DistancePair *dpPtr = index_.getUserDistPtr(userID);
 
+            record_.reset();
             int low = 0;
             int high = n_data_item;
             int rank = -1;
@@ -174,7 +181,7 @@ namespace ReverseMIPS {
                     }
                 }
             }
-
+            this->binary_search_time_ += record_.get_elapsed_time_micro() * 1e-6;
             if (rank <= 0) {
                 printf("bug\n");
             }
