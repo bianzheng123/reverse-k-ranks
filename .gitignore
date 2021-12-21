@@ -4,3 +4,6 @@ test.py
 /result/
 /index/
 *.log
+/.idea/
+/motivation/data/
+/motivation/result/
