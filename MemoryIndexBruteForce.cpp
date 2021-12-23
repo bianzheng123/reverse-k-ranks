@@ -3,7 +3,7 @@
 #include "src/util/FileIO.hpp"
 #include "src/struct/RankElement.hpp"
 #include "src/struct/VectorMatrix.hpp"
-#include "src/IndexBruteForce.hpp"
+#include "src/MemoryIndexBruteForce.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -46,10 +46,12 @@ int main(int argc, char **argv) {
     printf("dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector<float *> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);
-    float *data_item_ptr = data[0];
-    float *user_ptr = data[1];
-    float *query_item_ptr = data[2];
+    auto data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);
+    auto data_item_ptr = data[0].get();
+    auto user_ptr = data[1].get();
+    auto query_item_ptr = data[2].get();
+
+    printf("%.3f %.3f\n", data_item_ptr[0], data_item_ptr[1]);
 
     VectorMatrix data_item, user, query_item;
     data_item.init(data_item_ptr, n_data_item, vec_dim);
@@ -58,23 +60,23 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
 
-    IndexBruteForce ibf(data_item, user);
-    ibf.Preprocess();
-    ibf.ResetTime();
+    MemoryIndexBruteForce mibf(data_item, user);
+    mibf.Preprocess();
+    mibf.ResetTime();
     double preprocessed_time = record.get_elapsed_time_micro() * 1e-6;
     record.reset();
     printf("finish preprocess\n");
 
-    vector<vector<RankElement>> result = ibf.Retrieval(query_item, topk);
+    vector<vector<RankElement>> result = mibf.Retrieval(query_item, topk);
 
-    double ip_calc_time = ibf.inner_product_calculation_time_;
-    double binary_search_time = ibf.binary_search_time_;
+    double ip_calc_time = mibf.inner_product_calculation_time_;
+    double binary_search_time = mibf.binary_search_time_;
     double retrieval_time = record.get_elapsed_time_micro() * 1e-6;
 
     printf("preprocessed time %.3fs, retrieval time %.3fs\n", preprocessed_time, retrieval_time);
     printf("inner product calculation time %.3fs, binary search time %.3fs\n", ip_calc_time, binary_search_time);
-    writeRank(result, dataset_name, "IndexBruteForce");
-    writeConfig(dataset_name, "IndexBruteForce", preprocessed_time, retrieval_time, ip_calc_time,
+    writeRank(result, dataset_name, "MemoryIndexBruteForce");
+    writeConfig(dataset_name, "MemoryIndexBruteForce", preprocessed_time, retrieval_time, ip_calc_time,
                 binary_search_time);
 
     return 0;

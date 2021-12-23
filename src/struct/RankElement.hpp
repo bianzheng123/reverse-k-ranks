@@ -32,7 +32,11 @@ namespace ReverseMIPS {
         };
 
         inline bool operator<(const RankElement &other) const {
-            return rank_ < other.rank_;
+            if (rank_ != other.rank_) {
+                return rank_ < other.rank_;
+            } else {
+                return index_ < other.index_;
+            }
         }
 
         inline bool operator<=(const RankElement &other) const {
@@ -40,7 +44,11 @@ namespace ReverseMIPS {
         }
 
         inline bool operator>(const RankElement &other) const {
-            return rank_ > other.rank_;
+            if (rank_ != other.rank_) {
+                return rank_ > other.rank_;
+            } else {
+                return index_ > other.index_;
+            }
         }
 
         inline bool operator>=(const RankElement &other) const {

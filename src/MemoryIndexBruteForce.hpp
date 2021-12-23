@@ -33,7 +33,7 @@ namespace ReverseMIPS {
         }
     };
 
-    class IndexBruteForce {
+    class MemoryIndexBruteForce {
     public:
         VectorMatrix data_item_, user_;
         Index index_;
@@ -43,11 +43,11 @@ namespace ReverseMIPS {
         double binary_search_time_;
         TimeRecord record_;
 
-        IndexBruteForce() {}
+        MemoryIndexBruteForce() {}
 
-        IndexBruteForce(VectorMatrix
-                        &data_item,
-                        VectorMatrix &user
+        MemoryIndexBruteForce(VectorMatrix
+                              &data_item,
+                              VectorMatrix &user
         ) {
             this->data_item_ = data_item;
             this->user_ = user;
@@ -59,7 +59,7 @@ namespace ReverseMIPS {
             this->binary_search_time_ = 0;
         }
 
-        ~IndexBruteForce() {}
+        ~MemoryIndexBruteForce() {}
 
         void Preprocess() {
             int n_data_item = data_item_.n_vector_;
@@ -89,6 +89,7 @@ namespace ReverseMIPS {
             }
 
             index_.init(preprocess_matrix, n_user, n_data_item);
+
         }
 
         std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
@@ -110,6 +111,7 @@ namespace ReverseMIPS {
                 }
 
                 std::make_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+
                 RankElement minHeapEle = minHeap.front();
                 for (int userID = topk; userID < n_user; userID++) {
                     int tmpRank = getRank(query_item_vec, userID);
@@ -122,6 +124,7 @@ namespace ReverseMIPS {
                         std::push_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
                         minHeapEle = minHeap.front();
                     }
+
                 }
                 std::make_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
                 std::sort_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());

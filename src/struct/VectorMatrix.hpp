@@ -8,19 +8,15 @@ namespace ReverseMIPS {
         int vec_dim_;
 
         VectorMatrix() {
-            this->rawData_ = NULL;
+            this->rawData_ = nullptr;
             this->n_vector_ = 0;
             this->vec_dim_ = 0;
         }
 
-        ~VectorMatrix() {
-            if (!rawData_) {
-                delete[] rawData_;
-            }
-        }
+        ~VectorMatrix() = default;
 
-        float *getVector(const int vec_idx) {
-            return &rawData_[vec_idx * vec_dim_];
+        float *getVector(const int vec_idx) const {
+            return rawData_ + vec_idx * vec_dim_;
         }
 
         void init(float *rawData, const int n_vector, const int vec_dim) {

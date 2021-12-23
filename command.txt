@@ -1,5 +1,12 @@
 ./bfon fake 10
-./bfi fake 10
+./bfmi fake 10
+./bfdi fake 10
 
 ./bfon movielens-small 10
-./bfi movielens-small 10
+./bfmi movielens-small 10
+./bfdi movielens-small 10
+
+./bfon netflix 10
+./bfmi netflix 10
+./bfdi netflix 10
+

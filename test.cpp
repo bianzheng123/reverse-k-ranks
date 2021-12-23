@@ -1,23 +1,19 @@
 #include <iostream>
 #include <vector>
-#include <queue>
-#include "src/struct/RankElement.hpp"
+#include <fstream>
 
-using namespace ReverseMIPS;
 using namespace std;
 
-
 int main(int argc, char **argv) {
-    priority_queue<RankElement, vector<RankElement>, less<RankElement> > q;
-    q.push(RankElement(10, 6));
-    q.push(RankElement(10, 10));
-    q.push(RankElement(10, 1));
-    q.push(RankElement(10, 2));
-    while (!q.empty()) {
-        RankElement tmp = q.top();
-        printf("%d ", tmp.rank_);
-        q.pop();
+
+    vector<vector<int>> arr(2, vector<int>());
+    arr[0].emplace_back(1);
+    arr[1].emplace_back(2);
+    vector<int> &tmp = arr[1];
+    tmp.emplace_back(12312);
+    for (int i = 0; i < arr[1].size(); i++) {
+        cout << arr[i][i] << endl;
     }
-    printf("\n");
+
     return 0;
 }
