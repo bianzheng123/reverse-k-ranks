@@ -94,7 +94,6 @@ int main(int argc, char **argv) {
     user.init(user_ptr, n_user, vec_dim);
 
     DiskIndexBruteForce dibf(index_path, user);
-    dibf.ResetTime();
     TimeRecord record;
     record.reset();
     vector<vector<RankElement>> result = dibf.Retrieval(query_item, topk);

@@ -28,7 +28,6 @@ namespace ReverseMIPS {
         const int n_data_item = data_item.n_vector_;
         std::vector<DistancePair> distance_cache(write_every_ * n_data_item);
         const int vec_dim = data_item.vec_dim_;
-        printf("%d\n", user.n_vector_);
         const int n_batch = user.n_vector_ / write_every_;
         const int n_remain = user.n_vector_ % write_every_;
         out.write((char *) &n_data_item, sizeof(int));
@@ -112,6 +111,7 @@ namespace ReverseMIPS {
         ~DiskIndexBruteForce() {}
 
         std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+            ResetTime();
 
             if (topk > this->n_cache || this->n_cache > user_.n_vector_) {
                 printf("not support the number, program exit\n");
