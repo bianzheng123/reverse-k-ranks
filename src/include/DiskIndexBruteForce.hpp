@@ -95,7 +95,7 @@ namespace ReverseMIPS {
             this->user_ = user;
 
             if (!this->index_stream_) {
-                std::printf("error in write result\n");
+                std::printf("error in writing index\n");
             }
             this->index_stream_.read((char *) &this->n_data_item_, sizeof(int));
             this->vec_dim_ = user.vec_dim_;

@@ -10,3 +10,7 @@
 ./bfmi netflix 10
 ./bfdi netflix 10
 
+./bfon movielens-27m 10
+./bfmi movielens-27m 10
+./bfdi movielens-27m 10
+

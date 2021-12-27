@@ -1,13 +1,13 @@
 //
-// Created by BianZheng on 2021/12/22.
+// Created by BianZheng on 2021/12/27.
 //
 
-#include "src/util/VectorIO.hpp"
-#include "src/util/TimeMemory.hpp"
-#include "src/util/FileIO.hpp"
-#include "src/struct/RankElement.hpp"
-#include "src/struct/VectorMatrix.hpp"
-#include "src/DiskIndexBruteForce.hpp"
+#include "util/VectorIO.hpp"
+#include "util/TimeMemory.hpp"
+#include "util/FileIO.hpp"
+#include "struct/RankElement.hpp"
+#include "struct/VectorMatrix.hpp"
+#include "DiskIndexBruteForce.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -30,7 +30,8 @@ void writeConfig(const char *dataset_name, const char *method_name,
 
     file << "total preprocess time: " << std::fixed << std::setprecision(5) << total_preprocess_time << "s"
          << std::endl;
-    file << "preprocess calculation time: " << std::fixed << std::setprecision(5) << preprocess_time << "s" << std::endl;
+    file << "preprocess calculation time: " << std::fixed << std::setprecision(5) << preprocess_time << "s"
+         << std::endl;
     file << "total retrieval time: " << std::fixed << std::setprecision(5) << retrieval_time << "s" << std::endl;
     file << "inner product calculation time: " << std::fixed << std::setprecision(5) << ip_calc_time << "s"
          << std::endl;
@@ -54,18 +55,15 @@ int main(int argc, char **argv) {
 
     double preprocess_time, total_preprocess_time;
     char index_path[256];
-    sprintf(index_path, "../index/%s.index", dataset_name);
+    sprintf(index_path, "../index/sample_%s", dataset_name);
+    recreateFile(index_path);
+    sprintf(index_path, "../index/sample_%s/%s.bfi", dataset_name, dataset_name);
     {
-        std::ifstream file(index_path);
-        if (!file.is_open()) {
-            printf("error in writing index");
-        }
         int n_data_item, n_query_item, n_user, vec_dim;
-        vector<unique_ptr<float[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                                    vec_dim);
+        vector <unique_ptr<float[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                                     vec_dim);
         float *data_item_ptr = data[0].get();
         float *user_ptr = data[1].get();
-        float *query_item_ptr = data[2].get();
 
         VectorMatrix data_item, user, query_item;
         data_item.init(data_item_ptr, n_data_item, vec_dim);
@@ -96,13 +94,14 @@ int main(int argc, char **argv) {
     DiskIndexBruteForce dibf(index_path, user);
     TimeRecord record;
     record.reset();
-    vector<vector<RankElement>> result = dibf.Retrieval(query_item, topk);
+    vector <vector<RankElement>> result = dibf.Retrieval(query_item, topk);
 
     double ip_calc_time = dibf.inner_product_calculation_time_;
     double binary_search_time = dibf.binary_search_time_;
     double retrieval_time = record.get_elapsed_time_micro() * 1e-6;
 
-    printf("total preprocess time %.3fs, preprocessed calculation time %.3fs, total retrieval time %.3fs\n", total_preprocess_time,
+    printf("total preprocess time %.3fs, preprocessed calculation time %.3fs, total retrieval time %.3fs\n",
+           total_preprocess_time,
            preprocess_time, retrieval_time);
     printf("inner product calculation time %.3fs, binary search time %.3fs\n", ip_calc_time, binary_search_time);
     writeRank(result, dataset_name, "DiskIndexBruteForce");

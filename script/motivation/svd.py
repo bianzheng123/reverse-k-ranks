@@ -1,7 +1,5 @@
 import vecs_io
 import numpy as np
-import matplotlib.pyplot as plt
-import os
 
 # 对数据进行svd的处理
 
