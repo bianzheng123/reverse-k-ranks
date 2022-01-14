@@ -1,0 +1,6 @@
+./skyline netflix item
+./skyline netflix item_svd
+./skyline netflix item_fexipro_svd
+./skyline movielens-20m item
+./skyline movielens-20m item_svd
+./skyline movielens-20m item_fexipro_svd

@@ -1,5 +1,6 @@
 import vecs_io
 import numpy as np
+import matplotlib.pyplot as plt
 
 # 对数据进行svd的处理
 
@@ -8,8 +9,8 @@ if __name__ == '__main__':
     # dataset_l = ['netflix', 'yahoomusic']
     dataset_l = ['netflix', 'movielens-20m']
     for ds in dataset_l:
-        base, dim = vecs_io.fvecs_read('data/%s/%s_item.fvecs' % (ds, ds))
-        query, dim = vecs_io.fvecs_read('data/%s/%s_user.fvecs' % (ds, ds))
+        base, dim = vecs_io.fvecs_read('/home/bianzheng/skyline-partition/data/%s/%s_item.fvecs' % (ds, ds))
+        query, dim = vecs_io.fvecs_read('/home/bianzheng/skyline-partition/data/%s/%s_user.fvecs' % (ds, ds))
         base = base.T
 
         u, sigma, v_prime = np.linalg.svd(base, full_matrices=False)

@@ -1,4 +1,7 @@
 #pragma once
+
+#include <string>
+
 namespace ReverseMIPS {
     class DistancePair {
     public:
@@ -16,6 +19,13 @@ namespace ReverseMIPS {
         }
 
         ~DistancePair() {}
+
+        std::string ToString() {
+            char arr[256];
+            sprintf(arr, "%.3f %d", dist_, ID_);
+            std::string str(arr);
+            return str;
+        }
 
         inline bool operator==(const DistancePair &other) const {
             if (this == &other)

@@ -5,6 +5,9 @@ test.py
 /index/
 *.log
 /.idea/
-/script/motivation/data/
-/script/motivation/result/
+/motivation/data/
+/motivation/result/
 index
+/skyline-partition/build/
+/skyline-partition/data/
+/skyline-partition/result/
