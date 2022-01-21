@@ -1,10 +1,17 @@
 ./bfon fake 10
 ./bfmi fake 10
 ./bfdi fake 10
+./rkitv fake 10
+
+./bfon movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
+./bfmi movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
+./bfdi movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
+./rkitv movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
 
 ./bfon movielens-small 10
 ./bfmi movielens-small 10
 ./bfdi movielens-small 10
+./rkitv movielens-small 10
 
 ./bfon netflix 10
 ./bfmi netflix 10
@@ -13,4 +20,6 @@
 ./bfon movielens-27m 10
 ./bfmi movielens-27m 10
 ./bfdi movielens-27m 10
+
+
 

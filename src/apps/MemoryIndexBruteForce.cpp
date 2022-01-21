@@ -30,10 +30,10 @@ int main(int argc, char **argv) {
     printf("dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector <unique_ptr<float[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);
-    float *data_item_ptr = data[0].get();
-    float *user_ptr = data[1].get();
-    float *query_item_ptr = data[2].get();
+    vector <unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);
+    double *data_item_ptr = data[0].get();
+    double *user_ptr = data[1].get();
+    double *query_item_ptr = data[2].get();
 
     VectorMatrix data_item, user, query_item;
     data_item.init(data_item_ptr, n_data_item, vec_dim);
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     MemoryIndexBruteForce mibf(data_item, user);
     mibf.Preprocess();
     mibf.ResetTime();
-    double preprocessed_time = record.get_elapsed_time_micro() * 1e-6;
+    double preprocessed_time = record.get_elapsed_time_second();
     record.reset();
     printf("finish preprocess\n");
 
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
     double ip_calc_time = mibf.inner_product_calculation_time_;
     double binary_search_time = mibf.binary_search_time_;
-    double retrieval_time = record.get_elapsed_time_micro() * 1e-6;
+    double retrieval_time = record.get_elapsed_time_second();
 
     printf("preprocessed time %.3fs, retrieval time %.3fs\n", preprocessed_time, retrieval_time);
     printf("inner product calculation time %.3fs, binary search time %.3fs\n", ip_calc_time, binary_search_time);

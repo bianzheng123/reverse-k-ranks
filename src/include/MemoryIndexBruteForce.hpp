@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/SpaceInnerProduct.hpp"
+#include "alg/SpaceInnerProduct.hpp"
 #include "struct/RankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "util/TimeMemory.hpp"
@@ -70,7 +70,7 @@ namespace ReverseMIPS {
             for (int userID = 0; userID < n_user; userID++) {
 
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
-                    float query_dist = InnerProduct(data_item_.getVector(itemID), user_.getVector(userID), vec_dim_);
+                    double query_dist = InnerProduct(data_item_.getVector(itemID), user_.getVector(userID), vec_dim_);
                     preprocess_matrix[userID * n_data_item + itemID] = DistancePair(query_dist, itemID);
                 }
 
@@ -81,7 +81,7 @@ namespace ReverseMIPS {
 
                 if (userID % preprocess_report_every_ == 0) {
                     std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                              << 1e-6 * record_.get_elapsed_time_micro() << " s/iter" << " Mem: "
+                              << record_.get_elapsed_time_second() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
                     record_.reset();
                 }
@@ -99,7 +99,7 @@ namespace ReverseMIPS {
             std::vector<std::vector<RankElement>> results(n_query_item, std::vector<RankElement>());
 
             for (int qID = 0; qID < n_query_item; qID++) {
-                float *query_item_vec = query_item.getVector(qID);
+                double *query_item_vec = query_item.getVector(qID);
                 std::vector<RankElement> &minHeap = results[qID];
                 minHeap.resize(topk);
 
@@ -136,11 +136,11 @@ namespace ReverseMIPS {
             return results;
         }
 
-        int getRank(float *query_item_vec, int userID) {
-            float *user_vec = user_.getVector(userID);
+        int getRank(double *query_item_vec, int userID) {
+            double *user_vec = user_.getVector(userID);
             record_.reset();
-            float query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
-            this->inner_product_calculation_time_ += record_.get_elapsed_time_micro() * 1e-6;
+            double query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
+            this->inner_product_calculation_time_ += record_.get_elapsed_time_second();
             int n_data_item = data_item_.n_vector_;
             DistancePair *dpPtr = index_.getUserDistPtr(userID);
 
@@ -184,7 +184,7 @@ namespace ReverseMIPS {
                     }
                 }
             }
-            this->binary_search_time_ += record_.get_elapsed_time_micro() * 1e-6;
+            this->binary_search_time_ += record_.get_elapsed_time_second();
             if (rank <= 0) {
                 printf("bug\n");
             }

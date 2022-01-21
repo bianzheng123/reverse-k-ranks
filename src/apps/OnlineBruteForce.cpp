@@ -27,10 +27,10 @@ int main(int argc, char **argv) {
     printf("dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector <unique_ptr<float[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);
-    float *data_item_ptr = data[0].get();
-    float *user_ptr = data[1].get();
-    float *query_item_ptr = data[2].get();
+    vector <unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);
+    double *data_item_ptr = data[0].get();
+    double *user_ptr = data[1].get();
+    double *query_item_ptr = data[2].get();
 
     VectorMatrix data_item, user, query_item;
     data_item.init(data_item_ptr, n_data_item, vec_dim);
@@ -41,12 +41,12 @@ int main(int argc, char **argv) {
 
     OnlineBruteForce obf(data_item, user);
     obf.Preprocess();
-    double preprocessed_time = record.get_elapsed_time_micro() * 1e-6;
+    double preprocessed_time = record.get_elapsed_time_second();
     record.reset();
     printf("finish preprocess\n");
 
     vector <vector<RankElement>> result = obf.Retrieval(query_item, topk);
-    double retrieval_time = record.get_elapsed_time_micro() * 1e-6;
+    double retrieval_time = record.get_elapsed_time_second();
 
     printf("preprocessed time %.3fs, retrieval time %.3fs\n", preprocessed_time, retrieval_time);
     writeRank(result, dataset_name, "OnlineBruteForce");

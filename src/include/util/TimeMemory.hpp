@@ -11,9 +11,10 @@ namespace ReverseMIPS {
             time_begin = std::chrono::steady_clock::now();
         }
 
-        float get_elapsed_time_micro() {
+        double get_elapsed_time_second() {
             std::chrono::steady_clock::time_point time_end = std::chrono::steady_clock::now();
-            return (std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_begin).count());
+            std::chrono::duration<double> diff = time_end - time_begin;
+            return diff.count();
         }
 
         void reset() {
@@ -77,17 +78,17 @@ return (size_t)(psinfo.pr_rssize * 1024L);
 
 #elif defined(__unix__) || defined(__unix) || defined(unix) || (defined(__APPLE__) && defined(__MACH__))
 /* BSD, Linux, and OSX -------------------------------------- */
-struct rusage rusage;
-getrusage(RUSAGE_SELF, &rusage);
+        struct rusage rusage;
+        getrusage(RUSAGE_SELF, &rusage);
 #if defined(__APPLE__) && defined(__MACH__)
-return (size_t)rusage.ru_maxrss;
+        return (size_t)rusage.ru_maxrss;
 #else
-return (size_t) (rusage.ru_maxrss * 1024L);
+        return (size_t) (rusage.ru_maxrss * 1024L);
 #endif
 
 #else
-/* Unknown OS ----------------------------------------------- */
-return (size_t)0L;          /* Unsupported. */
+        /* Unknown OS ----------------------------------------------- */
+        return (size_t)0L;          /* Unsupported. */
 #endif
     }
 
@@ -114,20 +115,20 @@ return (size_t)info.resident_size;
 
 #elif defined(__linux__) || defined(__linux) || defined(linux) || defined(__gnu_linux__)
 /* Linux ---------------------------------------------------- */
-long rss = 0L;
-FILE *fp = NULL;
-if ((fp = fopen("/proc/self/statm", "r")) == NULL)
-    return (size_t) 0L;      /* Can't open? */
-if (fscanf(fp, "%*s%ld", &rss) != 1) {
-    fclose(fp);
-    return (size_t) 0L;      /* Can't read? */
-}
-fclose(fp);
-return (size_t) rss * (size_t) sysconf(_SC_PAGESIZE);
+        long rss = 0L;
+        FILE *fp = NULL;
+        if ((fp = fopen("/proc/self/statm", "r")) == NULL)
+            return (size_t) 0L;      /* Can't open? */
+        if (fscanf(fp, "%*s%ld", &rss) != 1) {
+            fclose(fp);
+            return (size_t) 0L;      /* Can't read? */
+        }
+        fclose(fp);
+        return (size_t) rss * (size_t) sysconf(_SC_PAGESIZE);
 
 #else
-/* AIX, BSD, Solaris, and Unknown OS ------------------------ */
-return (size_t)0L;          /* Unsupported. */
+        /* AIX, BSD, Solaris, and Unknown OS ------------------------ */
+        return (size_t)0L;          /* Unsupported. */
 #endif
     }
 }

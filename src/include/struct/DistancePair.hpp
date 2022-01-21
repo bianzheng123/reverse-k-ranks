@@ -5,10 +5,10 @@
 namespace ReverseMIPS {
     class DistancePair {
     public:
-        float dist_;
+        double dist_;
         int ID_;
 
-        DistancePair(float dist, int ID) {
+        DistancePair(double dist, int ID) {
             this->dist_ = dist;
             this->ID_ = ID;
         }

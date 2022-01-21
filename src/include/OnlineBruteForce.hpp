@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/SpaceInnerProduct.hpp"
+#include "alg/SpaceInnerProduct.hpp"
 #include "struct/RankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "util/TimeMemory.hpp"
@@ -36,7 +36,7 @@ namespace ReverseMIPS {
 
             TimeRecord single_query_record;
             for (int qID = 0; qID < n_query_item; qID++) {
-                float *query_item_vec = query_item.getVector(qID);
+                double *query_item_vec = query_item.getVector(qID);
                 std::vector<RankElement> &minHeap = results[qID];
                 minHeap.resize(topk);
 
@@ -64,7 +64,7 @@ namespace ReverseMIPS {
 
                 if (qID % report_every_ == 0) {
                     std::cout << "retrieval " << qID / (0.01 * n_query_item) << " %, "
-                              << 1e-6 * single_query_record.get_elapsed_time_micro() << " s/iter" << " Mem: "
+                              << single_query_record.get_elapsed_time_second() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
                     single_query_record.reset();
                 }
@@ -73,14 +73,14 @@ namespace ReverseMIPS {
             return results;
         }
 
-        int getRank(float *query_item_vec, float *user_vec) {
+        int getRank(double *query_item_vec, double *user_vec) {
 
-            float query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
+            double query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
             int n_data_item = data_item_.n_vector_;
             int rank = 1;
 
             for (int i = 0; i < n_data_item; i++) {
-                float data_dist = InnerProduct(data_item_.getVector(i), user_vec, vec_dim_);
+                double data_dist = InnerProduct(data_item_.getVector(i), user_vec, vec_dim_);
                 rank += data_dist > query_dist ? 1 : 0;
             }
 
