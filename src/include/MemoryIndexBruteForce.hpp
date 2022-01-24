@@ -88,7 +88,7 @@ namespace ReverseMIPS {
 
             }
 
-            index_.init(preprocess_matrix, n_user, n_data_item);
+            index_.init(preprocess_matrix, n_data_item, n_user);
 
         }
 

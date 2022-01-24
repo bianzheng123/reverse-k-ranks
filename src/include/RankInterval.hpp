@@ -11,6 +11,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/IntervalVector.hpp"
 #include "struct/DistancePair.hpp"
+#include "struct/RankElement.hpp"
 #include "alg/KMeans.hpp"
 #include <fstream>
 #include <cassert>

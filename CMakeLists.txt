@@ -62,11 +62,6 @@ FOREACH(i RANGE 1 ${ll})
 ENDFOREACH(i)
 
 add_executable(t1 test.cpp)
-#add_executable(bfon src/apps/OnlineBruteForce.cpp)
-#add_executable(bfmi src/apps/MemoryIndexBruteForce.cpp)
-#add_executable(bfdi src/apps/DiskIndexBruteForce.cpp)
-#add_executable(rkitv src/apps/RankInterval.cpp)
-#
 #target_link_libraries(rkitv ${ARMADILLO_LIBRARIES})
 #target_link_libraries(rkitv ${MLPACK_LIBRARY})
 

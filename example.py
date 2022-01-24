@@ -13,8 +13,8 @@ def ip_gnd(base, query, k):
 
 if __name__ == '__main__':
     for i in range(1000):
-        item_l = np.random.rand(21).reshape(-1, 3).astype(np.float32)
-        user_l = np.random.rand(18).reshape(-1, 3).astype(np.float32)
+        item_l = np.random.rand(60).reshape(-1, 3).astype(np.float32)
+        user_l = np.random.rand(60).reshape(-1, 3).astype(np.float32)
         gnd_idx_l, gnd_dist_l = ip_gnd(item_l, user_l, len(item_l))
         gnd_idx_l = gnd_idx_l + 1
         arr_end_idx = []
@@ -24,7 +24,7 @@ if __name__ == '__main__':
                     arr_end_idx.append(_)
         arr_end_idx = np.array(arr_end_idx)
         arr_end_idx = np.unique(arr_end_idx)
-        if len(arr_end_idx) > 5:
+        if len(arr_end_idx) > 12:
             print(item_l)
             print(user_l)
             print(gnd_idx_l)
