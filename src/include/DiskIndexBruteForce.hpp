@@ -20,6 +20,12 @@ namespace ReverseMIPS {
     int write_every_ = 10000;
     const int report_batch_every_ = 5;
 
+    /*
+     * bruteforce index
+     * shape: 1, type: int, n_data_item
+     * shape: n_user * n_data_item, type: DistancePair, the distance pair for each user
+     */
+
     double BuildSaveIndex(const VectorMatrix &data_item, const VectorMatrix &user, const char *index_path) {
         std::ofstream out(index_path, std::ios::binary | std::ios::out);
         if (!out) {
@@ -83,7 +89,7 @@ namespace ReverseMIPS {
         VectorMatrix user_;
         std::ifstream index_stream_;
         int vec_dim_, n_data_item_;
-        int n_cache = 30; //应该比top-k大
+        int n_cache; //应该比top-k大
         double read_disk_time_;
         TimeRecord record_;
 
@@ -214,7 +220,7 @@ namespace ReverseMIPS {
             return query_heap_l;
         }
 
-        int getRank(double *query_item_vec, int userID, int cacheID, std::vector<DistancePair> &distance_cache) {
+        int getRank(double *query_item_vec, int userID, int cacheID, std::vector<DistancePair> &distance_cache) const {
             double *user_vec = user_.getVector(userID);
             double query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
             DistancePair *dpPtr = distance_cache.data() + cacheID * n_data_item_;

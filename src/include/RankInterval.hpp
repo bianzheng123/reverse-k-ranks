@@ -20,7 +20,6 @@
 
 namespace ReverseMIPS {
 
-    int qID = 0;
     class RankIntervalIndex {
     public:
         std::vector<int> known_rank_idx_l_; // shape: n_known_rank
@@ -57,8 +56,7 @@ namespace ReverseMIPS {
             std::vector<std::vector<RankElement>> result(query_item.n_vector_, std::vector<RankElement>());
             int n_query = query_item.n_vector_;
             int vec_dim = query_item.vec_dim_;
-            for (qID = 0; qID < n_query; qID++) {
-//            for (int qID = 0; qID < n_query; qID++) {
+            for (int qID = 0; qID < n_query; qID++) {
                 double *query_vec = query_item.getVector(qID);
 
                 std::vector<RankElement> &minHeap = result[qID];
@@ -152,7 +150,7 @@ namespace ReverseMIPS {
     };
 
     RankIntervalIndex
-    BuildIndex(VectorMatrix user, VectorMatrix data_item, int n_merge_user, double &time) {
+    BuildIndex(VectorMatrix &user, VectorMatrix &data_item, int n_merge_user) {
 
         //perform Kmeans for user vector, the label start from 0, indicates where the rank should come from
         printf("n_merge_user %d\n", n_merge_user);
@@ -191,7 +189,7 @@ namespace ReverseMIPS {
             std::vector<std::vector<int>> tmp_interval_vec(n_interval, std::vector<int>());
             for (int i = 0; i < n_known_rank; i++) {
                 distance_table[userID * n_known_rank + i] = distance_cache[known_rank_idx_l[i]];
-                int base_idx = i == 0 ? 0 : known_rank_idx_l[i-1];
+                int base_idx = i == 0 ? 0 : known_rank_idx_l[i - 1];
                 for (int j = 0; j < interval_size; j++) {
                     tmp_interval_vec[i].emplace_back(distance_cache[base_idx + j].ID_);
                 }

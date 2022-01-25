@@ -40,12 +40,14 @@ SET(APPS
         bfmi
         bfdi
         rkitv
+        bktitv
         )
 SET(APPS_EXAMPLE
         OnlineBruteForce
         MemoryIndexBruteForce
         DiskIndexBruteForce
         RankInterval
+        BucketInterval
         )
 
 LIST(LENGTH APPS ll)

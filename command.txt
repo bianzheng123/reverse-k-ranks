@@ -2,29 +2,37 @@
 ./bfmi fake 10
 ./bfdi fake 10
 ./rkitv fake 10
+./bktitv fake 10
 
 ./bfon Test 20
 ./bfmi Test 20
 ./bfdi Test 20
 ./rkitv Test 20
+./bktitv Test 20
 
 ./bfon movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
 ./bfmi movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
 ./bfdi movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
 ./rkitv movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
+./bktitv movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
 
 ./bfon movielens-small 10
 ./bfmi movielens-small 10
 ./bfdi movielens-small 10
 ./rkitv movielens-small 10
+./bktitv movielens-small 10
 
 ./bfon netflix 10
 ./bfmi netflix 10
 ./bfdi netflix 10
+./rkitv netflix 10
+./bktitv netflix 10
 
 ./bfon movielens-27m 10
 ./bfmi movielens-27m 10
 ./bfdi movielens-27m 10
+./rkitv movielens-27m 10
+./bktitv movielens-27m 10
 
 
 
