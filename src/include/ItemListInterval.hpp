@@ -2,13 +2,10 @@
 // Created by BianZheng on 2022/1/25.
 //
 
-#ifndef REVERSE_KRANKS_BUCKETINTERVAL_HPP
-#define REVERSE_KRANKS_BUCKETINTERVAL_HPP
-
+#ifndef REVERSE_KRANKS_ITEMLISTINTERVAL_HPP
+#define REVERSE_KRANKS_ITEMLISTINTERVAL_HPP
 
 #include "struct/DistancePair.hpp"
-#include "struct/IntervalVector.hpp"
-#include "struct/BucketVector.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/KMeans.hpp"
 #include <vector>
@@ -17,21 +14,176 @@
 #include <fstream>
 
 namespace ReverseMIPS {
-    class BucketIntervalIndex {
-
+    class ItemInfo {
     public:
-        std::vector<int> user_merge_idx_l_; // shape: n_user, record which user belongs to which IntervalVector
-        std::vector<BucketVector> bucket_vector_l_; // shape: n_merge_user
-        // IntervalVector shape: n_bucket * unknown_size
-        std::vector<int> bucket_size_l_;
-        /*
-         * shape: n_user * (n_bucket - 1), for each user, record the lower bound of rank in each bucket
-         * start record from the second bucket since the first is always 0
-         */
-        int n_user_, n_merge_user_, n_bucket_;
+        //bound variable stores the rank, lower_bound means the rank of this item should be at least this value; same as upper bound
+        int lower_bound_, upper_bound_, itemID_;
+
+        inline ItemInfo(int lb, int ub, int itemID) {
+            this->lower_bound_ = lb;
+            this->upper_bound_ = ub;
+            this->itemID_ = itemID;
+        }
+
+        inline bool operator==(const ItemInfo &other) const {
+            if (this == &other)
+                return true;
+            return lower_bound_ == other.lower_bound_ && upper_bound_ == other.upper_bound_ && itemID_ == other.itemID_;
+        };
+
+        inline bool operator!=(const ItemInfo &other) const {
+            if (this == &other)
+                return false;
+            return lower_bound_ != other.lower_bound_ || upper_bound_ != other.upper_bound_ || itemID_ != other.itemID_;
+        };
+
+        inline bool operator<(const ItemInfo &other) const {
+            if (upper_bound_ != other.upper_bound_) {
+                return upper_bound_ < other.upper_bound_;
+            } else {
+                return lower_bound_ < other.lower_bound_;
+            }
+        }
+
+        inline bool operator<=(const ItemInfo &other) const {
+            if (upper_bound_ != other.upper_bound_) {
+                return upper_bound_ <= other.upper_bound_;
+            } else {
+                return lower_bound_ <= other.lower_bound_;
+            }
+        }
+
+        inline bool operator>(const ItemInfo &other) const {
+            if (upper_bound_ != other.upper_bound_) {
+                return upper_bound_ > other.upper_bound_;
+            } else {
+                return lower_bound_ > other.lower_bound_;
+            }
+        }
+
+        inline bool operator>=(const ItemInfo &other) const {
+            if (upper_bound_ != other.upper_bound_) {
+                return upper_bound_ >= other.upper_bound_;
+            } else {
+                return lower_bound_ >= other.lower_bound_;
+            }
+        }
+
+        std::string ToString() {
+            char arr[256];
+            sprintf(arr, "lbidx %d ubidx %d itemid %d", lower_bound_, upper_bound_, itemID_);
+            std::string str(arr);
+            return str;
+        }
+    };
+
+    class ItemListInterval {
+    public:
+        double lower_bound_inner_product_, upper_bound_inner_product_;
+        double interval_width_;
+        int n_interval_, n_data_item_;
+        //left is the lower bound, right is the upper bound
+        std::vector<ItemInfo> item_list_;
+
+        inline ItemListInterval() = default;
+
+        inline ItemListInterval(const double lb_ip, const double ub_ip, const int n_interval, const int n_data_item) {
+            this->n_interval_ = n_interval;
+            this->n_data_item_ = n_data_item;
+            this->lower_bound_inner_product_ = lb_ip - 0.01;
+            this->upper_bound_inner_product_ = ub_ip + 0.01;
+            this->interval_width_ = (upper_bound_inner_product_ - lower_bound_inner_product_) / n_interval;
+
+            this->item_list_.reserve(n_data_item);
+            for (int i = 0; i < n_data_item; i++) {
+                this->item_list_.emplace_back(n_data_item + 1, -1, i);
+            }
+
+        }
+
+        void UpdateItem(const DistancePair &dp) {
+            int itemID = dp.ID_;
+            double inner_product = dp.dist_;
+            int idx = std::floor((upper_bound_inner_product_ - inner_product) / interval_width_);
+            this->item_list_[itemID].lower_bound_ = std::min(this->item_list_[itemID].lower_bound_, idx);
+            this->item_list_[itemID].upper_bound_ = std::max(this->item_list_[itemID].upper_bound_, idx);
+        }
+
+        void SortItemAndCountSize() {
+            //the update function should be stopped
+            //TODO check whether it is all updated
+            std::sort(item_list_.begin(), item_list_.end(), std::less<ItemInfo>());
+
+//            for(int i=0;i<n_data_item_;i++){
+//                std::cout << item_list_[i].ToString() << std::endl;
+//            }
+        }
+
+        [[nodiscard]] std::vector<int> GetCandidateByIP(double queryIP) const {
+            int idx = std::floor((upper_bound_inner_product_ - queryIP) / interval_width_);
+            if (idx < 0 || idx >= n_interval_) {
+                return std::vector<int>{};
+            }
+
+            std::vector<int> res;
+            for (int i = 0; i < n_data_item_; i++) {
+                if (item_list_[i].lower_bound_ <= idx && idx <= item_list_[i].upper_bound_) {
+                    res.emplace_back(item_list_[i].itemID_);
+                }
+            }
+            return res;
+        }
+
+        [[nodiscard]] int GetPruneSizeByIP(double inner_product) const {
+            int index = std::floor((upper_bound_inner_product_ - inner_product) / interval_width_);
+            if (index < 0) {
+                return 0;
+            } else if (index >= n_interval_) {
+                return n_data_item_;
+            } else {
+                int size = 0;
+                for (int i = 0; i < n_data_item_; i++) {
+                    if (item_list_[i].upper_bound_ < index) {
+                        size++;
+                    }
+                }
+                return size;
+
+//                auto lb_ptr = std::lower_bound(item_list_.begin(), item_list_.end(), index,
+//                                               [](const ItemInfo &info, int value) {
+//                                                   return info.upper_bound_ < value;
+//                                               });
+//                return (int) (lb_ptr - item_list_.begin());
+            }
+        }
+
+        inline ~ItemListInterval() = default;
+    };
+
+    class ItemListIntervalIndex {
+    public:
+
+        std::vector<int> user_merge_idx_l_; // shape: n_user, record which user belongs to which ItemListInterval
+        std::vector<ItemListInterval> it_ls_itv_l_; // shape: n_merge_user
+        // ItemListInterval shape: n_data_item
+        int n_user_, n_merge_user_, n_data_item_;
         VectorMatrix user_, data_item_;
 
-        [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix query_item, int topk) const {
+        void setUserItemMatrix(VectorMatrix &user, VectorMatrix &data_item) {
+            this->user_ = user;
+            this->data_item_ = data_item;
+        }
+
+        inline ItemListIntervalIndex(std::vector<int> &user_merge_idx_l, std::vector<ItemListInterval> &it_ls_itv_l) {
+            this->user_merge_idx_l_ = user_merge_idx_l;
+            this->it_ls_itv_l_ = it_ls_itv_l;
+
+            this->n_user_ = (int) user_merge_idx_l.size();
+            this->n_merge_user_ = (int) it_ls_itv_l.size();
+            this->n_data_item_ = it_ls_itv_l[0].n_data_item_;
+        }
+
+        [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) const {
             std::vector<std::vector<RankElement>> result(query_item.n_vector_, std::vector<RankElement>());
             int n_query = query_item.n_vector_;
             int vec_dim = query_item.vec_dim_;
@@ -69,16 +221,16 @@ namespace ReverseMIPS {
             return result;
         }
 
-        [[nodiscard]] int RelativeRankInBucket(const std::vector<int> &candidate_l, double queryIP,
-                                               int userID, int vec_dim, double upper_bound_ip) const {
+        [[nodiscard]] int RelativeRankInInterval(const std::vector<int> &candidate_l, double queryIP,
+                                                 int userID, int vec_dim) const {
             //calculate all the IP, then get the lower bound
             //make different situation by the information
-            int bucket_size = (int) candidate_l.size();
+            int interval_size = (int) candidate_l.size();
             int rank = 0;
 
-            for (int i = 0; i < bucket_size; i++) {
+            for (int i = 0; i < interval_size; i++) {
                 double data_dist = InnerProduct(data_item_.getVector(candidate_l[i]), user_.getVector(userID), vec_dim);
-                rank += data_dist > queryIP && data_dist < upper_bound_ip ? 1 : 0;
+                rank += data_dist > queryIP? 1 : 0;
             }
 
             return rank;
@@ -88,40 +240,16 @@ namespace ReverseMIPS {
             double *user_vec = this->user_.getVector(userID);
             double queryIP = InnerProduct(query_vec, user_vec, vec_dim);
 
-            int bucket_vector_idx = user_merge_idx_l_[userID];
-            std::vector<int> candidate_l = bucket_vector_l_[bucket_vector_idx].getBucketByIP(queryIP);
-            double upper_bound_ip = bucket_vector_l_[bucket_vector_idx].getUpperBoundByIP(queryIP);
-            int bucketID = bucket_vector_l_[bucket_vector_idx].getBucketIndexByIP(queryIP);
-            int loc_rk = RelativeRankInBucket(candidate_l, queryIP, userID, vec_dim, upper_bound_ip);
+            int merge_l_idx = user_merge_idx_l_[userID];
+            std::vector<int> candidate_l = it_ls_itv_l_[merge_l_idx].GetCandidateByIP(queryIP);
+            int prune_size = it_ls_itv_l_[merge_l_idx].GetPruneSizeByIP(queryIP);
+            int loc_rk = RelativeRankInInterval(candidate_l, queryIP, userID, vec_dim);
 
-            int rank;
-            if (bucketID == n_bucket_) {
-                rank = data_item_.n_vector_;
-            } else {
-                rank = bucketID == 0 ? loc_rk : bucket_size_l_[userID * (n_bucket_ - 1) + bucketID - 1] + loc_rk;
-            }
+            int rank = loc_rk + prune_size;
             return rank + 1;
         }
 
-
-        inline BucketIntervalIndex(const std::vector<int> &user_merge_idx_l,
-                                   const std::vector<BucketVector> &bucket_vector_l,
-                                   const std::vector<int> &bucket_size_l) {
-            this->user_merge_idx_l_ = user_merge_idx_l;
-            this->bucket_vector_l_ = bucket_vector_l;
-            this->n_user_ = (int) user_merge_idx_l.size();
-            this->n_merge_user_ = (int) bucket_vector_l.size();
-            this->n_bucket_ = bucket_vector_l[0].n_bucket_;
-            this->bucket_size_l_ = bucket_size_l;
-        }
-
-        void setUserItemMatrix(VectorMatrix &user, VectorMatrix &data_item) {
-            this->user_ = user;
-            this->data_item_ = data_item;
-        }
-
     };
-
 
     /*
      * bruteforce index
@@ -129,7 +257,6 @@ namespace ReverseMIPS {
      * shape: 1, type: int, n_data_item
      * shape: n_user * n_data_item, type: DistancePair, the distance pair for each user
      */
-
     void BuildSaveBruteForceIndex(const VectorMatrix &user, const VectorMatrix &data_item, const char *index_path,
                                   const std::vector<int> &user_merge_idx_l,
                                   std::vector<std::pair<double, double>> &ip_bound_l) {
@@ -168,7 +295,7 @@ namespace ReverseMIPS {
                 ip_bound_l[merge_idx].first = ip_lower_bound;
                 ip_bound_l[merge_idx].second = ip_upper_bound;
             }
-            out.write((char *) distance_cache.data(), distance_cache.size() * sizeof(DistancePair));
+            out.write((char *) distance_cache.data(), (long) (distance_cache.size() * sizeof(DistancePair)));
 
             if (i % report_batch_every_ == 0) {
                 std::cout << "preprocessed " << i / (0.01 * n_batch) << " %, "
@@ -200,11 +327,11 @@ namespace ReverseMIPS {
         }
 
         out.write((char *) distance_cache.data(),
-                  n_remain * data_item.n_vector_ * sizeof(DistancePair));
+                  (int) n_remain * data_item.n_vector_ * sizeof(DistancePair));
     }
 
-    void BuildBucketIndex(const std::vector<int> &user_merge_idx_l, const char *index_path,
-                          std::vector<BucketVector> &bkt_vec_l, std::vector<int> &bucket_size_l, const int n_bucket) {
+    void BuildItemListInterval(const std::vector<int> &user_merge_idx_l, const char *index_path,
+                               std::vector<ItemListInterval> &ili_merge_l, const int n_interval) {
         std::ifstream index_stream_ = std::ifstream(index_path, std::ios::binary | std::ios::in);
         if (!index_stream_) {
             std::printf("error in writing index\n");
@@ -226,42 +353,17 @@ namespace ReverseMIPS {
             index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item * sizeof(DistancePair));
             for (int cacheID = 0; cacheID < n_cache; cacheID++) {
                 int userID = batchID * n_cache + cacheID;
-                int bkt_l_idx = user_merge_idx_l[userID];
-                BucketVector &tmp_bkt_vec = bkt_vec_l[bkt_l_idx];
+                int merge_l_idx = user_merge_idx_l[userID];
+                ItemListInterval &tmp_it_ls_itv = ili_merge_l[merge_l_idx];
 
-                // get index of every data item, used for calculate the size of bucket in each user
-                std::vector<int> bkt_idx_l(n_data_item);
-                std::memset(bkt_idx_l.data(), 0, sizeof(int) * n_data_item);
                 for (int d_itemID = 0; d_itemID < n_data_item; d_itemID++) {
                     int dp_idx = cacheID * n_data_item + d_itemID;
                     const DistancePair &dp = distance_cache[dp_idx];
-                    int bkt_idx = tmp_bkt_vec.addUniqueElement(dp.dist_, dp.ID_);
-                    bkt_idx_l[d_itemID] = bkt_idx;
-                }
-
-                int size_count = 0;
-                int bkt_ptr = 0;
-                int d_itemID = 0;
-                if (bkt_idx_l[d_itemID] != bkt_ptr) {
-                    for (; bkt_ptr < bkt_idx_l[d_itemID]; bkt_ptr++) {
-                        bucket_size_l[userID * (n_bucket - 1) + bkt_ptr] = size_count;
-                    }
-                } else {
-                    size_count++;
-                }
-                for (d_itemID = 1; d_itemID < n_data_item; d_itemID++) {
-                    if (bkt_ptr < bkt_idx_l[d_itemID]) {
-                        bucket_size_l[userID * (n_bucket - 1) + bkt_ptr] = size_count;
-                        bkt_ptr++;
-                    }
-                    size_count++;
-                }
-                for (; bkt_ptr < n_bucket - 1; bkt_ptr++) {
-                    bucket_size_l[userID * (n_bucket - 1) + bkt_ptr] = size_count;
+                    tmp_it_ls_itv.UpdateItem(dp);
                 }
 
                 if (userID % report_user_every_ == 0) {
-                    std::cout << "read and process bucket vector " << userID / (0.01 * n_user) << " %, "
+                    std::cout << "read and process interval vector " << userID / (0.01 * n_user) << " %, "
                               << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
                     batch_report_record.reset();
@@ -273,56 +375,31 @@ namespace ReverseMIPS {
         index_stream_.read((char *) distance_cache.data(), n_remain * n_data_item * sizeof(DistancePair));
         for (int cacheID = 0; cacheID < n_remain; cacheID++) {
             int userID = n_batch * n_cache + cacheID;
-            int bkt_l_idx = user_merge_idx_l[userID];
-            BucketVector &tmp_bkt_vec = bkt_vec_l[bkt_l_idx];
-            // get index of every data item, used for calculate the size of bucket in each user
-            std::vector<int> bkt_idx_l(n_data_item);
-            std::memset(bkt_idx_l.data(), 0, sizeof(int) * n_data_item);
+            int merge_l_idx = user_merge_idx_l[userID];
+            ItemListInterval &tmp_it_ls_itv = ili_merge_l[merge_l_idx];
 
             for (int d_itemID = 0; d_itemID < n_data_item; d_itemID++) {
                 int dp_idx = cacheID * n_data_item + d_itemID;
                 const DistancePair &dp = distance_cache[dp_idx];
-                int bkt_idx = tmp_bkt_vec.addUniqueElement(dp.dist_, dp.ID_);
-                bkt_idx_l[d_itemID] = bkt_idx;
-            }
-
-            int size_count = 0;
-            int bkt_ptr = 0;
-            int d_itemID = 0;
-            if (bkt_idx_l[d_itemID] != bkt_ptr) {
-                for (; bkt_ptr < bkt_idx_l[d_itemID]; bkt_ptr++) {
-                    bucket_size_l[userID * (n_bucket - 1) + bkt_ptr] = size_count;
-                }
-            } else {
-                size_count++;
-            }
-            for (d_itemID = 1; d_itemID < n_data_item; d_itemID++) {
-                if (bkt_ptr < bkt_idx_l[d_itemID]) {
-                    bucket_size_l[userID * (n_bucket - 1) + bkt_ptr] = size_count;
-                    bkt_ptr++;
-                }
-                size_count++;
-            }
-            for (; bkt_ptr < n_bucket - 1; bkt_ptr++) {
-                bucket_size_l[userID * (n_bucket - 1) + bkt_ptr] = size_count;
+                tmp_it_ls_itv.UpdateItem(dp);
             }
 
             if (userID % report_user_every_ == 0) {
-                std::cout << "read and process bucket vector " << userID / (0.01 * n_user) << " %, "
+                std::cout << "read and process interval vector " << userID / (0.01 * n_user) << " %, "
                           << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
                 batch_report_record.reset();
             }
         }
 
-        for (auto &tmp_bkt_vec: bkt_vec_l) {
-            tmp_bkt_vec.stopAddUniqueElement();
+        for (auto &tmp_it_ls_itv: ili_merge_l) {
+            tmp_it_ls_itv.SortItemAndCountSize();
         }
 
     }
 
 
-    BucketIntervalIndex
+    ItemListIntervalIndex
     BuildIndex(VectorMatrix &user, VectorMatrix &data_item, int n_merge_user, const char *dataset_name,
                std::vector<double> &component_time_l) {
 
@@ -330,14 +407,14 @@ namespace ReverseMIPS {
         int n_data_item = data_item.n_vector_;
         int vec_dim = user.vec_dim_;
 
-        int n_bucket = std::min(n_data_item / 10, 5);
+        int n_interval = std::min(n_data_item / 10, 5);
 
         //perform Kmeans for user vector, the label start from 0, indicates where the rank should come from
         printf("n_merge_user %d\n", n_merge_user);
         std::vector<int> user_merge_idx_l = BuildKMeans(user, n_merge_user);
 
         char index_path[256];
-        sprintf(index_path, "../index/%s.bkt_itv_idx", dataset_name);
+        sprintf(index_path, "../index/%s.it_ls_itv_index", dataset_name);
 
         //left: lower bound, right: upper bound
         std::vector<std::pair<double, double>> ip_bound_l(n_merge_user, std::pair<double, double>(DBL_MAX, DBL_MIN));
@@ -347,21 +424,20 @@ namespace ReverseMIPS {
         double bruteforce_index_time = record.get_elapsed_time_second();
         component_time_l.push_back(bruteforce_index_time);
 
-        std::vector<BucketVector> bkt_vec_l;
+        std::vector<ItemListInterval> it_ls_itv_l;
         for (std::pair<double, double> tmp_bound: ip_bound_l) {
             double lb = tmp_bound.first;
             double ub = tmp_bound.second;
-            bkt_vec_l.emplace_back(n_bucket, lb, ub);
+            it_ls_itv_l.emplace_back(lb, ub, n_interval, n_data_item);
         }
-        std::vector<int> bucket_size_l(n_user * (n_bucket - 1));
-        BuildBucketIndex(user_merge_idx_l, index_path, bkt_vec_l, bucket_size_l, n_bucket);
+        BuildItemListInterval(user_merge_idx_l, index_path, it_ls_itv_l, n_interval);
 
-        printf("n_bucket %d\n", n_bucket);
+        printf("n_interval %d\n", n_interval);
 
-        BucketIntervalIndex bucketIntervalIndex(user_merge_idx_l, bkt_vec_l, bucket_size_l);
-        bucketIntervalIndex.setUserItemMatrix(user, data_item);
+        ItemListIntervalIndex itemListIntervalIndex(user_merge_idx_l, it_ls_itv_l);
+        itemListIntervalIndex.setUserItemMatrix(user, data_item);
 
-        return bucketIntervalIndex;
+        return itemListIntervalIndex;
     }
 }
-#endif //REVERSE_KRANKS_BUCKETINTERVAL_HPP
+#endif //REVERSE_KRANKS_ITEMLISTINTERVAL_HPP

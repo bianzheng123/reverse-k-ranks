@@ -1,14 +1,16 @@
 ./bfon fake 10
 ./bfmi fake 10
 ./bfdi fake 10
-./rkitv fake 10
-./bktitv fake 10
+./rkbkt fake 10
+./itvvec fake 10
+./itlsitv fake 10
 
 ./bfon Test 20
 ./bfmi Test 20
 ./bfdi Test 20
-./rkitv Test 20
+./rkbkt Test 20
 ./bktitv Test 20
+./itlsitv Test 20
 
 ./bfon movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset
 ./bfmi movielens-small 10 /home/bianzheng/Reverse-kRanks/dataset

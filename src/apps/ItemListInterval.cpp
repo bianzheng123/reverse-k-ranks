@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2021/12/27.
+// Created by BianZheng on 2022/1/25.
 //
 
 #include "util/VectorIO.hpp"
@@ -7,8 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/RankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "struct/IntervalVector.hpp"
-#include "RankInterval.hpp"
+#include "ItemListInterval.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -49,26 +48,30 @@ int main(int argc, char **argv) {
     user.init(user_ptr, n_user, vec_dim);
     user.vectorNormalize();
     query_item.init(query_item_ptr, n_query_item, vec_dim);
-    n_merge_user = std::min(n_merge_user, n_user);
+    n_merge_user = std::min(n_merge_user, n_user / 2);
 
+    vector<double> component_time_l;
     TimeRecord timeRecord;
     timeRecord.reset();
-    RankIntervalIndex rankIntervalIndex = BuildIndex(user, data_item, n_merge_user);
+    ItemListIntervalIndex itemListIntervalIndex = BuildIndex(user, data_item, n_merge_user, dataset_name, component_time_l);
     double build_index_time = timeRecord.get_elapsed_time_second();
+    double bf_index_time = component_time_l[0];
     printf("finish building index\n");
 
     timeRecord.reset();
-    vector<vector<RankElement>> result = rankIntervalIndex.Retrieval(query_item, topk);
+    vector<vector<RankElement>> result = itemListIntervalIndex.Retrieval(query_item, topk);
     double retrieval_time = timeRecord.get_elapsed_time_second();
 
+    printf("build index: bruteforce index time %.3fs\n", bf_index_time);
     printf("build index time %.3fs, retrieval time %.3fs\n",
            build_index_time, retrieval_time);
-    writeRank(result, dataset_name, "RankInterval");
+    writeRank(result, dataset_name, "ItemListInterval");
 
     map<string, string> performance_m;
+    performance_m.emplace("build bruteforce index time", double2string(bf_index_time));
     performance_m.emplace("build index time", double2string(build_index_time));
     performance_m.emplace("retrieval time", double2string(retrieval_time));
-    writePerformance(dataset_name, "RankInterval", performance_m);
+    writePerformance(dataset_name, "ItemListInterval", performance_m);
 
     return 0;
 }

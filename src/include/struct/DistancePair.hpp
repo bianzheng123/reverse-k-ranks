@@ -18,7 +18,7 @@ namespace ReverseMIPS {
             ID_ = 0;
         }
 
-        ~DistancePair() {}
+        ~DistancePair() = default;
 
         std::string ToString() {
             char arr[256];

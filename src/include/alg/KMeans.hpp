@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include "struct/Cluster.hpp"
+#include <algorithm>
 
 namespace ReverseMIPS {
 

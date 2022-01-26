@@ -17,7 +17,7 @@ namespace ReverseMIPS {
             this->rank_ = rank;
         }
 
-        inline ~RankElement() {}
+        inline ~RankElement() = default;
 
         inline bool operator==(const RankElement &other) const {
             if (this == &other)

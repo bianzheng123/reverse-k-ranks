@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/RankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "BucketInterval.hpp"
+#include "IntervalVector.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -53,25 +53,25 @@ int main(int argc, char **argv) {
     vector<double> component_time_l;
     TimeRecord timeRecord;
     timeRecord.reset();
-    BucketIntervalIndex bucketIntervalIndex = BuildIndex(user, data_item, n_merge_user, dataset_name, component_time_l);
+    IntervalVectorIndex intervalVectorIndex = BuildIndex(user, data_item, n_merge_user, dataset_name, component_time_l);
     double build_index_time = timeRecord.get_elapsed_time_second();
     double bf_index_time = component_time_l[0];
     printf("finish building index\n");
 
     timeRecord.reset();
-    vector<vector<RankElement>> result = bucketIntervalIndex.Retrieval(query_item, topk);
+    vector<vector<RankElement>> result = intervalVectorIndex.Retrieval(query_item, topk);
     double retrieval_time = timeRecord.get_elapsed_time_second();
 
     printf("build index: bruteforce index time %.3fs\n", bf_index_time);
     printf("build index time %.3fs, retrieval time %.3fs\n",
            build_index_time, retrieval_time);
-    writeRank(result, dataset_name, "BucketInterval");
+    writeRank(result, dataset_name, "IntervalVector");
 
     map<string, string> performance_m;
     performance_m.emplace("build bruteforce index time", double2string(bf_index_time));
     performance_m.emplace("build index time", double2string(build_index_time));
     performance_m.emplace("retrieval time", double2string(retrieval_time));
-    writePerformance(dataset_name, "BucketInterval", performance_m);
+    writePerformance(dataset_name, "IntervalVector", performance_m);
 
     return 0;
 }

@@ -54,7 +54,7 @@ namespace ReverseMIPS {
         }
 
         bool removePoint(int pointId) {
-            int size = points.size();
+            int size = (int) points.size();
 
             for (int i = 0; i < size; i++) {
                 if (points[i].getID() == pointId) {
@@ -67,11 +67,11 @@ namespace ReverseMIPS {
 
         void removeAllPoints() { points.clear(); }
 
-        int getId() { return clusterId; }
+        [[nodiscard]] int getId() const { return clusterId; }
 
         Point getPoint(int pos) { return points[pos]; }
 
-        int getSize() { return points.size(); }
+        int getSize() { return (int) points.size(); }
 
         double getCentroidByPos(int pos) { return centroid[pos]; }
 

@@ -17,37 +17,23 @@ if(Armadillo_FOUND)
     message(STATUS "Armadillo_INCLUDE_DIRS in  " ${ARMADILLO_INCLUDE_DIRS})
 endif()
 
-set(MLPACK_INCLUDE_DIR "/usr/local/include/mlpack/")
-set(MLPACK_LIBRARY_DIR "/usr/local/lib/libmlpack.so")
-
-find_path(MLPACK_INCLUDE_DIR
-        NAMES core.hpp prereqs.hpp
-        PATHS ${MLPACK_INCLUDE_DIR})
-
-find_library(MLPACK_LIBRARY
-        NAMES mlpack
-        PATHS ${MLPACK_LIBRARY_DIR})
-
-if(MLPACK_LIBRARY)
-    message(STATUS "MLPACK found " ${MLPACK_LIBRARY_DIR})
-    include_directories(${MLPACK_INCLUDE_DIR})
-endif()
-
 include_directories(src/include)
 
 SET(APPS
         bfon
         bfmi
         bfdi
-        rkitv
-        bktitv
+        rkbkt
+        itvvec
+        itlsitv
         )
 SET(APPS_EXAMPLE
         OnlineBruteForce
         MemoryIndexBruteForce
         DiskIndexBruteForce
-        RankInterval
-        BucketInterval
+        RankBucket
+        IntervalVector
+        ItemListInterval
         )
 
 LIST(LENGTH APPS ll)
