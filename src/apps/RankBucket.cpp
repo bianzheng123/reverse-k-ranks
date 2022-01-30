@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
         basic_dir = argv[3];
     }
     printf("dataset_name %s, topk %d, basic_dir %s\n", dataset_name, topk, basic_dir);
-    int n_merge_user = 100;
+    int n_merge_user = 10000;
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<unique_ptr<double[]>>

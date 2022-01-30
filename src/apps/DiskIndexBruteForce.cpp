@@ -18,79 +18,125 @@
 using namespace std;
 using namespace ReverseMIPS;
 
+class RetrievalResult {
+public:
+    //unit: second
+    double total_time, read_disk_time, inner_product_time, binary_search_time, query_per_second;
+    int topk;
+
+    inline RetrievalResult(double total_time, double read_disk_time, double inner_product_time,
+                           double binary_search_time, double query_per_second, int topk) {
+        this->total_time = total_time;
+        this->read_disk_time = read_disk_time;
+        this->inner_product_time = inner_product_time;
+        this->binary_search_time = binary_search_time;
+        this->query_per_second = query_per_second;
+
+        this->topk = topk;
+    }
+
+    void AddMap(map<string, string> &performance_m) {
+        char buff[256];
+        sprintf(buff, "top%d total retrieval time", topk);
+        string str1(buff);
+        performance_m.emplace(str1, double2string(total_time));
+
+        sprintf(buff, "top%d retrieval read disk time", topk);
+        string str2(buff);
+        performance_m.emplace(str2, double2string(read_disk_time));
+
+        sprintf(buff, "top%d retrieval inner product time", topk);
+        string str3(buff);
+        performance_m.emplace(str3, double2string(inner_product_time));
+
+        sprintf(buff, "top%d retrieval binary search time", topk);
+        string str4(buff);
+        performance_m.emplace(str4, double2string(binary_search_time));
+    }
+
+    [[nodiscard]] std::string ToString() const {
+        char arr[256];
+        sprintf(arr,
+                "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, binary search %.3fs, query per ms %.3fms",
+                topk, total_time, read_disk_time, inner_product_time, binary_search_time, query_per_second * 1000);
+        std::string str(arr);
+        return str;
+    }
+
+
+};
+
 
 int main(int argc, char **argv) {
-    if (!(argc == 3 or argc == 4)) {
-        cout << argv[0] << " dataset_name top-k [basic_dir]" << endl;
+    if (!(argc == 2 or argc == 3)) {
+        cout << argv[0] << " dataset_name [basic_dir]" << endl;
         return 0;
     }
     const char *dataset_name = argv[1];
-    int topk = atoi(argv[2]);
     const char *basic_dir = "/home/bianzheng/Dataset/MIPS/Reverse-kRanks";
-    if (argc == 4) {
-        basic_dir = argv[3];
+    if (argc == 3) {
+        basic_dir = argv[2];
     }
     printf("dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     double preprocess_time, total_preprocess_time;
     char index_path[256];
     sprintf(index_path, "../index/%s.bfi", dataset_name);
-    {
-        int n_data_item, n_query_item, n_user, vec_dim;
-        vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                                    vec_dim);
-        double *data_item_ptr = data[0].get();
-        double *user_ptr = data[1].get();
-        double *query_item_ptr = data[2].get();
 
-        VectorMatrix data_item, user, query_item;
-        data_item.init(data_item_ptr, n_data_item, vec_dim);
-        user.init(user_ptr, n_user, vec_dim);
+    int n_data_item, n_query_item, n_user, vec_dim;
+    vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                                 vec_dim);
+    double *data_item_ptr = data[0].get();
+    double *user_ptr = data[1].get();
+    double *query_item_ptr = data[2].get();
 
-        printf("dimensionality %d\n", vec_dim);
-        TimeRecord record;
-        record.reset();
-        preprocess_time = BuildSaveIndex(data_item, user, index_path);
-        total_preprocess_time = record.get_elapsed_time_second();
-        printf("finish preprocess and save the index\n");
-    }
-
-    char filename[256];
-    sprintf(filename, "%s/%s/%s_query_item.dvecs", basic_dir, dataset_name, dataset_name);
-    int n_query_item, vec_dim;
-    std::unique_ptr<double[]> query_item_uptr = loadVector<double>(filename, n_query_item, vec_dim);
-    double *query_item_ptr = query_item_uptr.get();
-
-    sprintf(filename, "%s/%s/%s_user.dvecs", basic_dir, dataset_name, dataset_name);
-    int n_user;
-    std::unique_ptr<double[]> user_item_uptr = loadVector<double>(filename, n_user, vec_dim);
-    double *user_ptr = user_item_uptr.get();
-
-    VectorMatrix query_item, user;
-    query_item.init(query_item_ptr, n_query_item, vec_dim);
+    VectorMatrix data_item, user, query_item;
+    data_item.init(data_item_ptr, n_data_item, vec_dim);
     user.init(user_ptr, n_user, vec_dim);
+    query_item.init(query_item_ptr, n_query_item, vec_dim);
 
-    DiskIndexBruteForce dibf(index_path, user);
+    printf("dimensionality %d\n", vec_dim);
     TimeRecord record;
     record.reset();
-    vector<vector<RankElement>> result = dibf.Retrieval(query_item, topk);
+    preprocess_time = BuildSaveIndex(data_item, user, index_path);
+    total_preprocess_time = record.get_elapsed_time_second();
+    printf("finish preprocess and save the index\n");
 
-    double retrieval_read_disk_time = dibf.read_disk_time_;
-    double retrieval_time = record.get_elapsed_time_second();
-    double query_per_second = retrieval_time / n_query_item;
+    DiskIndexBruteForce dibf(index_path, n_data_item, user);
+
+    vector<int> topk_l{10, 20, 30, 40, 50};
+    vector<RetrievalResult> retrieval_res_l;
+    vector<vector<vector<RankElement>>> result_rank_l;
+    for (int topk: topk_l) {
+        record.reset();
+        vector<vector<RankElement>> result_rk = dibf.Retrieval(query_item, topk);
+        result_rank_l.emplace_back(result_rk);
+
+        double retrieval_time = record.get_elapsed_time_second();
+        double read_disk_time = dibf.read_disk_time_;
+        double inner_product_time = dibf.inner_product_time_;
+        double binary_search_time = dibf.binary_search_time_;
+        double query_per_second = retrieval_time / n_query_item;
+
+        retrieval_res_l.emplace_back(retrieval_time, read_disk_time, inner_product_time, binary_search_time,
+                                     query_per_second, topk);
+    }
 
     printf("total preprocess time %.3fs, preprocessed calculation time %.3fs\n",
            total_preprocess_time, preprocess_time);
-    printf("retrieval read disk time %.3fs, total retrieval time %.3fs\n", retrieval_read_disk_time, retrieval_time);
-    printf("query per second %.3fms\n", query_per_second * 1000);
-    writeRank(result, dataset_name, "DiskIndexBruteForce");
+    int n_topk = (int) topk_l.size();
+
+    for (int i = 0; i < n_topk; i++) {
+        cout << retrieval_res_l[i].ToString() << endl;
+        writeRank(result_rank_l[i], dataset_name, "DiskIndexBruteForce");
+    }
 
     map<string, string> performance_m;
     performance_m.emplace("total preprocess time", double2string(total_preprocess_time));
-    performance_m.emplace("preprocess time", double2string(preprocess_time));
-    performance_m.emplace("retrieval time", double2string(retrieval_time));
-    performance_m.emplace("retrieval read disk time", double2string(retrieval_read_disk_time));
-    performance_m.emplace("query per second", double2string(query_per_second));
+    performance_m.emplace("preprocess calculation time", double2string(preprocess_time));
+    for (int i = 0; i < n_topk; i++) {
+        retrieval_res_l[i].AddMap(performance_m);
+    }
     writePerformance(dataset_name, "DiskIndexBruteForce", performance_m);
 
     return 0;

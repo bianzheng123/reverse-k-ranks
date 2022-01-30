@@ -38,12 +38,12 @@ namespace ReverseMIPS {
     }
 
 
-    void writeRank(std::vector<std::vector<RankElement>> result, const char *dataset_name, const char *method_name) {
-        int n_query_item = result.size();
-        int topk = result[0].size();
+    void writeRank(std::vector<std::vector<RankElement>> &result, const char *dataset_name, const char *method_name) {
+        int n_query_item = (int) result.size();
+        int topk = (int) result[0].size();
 
         char resPath[256];
-        std::sprintf(resPath, "../result/%s-%s-index.csv", dataset_name, method_name);
+        std::sprintf(resPath, "../result/%s-%s-top%d-index.csv", dataset_name, method_name, topk);
         std::ofstream file(resPath);
         if (!file) {
             std::printf("error in write result\n");
@@ -57,7 +57,7 @@ namespace ReverseMIPS {
         }
         file.close();
 
-        std::sprintf(resPath, "../result/%s-%s-rank.csv", dataset_name, method_name);
+        std::sprintf(resPath, "../result/%s-%s-top%d-rank.csv", dataset_name, method_name, topk);
         file.open(resPath);
         if (!file) {
             std::printf("error in write result\n");

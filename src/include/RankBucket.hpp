@@ -17,6 +17,7 @@
 #include <utility>
 #include <algorithm>
 //#undef NDEBUG
+//#define TEST
 
 namespace ReverseMIPS {
 
@@ -75,6 +76,9 @@ namespace ReverseMIPS {
         // BucketVector shape: n_bucket * (bucket_size or final_bucket_size)
         int n_known_rank_, n_user_, n_merge_user_, n_bucket_, bucket_size_, final_bucket_size_;
         VectorMatrix user_, data_item_;
+#ifdef TEST
+        int ip_calc = 0;
+#endif
 
 
         RankBucketIndex(std::vector<int> &known_rank_idx_l, std::vector<DistancePair> &distance_table,
@@ -139,6 +143,9 @@ namespace ReverseMIPS {
         [[nodiscard]] int GetRank(const int userID, const double *query_vec, const int vec_dim) const {
             double *user = this->user_.getVector(userID);
             double queryIP = InnerProduct(query_vec, user, vec_dim);
+#ifdef TEST
+            ip_calc++;
+#endif
             int bucket_idx = BinarySearch(queryIP, userID);
 
             int bucket_vector_idx = user_merge_idx_l_[userID];
