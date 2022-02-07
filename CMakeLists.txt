@@ -25,7 +25,7 @@ SET(APPS
         bfdi
         rkbkt
         itvvec
-        itlsitv
+#        itlsitv
         )
 SET(APPS_EXAMPLE
         OnlineBruteForce
@@ -33,7 +33,7 @@ SET(APPS_EXAMPLE
         DiskIndexBruteForce
         RankBucket
         IntervalVector
-        ItemListInterval
+#        ItemListInterval
         )
 
 LIST(LENGTH APPS ll)

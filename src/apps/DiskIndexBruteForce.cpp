@@ -21,16 +21,16 @@ using namespace ReverseMIPS;
 class RetrievalResult {
 public:
     //unit: second
-    double total_time, read_disk_time, inner_product_time, binary_search_time, query_per_second;
+    double total_time, read_disk_time, inner_product_time, binary_search_time, second_per_query;
     int topk;
 
     inline RetrievalResult(double total_time, double read_disk_time, double inner_product_time,
-                           double binary_search_time, double query_per_second, int topk) {
+                           double binary_search_time, double second_per_query, int topk) {
         this->total_time = total_time;
         this->read_disk_time = read_disk_time;
         this->inner_product_time = inner_product_time;
         this->binary_search_time = binary_search_time;
-        this->query_per_second = query_per_second;
+        this->second_per_query = second_per_query;
 
         this->topk = topk;
     }
@@ -52,17 +52,20 @@ public:
         sprintf(buff, "top%d retrieval binary search time", topk);
         string str4(buff);
         performance_m.emplace(str4, double2string(binary_search_time));
+
+        sprintf(buff, "top%d second per query time", topk);
+        string str5(buff);
+        performance_m.emplace(str5, double2string(second_per_query));
     }
 
     [[nodiscard]] std::string ToString() const {
         char arr[256];
         sprintf(arr,
-                "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, binary search %.3fs, query per ms %.3fms",
-                topk, total_time, read_disk_time, inner_product_time, binary_search_time, query_per_second * 1000);
+                "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, binary search %.3fs, million second per query %.3fms",
+                topk, total_time, read_disk_time, inner_product_time, binary_search_time, second_per_query * 1000);
         std::string str(arr);
         return str;
     }
-
 
 };
 
@@ -79,7 +82,7 @@ int main(int argc, char **argv) {
     }
     printf("dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
-    double preprocess_time, total_preprocess_time;
+    double build_index_calculation_time, total_build_index_time;
     char index_path[256];
     sprintf(index_path, "../index/%s.bfi", dataset_name);
 
@@ -89,17 +92,17 @@ int main(int argc, char **argv) {
     double *data_item_ptr = data[0].get();
     double *user_ptr = data[1].get();
     double *query_item_ptr = data[2].get();
+    printf("n_data_item %d, n_query_item %d, n_user %d, vec_dim %d\n", n_data_item, n_query_item, n_user, vec_dim);
 
     VectorMatrix data_item, user, query_item;
     data_item.init(data_item_ptr, n_data_item, vec_dim);
     user.init(user_ptr, n_user, vec_dim);
     query_item.init(query_item_ptr, n_query_item, vec_dim);
 
-    printf("dimensionality %d\n", vec_dim);
     TimeRecord record;
     record.reset();
-    preprocess_time = BuildSaveIndex(data_item, user, index_path);
-    total_preprocess_time = record.get_elapsed_time_second();
+    build_index_calculation_time = BuildSaveIndex(data_item, user, index_path);
+    total_build_index_time = record.get_elapsed_time_second();
     printf("finish preprocess and save the index\n");
 
     DiskIndexBruteForce dibf(index_path, n_data_item, user);
@@ -110,20 +113,20 @@ int main(int argc, char **argv) {
     for (int topk: topk_l) {
         record.reset();
         vector<vector<RankElement>> result_rk = dibf.Retrieval(query_item, topk);
-        result_rank_l.emplace_back(result_rk);
 
         double retrieval_time = record.get_elapsed_time_second();
         double read_disk_time = dibf.read_disk_time_;
         double inner_product_time = dibf.inner_product_time_;
         double binary_search_time = dibf.binary_search_time_;
-        double query_per_second = retrieval_time / n_query_item;
+        double second_per_query = retrieval_time / n_query_item;
 
+        result_rank_l.emplace_back(result_rk);
         retrieval_res_l.emplace_back(retrieval_time, read_disk_time, inner_product_time, binary_search_time,
-                                     query_per_second, topk);
+                                     second_per_query, topk);
     }
 
-    printf("total preprocess time %.3fs, preprocessed calculation time %.3fs\n",
-           total_preprocess_time, preprocess_time);
+    printf("build index time: total %.3fs, inner product calculation %.3fs\n",
+           total_build_index_time, build_index_calculation_time);
     int n_topk = (int) topk_l.size();
 
     for (int i = 0; i < n_topk; i++) {
@@ -132,8 +135,8 @@ int main(int argc, char **argv) {
     }
 
     map<string, string> performance_m;
-    performance_m.emplace("total preprocess time", double2string(total_preprocess_time));
-    performance_m.emplace("preprocess calculation time", double2string(preprocess_time));
+    performance_m.emplace("build index total time", double2string(total_build_index_time));
+    performance_m.emplace("build index calculation time", double2string(build_index_calculation_time));
     for (int i = 0; i < n_topk; i++) {
         retrieval_res_l[i].AddMap(performance_m);
     }

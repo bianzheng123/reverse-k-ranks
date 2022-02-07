@@ -34,13 +34,17 @@ namespace ReverseMIPS {
     };
 
     class MemoryIndexBruteForce {
+    private:
+        void ResetTime() {
+            this->inner_product_calculation_time_ = 0;
+            this->binary_search_time_ = 0;
+        }
     public:
         VectorMatrix data_item_, user_;
         Index index_;
         int vec_dim_;
         int preprocess_report_every_ = 100;
-        double inner_product_calculation_time_;
-        double binary_search_time_;
+        double inner_product_calculation_time_, binary_search_time_;
         TimeRecord record_;
 
         MemoryIndexBruteForce() {}
@@ -52,11 +56,6 @@ namespace ReverseMIPS {
             this->data_item_ = data_item;
             this->user_ = user;
             this->vec_dim_ = user.vec_dim_;
-        }
-
-        void ResetTime() {
-            this->inner_product_calculation_time_ = 0;
-            this->binary_search_time_ = 0;
         }
 
         ~MemoryIndexBruteForce() {}
@@ -93,6 +92,7 @@ namespace ReverseMIPS {
         }
 
         std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+            ResetTime();
             int n_query_item = query_item.n_vector_;
             int n_user = user_.n_vector_;
 

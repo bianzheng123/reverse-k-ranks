@@ -1,15 +1,17 @@
-./bfon fake 10
-./bfmi fake 10
-./bfdi fake 10
-./rkbkt fake 10
-./itvvec fake 10
+./bfon fake
+./bfmi fake
+./bfdi fake
+./rkbkt fake
+./itvvec fake
+
 ./itlsitv fake 10
 
-./bfon Test 20
-./bfmi Test 20
-./bfdi Test 20
-./rkbkt Test 20
-./bktitv Test 20
+./bfon Test
+./bfmi Test
+./bfdi Test
+./rkbkt Test
+./bktitv Test
+
 ./itlsitv Test 20
 
 ./bfdi movielens-27m

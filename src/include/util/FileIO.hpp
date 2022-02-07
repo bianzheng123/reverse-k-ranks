@@ -43,7 +43,7 @@ namespace ReverseMIPS {
         int topk = (int) result[0].size();
 
         char resPath[256];
-        std::sprintf(resPath, "../result/%s-%s-top%d-index.csv", dataset_name, method_name, topk);
+        std::sprintf(resPath, "../result/rank/%s-%s-top%d-index.csv", dataset_name, method_name, topk);
         std::ofstream file(resPath);
         if (!file) {
             std::printf("error in write result\n");
@@ -57,7 +57,7 @@ namespace ReverseMIPS {
         }
         file.close();
 
-        std::sprintf(resPath, "../result/%s-%s-top%d-rank.csv", dataset_name, method_name, topk);
+        std::sprintf(resPath, "../result/rank/%s-%s-top%d-rank.csv", dataset_name, method_name, topk);
         file.open(resPath);
         if (!file) {
             std::printf("error in write result\n");
@@ -75,7 +75,7 @@ namespace ReverseMIPS {
     void writePerformance(const char *dataset_name, const char *method_name,
                           const std::map<std::string, std::string> &perform_m) {
         char resPath[256];
-        std::sprintf(resPath, "../result/%s-%s-config.txt", dataset_name, method_name);
+        std::sprintf(resPath, "../result/performance/%s-%s-config.txt", dataset_name, method_name);
         std::ofstream file(resPath);
         if (!file) {
             std::printf("error in write result\n");

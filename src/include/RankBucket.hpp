@@ -68,6 +68,12 @@ namespace ReverseMIPS {
     };
 
     class RankBucketIndex {
+    private:
+        void ResetTime(){
+            brute_force_rank_time_ = 0;
+            self_inner_product_time_ = 0;
+            binary_search_time_ = 0;
+        }
     public:
         std::vector<int> known_rank_idx_l_; // shape: n_known_rank
         std::vector<int> user_merge_idx_l_; // shape: n_user, record which user belongs to which BucketVector
@@ -76,6 +82,8 @@ namespace ReverseMIPS {
         // BucketVector shape: n_bucket * (bucket_size or final_bucket_size)
         int n_known_rank_, n_user_, n_merge_user_, n_bucket_, bucket_size_, final_bucket_size_;
         VectorMatrix user_, data_item_;
+        double brute_force_rank_time_, self_inner_product_time_, binary_search_time_;
+        TimeRecord record_;
 #ifdef TEST
         int ip_calc = 0;
 #endif
@@ -102,7 +110,8 @@ namespace ReverseMIPS {
             this->data_item_ = data_item;
         }
 
-        [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix query_item, int topk) const {
+        [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix query_item, int topk) {
+            ResetTime();
             std::vector<std::vector<RankElement>> result(query_item.n_vector_, std::vector<RankElement>());
             int n_query = query_item.n_vector_;
             int vec_dim = query_item.vec_dim_;
@@ -140,17 +149,23 @@ namespace ReverseMIPS {
             return result;
         }
 
-        [[nodiscard]] int GetRank(const int userID, const double *query_vec, const int vec_dim) const {
+        [[nodiscard]] int GetRank(const int userID, const double *query_vec, const int vec_dim) {
             double *user = this->user_.getVector(userID);
+            record_.reset();
             double queryIP = InnerProduct(query_vec, user, vec_dim);
+            self_inner_product_time_ += record_.get_elapsed_time_second();
 #ifdef TEST
             ip_calc++;
 #endif
+            record_.reset();
             int bucket_idx = BinarySearch(queryIP, userID);
+            binary_search_time_ += record_.get_elapsed_time_second();
 
+            record_.reset();
             int bucket_vector_idx = user_merge_idx_l_[userID];
             std::vector<int> candidate_l = bkt_vec_arr[bucket_vector_idx].GetBucket(bucket_idx);
             int loc_rk = RelativeRankInBucket(candidate_l, bucket_idx, queryIP, userID, vec_dim);
+            brute_force_rank_time_ += record_.get_elapsed_time_second();
 
             int rank = bucket_idx == 0 ? loc_rk : known_rank_idx_l_[bucket_idx - 1] + loc_rk;
             return rank + 1;

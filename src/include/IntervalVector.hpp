@@ -95,6 +95,11 @@ namespace ReverseMIPS {
     };
 
     class IntervalVectorIndex {
+    private:
+        void ResetTime(){
+            self_inner_product_time_ = 0;
+            brute_force_search_time_ = 0;
+        }
 
     public:
         std::vector<int> user_merge_idx_l_; // shape: n_user, record which user belongs to which IntervalVector
@@ -107,8 +112,11 @@ namespace ReverseMIPS {
          */
         int n_user_, n_merge_user_, n_interval_;
         VectorMatrix user_, data_item_;
+        double self_inner_product_time_, brute_force_search_time_;
+        TimeRecord record;
 
-        [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) const {
+        [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+            ResetTime();
             std::vector<std::vector<RankElement>> result(query_item.n_vector_, std::vector<RankElement>());
             int n_query = query_item.n_vector_;
             int vec_dim = query_item.vec_dim_;
@@ -161,15 +169,19 @@ namespace ReverseMIPS {
             return rank;
         }
 
-        [[nodiscard]] int GetRank(const int userID, const double *query_vec, const int vec_dim) const {
+        [[nodiscard]] int GetRank(const int userID, const double *query_vec, const int vec_dim) {
             double *user_vec = this->user_.getVector(userID);
+            record.reset();
             double queryIP = InnerProduct(query_vec, user_vec, vec_dim);
+            self_inner_product_time_ += record.get_elapsed_time_second();
 
             int interval_vector_idx = user_merge_idx_l_[userID];
             std::vector<int> candidate_l = interval_vector_l_[interval_vector_idx].GetIntervalByIP(queryIP);
             double upper_bound_ip = interval_vector_l_[interval_vector_idx].GetUpperBoundByIP(queryIP);
             int intervalID = interval_vector_l_[interval_vector_idx].GetIntervalIndexByIP(queryIP);
+            record.reset();
             int loc_rk = RelativeRankInInterval(candidate_l, queryIP, userID, vec_dim, upper_bound_ip);
+            brute_force_search_time_ += record.get_elapsed_time_second();
 
             int rank;
             if (intervalID == n_interval_) {

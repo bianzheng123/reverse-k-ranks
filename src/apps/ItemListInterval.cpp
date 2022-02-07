@@ -20,7 +20,7 @@ using namespace ReverseMIPS;
 /*
  * 首先进行merge用户, 然后建立索引, 根据指定的方向进行merge
  */
-
+//deprecated
 int main(int argc, char **argv) {
     if (!(argc == 3 or argc == 4)) {
         cout << argv[0] << " dataset_name top-k [basic_dir]" << endl;
