@@ -45,7 +45,7 @@ namespace ReverseMIPS {
         inline ~BucketVector() = default;
 
         void Merge(const BucketVector &other) {
-            assert(other.dimension_ != this->dimension_);
+            assert(other.dimension_ == this->dimension_);
 
             for (int i = 0; i < dimension_; i++) {
                 //it has sorted before the assignment
@@ -69,11 +69,12 @@ namespace ReverseMIPS {
 
     class RankBucketIndex {
     private:
-        void ResetTime(){
+        void ResetTime() {
             brute_force_rank_time_ = 0;
             self_inner_product_time_ = 0;
             binary_search_time_ = 0;
         }
+
     public:
         std::vector<int> known_rank_idx_l_; // shape: n_known_rank
         std::vector<int> user_merge_idx_l_; // shape: n_user, record which user belongs to which BucketVector
@@ -111,6 +112,10 @@ namespace ReverseMIPS {
         }
 
         [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix query_item, int topk) {
+            if (topk > user_.n_vector_) {
+                printf("top-k is larger than user, system exit\n");
+                exit(-1);
+            }
             ResetTime();
             std::vector<std::vector<RankElement>> result(query_item.n_vector_, std::vector<RankElement>());
             int n_query = query_item.n_vector_;
@@ -164,43 +169,38 @@ namespace ReverseMIPS {
             record_.reset();
             int bucket_vector_idx = user_merge_idx_l_[userID];
             std::vector<int> candidate_l = bkt_vec_arr[bucket_vector_idx].GetBucket(bucket_idx);
+            assert(0 <= bucket_idx && bucket_idx <= n_known_rank_);
             int loc_rk = RelativeRankInBucket(candidate_l, bucket_idx, queryIP, userID, vec_dim);
             brute_force_rank_time_ += record_.get_elapsed_time_second();
 
-            int rank = bucket_idx == 0 ? loc_rk : known_rank_idx_l_[bucket_idx - 1] + loc_rk;
+            int rank = bucket_idx == 0 ? loc_rk : known_rank_idx_l_[bucket_idx - 1] + loc_rk + 1;
             return rank + 1;
         }
 
         [[nodiscard]] int RelativeRankInBucket(const std::vector<int> &candidate_l, int bucket_idx, double queryIP,
-                                                 int userID, int vec_dim) const {
+                                               int userID, int vec_dim) const {
             //calculate all the IP, then get the lower bound
             //make different situation by the information
-            int bucket_size = (int) candidate_l.size();
+            int candidate_size = (int) candidate_l.size();
             std::vector<DistancePair> dp_l;
-            for (int i = 0; i < bucket_size; i++) {
+            double bucket_upper_bound =
+                    bucket_idx == 0 ? DBL_MAX : distance_table_[userID * n_known_rank_ + bucket_idx - 1].dist_;
+            double bucket_lower_bound =
+                    bucket_idx == n_known_rank_ ? -DBL_MAX : distance_table_[userID * n_known_rank_ + bucket_idx].dist_;
+            assert(bucket_lower_bound < queryIP && queryIP < bucket_upper_bound);
+            for (int i = 0; i < candidate_size; i++) {
                 double ip = InnerProduct(data_item_.getVector(candidate_l[i]), user_.getVector(userID), vec_dim);
-                dp_l.emplace_back(ip, candidate_l[i]);
+                if (bucket_lower_bound < ip && ip < bucket_upper_bound) {
+                    dp_l.emplace_back(ip, candidate_l[i]);
+                }
             }
             std::sort(dp_l.begin(), dp_l.end(), std::greater<DistancePair>());
 
-            if (bucket_idx == 0) {
-                auto lb_ptr = std::lower_bound(dp_l.begin(), dp_l.end(), queryIP,
-                                               [](const DistancePair &info, double value) {
-                                                   return info.dist_ > value;
-                                               });
-                return (int) (lb_ptr - dp_l.begin());
-            } else {
-                auto lb_ptr = std::lower_bound(dp_l.begin(), dp_l.end(), queryIP,
-                                               [](const DistancePair &info, double value) {
-                                                   return info.dist_ > value;
-                                               });
-                double bucket_upper_bound = distance_table_[userID * n_known_rank_ + bucket_idx - 1].dist_;
-                auto bucket_ptr = std::lower_bound(dp_l.begin(), dp_l.end(), bucket_upper_bound,
-                                                     [](const DistancePair &info, double value) {
-                                                         return info.dist_ > value;
-                                                     });
-                return (int) (lb_ptr - dp_l.begin()) - (int) (bucket_ptr - dp_l.begin());
-            }
+            auto lb_ptr = std::lower_bound(dp_l.begin(), dp_l.end(), queryIP,
+                                           [](const DistancePair &info, double value) {
+                                               return info.dist_ > value;
+                                           });
+            return (int) (lb_ptr - dp_l.begin());
         }
 
         //return the index of the bucket it belongs to
@@ -218,21 +218,25 @@ namespace ReverseMIPS {
     };
 
     RankBucketIndex
-    BuildIndex(VectorMatrix &user, VectorMatrix &data_item, int n_merge_user) {
+    BuildIndex(VectorMatrix &user, VectorMatrix &data_item) {
+        int n_user = user.n_vector_;
+        int n_data_item = data_item.n_vector_;
+        int vec_dim = user.vec_dim_;
+        if (n_data_item <= 5) {
+            printf("the number of data item is too small, program exit\n");
+            exit(-1);
+        }
+
+        const int n_merge_user = std::min(10000, n_user / 10);
+        const int n_known_rank = n_data_item > 256 ? 256 : 5;
 
         //perform Kmeans for user vector, the label start from 0, indicates where the rank should come from
         printf("n_merge_user %d\n", n_merge_user);
         std::vector<int> label_l = BuildKMeans(user, n_merge_user);
 
-        int n_user = user.n_vector_;
-        int n_data_item = data_item.n_vector_;
-        int vec_dim = user.vec_dim_;
-
-        int n_known_rank = std::min(n_data_item / 10, 5);
-
         int n_bucket = n_known_rank + 1;
         int bucket_size = n_data_item / n_known_rank - 1;
-        int final_bucket_size = n_data_item % (bucket_size + 1);
+        int final_bucket_size = n_data_item - (bucket_size + 1) * n_known_rank;
 
         printf("n_known_rank %d, n_bucket %d, bucket_size %d, final_bucket_size %d\n", n_known_rank, n_bucket,
                bucket_size, final_bucket_size);
@@ -240,7 +244,7 @@ namespace ReverseMIPS {
         //confirm the specific rank, start from 1
         std::vector<int> known_rank_idx_l(n_known_rank);
         for (int i = 0; i < n_known_rank; i++) {
-            known_rank_idx_l[i] = (i + 1) * bucket_size + i - 1;
+            known_rank_idx_l[i] = (bucket_size + 1) * (i + 1) - 1;
         }
 
         std::vector<DistancePair> distance_table(n_user * n_known_rank);
@@ -257,13 +261,13 @@ namespace ReverseMIPS {
             std::vector<std::vector<int>> tmp_bucket_vec(n_bucket, std::vector<int>());
             for (int i = 0; i < n_known_rank; i++) {
                 distance_table[userID * n_known_rank + i] = distance_cache[known_rank_idx_l[i]];
-                int base_idx = i == 0 ? 0 : known_rank_idx_l[i - 1];
+                int base_idx = i == 0 ? 0 : known_rank_idx_l[i - 1] + 1;
                 for (int j = 0; j < bucket_size; j++) {
                     tmp_bucket_vec[i].emplace_back(distance_cache[base_idx + j].ID_);
                 }
             }
             {
-                int base_idx = known_rank_idx_l[n_known_rank - 1];
+                int base_idx = known_rank_idx_l[n_known_rank - 1] + 1;
                 for (int j = 0; j < final_bucket_size; j++) {
                     tmp_bucket_vec[n_known_rank].emplace_back(distance_cache[base_idx + j].ID_);
                 }
@@ -271,12 +275,11 @@ namespace ReverseMIPS {
             BucketVector setVector(tmp_bucket_vec, n_bucket);
 
             bkt_vec_arr[label_l[userID]].Merge(setVector);
-
         }
 
         RankBucketIndex rii(known_rank_idx_l, distance_table, bkt_vec_arr, label_l,
                             std::vector<int>{n_known_rank, n_user, n_merge_user, n_bucket, bucket_size,
-                                               final_bucket_size});
+                                             final_bucket_size});
         rii.setUserItemMatrix(user, data_item);
         return rii;
     }

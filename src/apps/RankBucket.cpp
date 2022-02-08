@@ -92,7 +92,6 @@ int main(int argc, char **argv) {
     double *user_ptr = data[1].get();
     double *query_item_ptr = data[2].get();
     printf("n_data_item %d, n_query_item %d, n_user %d, vec_dim %d\n", n_data_item, n_query_item, n_user, vec_dim);
-    const int n_merge_user = std::min(10000, n_user);
 
     VectorMatrix data_item, user, query_item;
     data_item.init(data_item_ptr, n_data_item, vec_dim);
@@ -102,7 +101,7 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    RankBucketIndex rankBucketIndex = BuildIndex(user, data_item, n_merge_user);
+    RankBucketIndex rankBucketIndex = BuildIndex(user, data_item);
     double build_index_time = record.get_elapsed_time_second();
     printf("finish building index\n");
 

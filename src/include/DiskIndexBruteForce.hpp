@@ -17,7 +17,7 @@
 
 namespace ReverseMIPS {
 
-    int write_every_ = 10000;
+    int write_every_ = 30000;
     const int report_batch_every_ = 5;
 
     /*
@@ -112,7 +112,7 @@ namespace ReverseMIPS {
         ~DiskIndexBruteForce() {}
 
         std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
-            TimeRecord record;
+            TimeRecord record, batch_report_record;
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
@@ -120,19 +120,20 @@ namespace ReverseMIPS {
             }
             index_stream_.read((char *) &this->n_data_item_, sizeof(int));
 
-            if (topk > this->n_cache || this->n_cache > user_.n_vector_) {
-                printf("not support the number, program exit\n");
+            if (topk > user_.n_vector_) {
+                printf("top-k is too large, program exit\n");
                 exit(-1);
             }
 
+            size_t avail_memory = get_avail_memory();
+            n_cache = std::min(user_.n_vector_,
+                               (int) (avail_memory / ((n_data_item_ * 1.5) * sizeof(DistancePair))));
             std::vector<DistancePair> distance_cache(n_cache * n_data_item_);
             int n_query_item = query_item.n_vector_;
             int n_user = user_.n_vector_;
-            size_t avail_memory = get_avail_memory();
-            n_cache = std::max(user_.n_vector_,
-                               (int) (avail_memory / (8 * 1024 * 1024 * (n_data_item_ + 5) * sizeof(DistancePair))));
             int n_batch = n_user / n_cache;
             int n_remain = n_user % n_cache;
+            const int report_batch_every_ = 5;
 
             std::vector<std::vector<RankElement>> query_heap_l(n_query_item, std::vector<RankElement>(topk));
 
@@ -190,6 +191,13 @@ namespace ReverseMIPS {
                         }
                     }
 
+                }
+
+                if (bth_idx % report_batch_every_ == 0) {
+                    std::cout << "top-" << topk << " retrieval batch " << bth_idx / (0.01 * n_batch) << " %, "
+                              << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                              << get_current_RSS() / 1000000 << " Mb \n";
+                    batch_report_record.reset();
                 }
 
             }

@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
         basic_dir = argv[2];
     }
     printf("dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
-    int n_merge_user = 100;
+    int n_merge_user = 1024;
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<unique_ptr<double[]>>

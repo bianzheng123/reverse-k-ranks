@@ -29,6 +29,10 @@ namespace ReverseMIPS {
         void Preprocess() {}
 
         std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+            if (topk > user_.n_vector_) {
+                printf("top-k is larger than user, system exit\n");
+                exit(-1);
+            }
             int n_query_item = query_item.n_vector_;
             int n_user = user_.n_vector_;
 

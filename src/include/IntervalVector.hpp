@@ -116,6 +116,10 @@ namespace ReverseMIPS {
         TimeRecord record;
 
         [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+            if (topk > user_.n_vector_) {
+                printf("top-k is larger than user, system exit\n");
+                exit(-1);
+            }
             ResetTime();
             std::vector<std::vector<RankElement>> result(query_item.n_vector_, std::vector<RankElement>());
             int n_query = query_item.n_vector_;
@@ -430,7 +434,7 @@ namespace ReverseMIPS {
         sprintf(index_path, "../index/%s.itv_vec_idx", dataset_name);
 
         //left: lower bound, right: upper bound
-        std::vector<std::pair<double, double>> ip_bound_l(n_merge_user, std::pair<double, double>(DBL_MAX, DBL_MIN));
+        std::vector<std::pair<double, double>> ip_bound_l(n_merge_user, std::pair<double, double>(DBL_MAX, -DBL_MAX));
 
         TimeRecord record;
         BuildSaveBruteForceIndex(user, data_item, index_path, user_merge_idx_l, ip_bound_l);
