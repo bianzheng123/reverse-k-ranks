@@ -12,7 +12,26 @@ find_package( PkgConfig )
 pkg_check_modules( EIGEN3 REQUIRED eigen3 )
 include_directories( ${EIGEN3_INCLUDE_DIRS} )
 
+#find_package(OpenMP)
+#if (OPENMP_FOUND)
+#    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+#endif()
+#
+#link_libraries(-lpthread)
+#link_libraries(-fopenmp)
+
 include(FetchContent)
+
+FetchContent_Declare(
+        openmpi
+        URL https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz
+)
+
+FetchContent_MakeAvailable(
+        openmpi
+)
 
 FetchContent_Declare(
         armadillo
@@ -22,15 +41,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(
         armadillo
 )
+SET(CMAKE_CXX_FLAGS "-fopenmp")
 
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
-
-link_libraries(-lpthread)
 #link_libraries(-DNDEBUG)
 
 include_directories(src/include)

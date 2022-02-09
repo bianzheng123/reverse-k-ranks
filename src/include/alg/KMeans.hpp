@@ -18,7 +18,7 @@ namespace ReverseMIPS {
         arma::mat means;
 
         // Reference: http://arma.sourceforge.net/docs.html#kmeans
-        bool status = arma::kmeans(means, data, n_merge_user, arma::static_spread, 100, false);
+        bool status = arma::kmeans(means, data, n_merge_user, arma::random_subset, 7, true);
 
         if (!status) {
             std::cout << "clustering failed" << std::endl;
@@ -28,6 +28,7 @@ namespace ReverseMIPS {
 //    means.print("means:");
 
         std::vector<std::vector<double>> centroid(n_merge_user, std::vector<double>(user.vec_dim_));
+#pragma omp parallel for schedule(static)
         for (int i = 0; i < n_merge_user; i++) {
             for (int j = 0; j < user.vec_dim_; j++) {
                 centroid[i][j] = means(j, i);

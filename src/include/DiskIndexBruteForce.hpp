@@ -43,6 +43,7 @@ namespace ReverseMIPS {
         batch_report_record.reset();
         for (int i = 0; i < n_batch; i++) {
             record.reset();
+#pragma omp parallel for default(none)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;
                 for (int itemID = 0; itemID < n_data_item; itemID++) {

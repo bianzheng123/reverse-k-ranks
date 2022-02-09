@@ -227,8 +227,8 @@ namespace ReverseMIPS {
             exit(-1);
         }
 
-        const int n_merge_user = std::min(10000, n_user / 10);
-        const int n_known_rank = n_data_item > 256 ? 256 : 5;
+        const int n_merge_user = std::min(10000, n_user / 2);
+        const int n_known_rank = n_data_item > 256 ? 128 : 5;
 
         //perform Kmeans for user vector, the label start from 0, indicates where the rank should come from
         printf("n_merge_user %d\n", n_merge_user);
