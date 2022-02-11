@@ -1,36 +1,19 @@
 cmake_minimum_required(VERSION 3.14)
 project(Reverse-kRanks)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-#add_executable(parhip dataset-partition/graph-partition/parhip_test.cpp)
-#TARGET_LINK_LIBRARIES(parhip /home/zhengbian/software/KaHIP/deploy/libparhip.a)
-#include_directories(/home/zhengbian/software/KaHIP/deploy)
-
-find_package( PkgConfig )
-pkg_check_modules( EIGEN3 REQUIRED eigen3 )
-include_directories( ${EIGEN3_INCLUDE_DIRS} )
-
-#find_package(OpenMP)
-#if (OPENMP_FOUND)
-#    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-#    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-#    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-#endif()
-#
-#link_libraries(-lpthread)
-#link_libraries(-fopenmp)
 
 include(FetchContent)
 
 FetchContent_Declare(
-        openmpi
-        URL https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.1.tar.gz
+        spdlog
+        URL https://github.com/gabime/spdlog/archive/refs/tags/v1.9.2.tar.gz
 )
 
-FetchContent_MakeAvailable(
-        openmpi
+FetchContent_Declare(
+        openblas
+        URL https://github.com/xianyi/OpenBLAS/archive/refs/tags/v0.3.19.zip
 )
 
 FetchContent_Declare(
@@ -39,11 +22,36 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(
+        spdlog
+)
+
+set(BUILD_STATIC_LIBS ON)
+set(BUILD_WITHOUT_LAPACK OFF)
+
+FetchContent_MakeAvailable(
+        openblas
+)
+
+set(OpenBLAS_LIBRARY ${openblas_BINARY_DIR}/lib/libopenblas.a)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
+set(DETECT_HDF5 OFF CACHE BOOL "")
+set(OPENBLAS_PROVIDES_LAPACK ON CACHE BOOL "")
+set(ALLOW_FLEXIBLAS_LINUX OFF CACHE BOOL "")
+set(ALLOW_OPENBLAS_MACOS ON CACHE BOOL "")
+
+FetchContent_MakeAvailable(
         armadillo
 )
-SET(CMAKE_CXX_FLAGS "-fopenmp")
 
-#link_libraries(-DNDEBUG)
+add_dependencies(armadillo openblas_static)
+
+find_package(OpenMP)
+
+#target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
+#target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
+#
+#target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
+#target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
 
 include_directories(src/include)
 
@@ -64,6 +72,7 @@ SET(APPS_EXAMPLE
         #        ItemListInterval
         )
 
+
 LIST(LENGTH APPS ll)
 message(STATUS "length is ${ll}")
 FOREACH (i RANGE 1 ${ll})
@@ -73,17 +82,11 @@ FOREACH (i RANGE 1 ${ll})
     LIST(GET APPS_EXAMPLE ${temp} app_example)
     #    message(STATUS "current is ${app} ${app_example}")
     add_executable(${app} src/apps/${app_example}.cpp)
-    target_link_libraries(${app} PRIVATE armadillo)
+
+    target_include_directories(${app} PRIVATE ${armadillo_SOURCE_DIR}/include)
+    target_link_libraries(${app} PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
     #    target_link_libraries(${app} ${MLPACK_LIBRARY})
 ENDFOREACH (i)
 
 add_executable(t1 test.cpp)
 target_link_libraries(t1 PRIVATE armadillo)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    SET(CMAKE_CXX_FLAGS "-Ofast -DHAVE_CXX0X -march=native -fpic -ftree-vectorize")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    SET(CMAKE_CXX_FLAGS "-Ofast -lrt -DHAVE_CXX0X -march=native -fpic -w -ftree-vectorize -ftree-vectorizer-verbose=0")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    SET(CMAKE_CXX_FLAGS "-Ofast -lrt -DHAVE_CXX0X -march=native -fpic -w -ftree-vectorize")
-endif ()

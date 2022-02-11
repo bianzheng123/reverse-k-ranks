@@ -7,36 +7,23 @@
 #include <ostream>
 #include <string>
 #include <map>
-#include <strstream>
 #include <iomanip>
-
-#if defined(_WIN32)
-
-#error "Cannot make directory for windows OS."
-
-#elif defined(__unix__) || defined(__unix) || defined(unix) || (defined(__APPLE__) && defined(__MACH__))
-
-#include <sys/stat.h>
-#include <sys/types.h>
-
-#else
-#error "Cannot make directory for an unknown OS."
-#endif
+#include <filesystem>
 
 namespace ReverseMIPS {
-
-    void recreateFile(char *filename) {
-        if (mkdir(filename, 0755) == -1) {
+    
+    void recreateFile(std::string_view path) {
+        namespace fs = std::filesystem;
+        std::error_code e;
+        if (not fs::create_directory(path, e)) {
             printf("can not make directory, delete directory\n");
-            char delete_command[256];
-            std::sprintf(delete_command, "rm -rf %s", filename);
-            if (system(delete_command) == 1) {
+            if (fs::remove(path, e)) {
+                fs::create_directory(path, e);
+            } else {
                 printf("fail to delete the directory command");
             }
         }
-        mkdir(filename, 0755);
     }
-
 
     void writeRank(std::vector<std::vector<RankElement>> &result, const char *dataset_name, const char *method_name) {
         int n_query_item = (int) result.size();

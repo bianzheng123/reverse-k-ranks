@@ -16,8 +16,6 @@
 #include <cassert>
 #include <utility>
 #include <algorithm>
-//#undef NDEBUG
-//#define TEST
 
 namespace ReverseMIPS {
 

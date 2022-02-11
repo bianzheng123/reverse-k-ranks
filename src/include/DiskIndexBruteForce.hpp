@@ -14,10 +14,11 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include "spdlog/spdlog.h"
 
 namespace ReverseMIPS {
 
-    int write_every_ = 30000;
+    const int write_every_ = 30000;
     const int report_batch_every_ = 5;
 
     /*
@@ -43,7 +44,7 @@ namespace ReverseMIPS {
         batch_report_record.reset();
         for (int i = 0; i < n_batch; i++) {
             record.reset();
-#pragma omp parallel for default(none)
+//#pragma omp parallel for default(shared)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -156,6 +157,7 @@ namespace ReverseMIPS {
             }
 
             for (int cacheID = topk; cacheID < n_cache; cacheID++) {
+                spdlog::info("processing cache {} of total {}", cacheID, n_cache);
                 int userID = cacheID;
                 for (int qID = 0; qID < n_query_item; qID++) {
                     std::vector<RankElement> &tmp_heap = query_heap_l[qID];
