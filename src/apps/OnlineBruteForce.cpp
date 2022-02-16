@@ -53,11 +53,11 @@ int main(int argc, char **argv) {
         return 0;
     }
     const char *dataset_name = argv[1];
-    const char *basic_dir = "/home/bianzheng/Dataset/MIPS/Reverse-kRanks";
+    const char *basic_dir = "/run/media/hdd/ReverseMIPS";
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    printf("dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
+    printf("OnlineBruteForce dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);

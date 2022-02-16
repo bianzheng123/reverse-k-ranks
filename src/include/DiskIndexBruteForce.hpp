@@ -44,7 +44,7 @@ namespace ReverseMIPS {
         batch_report_record.reset();
         for (int i = 0; i < n_batch; i++) {
             record.reset();
-//#pragma omp parallel for default(shared)
+#pragma omp parallel for default(none) shared(write_every_, i, n_data_item, data_item, user, vec_dim, distance_cache)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -96,7 +96,7 @@ namespace ReverseMIPS {
     public:
         VectorMatrix user_;
         int vec_dim_, n_data_item_;
-        int n_cache; //should larger than top-k
+        size_t n_cache; //should larger than top-k
         double read_disk_time_, inner_product_time_, binary_search_time_;
         char *index_path_;
         TimeRecord get_rank_record_;
@@ -127,14 +127,15 @@ namespace ReverseMIPS {
                 exit(-1);
             }
 
-            size_t avail_memory = get_avail_memory();
-            n_cache = std::min(user_.n_vector_,
-                               (int) (avail_memory / ((n_data_item_ * 1.5) * sizeof(DistancePair))));
+//            size_t avail_memory = get_avail_memory();
+            size_t a = user_.n_vector_;
+            size_t b = (size_t) 2000000000 / n_data_item_ ;
+            n_cache = a > b ? b : a;
             std::vector<DistancePair> distance_cache(n_cache * n_data_item_);
             int n_query_item = query_item.n_vector_;
             int n_user = user_.n_vector_;
-            int n_batch = n_user / n_cache;
-            int n_remain = n_user % n_cache;
+            int n_batch = (int) (n_user / n_cache);
+            int n_remain = (int) (n_user % n_cache);
             const int report_batch_every_ = 5;
 
             std::vector<std::vector<RankElement>> query_heap_l(n_query_item, std::vector<RankElement>(topk));
@@ -157,7 +158,7 @@ namespace ReverseMIPS {
             }
 
             for (int cacheID = topk; cacheID < n_cache; cacheID++) {
-                spdlog::info("processing cache {} of total {}", cacheID, n_cache);
+//                spdlog::info("processing cache {} of total {}", cacheID, n_cache);
                 int userID = cacheID;
                 for (int qID = 0; qID < n_query_item; qID++) {
                     std::vector<RankElement> &tmp_heap = query_heap_l[qID];

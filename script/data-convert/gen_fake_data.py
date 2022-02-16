@@ -1,4 +1,3 @@
-import faiss
 import numpy as np
 import vecs_io
 import multiprocessing
@@ -25,10 +24,10 @@ if __name__ == '__main__':
     user_l = np.random.normal(scale=10, size=(n_user, n_dim))
 
     dataset = 'fake'
-    output_dir = '/home/bianzheng/Dataset/MIPS/Reverse-kRanks/%s' % dataset
+    output_dir = '/run/media/hdd/ReverseMIPS/%s' % dataset
     delete_file_if_exist(output_dir)
     os.mkdir(output_dir)
 
-    vecs_io.fvecs_write("%s/%s_query_item.fvecs" % (output_dir, dataset), query_item_l)
-    vecs_io.fvecs_write("%s/%s_data_item.fvecs" % (output_dir, dataset), data_item_l)
-    vecs_io.fvecs_write("%s/%s_user.fvecs" % (output_dir, dataset), user_l)
+    vecs_io.dvecs_write("%s/%s_query_item.dvecs" % (output_dir, dataset), query_item_l)
+    vecs_io.dvecs_write("%s/%s_data_item.dvecs" % (output_dir, dataset), data_item_l)
+    vecs_io.dvecs_write("%s/%s_user.dvecs" % (output_dir, dataset), user_l)

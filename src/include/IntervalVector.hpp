@@ -424,7 +424,7 @@ namespace ReverseMIPS {
         int n_data_item = data_item.n_vector_;
         int vec_dim = user.vec_dim_;
 
-        int n_interval = std::min(n_data_item / 10, 5);
+        int n_interval = std::min(n_data_item / 2, 20000);
 
         //perform Kmeans for user vector, the label start from 0, indicates where the rank should come from
         printf("n_merge_user %d\n", n_merge_user);

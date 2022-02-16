@@ -1,4 +1,3 @@
-import faiss
 import numpy as np
 import vecs_io
 import multiprocessing
@@ -16,19 +15,20 @@ def delete_file_if_exist(dire):
 if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
     rank_k = 10
+    dimension = 150
     n_query_item = 1000
 
-    ds_l = ['movielens-small', 'movielens-20m', 'movielens-25m', 'movielens-27m', 'netflix', 'yahoomusic']
+    ds_l = ['movielens-small', 'movielens-27m', 'netflix', 'yelp']
     for dataset in ds_l:
-        input_dir = '/home/bianzheng/Dataset/MIPS/user_item_query'
+        input_dir = '/run/media/hdd/MIPS'
 
-        item_dir = os.path.join(input_dir, dataset, '%s_item.fvecs' % dataset)
-        user_dir = os.path.join(input_dir, dataset, '%s_user.fvecs' % dataset)
+        item_dir = os.path.join(input_dir, '%s-%dd' % (dataset, dimension), '%s_item.dvecs' % dataset)
+        user_dir = os.path.join(input_dir, '%s-%dd' % (dataset, dimension), '%s_user.dvecs' % dataset)
 
-        item_l, d = vecs_io.fvecs_read(item_dir)
-        user_l, d = vecs_io.fvecs_read(user_dir)
+        item_l, d = vecs_io.dvecs_read(item_dir)
+        user_l, d = vecs_io.dvecs_read(user_dir)
 
-        output_dir = '/home/bianzheng/Dataset/MIPS/Reverse-kRanks/%s' % dataset
+        output_dir = '/run/media/hdd/ReverseMIPS/%s' % dataset
         delete_file_if_exist(output_dir)
         os.mkdir(output_dir)
 
@@ -43,6 +43,7 @@ if __name__ == '__main__':
         query_item_l = item_l[query_idx_l, :]
         data_item_l = item_l[data_idx_l, :]
 
-        vecs_io.fvecs_write("%s/%s_query_item.fvecs" % (output_dir, dataset), query_item_l)
-        vecs_io.fvecs_write("%s/%s_data_item.fvecs" % (output_dir, dataset), data_item_l)
-        vecs_io.fvecs_write("%s/%s_user.fvecs" % (output_dir, dataset), user_l)
+        vecs_io.dvecs_write("%s/%s_query_item.dvecs" % (output_dir, dataset), query_item_l)
+        vecs_io.dvecs_write("%s/%s_data_item.dvecs" % (output_dir, dataset), data_item_l)
+        vecs_io.dvecs_write("%s/%s_user.dvecs" % (output_dir, dataset), user_l)
+        print("write %s complete" % dataset)

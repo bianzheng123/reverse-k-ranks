@@ -12,6 +12,7 @@
 #include "struct/DistancePair.hpp"
 #include "struct/RankElement.hpp"
 #include "alg/KMeans.hpp"
+#include <spdlog/spdlog.h>
 #include <fstream>
 #include <cassert>
 #include <utility>
@@ -56,6 +57,14 @@ namespace ReverseMIPS {
                 final.resize(it - final.begin());
                 bucket_vector_[i] = final;
             }
+        }
+
+        std::vector<int> BucketSize() {
+            std::vector<int> bkt_size_l(dimension_ - 1);
+            for (int i = 0; i < dimension_ - 1; ++i) {
+                bkt_size_l[i] = bucket_vector_[i].size();
+            }
+            return bkt_size_l;
         }
 
         [[nodiscard]] std::vector<int> GetBucket(int id) const {
@@ -110,11 +119,14 @@ namespace ReverseMIPS {
         }
 
         [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix query_item, int topk) {
+            const int report_query_every = 100;
+            TimeRecord record;
             if (topk > user_.n_vector_) {
                 printf("top-k is larger than user, system exit\n");
                 exit(-1);
             }
             ResetTime();
+            record.reset();
             std::vector<std::vector<RankElement>> result(query_item.n_vector_, std::vector<RankElement>());
             int n_query = query_item.n_vector_;
             int vec_dim = query_item.vec_dim_;
@@ -148,6 +160,13 @@ namespace ReverseMIPS {
                 }
                 std::make_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
                 std::sort_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+
+                if (qID % report_query_every == 0) {
+                    std::cout << "top" << topk << " retrieval " << qID / (0.01 * n_query) << " %, "
+                              << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                              << get_current_RSS() / 1000000 << " Mb \n";
+                    record.reset();
+                }
             }
             return result;
         }
@@ -217,39 +236,58 @@ namespace ReverseMIPS {
 
     RankBucketIndex
     BuildIndex(VectorMatrix &user, VectorMatrix &data_item) {
+        TimeRecord record;
         int n_user = user.n_vector_;
         int n_data_item = data_item.n_vector_;
         int vec_dim = user.vec_dim_;
-        if (n_data_item <= 5) {
-            printf("the number of data item is too small, program exit\n");
-            exit(-1);
-        }
+//        if (n_data_item <= 5) {
+//            printf("the number of data item is too small, program exit\n");
+//            exit(-1);
+//        }
 
-        const int n_merge_user = std::min(10000, n_user / 2);
-        const int n_known_rank = n_data_item > 256 ? 128 : 5;
-
-        //perform Kmeans for user vector, the label start from 0, indicates where the rank should come from
-        printf("n_merge_user %d\n", n_merge_user);
-        std::vector<int> label_l = BuildKMeans(user, n_merge_user);
-
-        int n_bucket = n_known_rank + 1;
-        int bucket_size = n_data_item / n_known_rank - 1;
-        int final_bucket_size = n_data_item - (bucket_size + 1) * n_known_rank;
-
-        printf("n_known_rank %d, n_bucket %d, bucket_size %d, final_bucket_size %d\n", n_known_rank, n_bucket,
-               bucket_size, final_bucket_size);
+        const int n_merge_user = 256;
+//        const int n_merge_user = std::min(1024, n_user >> 4 <= 0 ? 2 : n_user >> 4);
+        const int bucket_size = 10;
+//        const int n_known_rank = n_data_item > 20000 ? 20000 : 5;
 
         //confirm the specific rank, start from 1
-        std::vector<int> known_rank_idx_l(n_known_rank);
-        for (int i = 0; i < n_known_rank; i++) {
-            known_rank_idx_l[i] = (bucket_size + 1) * (i + 1) - 1;
+        std::vector<int> known_rank_idx_l;
+        for (int known_rank_idx = bucket_size; known_rank_idx < n_data_item; known_rank_idx += bucket_size + 1) {
+            known_rank_idx_l.emplace_back(known_rank_idx);
         }
+        const int n_known_rank = (int) known_rank_idx_l.size();
+        const int n_bucket = n_known_rank + 1;
+        const int final_bucket_size = n_data_item - 1 - known_rank_idx_l[n_known_rank - 1];
+        spdlog::info("n_merge_user {}, n_known_rank {}, n_bucket {}, bucket_size {}, final_bucket_size {}",
+                     n_merge_user, n_known_rank, n_bucket,
+                     bucket_size, final_bucket_size);
 
+        const int report_user_every_ = 5000;
+
+        //perform Kmeans for user vector, the label start from 0, indicates where the rank should come from
+        std::vector<int> label_l = BuildKMeans(user, n_merge_user);
+
+        //profile
+        std::vector<int> merge_label_count_l(n_merge_user);
+        for (int i = 0; i < n_merge_user; i++) {
+            merge_label_count_l[i] = 0;
+        }
+        for (int userID = 0; userID < user.n_vector_; userID++) {
+            merge_label_count_l[label_l[userID]]++;
+        }
+        printf("merge label count \n");
+        for (int i = 0; i < n_merge_user; i++) {
+            printf("%d ", merge_label_count_l[i]);
+        }
+        printf("\n");
+
+        spdlog::info("finish KMeans");
+        record.reset();
         std::vector<DistancePair> distance_table(n_user * n_known_rank);
         std::vector<BucketVector> bkt_vec_arr(n_merge_user, BucketVector(n_bucket));
-
         std::vector<DistancePair> distance_cache(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
+#pragma omp parallel for default(none) shared(n_data_item, data_item, user, userID, vec_dim, distance_cache)
             for (int itemID = 0; itemID < n_data_item; itemID++) {
                 double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
                 distance_cache[itemID] = DistancePair(ip, itemID);
@@ -273,7 +311,36 @@ namespace ReverseMIPS {
             BucketVector setVector(tmp_bucket_vec, n_bucket);
 
             bkt_vec_arr[label_l[userID]].Merge(setVector);
+
+            if (userID % report_user_every_ == 0) {
+                std::cout << "build index " << userID / (0.01 * n_user) << " %, "
+                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                          << get_current_RSS() / 1000000 << " Mb \n";
+                record.reset();
+            }
         }
+
+        //profile
+        //compression ratio, imbalance clustering algorithm, a bound 
+        int dimension = bkt_vec_arr[0].dimension_ - 1;
+        std::vector<int> sum_bkt_size_l(dimension);
+        for (int i = 0; i < dimension; i++) {
+            sum_bkt_size_l[i] = 0;
+        }
+        for (int i = 0; i < n_merge_user; i++) {
+            std::vector<int> tmp_bkt_size_l = bkt_vec_arr[i].BucketSize();
+            for (int j = 0; j < dimension; j++) {
+                sum_bkt_size_l[j] += tmp_bkt_size_l[j];
+            }
+        }
+        std::vector<double> ratio_bkt_size_l(dimension);
+        for (int i = 0; i < dimension; i++) {
+            ratio_bkt_size_l[i] = 1.0 * sum_bkt_size_l[i] / (bucket_size * n_user);
+        }
+        for (int i = 0; i < dimension; i++) {
+            printf("%.3f ", ratio_bkt_size_l[i]);
+        }
+        printf("\n");
 
         RankBucketIndex rii(known_rank_idx_l, distance_table, bkt_vec_arr, label_l,
                             std::vector<int>{n_known_rank, n_user, n_merge_user, n_bucket, bucket_size,

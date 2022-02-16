@@ -76,11 +76,11 @@ int main(int argc, char **argv) {
         return 0;
     }
     const char *dataset_name = argv[1];
-    const char *basic_dir = "/home/bianzheng/Dataset/MIPS/Reverse-kRanks";
+    const char *basic_dir = "/run/media/hdd/ReverseMIPS";
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    printf("dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
+    printf("DiskIndexBruteForce dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     double build_index_calculation_time, total_build_index_time;
     char index_path[256];

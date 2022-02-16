@@ -28,11 +28,11 @@ int main(int argc, char **argv) {
     }
     const char *dataset_name = argv[1];
     int topk = atoi(argv[2]);
-    const char *basic_dir = "/home/bianzheng/Dataset/MIPS/Reverse-kRanks";
+    const char *basic_dir = "/run/media/hdd/ReverseMIPS";
     if (argc == 4) {
         basic_dir = argv[3];
     }
-    printf("dataset_name %s, topk %d, basic_dir %s\n", dataset_name, topk, basic_dir);
+    printf("ItemListInterval dataset_name %s, topk %d, basic_dir %s\n", dataset_name, topk, basic_dir);
     int n_merge_user = 100;
 
     int n_data_item, n_query_item, n_user, vec_dim;
