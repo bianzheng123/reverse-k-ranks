@@ -1,7 +1,7 @@
 #pragma once
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "struct/RankElement.hpp"
+#include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "util/TimeMemory.hpp"
 #include <vector>
@@ -28,7 +28,7 @@ namespace ReverseMIPS {
 
         void Preprocess() {}
 
-        std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) {
             if (topk > user_.n_vector_) {
                 printf("top-k is larger than user, system exit\n");
                 exit(-1);
@@ -36,35 +36,35 @@ namespace ReverseMIPS {
             int n_query_item = query_item.n_vector_;
             int n_user = user_.n_vector_;
 
-            std::vector<std::vector<RankElement>> results(n_query_item, std::vector<RankElement>());
+            std::vector<std::vector<UserRankElement>> results(n_query_item, std::vector<UserRankElement>());
 
             TimeRecord single_query_record;
             for (int qID = 0; qID < n_query_item; qID++) {
                 double *query_item_vec = query_item.getVector(qID);
-                std::vector<RankElement> &minHeap = results[qID];
+                std::vector<UserRankElement> &minHeap = results[qID];
                 minHeap.resize(topk);
 
                 for (int userID = 0; userID < topk; userID++) {
                     int tmp_rank = getRank(query_item_vec, user_.getVector(userID));
-                    RankElement rankElement(userID, tmp_rank);
+                    UserRankElement rankElement(userID, tmp_rank);
                     minHeap[userID] = rankElement;
                 }
 
-                std::make_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
-                RankElement minHeapEle = minHeap.front();
+                std::make_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
+                UserRankElement minHeapEle = minHeap.front();
                 for (int userID = topk; userID < n_user; userID++) {
                     int tmpRank = getRank(query_item_vec, user_.getVector(userID));
-                    RankElement rankElement(userID, tmpRank);
+                    UserRankElement rankElement(userID, tmpRank);
                     if (minHeapEle.rank_ > rankElement.rank_) {
-                        std::pop_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+                        std::pop_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                         minHeap.pop_back();
                         minHeap.push_back(rankElement);
-                        std::push_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+                        std::push_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                         minHeapEle = minHeap.front();
                     }
                 }
-                std::make_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
-                std::sort_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+                std::make_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
+                std::sort_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
 
                 if (qID % report_every_ == 0) {
                     std::cout << "retrieval " << qID / (0.01 * n_query_item) << " %, "

@@ -1,4 +1,9 @@
-#pragma once
+//
+// Created by BianZheng on 2022/2/20.
+//
+
+#ifndef REVERSE_KRANKS_DISTANCEPAIR_HPP
+#define REVERSE_KRANKS_DISTANCEPAIR_HPP
 
 #include <string>
 
@@ -56,3 +61,5 @@ namespace ReverseMIPS {
         }
     };
 }
+
+#endif //REVERSE_KRANKS_DISTANCEPAIR_HPP

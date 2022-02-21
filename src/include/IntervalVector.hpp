@@ -115,45 +115,45 @@ namespace ReverseMIPS {
         double self_inner_product_time_, brute_force_search_time_;
         TimeRecord record;
 
-        [[nodiscard]] std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+        [[nodiscard]] std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) {
             if (topk > user_.n_vector_) {
                 printf("top-k is larger than user, system exit\n");
                 exit(-1);
             }
             ResetTime();
-            std::vector<std::vector<RankElement>> result(query_item.n_vector_, std::vector<RankElement>());
+            std::vector<std::vector<UserRankElement>> result(query_item.n_vector_, std::vector<UserRankElement>());
             int n_query = query_item.n_vector_;
             int vec_dim = query_item.vec_dim_;
             for (int qID = 0; qID < n_query; qID++) {
                 double *query_vec = query_item.getVector(qID);
 
-                std::vector<RankElement> &minHeap = result[qID];
+                std::vector<UserRankElement> &minHeap = result[qID];
                 minHeap.resize(topk);
 
                 for (int userID = 0; userID < topk; userID++) {
                     int rank = GetRank(userID, query_vec, vec_dim);
-                    RankElement rankElement(userID, rank);
+                    UserRankElement rankElement(userID, rank);
                     minHeap[userID] = rankElement;
                 }
 
-                std::make_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+                std::make_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
 
-                RankElement minHeapEle = minHeap.front();
+                UserRankElement minHeapEle = minHeap.front();
                 for (int userID = topk; userID < n_user_; userID++) {
                     int tmpRank = GetRank(userID, query_vec, vec_dim);
 
-                    RankElement rankElement(userID, tmpRank);
+                    UserRankElement rankElement(userID, tmpRank);
                     if (minHeapEle.rank_ > rankElement.rank_) {
-                        std::pop_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+                        std::pop_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                         minHeap.pop_back();
                         minHeap.push_back(rankElement);
-                        std::push_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+                        std::push_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                         minHeapEle = minHeap.front();
                     }
 
                 }
-                std::make_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
-                std::sort_heap(minHeap.begin(), minHeap.end(), std::less<RankElement>());
+                std::make_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
+                std::sort_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
             }
             return result;
         }

@@ -5,7 +5,6 @@
 #ifndef REVERSE_KRANKS_KMEANS_HPP
 #define REVERSE_KRANKS_KMEANS_HPP
 
-#include "struct/Cluster.hpp"
 #include <fstream>
 #include <algorithm>
 #include <cfloat>

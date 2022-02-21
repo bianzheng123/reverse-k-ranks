@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_ITEMLISTINTERVAL_HPP
 #define REVERSE_KRANKS_ITEMLISTINTERVAL_HPP
 
-#include "struct/DistancePair.hpp"
+#include "struct/DistancePair_cpy.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/KMeans.hpp"
 #include <vector>

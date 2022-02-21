@@ -2,8 +2,8 @@
 // Created by BianZheng on 2021/12/22.
 //
 
-#ifndef REVERSE_KRANKS_DISKINDEXBRUTEFORCE_HPP
-#define REVERSE_KRANKS_DISKINDEXBRUTEFORCE_HPP
+#ifndef REVERSE_KRANKS_DISKBRUTEFORCEINDEX_HPP
+#define REVERSE_KRANKS_DISKBRUTEFORCEINDEX_HPP
 
 #include "util/VectorIO.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -24,7 +24,7 @@ namespace ReverseMIPS {
     /*
      * bruteforce index
      * shape: 1, type: int, n_data_item
-     * shape: n_user * n_data_item, type: DistancePair, the distance pair for each user
+     * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
     double BuildSaveIndex(const VectorMatrix &data_item, const VectorMatrix &user, const char *index_path) {
@@ -33,7 +33,7 @@ namespace ReverseMIPS {
             std::printf("error in write result\n");
         }
         const int n_data_item = data_item.n_vector_;
-        std::vector<DistancePair> distance_cache(write_every_ * n_data_item);
+        std::vector<double> distance_cache(write_every_ * n_data_item);
         const int vec_dim = data_item.vec_dim_;
         const int n_batch = user.n_vector_ / write_every_;
         const int n_remain = user.n_vector_ % write_every_;
@@ -44,18 +44,18 @@ namespace ReverseMIPS {
         batch_report_record.reset();
         for (int i = 0; i < n_batch; i++) {
             record.reset();
-#pragma omp parallel for default(none) shared(i, data_item, user, distance_cache)
+#pragma omp parallel for default(none) shared(i, data_item, user, distance_cache) //shared(write_every_, n_data_item, vec_dim)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
                     double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
-                    distance_cache[cacheID * n_data_item + itemID] = DistancePair(ip, itemID);
+                    distance_cache[cacheID * n_data_item + itemID] = ip;
                 }
                 std::sort(distance_cache.begin() + cacheID * n_data_item,
-                          distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater<DistancePair>());
+                          distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater<double>());
             }
             preprocess_time_s += record.get_elapsed_time_second();
-            out.write((char *) distance_cache.data(), distance_cache.size() * sizeof(DistancePair));
+            out.write((char *) distance_cache.data(), distance_cache.size() * sizeof(double));
 
             if (i % report_batch_every_ == 0) {
                 std::cout << "preprocessed " << i / (0.01 * n_batch) << " %, "
@@ -72,21 +72,21 @@ namespace ReverseMIPS {
             for (int itemID = 0; itemID < data_item.n_vector_; itemID++) {
                 double ip = InnerProduct(data_item.rawData_ + itemID * vec_dim,
                                          user.rawData_ + userID * vec_dim, vec_dim);
-                distance_cache[cacheID * data_item.n_vector_ + itemID] = DistancePair(ip, itemID);
+                distance_cache[cacheID * data_item.n_vector_ + itemID] = ip;
             }
 
             std::sort(distance_cache.begin() + cacheID * n_data_item,
-                      distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater<DistancePair>());
+                      distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater<double>());
 
         }
         preprocess_time_s += record.get_elapsed_time_second();
 
         out.write((char *) distance_cache.data(),
-                  n_remain * data_item.n_vector_ * sizeof(DistancePair));
+                  n_remain * data_item.n_vector_ * sizeof(double));
         return preprocess_time_s;
     }
 
-    class DiskIndexBruteForce {
+    class DiskBruteForceIndex {
         void ResetTimer() {
             read_disk_time_ = 0;
             inner_product_time_ = 0;
@@ -101,9 +101,9 @@ namespace ReverseMIPS {
         char *index_path_;
         TimeRecord get_rank_record_;
 
-        DiskIndexBruteForce() {}
+        DiskBruteForceIndex() {}
 
-        DiskIndexBruteForce(char *index_path, int n_data_item, VectorMatrix &user) {
+        DiskBruteForceIndex(char *index_path, int n_data_item, VectorMatrix &user) {
             this->index_path_ = index_path;
             this->user_ = user;
             this->n_data_item_ = n_data_item;
@@ -111,9 +111,9 @@ namespace ReverseMIPS {
             this->n_cache = std::min(user_.n_vector_, 10000);
         }
 
-        ~DiskIndexBruteForce() {}
+        ~DiskBruteForceIndex() {}
 
-        std::vector<std::vector<RankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) {
             TimeRecord record, batch_report_record;
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
@@ -131,17 +131,17 @@ namespace ReverseMIPS {
             size_t a = user_.n_vector_;
             size_t b = (size_t) 2000000000 / n_data_item_ ;
             n_cache = a > b ? b : a;
-            std::vector<DistancePair> distance_cache(n_cache * n_data_item_);
+            std::vector<double> distance_cache(n_cache * n_data_item_);
             int n_query_item = query_item.n_vector_;
             int n_user = user_.n_vector_;
             int n_batch = (int) (n_user / n_cache);
             int n_remain = (int) (n_user % n_cache);
             const int report_batch_every_ = 5;
 
-            std::vector<std::vector<RankElement>> query_heap_l(n_query_item, std::vector<RankElement>(topk));
+            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
             record.reset();
-            index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(DistancePair));
+            index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
             read_disk_time_ += record.get_elapsed_time_second();
 
             for (int cacheID = 0; cacheID < topk; cacheID++) {
@@ -149,27 +149,27 @@ namespace ReverseMIPS {
                 for (int qID = 0; qID < n_query_item; qID++) {
                     double *query_item_vec = query_item.getVector(qID);
                     int tmp_rank = getRank(query_item_vec, userID, cacheID, distance_cache);
-                    query_heap_l[qID][cacheID].index_ = userID;
+                    query_heap_l[qID][cacheID].userID_ = userID;
                     query_heap_l[qID][cacheID].rank_ = tmp_rank;
                 }
             }
             for (int qID = 0; qID < n_query_item; qID++) {
-                std::make_heap(query_heap_l[qID].begin(), query_heap_l[qID].end(), std::less<RankElement>());
+                std::make_heap(query_heap_l[qID].begin(), query_heap_l[qID].end(), std::less<UserRankElement>());
             }
 
             for (int cacheID = topk; cacheID < n_cache; cacheID++) {
 //                spdlog::info("processing cache {} of total {}", cacheID, n_cache);
                 int userID = cacheID;
                 for (int qID = 0; qID < n_query_item; qID++) {
-                    std::vector<RankElement> &tmp_heap = query_heap_l[qID];
-                    RankElement min_heap_ele = tmp_heap.front();
+                    std::vector<UserRankElement> &tmp_heap = query_heap_l[qID];
+                    UserRankElement min_heap_ele = tmp_heap.front();
                     double *query_item_vec = query_item.getVector(qID);
                     int tmp_rank = getRank(query_item_vec, userID, cacheID, distance_cache);
                     if (min_heap_ele.rank_ > tmp_rank) {
-                        std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<RankElement>());
+                        std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<UserRankElement>());
                         tmp_heap.pop_back();
                         tmp_heap.emplace_back(userID, tmp_rank);
-                        std::push_heap(tmp_heap.begin(), tmp_heap.end(), std::less<RankElement>());
+                        std::push_heap(tmp_heap.begin(), tmp_heap.end(), std::less<UserRankElement>());
                     }
                 }
             }
@@ -182,16 +182,16 @@ namespace ReverseMIPS {
                 for (int cacheID = 0; cacheID < n_cache; cacheID++) {
                     int userID = bth_idx * n_cache + cacheID;
                     for (int qID = 0; qID < n_query_item; qID++) {
-                        std::vector<RankElement> &tmp_heap = query_heap_l[qID];
-                        RankElement min_heap_ele = tmp_heap.front();
+                        std::vector<UserRankElement> &tmp_heap = query_heap_l[qID];
+                        UserRankElement min_heap_ele = tmp_heap.front();
                         double *query_item_vec = query_item.getVector(qID);
                         int tmp_rank = getRank(query_item_vec, userID, cacheID, distance_cache);
                         if (min_heap_ele.rank_ > tmp_rank) {
-                            std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<RankElement>());
+                            std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<UserRankElement>());
                             tmp_heap.pop_back();
                             tmp_heap.emplace_back(userID, tmp_rank);
                             std::push_heap(tmp_heap.begin(), tmp_heap.end(),
-                                           std::less<RankElement>());
+                                           std::less<UserRankElement>());
                         }
                     }
 
@@ -209,22 +209,22 @@ namespace ReverseMIPS {
             if (n_remain != 0) {
                 record.reset();
                 index_stream_.read((char *) distance_cache.data(),
-                                   n_remain * n_data_item_ * sizeof(DistancePair));
+                                   n_remain * n_data_item_ * sizeof(double));
                 read_disk_time_ += record.get_elapsed_time_second();
 
                 for (int cacheID = 0; cacheID < n_remain; cacheID++) {
                     int userID = n_batch * n_cache + cacheID;
                     for (int qID = 0; qID < n_query_item; qID++) {
-                        std::vector<RankElement> &tmp_heap = query_heap_l[qID];
-                        RankElement min_heap_ele = tmp_heap.front();
+                        std::vector<UserRankElement> &tmp_heap = query_heap_l[qID];
+                        UserRankElement min_heap_ele = tmp_heap.front();
                         double *query_item_vec = query_item.getVector(qID);
                         int tmp_rank = getRank(query_item_vec, userID, cacheID, distance_cache);
                         if (min_heap_ele.rank_ > tmp_rank) {
-                            std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<RankElement>());
+                            std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<UserRankElement>());
                             tmp_heap.pop_back();
                             tmp_heap.emplace_back(userID, tmp_rank);
                             std::push_heap(tmp_heap.begin(), tmp_heap.end(),
-                                           std::less<RankElement>());
+                                           std::less<UserRankElement>());
                         }
                     }
                 }
@@ -233,17 +233,17 @@ namespace ReverseMIPS {
             index_stream_.close();
 
             for (int qID = 0; qID < n_query_item; qID++) {
-                std::sort(query_heap_l[qID].begin(), query_heap_l[qID].end(), std::less<RankElement>());
+                std::sort(query_heap_l[qID].begin(), query_heap_l[qID].end(), std::less<UserRankElement>());
             }
 
             return query_heap_l;
         }
 
-        int getRank(double *query_item_vec, int userID, int cacheID, std::vector<DistancePair> &distance_cache) {
+        int getRank(double *query_item_vec, int userID, int cacheID, std::vector<double> &distance_cache) {
             get_rank_record_.reset();
             double *user_vec = user_.getVector(userID);
             double query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
-            DistancePair *dpPtr = distance_cache.data() + cacheID * n_data_item_;
+            double *dpPtr = distance_cache.data() + cacheID * n_data_item_;
             this->inner_product_time_ += get_rank_record_.get_elapsed_time_second();
 
             get_rank_record_.reset();
@@ -254,34 +254,34 @@ namespace ReverseMIPS {
             while (low <= high) {
                 int mid = (low + high) / 2;
                 if (mid == 0) {
-                    if (query_dist >= dpPtr[mid].dist_) {
+                    if (query_dist >= dpPtr[mid]) {
                         rank = 1;
                         break;
-                    } else if (query_dist < dpPtr[mid].dist_ && query_dist > dpPtr[mid + 1].dist_) {
+                    } else if (query_dist < dpPtr[mid] && query_dist > dpPtr[mid + 1]) {
                         rank = 2;
                         break;
-                    } else if (query_dist < dpPtr[mid].dist_ && query_dist <= dpPtr[mid + 1].dist_) {
+                    } else if (query_dist < dpPtr[mid] && query_dist <= dpPtr[mid + 1]) {
                         low = mid + 1;
                     }
                 } else if (0 < mid && mid < n_data_item_ - 1) {
-                    if (query_dist > dpPtr[mid].dist_) {
+                    if (query_dist > dpPtr[mid]) {
                         high = mid - 1;
-                    } else if (query_dist <= dpPtr[mid].dist_ &&
-                               query_dist > dpPtr[mid + 1].dist_) {
+                    } else if (query_dist <= dpPtr[mid] &&
+                               query_dist > dpPtr[mid + 1]) {
                         rank = mid + 2;
                         break;
-                    } else if (query_dist <= dpPtr[mid].dist_ &&
-                               query_dist <= dpPtr[mid + 1].dist_) {
+                    } else if (query_dist <= dpPtr[mid] &&
+                               query_dist <= dpPtr[mid + 1]) {
                         low = mid + 1;
                     }
                 } else if (mid == n_data_item_ - 1) {
-                    if (query_dist <= dpPtr[mid].dist_) {
+                    if (query_dist <= dpPtr[mid]) {
                         rank = n_data_item_ + 1;
                         break;
-                    } else if (query_dist <= dpPtr[mid - 1].dist_ && query_dist > dpPtr[mid].dist_) {
+                    } else if (query_dist <= dpPtr[mid - 1] && query_dist > dpPtr[mid]) {
                         rank = n_data_item_;
                         break;
-                    } else if (query_dist > dpPtr[mid - 1].dist_ && query_dist > dpPtr[mid].dist_) {
+                    } else if (query_dist > dpPtr[mid - 1] && query_dist > dpPtr[mid]) {
                         high = mid - 1;
                     }
                 }
@@ -297,4 +297,4 @@ namespace ReverseMIPS {
 
 }
 
-#endif //REVERSE_KRANKS_DISKINDEXBRUTEFORCE_HPP
+#endif //REVERSE_KRANKS_DISKBRUTEFORCEINDEX_HPP

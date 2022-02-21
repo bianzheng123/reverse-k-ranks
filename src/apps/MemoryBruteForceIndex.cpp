@@ -1,9 +1,9 @@
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
-#include "struct/RankElement.hpp"
+#include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "MemoryIndexBruteForce.hpp"
+#include "MemoryBruteForceIndex.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -68,11 +68,11 @@ int main(int argc, char **argv) {
         return 0;
     }
     const char *dataset_name = argv[1];
-    const char *basic_dir = "/run/media/hdd/ReverseMIPS";
+    const char *basic_dir = "/home/bianzheng/Dataset/ReverseMIPS";
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    printf("MemoryIndexBruteForce dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
+    printf("MemoryBruteForceIndex dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);
@@ -88,17 +88,17 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    MemoryIndexBruteForce mibf(data_item, user);
+    MemoryBruteForceIndex mibf(data_item, user);
     mibf.Preprocess();
     double preprocessed_time = record.get_elapsed_time_second();
     printf("finish preprocess\n");
 
     vector<int> topk_l{10, 20, 30, 40, 50};
     vector<RetrievalResult> retrieval_res_l;
-    vector<vector<vector<RankElement>>> result_rank_l;
+    vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
-        vector<vector<RankElement>> result_rk = mibf.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = mibf.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
         double ip_calc_time = mibf.inner_product_calculation_time_;
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < n_topk; i++) {
         cout << retrieval_res_l[i].ToString() << endl;
-        writeRank(result_rank_l[i], dataset_name, "MemoryIndexBruteForce");
+        writeRank(result_rank_l[i], dataset_name, "MemoryBruteForceIndex");
     }
 
     map<string, string> performance_m;
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n_topk; i++) {
         retrieval_res_l[i].AddMap(performance_m);
     }
-    writePerformance(dataset_name, "MemoryIndexBruteForce", performance_m);
+    writePerformance(dataset_name, "MemoryBruteForceIndex", performance_m);
 
     return 0;
 }

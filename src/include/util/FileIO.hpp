@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <iostream>
-#include "../struct/RankElement.hpp"
+#include "../struct/UserRankElement.hpp"
 #include <vector>
 #include <ostream>
 #include <string>
@@ -25,7 +25,7 @@ namespace ReverseMIPS {
 //        }
 //    }
 
-    void writeRank(std::vector<std::vector<RankElement>> &result, const char *dataset_name, const char *method_name) {
+    void writeRank(std::vector<std::vector<UserRankElement>> &result, const char *dataset_name, const char *method_name) {
         int n_query_item = (int) result.size();
         int topk = (int) result[0].size();
 
@@ -38,9 +38,9 @@ namespace ReverseMIPS {
 
         for (int i = 0; i < n_query_item; i++) {
             for (int j = 0; j < topk - 1; j++) {
-                file << result[i][j].index_ << ",";
+                file << result[i][j].userID_ << ",";
             }
-            file << result[i][topk - 1].index_ << std::endl;
+            file << result[i][topk - 1].userID_ << std::endl;
         }
         file.close();
 

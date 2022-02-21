@@ -1,13 +1,13 @@
 //
-// Created by BianZheng on 2021/12/22.
+// Created by BianZheng on 2022/2/20.
 //
 
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
-#include "struct/RankElement.hpp"
+#include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "DiskIndexBruteForce.hpp"
+#include "BinarySearchCacheBound.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -76,15 +76,11 @@ int main(int argc, char **argv) {
         return 0;
     }
     const char *dataset_name = argv[1];
-    const char *basic_dir = "/run/media/hdd/ReverseMIPS";
+    const char *basic_dir = "/home/bianzheng/Dataset/ReverseMIPS";
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    printf("DiskIndexBruteForce dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
-
-    double build_index_calculation_time, total_build_index_time;
-    char index_path[256];
-    sprintf(index_path, "../index/%s.bfi", dataset_name);
+    printf("BinarySearchCacheBound dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -99,25 +95,28 @@ int main(int argc, char **argv) {
     user.init(user_ptr, n_user, vec_dim);
     query_item.init(query_item_ptr, n_query_item, vec_dim);
 
+    char index_path[256];
+    sprintf(index_path, "../index/%s.bfi", dataset_name);
+
     TimeRecord record;
     record.reset();
-    build_index_calculation_time = BuildSaveIndex(data_item, user, index_path);
-    total_build_index_time = record.get_elapsed_time_second();
+    BinarySearchCacheBoundIndex bscb = BuildBinarySearchCacheBoundIndex(data_item, user, index_path);
+    double build_index_time = record.get_elapsed_time_second();
     printf("finish preprocess and save the index\n");
 
-    DiskIndexBruteForce dibf(index_path, n_data_item, user);
+//    BinarySearchCacheBound bscb(index_path, n_data_item, user);
 
     vector<int> topk_l{10, 20, 30, 40, 50};
     vector<RetrievalResult> retrieval_res_l;
-    vector<vector<vector<RankElement>>> result_rank_l;
+    vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
-        vector<vector<RankElement>> result_rk = dibf.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = bscb.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double read_disk_time = dibf.read_disk_time_;
-        double inner_product_time = dibf.inner_product_time_;
-        double binary_search_time = dibf.binary_search_time_;
+        double read_disk_time = bscb.read_disk_time_;
+        double inner_product_time = bscb.inner_product_time_;
+        double binary_search_time = bscb.binary_search_time_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
@@ -125,22 +124,20 @@ int main(int argc, char **argv) {
                                      second_per_query, topk);
     }
 
-    printf("build index time: total %.3fs, inner product calculation %.3fs\n",
-           total_build_index_time, build_index_calculation_time);
+    printf("build index time: total %.3fs\n", build_index_time);
     int n_topk = (int) topk_l.size();
 
     for (int i = 0; i < n_topk; i++) {
         cout << retrieval_res_l[i].ToString() << endl;
-        writeRank(result_rank_l[i], dataset_name, "DiskIndexBruteForce");
+        writeRank(result_rank_l[i], dataset_name, "BinarySearchCacheBound");
     }
 
     map<string, string> performance_m;
-    performance_m.emplace("build index total time", double2string(total_build_index_time));
-    performance_m.emplace("build index calculation time", double2string(build_index_calculation_time));
+    performance_m.emplace("build index total time", double2string(build_index_time));
     for (int i = 0; i < n_topk; i++) {
         retrieval_res_l[i].AddMap(performance_m);
     }
-    writePerformance(dataset_name, "DiskIndexBruteForce", performance_m);
+    writePerformance(dataset_name, "BinarySearchCacheBound", performance_m);
 
     return 0;
 }

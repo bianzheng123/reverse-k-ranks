@@ -3,10 +3,15 @@
 ./bfdi fake
 ./rkbkt fake
 ./itvvec fake
+./bscb fake
 
-./bfdi movielens-27m
-./rkbkt movielens-27m
-./itvvec movielens-27m
+./bfdi movielens-small
+./bscb movielens-small
+./bfmi movielens-small
+
+./bfdi movielens-1m
+./bscb movielens-1m
+
 
 ./bfdi movielens-small
 ./rkbkt movielens-small

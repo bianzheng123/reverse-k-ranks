@@ -1,7 +1,7 @@
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
-#include "struct/RankElement.hpp"
+#include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "OnlineBruteForce.hpp"
 #include <iostream>
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
         return 0;
     }
     const char *dataset_name = argv[1];
-    const char *basic_dir = "/run/media/hdd/ReverseMIPS";
+    const char *basic_dir = "/home/bianzheng/Dataset/ReverseMIPS";
     if (argc == 3) {
         basic_dir = argv[2];
     }
@@ -81,10 +81,10 @@ int main(int argc, char **argv) {
 
     vector<int> topk_l{10, 20, 30, 40, 50};
     vector<RetrievalResult> retrieval_res_l;
-    vector<vector<vector<RankElement>>> result_rank_l;
+    vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
-        vector<vector<RankElement>> result_rk = obf.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = obf.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
         double second_per_query = retrieval_time / n_query_item;

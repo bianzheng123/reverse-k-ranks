@@ -5,7 +5,7 @@
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
-#include "struct/RankElement.hpp"
+#include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "ItemListInterval.hpp"
 #include <iostream>
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     }
     const char *dataset_name = argv[1];
     int topk = atoi(argv[2]);
-    const char *basic_dir = "/run/media/hdd/ReverseMIPS";
+    const char *basic_dir = "/home/bianzheng/Dataset/ReverseMIPS";
     if (argc == 4) {
         basic_dir = argv[3];
     }

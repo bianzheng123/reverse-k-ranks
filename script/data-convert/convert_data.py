@@ -18,9 +18,10 @@ if __name__ == '__main__':
     dimension = 150
     n_query_item = 1000
 
-    ds_l = ['movielens-small', 'movielens-27m', 'netflix', 'yelp']
+    # ds_l = ['movielens-small', 'movielens-27m', 'netflix', 'yelp']
+    ds_l = ['movielens-small', 'movielens-1m']
     for dataset in ds_l:
-        input_dir = '/run/media/hdd/MIPS'
+        input_dir = '/home/bianzheng/Dataset/MIPS'
 
         item_dir = os.path.join(input_dir, '%s-%dd' % (dataset, dimension), '%s_item.dvecs' % dataset)
         user_dir = os.path.join(input_dir, '%s-%dd' % (dataset, dimension), '%s_user.dvecs' % dataset)
@@ -28,7 +29,7 @@ if __name__ == '__main__':
         item_l, d = vecs_io.dvecs_read(item_dir)
         user_l, d = vecs_io.dvecs_read(user_dir)
 
-        output_dir = '/run/media/hdd/ReverseMIPS/%s' % dataset
+        output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
         delete_file_if_exist(output_dir)
         os.mkdir(output_dir)
 
