@@ -1,0 +1,2 @@
+binary search cache bound有bug
+IntervalVector也有bug
