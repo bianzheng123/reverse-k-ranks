@@ -191,7 +191,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                 std::unordered_map<int, std::vector<std::pair<int, double>>> &invert_index = candidates_invert_index_l[userID];
                 for (auto &iter: invert_index) {
                     int bucketID = iter.first;
-                    int start_idx = bucketID == 0 ? 0 : known_rank_idx_l_[bucketID - 1];
+                    int start_idx = bucketID == 0 ? 0 : known_rank_idx_l_[bucketID - 1] + 1;
                     int end_idx = bucketID == n_cache_rank_ ? n_data_item_ : known_rank_idx_l_[bucketID];
                     assert(start_idx < end_idx);
                     read_disk_record_.reset();
@@ -206,11 +206,11 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                         fine_binary_search_record_.reset();
                         auto lb_ptr = std::lower_bound(start_iter, end_iter, queryIP,
                                                        [](const double &info, double value) {
-                                                           return info > value;
+                                                           return info >= value;
                                                        });
                         fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
                         int offset_rank = (int) (lb_ptr - start_iter);
-                        int base_rank = bucketID == 0 ? 0 : known_rank_idx_l_[bucketID - 1];
+                        int base_rank = bucketID == 0 ? 0 : known_rank_idx_l_[bucketID - 1] + 1;
                         int rank = base_rank + offset_rank + 1;
                         if (query_heap_l[queryID].size() < topk) {
                             query_heap_l[queryID].emplace_back(userID, rank);
@@ -247,7 +247,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
 
             auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
                                            [](const double &arrIP, double queryIP) {
-                                               return arrIP > queryIP;
+                                               return arrIP >= queryIP;
                                            });
             return (int) (lb_ptr - iter_begin);
         }

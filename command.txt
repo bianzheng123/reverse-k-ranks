@@ -9,6 +9,9 @@
 ./bscb movielens-small /home/zhengbian/Dataset/ReverseMIPS
 ./bfmi movielens-small /home/zhengbian/Dataset/ReverseMIPS
 
+./bfdi movielens-small
+./bscb movielens-small
+
 ./bfdi movielens-1m
 ./bscb movielens-1m
 
