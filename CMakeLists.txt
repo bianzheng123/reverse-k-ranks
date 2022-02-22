@@ -12,7 +12,6 @@ set(BUILD_STATIC_LIBS ON)
 set(BUILD_WITHOUT_LAPACK OFF)
 
 find_package(BLAS REQUIRED)
-message("${pthread_INCLUDE_DIRS}")
 
 set(OpenBLAS_LIBRARY ${openblas_BINARY_DIR}/lib/libopenblas.a)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "")

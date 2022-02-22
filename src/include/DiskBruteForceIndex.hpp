@@ -5,16 +5,16 @@
 #ifndef REVERSE_KRANKS_DISKBRUTEFORCEINDEX_HPP
 #define REVERSE_KRANKS_DISKBRUTEFORCEINDEX_HPP
 
+#include "alg/SpaceInnerProduct.hpp"
 #include "util/VectorIO.hpp"
+#include "util/TimeMemory.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/DistancePair.hpp"
-#include "alg/SpaceInnerProduct.hpp"
-#include "util/TimeMemory.hpp"
 #include <fstream>
 #include <vector>
 #include <algorithm>
 #include <cassert>
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
 
