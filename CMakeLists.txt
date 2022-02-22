@@ -40,8 +40,8 @@ SET(APPS
         )
 SET(APPS_EXAMPLE
         OnlineBruteForce
-        MemoryBruteForceIndex
-        DiskBruteForceIndex
+        MemoryBruteForce
+        DiskBruteForce
         RankBucket
         IntervalVector
         BinarySearchCacheBound
@@ -61,6 +61,10 @@ FOREACH (i RANGE 1 ${ll})
     target_link_libraries(${app} PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
     #    target_link_libraries(${app} ${MLPACK_LIBRARY})
 ENDFOREACH (i)
+
+#add_executable(Main src/apps/Main.cpp)
+#target_include_directories(Main PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+#target_link_libraries(Main PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
 add_executable(t1 test.cpp)
 target_link_libraries(t1 PRIVATE spdlog::spdlog)

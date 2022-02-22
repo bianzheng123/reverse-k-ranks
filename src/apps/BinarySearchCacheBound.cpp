@@ -18,58 +18,6 @@
 using namespace std;
 using namespace ReverseMIPS;
 
-class RetrievalResult {
-public:
-    //unit: second
-    double total_time, read_disk_time, inner_product_time, binary_search_time, second_per_query;
-    int topk;
-
-    inline RetrievalResult(double total_time, double read_disk_time, double inner_product_time,
-                           double binary_search_time, double second_per_query, int topk) {
-        this->total_time = total_time;
-        this->read_disk_time = read_disk_time;
-        this->inner_product_time = inner_product_time;
-        this->binary_search_time = binary_search_time;
-        this->second_per_query = second_per_query;
-
-        this->topk = topk;
-    }
-
-    void AddMap(map<string, string> &performance_m) {
-        char buff[256];
-        sprintf(buff, "top%d total retrieval time", topk);
-        string str1(buff);
-        performance_m.emplace(str1, double2string(total_time));
-
-        sprintf(buff, "top%d retrieval read disk time", topk);
-        string str2(buff);
-        performance_m.emplace(str2, double2string(read_disk_time));
-
-        sprintf(buff, "top%d retrieval inner product time", topk);
-        string str3(buff);
-        performance_m.emplace(str3, double2string(inner_product_time));
-
-        sprintf(buff, "top%d retrieval binary search time", topk);
-        string str4(buff);
-        performance_m.emplace(str4, double2string(binary_search_time));
-
-        sprintf(buff, "top%d second per query time", topk);
-        string str5(buff);
-        performance_m.emplace(str5, double2string(second_per_query));
-    }
-
-    [[nodiscard]] std::string ToString() const {
-        char arr[256];
-        sprintf(arr,
-                "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, binary search %.3fs, million second per query %.3fms",
-                topk, total_time, read_disk_time, inner_product_time, binary_search_time, second_per_query * 1000);
-        std::string str(arr);
-        return str;
-    }
-
-};
-
-
 int main(int argc, char **argv) {
     if (!(argc == 2 or argc == 3)) {
         cout << argv[0] << " dataset_name [basic_dir]" << endl;
@@ -96,18 +44,16 @@ int main(int argc, char **argv) {
     query_item.init(query_item_ptr, n_query_item, vec_dim);
 
     char index_path[256];
-    sprintf(index_path, "../index/%s.bfi", dataset_name);
+    sprintf(index_path, "../index/%s.bscb", dataset_name);
 
     TimeRecord record;
     record.reset();
-    BinarySearchCacheBoundIndex bscb = BuildBinarySearchCacheBoundIndex(data_item, user, index_path);
+    BinarySearchCacheBound::Index bscb = BinarySearchCacheBound::BuildIndex(data_item, user, index_path);
     double build_index_time = record.get_elapsed_time_second();
     printf("finish preprocess and save the index\n");
 
-//    BinarySearchCacheBound bscb(index_path, n_data_item, user);
-
     vector<int> topk_l{10, 20, 30, 40, 50};
-    vector<RetrievalResult> retrieval_res_l;
+    vector<BinarySearchCacheBound::RetrievalResult> retrieval_res_l;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
@@ -116,12 +62,13 @@ int main(int argc, char **argv) {
         double retrieval_time = record.get_elapsed_time_second();
         double read_disk_time = bscb.read_disk_time_;
         double inner_product_time = bscb.inner_product_time_;
-        double binary_search_time = bscb.binary_search_time_;
+        double coarse_binary_search_time = bscb.coarse_binary_search_time_;
+        double fine_binary_search_time = bscb.fine_binary_search_time_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
-        retrieval_res_l.emplace_back(retrieval_time, read_disk_time, inner_product_time, binary_search_time,
-                                     second_per_query, topk);
+        retrieval_res_l.emplace_back(retrieval_time, read_disk_time, inner_product_time, coarse_binary_search_time,
+                                     fine_binary_search_time, second_per_query, topk);
     }
 
     printf("build index time: total %.3fs\n", build_index_time);

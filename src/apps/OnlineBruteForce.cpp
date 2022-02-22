@@ -13,40 +13,6 @@
 using namespace std;
 using namespace ReverseMIPS;
 
-class RetrievalResult {
-public:
-    //unit: second
-    double total_time, second_per_query;
-    int topk;
-
-    inline RetrievalResult(double total_time, double second_per_query, int topk) {
-        this->total_time = total_time;
-        this->second_per_query = second_per_query;
-
-        this->topk = topk;
-    }
-
-    void AddMap(map<string, string> &performance_m) {
-        char buff[256];
-        sprintf(buff, "top%d total retrieval time", topk);
-        string str1(buff);
-        performance_m.emplace(str1, double2string(total_time));
-
-        sprintf(buff, "top%d second per query time", topk);
-        string str5(buff);
-        performance_m.emplace(str5, double2string(second_per_query));
-    }
-
-    [[nodiscard]] std::string ToString() const {
-        char arr[256];
-        sprintf(arr, "top%d retrieval time:\n\ttotal %.3fs, million second per query %.3fms",
-                topk, total_time, second_per_query * 1000);
-        std::string str(arr);
-        return str;
-    }
-
-};
-
 int main(int argc, char **argv) {
     if (!(argc == 2 or argc == 3)) {
         cout << argv[0] << " dataset_name [basic_dir]" << endl;
@@ -73,14 +39,14 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    OnlineBruteForce obf(data_item, user);
+    OnlineBruteForce::Index obf(data_item, user);
     obf.Preprocess();
     double preprocessed_time = record.get_elapsed_time_second();
     record.reset();
     printf("finish preprocess\n");
 
     vector<int> topk_l{10, 20, 30, 40, 50};
-    vector<RetrievalResult> retrieval_res_l;
+    vector<OnlineBruteForce::RetrievalResult> retrieval_res_l;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();

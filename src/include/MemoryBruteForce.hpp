@@ -1,27 +1,76 @@
 #pragma once
 
 #include "alg/SpaceInnerProduct.hpp"
+#include "util/TimeMemory.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "util/TimeMemory.hpp"
 #include "struct/DistancePair.hpp"
+#include "struct/MethodBase.hpp"
 #include <vector>
 #include <cassert>
 #include <queue>
 
-namespace ReverseMIPS {
-    class Index {
+namespace ReverseMIPS::MemoryBruteForce {
+
+    class RetrievalResult {
+    public:
+        //unit: second
+        double total_time, inner_product_time, binary_search_time, second_per_query;
+        int topk;
+
+        inline RetrievalResult(double total_time, double inner_product_time,
+                               double binary_search_time, double second_per_query, int topk) {
+            this->total_time = total_time;
+            this->inner_product_time = inner_product_time;
+            this->binary_search_time = binary_search_time;
+            this->second_per_query = second_per_query;
+
+            this->topk = topk;
+        }
+
+        void AddMap(std::map<std::string, std::string> &performance_m) {
+            char buff[256];
+            sprintf(buff, "top%d total retrieval time", topk);
+            std::string str1(buff);
+            performance_m.emplace(str1, double2string(total_time));
+
+            sprintf(buff, "top%d retrieval inner product time", topk);
+            std::string str2(buff);
+            performance_m.emplace(str2, double2string(inner_product_time));
+
+            sprintf(buff, "top%d retrieval binary search time", topk);
+            std::string str3(buff);
+            performance_m.emplace(str3, double2string(binary_search_time));
+
+            sprintf(buff, "top%d second per query", topk);
+            std::string str4(buff);
+            performance_m.emplace(str4, double2string(second_per_query));
+        }
+
+        [[nodiscard]] std::string ToString() const {
+            char arr[256];
+            sprintf(arr,
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, binary search %.3fs, million second per query %.3fms",
+                    topk, total_time, inner_product_time, binary_search_time, second_per_query * 1000);
+            std::string str(arr);
+            return str;
+        }
+
+
+    };
+
+    class DataIndex {
     public:
         std::vector<DistancePair> dist_arr_;
         //n_user_ is row, n_data_item_ is column
         int n_user_, n_data_item_;
 
-        Index() {
+        DataIndex() {
             this->n_data_item_ = 0;
             this->n_user_ = 0;
         }
 
-        void init(std::vector<DistancePair>& dist_arr, int n_data_item, int n_user) {
+        void init(std::vector<DistancePair> &dist_arr, int n_data_item, int n_user) {
             this->dist_arr_ = dist_arr;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
@@ -33,32 +82,30 @@ namespace ReverseMIPS {
         }
     };
 
-    class MemoryBruteForceIndex {
+    class Index : public BaseIndex {
     private:
         void ResetTime() {
             this->inner_product_calculation_time_ = 0;
             this->binary_search_time_ = 0;
         }
+
     public:
         VectorMatrix data_item_, user_;
-        Index index_;
+        DataIndex index_;
         int vec_dim_;
         int preprocess_report_every_ = 100;
         double inner_product_calculation_time_, binary_search_time_;
         TimeRecord record_;
 
-        MemoryBruteForceIndex() {}
+        Index() {}
 
-        MemoryBruteForceIndex(VectorMatrix
-                              &data_item,
-                              VectorMatrix &user
-        ) {
+        Index(VectorMatrix &data_item, VectorMatrix &user) {
             this->data_item_ = data_item;
             this->user_ = user;
             this->vec_dim_ = user.vec_dim_;
         }
 
-        ~MemoryBruteForceIndex() {}
+        ~Index() {}
 
         void Preprocess() {
             int n_data_item = data_item_.n_vector_;
@@ -91,7 +138,7 @@ namespace ReverseMIPS {
 
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) override {
             if (topk > user_.n_vector_) {
                 printf("top-k is larger than user, system exit\n");
                 exit(-1);

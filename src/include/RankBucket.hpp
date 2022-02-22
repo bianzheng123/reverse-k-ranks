@@ -5,20 +5,73 @@
 #ifndef REVERSE_KRANKS_SAMPLEINDEX_HPP
 #define REVERSE_KRANKS_SAMPLEINDEX_HPP
 
-#include "struct/VectorMatrix.hpp"
-#include "util/TimeMemory.hpp"
-#include "util/StringUtil.hpp"
 #include "alg/SpaceInnerProduct.hpp"
+#include "alg/KMeans.hpp"
+#include "struct/VectorMatrix.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
-#include "alg/KMeans.hpp"
+#include "struct/MethodBase.hpp"
+#include "util/TimeMemory.hpp"
+#include "util/StringUtil.hpp"
 #include <spdlog/spdlog.h>
 #include <fstream>
 #include <cassert>
 #include <utility>
 #include <algorithm>
 
-namespace ReverseMIPS {
+namespace ReverseMIPS::RankBucket {
+
+    class RetrievalResult {
+    public:
+        //unit: second
+        double total_time, brute_force_rank_time, inner_product_time, binary_search_time, second_per_query;
+        int topk;
+
+        inline RetrievalResult(double total_time, double brute_force_rank_time, double inner_product_time,
+                               double binary_search_time, double second_per_query, int topk) {
+            this->total_time = total_time;
+            this->brute_force_rank_time = brute_force_rank_time;
+            this->inner_product_time = inner_product_time;
+            this->binary_search_time = binary_search_time;
+            this->second_per_query = second_per_query;
+
+            this->topk = topk;
+        }
+
+        void AddMap(std::map<std::string, std::string> &performance_m) {
+            char buff[256];
+            sprintf(buff, "top%d total retrieval time", topk);
+            std::string str1(buff);
+            performance_m.emplace(str1, double2string(total_time));
+
+            sprintf(buff, "top%d retrieval brute force rank time", topk);
+            std::string str2(buff);
+            performance_m.emplace(str2, double2string(brute_force_rank_time));
+
+            sprintf(buff, "top%d retrieval inner product time", topk);
+            std::string str3(buff);
+            performance_m.emplace(str3, double2string(inner_product_time));
+
+            sprintf(buff, "top%d retrieval binary search time", topk);
+            std::string str4(buff);
+            performance_m.emplace(str4, double2string(binary_search_time));
+
+            sprintf(buff, "top%d second per query time", topk);
+            std::string str5(buff);
+            performance_m.emplace(str5, double2string(second_per_query));
+        }
+
+        [[nodiscard]] std::string ToString() const {
+            char arr[256];
+            sprintf(arr,
+                    "top%d retrieval time:\n\ttotal %.3fs, brute force rank %.3fs\n\tinner product %.3fs, binary search %.3fs, million second per query %.3fms",
+                    topk, total_time, brute_force_rank_time, inner_product_time, binary_search_time,
+                    second_per_query * 1000);
+            std::string str(arr);
+            return str;
+        }
+
+    };
 
     class BucketVector {
 
@@ -74,7 +127,7 @@ namespace ReverseMIPS {
 
     };
 
-    class RankBucketIndex {
+    class Index : public BaseIndex {
     private:
         void ResetTime() {
             brute_force_rank_time_ = 0;
@@ -97,9 +150,9 @@ namespace ReverseMIPS {
 #endif
 
 
-        RankBucketIndex(std::vector<int> &known_rank_idx_l, std::vector<DistancePair> &distance_table,
-                        std::vector<BucketVector> &bkt_vec_arr, std::vector<int> &user_merge_idx_l,
-                        std::vector<int> size_config) {
+        Index(std::vector<int> &known_rank_idx_l, std::vector<DistancePair> &distance_table,
+              std::vector<BucketVector> &bkt_vec_arr, std::vector<int> &user_merge_idx_l,
+              std::vector<int> size_config) {
             this->known_rank_idx_l_ = std::move(known_rank_idx_l);
             this->distance_table_ = std::move(distance_table);
             this->bkt_vec_arr = std::move(bkt_vec_arr);
@@ -118,7 +171,7 @@ namespace ReverseMIPS {
             this->data_item_ = data_item;
         }
 
-        [[nodiscard]] std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix query_item, int topk) {
+        [[nodiscard]] std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int topk) override {
             const int report_query_every = 100;
             TimeRecord record;
             if (topk > user_.n_vector_) {
@@ -234,8 +287,7 @@ namespace ReverseMIPS {
 
     };
 
-    RankBucketIndex
-    BuildIndex(VectorMatrix &user, VectorMatrix &data_item) {
+    Index BuildIndex(VectorMatrix &user, VectorMatrix &data_item) {
         TimeRecord record;
         int n_user = user.n_vector_;
         int n_data_item = data_item.n_vector_;
@@ -342,9 +394,9 @@ namespace ReverseMIPS {
         }
         printf("\n");
 
-        RankBucketIndex rii(known_rank_idx_l, distance_table, bkt_vec_arr, label_l,
-                            std::vector<int>{n_known_rank, n_user, n_merge_user, n_bucket, bucket_size,
-                                             final_bucket_size});
+        Index rii(known_rank_idx_l, distance_table, bkt_vec_arr, label_l,
+                  std::vector<int>{n_known_rank, n_user, n_merge_user, n_bucket, bucket_size,
+                                   final_bucket_size});
         rii.setUserItemMatrix(user, data_item);
         return rii;
     }

@@ -3,7 +3,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "MemoryBruteForceIndex.hpp"
+#include "MemoryBruteForce.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -13,54 +13,6 @@
 
 using namespace std;
 using namespace ReverseMIPS;
-
-class RetrievalResult {
-public:
-    //unit: second
-    double total_time, inner_product_time, binary_search_time, second_per_query;
-    int topk;
-
-    inline RetrievalResult(double total_time, double inner_product_time,
-                           double binary_search_time, double second_per_query, int topk) {
-        this->total_time = total_time;
-        this->inner_product_time = inner_product_time;
-        this->binary_search_time = binary_search_time;
-        this->second_per_query = second_per_query;
-
-        this->topk = topk;
-    }
-
-    void AddMap(map<string, string> &performance_m) {
-        char buff[256];
-        sprintf(buff, "top%d total retrieval time", topk);
-        string str1(buff);
-        performance_m.emplace(str1, double2string(total_time));
-
-        sprintf(buff, "top%d retrieval inner product time", topk);
-        string str2(buff);
-        performance_m.emplace(str2, double2string(inner_product_time));
-
-        sprintf(buff, "top%d retrieval binary search time", topk);
-        string str3(buff);
-        performance_m.emplace(str3, double2string(binary_search_time));
-
-        sprintf(buff, "top%d second per query", topk);
-        string str4(buff);
-        performance_m.emplace(str4, double2string(second_per_query));
-    }
-
-    [[nodiscard]] std::string ToString() const {
-        char arr[256];
-        sprintf(arr,
-                "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, binary search %.3fs, million second per query %.3fms",
-                topk, total_time, inner_product_time, binary_search_time, second_per_query * 1000);
-        std::string str(arr);
-        return str;
-    }
-
-
-};
-
 
 int main(int argc, char **argv) {
     if (!(argc == 2 or argc == 3)) {
@@ -88,13 +40,13 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    MemoryBruteForceIndex mibf(data_item, user);
+    MemoryBruteForce::Index mibf(data_item, user);
     mibf.Preprocess();
     double preprocessed_time = record.get_elapsed_time_second();
     printf("finish preprocess\n");
 
     vector<int> topk_l{10, 20, 30, 40, 50};
-    vector<RetrievalResult> retrieval_res_l;
+    vector<MemoryBruteForce::RetrievalResult> retrieval_res_l;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
@@ -114,7 +66,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < n_topk; i++) {
         cout << retrieval_res_l[i].ToString() << endl;
-        writeRank(result_rank_l[i], dataset_name, "MemoryBruteForceIndex");
+        writeRank(result_rank_l[i], dataset_name, "MemoryBruteForce");
     }
 
     map<string, string> performance_m;
@@ -122,7 +74,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n_topk; i++) {
         retrieval_res_l[i].AddMap(performance_m);
     }
-    writePerformance(dataset_name, "MemoryBruteForceIndex", performance_m);
+    writePerformance(dataset_name, "MemoryBruteForce", performance_m);
 
     return 0;
 }

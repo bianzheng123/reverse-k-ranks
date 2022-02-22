@@ -3,32 +3,67 @@
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
+#include "struct/MethodBase.hpp"
 #include "util/TimeMemory.hpp"
 #include <vector>
 #include <queue>
 
-namespace ReverseMIPS {
+namespace ReverseMIPS::OnlineBruteForce {
 
-    class OnlineBruteForce {
+    class RetrievalResult {
+    public:
+        //unit: second
+        double total_time, second_per_query;
+        int topk;
+
+        inline RetrievalResult(double total_time, double second_per_query, int topk) {
+            this->total_time = total_time;
+            this->second_per_query = second_per_query;
+
+            this->topk = topk;
+        }
+
+        void AddMap(std::map<std::string, std::string> &performance_m) {
+            char buff[256];
+            sprintf(buff, "top%d total retrieval time", topk);
+            std::string str1(buff);
+            performance_m.emplace(str1, double2string(total_time));
+
+            sprintf(buff, "top%d second per query time", topk);
+            std::string str5(buff);
+            performance_m.emplace(str5, double2string(second_per_query));
+        }
+
+        [[nodiscard]] std::string ToString() const {
+            char arr[256];
+            sprintf(arr, "top%d retrieval time:\n\ttotal %.3fs, million second per query %.3fms",
+                    topk, total_time, second_per_query * 1000);
+            std::string str(arr);
+            return str;
+        }
+
+    };
+
+    class Index : public BaseIndex {
     public:
         VectorMatrix data_item_, user_;
         int vec_dim_;
         int report_every_ = 10;
 
-        inline OnlineBruteForce() {}
+        inline Index() {}
 
-        inline OnlineBruteForce(VectorMatrix &data_item, VectorMatrix &user) {
+        inline Index(VectorMatrix &data_item, VectorMatrix &user) {
             this->data_item_ = data_item;
             this->user_ = user;
 
             vec_dim_ = user.vec_dim_;
         }
 
-        inline ~OnlineBruteForce() {}
+        inline ~Index() {}
 
         void Preprocess() {}
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) override {
             if (topk > user_.n_vector_) {
                 printf("top-k is larger than user, system exit\n");
                 exit(-1);

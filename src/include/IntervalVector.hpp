@@ -5,10 +5,10 @@
 #ifndef REVERSE_KRANKS_INTERVALVECTOR_HPP
 #define REVERSE_KRANKS_INTERVALVECTOR_HPP
 
-
-#include "struct/DistancePair.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/KMeans.hpp"
+#include "struct/DistancePair.hpp"
+#include "struct/MethodBase.hpp"
 #include <vector>
 #include <cfloat>
 #include <cstring>
@@ -16,7 +16,53 @@
 #include <algorithm>
 #include <fstream>
 
-namespace ReverseMIPS {
+namespace ReverseMIPS::IntervalVector {
+
+    class RetrievalResult {
+    public:
+        //unit: second
+        double total_time, inner_product_time, brute_force_search_time, second_per_query;
+        int topk;
+
+        inline RetrievalResult(double total_time, double inner_product_time, double brute_force_search_time,
+                               double second_per_query, int topk) {
+            this->total_time = total_time;
+            this->inner_product_time = inner_product_time;
+            this->brute_force_search_time = brute_force_search_time;
+            this->second_per_query = second_per_query;
+
+            this->topk = topk;
+        }
+
+        void AddMap(std::map<std::string, std::string> &performance_m) {
+            char buff[256];
+            sprintf(buff, "top%d total retrieval time", topk);
+            std::string str1(buff);
+            performance_m.emplace(str1, double2string(total_time));
+
+            sprintf(buff, "top%d inner product time", topk);
+            std::string str2(buff);
+            performance_m.emplace(str2, double2string(inner_product_time));
+
+            sprintf(buff, "top%d brute force search time", topk);
+            std::string str3(buff);
+            performance_m.emplace(str3, double2string(brute_force_search_time));
+
+            sprintf(buff, "top%d second per query time", topk);
+            std::string str4(buff);
+            performance_m.emplace(str4, double2string(second_per_query));
+        }
+
+        [[nodiscard]] std::string ToString() const {
+            char arr[256];
+            sprintf(arr,
+                    "top%d retrieval time:\n\ttotal %.3fs, inner product search %.3fs\n\tbrute force search time %.3fs, million second per query %.3fms",
+                    topk, total_time, inner_product_time, brute_force_search_time, second_per_query * 1000);
+            std::string str(arr);
+            return str;
+        }
+
+    };
 
     class IntervalVector {
     public:
@@ -94,9 +140,9 @@ namespace ReverseMIPS {
 
     };
 
-    class IntervalVectorIndex {
+    class Index : public BaseIndex {
     private:
-        void ResetTime(){
+        void ResetTime() {
             self_inner_product_time_ = 0;
             brute_force_search_time_ = 0;
         }
@@ -115,7 +161,23 @@ namespace ReverseMIPS {
         double self_inner_product_time_, brute_force_search_time_;
         TimeRecord record;
 
-        [[nodiscard]] std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) {
+        inline Index(const std::vector<int> &user_merge_idx_l,
+                     const std::vector<IntervalVector> &interval_vector_l,
+                     const std::vector<int> &interval_size_l) {
+            this->user_merge_idx_l_ = user_merge_idx_l;
+            this->interval_vector_l_ = interval_vector_l;
+            this->n_user_ = (int) user_merge_idx_l.size();
+            this->n_merge_user_ = (int) interval_vector_l.size();
+            this->n_interval_ = interval_vector_l[0].n_interval_;
+            this->interval_size_l_ = interval_size_l;
+        }
+
+        void setUserItemMatrix(VectorMatrix &user, VectorMatrix &data_item) {
+            this->user_ = user;
+            this->data_item_ = data_item;
+        }
+
+        [[nodiscard]] std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) override {
             if (topk > user_.n_vector_) {
                 printf("top-k is larger than user, system exit\n");
                 exit(-1);
@@ -159,7 +221,7 @@ namespace ReverseMIPS {
         }
 
         [[nodiscard]] int RelativeRankInInterval(const std::vector<int> &candidate_l, double queryIP,
-                                               int userID, int vec_dim, double upper_bound_ip) const {
+                                                 int userID, int vec_dim, double upper_bound_ip) const {
             //calculate all the IP, then get the lower bound
             //make different situation by the information
             int interval_size = (int) candidate_l.size();
@@ -191,26 +253,10 @@ namespace ReverseMIPS {
             if (intervalID == n_interval_) {
                 rank = data_item_.n_vector_;
             } else {
-                rank = intervalID == 0 ? loc_rk : interval_size_l_[userID * (n_interval_ - 1) + intervalID - 1] + loc_rk;
+                rank = intervalID == 0 ? loc_rk : interval_size_l_[userID * (n_interval_ - 1) + intervalID - 1] +
+                                                  loc_rk;
             }
             return rank + 1;
-        }
-
-
-        inline IntervalVectorIndex(const std::vector<int> &user_merge_idx_l,
-                                   const std::vector<IntervalVector> &interval_vector_l,
-                                   const std::vector<int> &interval_size_l) {
-            this->user_merge_idx_l_ = user_merge_idx_l;
-            this->interval_vector_l_ = interval_vector_l;
-            this->n_user_ = (int) user_merge_idx_l.size();
-            this->n_merge_user_ = (int) interval_vector_l.size();
-            this->n_interval_ = interval_vector_l[0].n_interval_;
-            this->interval_size_l_ = interval_size_l;
-        }
-
-        void setUserItemMatrix(VectorMatrix &user, VectorMatrix &data_item) {
-            this->user_ = user;
-            this->data_item_ = data_item;
         }
 
     };
@@ -297,8 +343,8 @@ namespace ReverseMIPS {
     }
 
     void BuildIntervalVectorIndex(const std::vector<int> &user_merge_idx_l, const char *index_path,
-                                std::vector<IntervalVector> &itv_vec_l, std::vector<int> &interval_size_l,
-                                const int n_interval) {
+                                  std::vector<IntervalVector> &itv_vec_l, std::vector<int> &interval_size_l,
+                                  const int n_interval) {
         std::ifstream index_stream_ = std::ifstream(index_path, std::ios::binary | std::ios::in);
         if (!index_stream_) {
             std::printf("error in writing index\n");
@@ -416,9 +462,8 @@ namespace ReverseMIPS {
     }
 
 
-    IntervalVectorIndex
-    BuildIndex(VectorMatrix &user, VectorMatrix &data_item, int n_merge_user, const char *dataset_name,
-               std::vector<double> &component_time_l) {
+    Index BuildIndex(VectorMatrix &user, VectorMatrix &data_item, int n_merge_user, const char *dataset_name,
+                     std::vector<double> &component_time_l) {
 
         int n_user = user.n_vector_;
         int n_data_item = data_item.n_vector_;
@@ -452,10 +497,10 @@ namespace ReverseMIPS {
 
         printf("n_interval %d\n", n_interval);
 
-        IntervalVectorIndex intervalVectorIndex(user_merge_idx_l, itv_vec_l, interval_size_l);
-        intervalVectorIndex.setUserItemMatrix(user, data_item);
+        Index index(user_merge_idx_l, itv_vec_l, interval_size_l);
+        index.setUserItemMatrix(user, data_item);
 
-        return intervalVectorIndex;
+        return index;
     }
 }
 #endif //REVERSE_KRANKS_INTERVALVECTOR_HPP

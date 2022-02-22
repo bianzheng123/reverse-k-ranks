@@ -8,24 +8,86 @@
 #include "struct/VectorMatrix.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserBucketElement.hpp"
+#include "struct/MethodBase.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
+#include <string>
 #include <fstream>
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
+#include <map>
 #include <set>
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS {
+namespace ReverseMIPS::BinarySearchCacheBound {
+    class RetrievalResult {
+    public:
+        //unit: second
+        double total_time, read_disk_time, inner_product_time, coarse_binary_search_time, fine_binary_search_time, second_per_query;
+        int topk;
 
-    class BinarySearchCacheBoundIndex {
+        inline RetrievalResult(double total_time, double read_disk_time, double inner_product_time,
+                               double coarse_binary_search_time, double fine_binary_search_time,
+                               double second_per_query, int topk) {
+            this->total_time = total_time;
+            this->read_disk_time = read_disk_time;
+            this->inner_product_time = inner_product_time;
+            this->coarse_binary_search_time = coarse_binary_search_time;
+            this->fine_binary_search_time = fine_binary_search_time;
+            this->second_per_query = second_per_query;
+
+            this->topk = topk;
+        }
+
+        void AddMap(std::map<std::string, std::string> &performance_m) const {
+            char buff[256];
+            sprintf(buff, "top%d retrieval\t\t total time", topk);
+            std::string str1(buff);
+            performance_m.emplace(str1, double2string(total_time));
+
+            sprintf(buff, "top%d retrieval\t\t read disk time", topk);
+            std::string str2(buff);
+            performance_m.emplace(str2, double2string(read_disk_time));
+
+            sprintf(buff, "top%d retrieval\t\t inner product time", topk);
+            std::string str3(buff);
+            performance_m.emplace(str3, double2string(inner_product_time));
+
+            sprintf(buff, "top%d retrieval\t\t coarse binary search time", topk);
+            std::string str4(buff);
+            performance_m.emplace(str4, double2string(coarse_binary_search_time));
+
+            sprintf(buff, "top%d retrieval\t\t fine binary search time", topk);
+            std::string str5(buff);
+            performance_m.emplace(str5, double2string(fine_binary_search_time));
+
+            sprintf(buff, "top%d retrieval\t\t second per query time", topk);
+            std::string str6(buff);
+            performance_m.emplace(str6, double2string(second_per_query));
+        }
+
+        [[nodiscard]] std::string ToString() const {
+            char arr[512];
+            sprintf(arr,
+                    "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, fine binary search %.3fs, million second per query %.3fms",
+                    topk, total_time, read_disk_time, inner_product_time, coarse_binary_search_time,
+                    fine_binary_search_time,
+                    second_per_query * 1000);
+            std::string str(arr);
+            return str;
+        }
+
+    };
+
+    class Index : public BaseIndex {
         void ResetTimer() {
             read_disk_time_ = 0;
             inner_product_time_ = 0;
-            binary_search_time_ = 0;
+            coarse_binary_search_time_ = 0;
+            fine_binary_search_time_ = 0;
         }
 
     public:
@@ -39,12 +101,12 @@ namespace ReverseMIPS {
 
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
-        double read_disk_time_, inner_product_time_, binary_search_time_;
-        TimeRecord read_disk_record, inner_product_record, binary_search_record;
+        double read_disk_time_, inner_product_time_, coarse_binary_search_time_, fine_binary_search_time_;
+        TimeRecord read_disk_record_, inner_product_record_, coarse_binary_search_record_, fine_binary_search_record_;
 
-        BinarySearchCacheBoundIndex(const std::vector<double> &bound_distance_table,
-                                    const std::vector<int> &known_rank_idx_l,
-                                    const char *index_path) {
+        Index(const std::vector<double> &bound_distance_table,
+              const std::vector<int> &known_rank_idx_l,
+              const char *index_path) {
             this->bound_distance_table_ = bound_distance_table;
             this->known_rank_idx_l_ = known_rank_idx_l;
             this->index_path_ = index_path;
@@ -58,10 +120,7 @@ namespace ReverseMIPS {
             this->vec_dim_ = user.vec_dim_;
         }
 
-        ~BinarySearchCacheBoundIndex() {}
-
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int topk) {
-            TimeRecord batch_report_record;
+        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int topk) override {
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
@@ -78,19 +137,21 @@ namespace ReverseMIPS {
             const int n_query_item = query_item.n_vector_;
 
             //first dimension: userID, key: bucketID, value: queryItemID, queryIP, shape: n_user * unordered_map
-            std::vector<std::unordered_map<int, std::vector<std::pair<int, double>>>> candidates_invert_index_l(n_user_,
-                                                                                                                std::unordered_map<int, std::vector<std::pair<int, double>>>());
+            std::vector<std::unordered_map<int, std::vector<std::pair<int, double>>>> candidates_invert_index_l(
+                    n_user_, std::unordered_map<int, std::vector<std::pair<int, double>>>());
             //store the bucketID that queryIP fall in, for each query. used for coarse binary search
             std::vector<UserBucketElement> user_bucket_l(n_user_);
 
             for (int queryID = 0; queryID < n_query_item; ++queryID) {
                 for (int userID = 0; userID < n_user_; ++userID) {
-                    inner_product_record.reset();
+                    inner_product_record_.reset();
                     double *user_vec = user_.getVector(userID);
                     double *query_item_vec = query_item.getVector(queryID);
                     double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
-                    this->inner_product_time_ += inner_product_record.get_elapsed_time_second();
+                    this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+                    coarse_binary_search_record_.reset();
                     int bucketID = MemoryBinarySearch(queryIP, userID);
+                    this->coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
                     assert(0 <= bucketID && bucketID <= n_cache_rank_);
                     user_bucket_l[userID] = UserBucketElement(userID, bucketID, queryIP);
                 }
@@ -133,18 +194,21 @@ namespace ReverseMIPS {
                     int start_idx = bucketID == 0 ? 0 : known_rank_idx_l_[bucketID - 1];
                     int end_idx = bucketID == n_cache_rank_ ? n_data_item_ : known_rank_idx_l_[bucketID];
                     assert(start_idx < end_idx);
+                    read_disk_record_.reset();
                     index_stream_.seekg(sizeof(double) * (userID * n_data_item_ + start_idx), std::ios::beg);
                     index_stream_.read((char *) distance_cache.data(), (end_idx - start_idx) * sizeof(double));
+                    read_disk_time_ += read_disk_record_.get_elapsed_time_second();
                     auto start_iter = distance_cache.begin();
                     auto end_iter = distance_cache.begin() + end_idx - start_idx;
                     for (auto &queryIter: iter.second) {
                         int queryID = queryIter.first;
                         double queryIP = queryIter.second;
-
+                        fine_binary_search_record_.reset();
                         auto lb_ptr = std::lower_bound(start_iter, end_iter, queryIP,
                                                        [](const double &info, double value) {
                                                            return info > value;
                                                        });
+                        fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
                         int offset_rank = (int) (lb_ptr - start_iter);
                         int base_rank = bucketID == 0 ? 0 : known_rank_idx_l_[bucketID - 1];
                         int rank = base_rank + offset_rank + 1;
@@ -198,8 +262,7 @@ namespace ReverseMIPS {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    BinarySearchCacheBoundIndex
-    BuildBinarySearchCacheBoundIndex(const VectorMatrix &data_item, const VectorMatrix &user, const char *index_path) {
+    Index BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user, const char *index_path) {
         std::ofstream out(index_path, std::ios::binary | std::ios::out);
         if (!out) {
             std::printf("error in write result\n");
@@ -273,7 +336,7 @@ namespace ReverseMIPS {
 
         out.write((char *) write_distance_cache.data(),
                   n_remain * data_item.n_vector_ * sizeof(double));
-        BinarySearchCacheBoundIndex index(bound_distance_table, known_rank_idx_l, index_path);
+        Index index(bound_distance_table, known_rank_idx_l, index_path);
         index.setUserItemMatrix(user, data_item);
         return index;
     }
