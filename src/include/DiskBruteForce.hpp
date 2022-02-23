@@ -300,7 +300,7 @@ namespace ReverseMIPS::DiskBruteForce {
         TimeRecord batch_report_record;
         batch_report_record.reset();
         for (int i = 0; i < n_batch; i++) {
-//#pragma omp parallel for default(none) shared(i, data_item, user, distance_cache) //shared(write_every_, n_data_item, vec_dim)
+#pragma omp parallel for default(none) shared(i, data_item, user, distance_cache) //shared(write_every_, n_data_item, vec_dim)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;
                 for (int itemID = 0; itemID < n_data_item; itemID++) {

@@ -30,41 +30,33 @@ find_package(OpenMP)
 #target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
 #target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
 
-SET(APPS
-        bfon
-        bfmi
-        bfdi
-        rkbkt
-        itvvec
-        bscb
-        )
-SET(APPS_EXAMPLE
-        OnlineBruteForce
-        MemoryBruteForce
-        DiskBruteForce
-        RankBucket
-        IntervalVector
-        BinarySearchCacheBound
-        )
+add_executable(bfon src/apps/OnlineBruteForce.cpp)
+target_include_directories(bfon PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(bfon PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-LIST(LENGTH APPS ll)
-message(STATUS "length is ${ll}")
-FOREACH (i RANGE 1 ${ll})
-    MATH(EXPR temp "${i} - 1")
-    #    message(STATUS "current is ${temp}")
-    LIST(GET APPS ${temp} app)
-    LIST(GET APPS_EXAMPLE ${temp} app_example)
-    #    message(STATUS "current is ${app} ${app_example}")
-    add_executable(${app} src/apps/${app_example}.cpp)
+add_executable(bfmi src/apps/MemoryBruteForce.cpp)
+target_include_directories(bfmi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(bfmi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    target_include_directories(${app} PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(${app} PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-    #    target_link_libraries(${app} ${MLPACK_LIBRARY})
-ENDFOREACH (i)
+add_executable(bfdi src/apps/DiskBruteForce.cpp)
+target_include_directories(bfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(bfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-#add_executable(Main src/apps/Main.cpp)
-#target_include_directories(Main PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-#target_link_libraries(Main PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+add_executable(rkbkt src/apps/RankBucket.cpp)
+target_include_directories(rkbkt PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(rkbkt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+
+add_executable(itvvec src/apps/IntervalVector.cpp)
+target_include_directories(itvvec PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(itvvec PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+
+add_executable(bscb src/apps/BinarySearchCacheBound.cpp)
+target_include_directories(bscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(bscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+
+#add_executable(iscb src/apps/IntervalSearchCacheBound.cpp)
+#target_include_directories(iscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+#target_link_libraries(iscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
 add_executable(t1 test.cpp)
 target_link_libraries(t1 PRIVATE spdlog::spdlog)
