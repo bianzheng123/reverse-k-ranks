@@ -15,15 +15,15 @@ def delete_file_if_exist(dire):
 if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
     n_query_item = 100
-    n_dim = 30
-    n_data_item = 1000
-    n_user = 1000
+    n_dim = 100
+    n_data_item = 5000
+    n_user = 5000
 
     query_item_l = np.random.normal(scale=10, size=(n_query_item, n_dim))
     data_item_l = np.random.normal(scale=10, size=(n_data_item, n_dim))
     user_l = np.random.normal(scale=10, size=(n_user, n_dim))
 
-    dataset = 'fake'
+    dataset = 'fake-big'
     output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
     delete_file_if_exist(output_dir)
     os.mkdir(output_dir)

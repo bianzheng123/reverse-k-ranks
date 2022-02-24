@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
         vector<vector<UserRankElement>> result_rk = mibf.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double ip_calc_time = mibf.inner_product_calculation_time_;
+        double ip_calc_time = mibf.inner_product_time_;
         double binary_search_time = mibf.binary_search_time_;
         double second_per_query = retrieval_time / n_query_item;
 

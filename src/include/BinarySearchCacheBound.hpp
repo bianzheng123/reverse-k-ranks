@@ -206,7 +206,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                         fine_binary_search_record_.reset();
                         auto lb_ptr = std::lower_bound(start_iter, end_iter, queryIP,
                                                        [](const double &info, double value) {
-                                                           return info >= value;
+                                                           return info > value;
                                                        });
                         fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
                         int offset_rank = (int) (lb_ptr - start_iter);
@@ -247,7 +247,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
 
             auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
                                            [](const double &arrIP, double queryIP) {
-                                               return arrIP >= queryIP;
+                                               return arrIP > queryIP;
                                            });
             return (int) (lb_ptr - iter_begin);
         }

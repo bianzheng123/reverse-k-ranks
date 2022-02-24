@@ -4,9 +4,9 @@
 #include "util/TimeMemory.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "struct/DistancePair.hpp"
 #include "struct/MethodBase.hpp"
 #include <vector>
+#include <algorithm>
 #include <cassert>
 #include <queue>
 
@@ -59,42 +59,21 @@ namespace ReverseMIPS::MemoryBruteForce {
 
     };
 
-    class DataIndex {
-    public:
-        std::vector<DistancePair> dist_arr_;
-        //n_user_ is row, n_data_item_ is column
-        int n_user_, n_data_item_;
-
-        DataIndex() {
-            this->n_data_item_ = 0;
-            this->n_user_ = 0;
-        }
-
-        void init(std::vector<DistancePair> &dist_arr, int n_data_item, int n_user) {
-            this->dist_arr_ = dist_arr;
-            this->n_data_item_ = n_data_item;
-            this->n_user_ = n_user;
-        }
-
-        DistancePair *getUserDistPtr(int userID) {
-            assert(userID < n_user_);
-            return dist_arr_.data() + userID * n_data_item_;
-        }
-    };
-
     class Index : public BaseIndex {
     private:
         void ResetTime() {
-            this->inner_product_calculation_time_ = 0;
+            this->inner_product_time_ = 0;
             this->binary_search_time_ = 0;
         }
 
     public:
         VectorMatrix data_item_, user_;
-        DataIndex index_;
+        std::vector<double> distance_table_; // n_user_ * n_data_item_
+        int n_user_, n_data_item_;
+        
         int vec_dim_;
         int preprocess_report_every_ = 100;
-        double inner_product_calculation_time_, binary_search_time_;
+        double inner_product_time_, binary_search_time_;
         TimeRecord record_;
 
         Index() {}
@@ -110,20 +89,20 @@ namespace ReverseMIPS::MemoryBruteForce {
         void Preprocess() {
             int n_data_item = data_item_.n_vector_;
             int n_user = user_.n_vector_;
-            std::vector<DistancePair> preprocess_matrix(n_user * n_data_item);
+            std::vector<double> preprocess_matrix(n_user * n_data_item);
 
             record_.reset();
             for (int userID = 0; userID < n_user; userID++) {
 
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
                     double query_dist = InnerProduct(data_item_.getVector(itemID), user_.getVector(userID), vec_dim_);
-                    preprocess_matrix[userID * n_data_item + itemID] = DistancePair(query_dist, itemID);
+                    preprocess_matrix[userID * n_data_item + itemID] = query_dist;
                 }
 
                 std::make_heap(preprocess_matrix.begin() + userID * n_data_item,
-                               preprocess_matrix.begin() + (userID + 1) * n_data_item, std::greater<DistancePair>());
+                               preprocess_matrix.begin() + (userID + 1) * n_data_item, std::greater<double>());
                 std::sort_heap(preprocess_matrix.begin() + userID * n_data_item,
-                               preprocess_matrix.begin() + (userID + 1) * n_data_item, std::greater<DistancePair>());
+                               preprocess_matrix.begin() + (userID + 1) * n_data_item, std::greater<double>());
 
                 if (userID % preprocess_report_every_ == 0) {
                     std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
@@ -133,8 +112,10 @@ namespace ReverseMIPS::MemoryBruteForce {
                 }
 
             }
-
-            index_.init(preprocess_matrix, n_data_item, n_user);
+            
+            this->distance_table_ = preprocess_matrix;
+            this->n_data_item_ = n_data_item;
+            this->n_user_ = n_user;
 
         }
 
@@ -182,64 +163,26 @@ namespace ReverseMIPS::MemoryBruteForce {
 
             }
 
-//            this->inner_product_calculation_time_ /= (double) n_query_item;
-//            this->binary_search_time_ /= (double) n_query_item;
             return results;
         }
 
         int getRank(double *query_item_vec, int userID) {
             double *user_vec = user_.getVector(userID);
             record_.reset();
-            double query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
-            this->inner_product_calculation_time_ += record_.get_elapsed_time_second();
+            double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+            this->inner_product_time_ += record_.get_elapsed_time_second();
             int n_data_item = data_item_.n_vector_;
-            DistancePair *dpPtr = index_.getUserDistPtr(userID);
-
+            auto iter_begin = distance_table_.begin() + userID * n_data_item_;
+            auto iter_end = distance_table_.begin() + (userID + 1) * n_data_item_;
+            
             record_.reset();
-            int low = 0;
-            int high = n_data_item;
-            int rank = -1;
-            //descending
-            while (low <= high) {
-                int mid = (low + high) / 2;
-                if (mid == 0) {
-                    if (query_dist >= dpPtr[mid].dist_) {
-                        rank = 1;
-                        break;
-                    } else if (query_dist < dpPtr[mid].dist_ && query_dist > dpPtr[mid + 1].dist_) {
-                        rank = 2;
-                        break;
-                    } else if (query_dist < dpPtr[mid].dist_ && query_dist <= dpPtr[mid + 1].dist_) {
-                        low = mid + 1;
-                    }
-                } else if (0 < mid && mid < n_data_item - 1) {
-                    if (query_dist > dpPtr[mid].dist_) {
-                        high = mid - 1;
-                    } else if (query_dist <= dpPtr[mid].dist_ &&
-                               query_dist > dpPtr[mid + 1].dist_) {
-                        rank = mid + 2;
-                        break;
-                    } else if (query_dist <= dpPtr[mid].dist_ &&
-                               query_dist <= dpPtr[mid + 1].dist_) {
-                        low = mid + 1;
-                    }
-                } else if (mid == n_data_item - 1) {
-                    if (query_dist <= dpPtr[mid].dist_) {
-                        rank = n_data_item + 1;
-                        break;
-                    } else if (query_dist <= dpPtr[mid - 1].dist_ && query_dist > dpPtr[mid].dist_) {
-                        rank = n_data_item;
-                        break;
-                    } else if (query_dist > dpPtr[mid - 1].dist_ && query_dist > dpPtr[mid].dist_) {
-                        high = mid - 1;
-                    }
-                }
-            }
+
+            auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
+                                           [](const double &arrIP, double queryIP) {
+                                               return arrIP > queryIP;
+                                           });
             this->binary_search_time_ += record_.get_elapsed_time_second();
-            if (rank <= 0) {
-                printf("bug\n");
-            }
-            return rank;
+            return (int) (lb_ptr - iter_begin) + 1;
         }
 
     };

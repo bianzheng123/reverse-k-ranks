@@ -223,55 +223,18 @@ namespace ReverseMIPS::DiskBruteForce {
         int getRank(double *query_item_vec, int userID, int cacheID, std::vector<double> &distance_cache) {
             get_rank_record_.reset();
             double *user_vec = user_.getVector(userID);
-            double query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
-            double *dpPtr = distance_cache.data() + cacheID * n_data_item_;
+            double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+            auto iter_begin = distance_cache.begin() + cacheID * n_data_item_;
+            auto iter_end = distance_cache.begin() + (cacheID + 1) * n_data_item_;
             this->inner_product_time_ += get_rank_record_.get_elapsed_time_second();
 
             get_rank_record_.reset();
-            int low = 0;
-            int high = n_data_item_;
-            int rank = -1;
-            //descending
-            while (low <= high) {
-                int mid = (low + high) / 2;
-                if (mid == 0) {
-                    if (query_dist >= dpPtr[mid]) {
-                        rank = 1;
-                        break;
-                    } else if (query_dist < dpPtr[mid] && query_dist > dpPtr[mid + 1]) {
-                        rank = 2;
-                        break;
-                    } else if (query_dist < dpPtr[mid] && query_dist <= dpPtr[mid + 1]) {
-                        low = mid + 1;
-                    }
-                } else if (0 < mid && mid < n_data_item_ - 1) {
-                    if (query_dist > dpPtr[mid]) {
-                        high = mid - 1;
-                    } else if (query_dist <= dpPtr[mid] &&
-                               query_dist > dpPtr[mid + 1]) {
-                        rank = mid + 2;
-                        break;
-                    } else if (query_dist <= dpPtr[mid] &&
-                               query_dist <= dpPtr[mid + 1]) {
-                        low = mid + 1;
-                    }
-                } else if (mid == n_data_item_ - 1) {
-                    if (query_dist <= dpPtr[mid]) {
-                        rank = n_data_item_ + 1;
-                        break;
-                    } else if (query_dist <= dpPtr[mid - 1] && query_dist > dpPtr[mid]) {
-                        rank = n_data_item_;
-                        break;
-                    } else if (query_dist > dpPtr[mid - 1] && query_dist > dpPtr[mid]) {
-                        high = mid - 1;
-                    }
-                }
-            }
-            if (rank <= 0) {
-                printf("bug\n");
-            }
+            auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
+                                           [](const double &arrIP, double queryIP) {
+                                               return arrIP > queryIP;
+                                           });
             this->binary_search_time_ += get_rank_record_.get_elapsed_time_second();
-            return rank;
+            return (int) (lb_ptr - iter_begin) + 1;
         }
 
     };

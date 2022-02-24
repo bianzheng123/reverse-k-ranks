@@ -71,13 +71,13 @@ namespace ReverseMIPS::OnlineBruteForce {
             int n_query_item = query_item.n_vector_;
             int n_user = user_.n_vector_;
 
-            std::vector<std::vector<UserRankElement>> results(n_query_item, std::vector<UserRankElement>());
+            std::vector<std::vector<UserRankElement>> results(n_query_item, std::vector<UserRankElement>(topk));
 
             TimeRecord single_query_record;
+#pragma omp parallel for default(none) shared(n_query_item, query_item, results, topk, n_user, single_query_record, std::cout)
             for (int qID = 0; qID < n_query_item; qID++) {
                 double *query_item_vec = query_item.getVector(qID);
                 std::vector<UserRankElement> &minHeap = results[qID];
-                minHeap.resize(topk);
 
                 for (int userID = 0; userID < topk; userID++) {
                     int tmp_rank = getRank(query_item_vec, user_.getVector(userID));
@@ -102,7 +102,7 @@ namespace ReverseMIPS::OnlineBruteForce {
                 std::sort_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
 
                 if (qID % report_every_ == 0) {
-                    std::cout << "retrieval " << qID / (0.01 * n_query_item) << " %, "
+                    std::cout << "retrieval top" << topk << " progress " << qID / (0.01 * n_query_item) << " %, "
                               << single_query_record.get_elapsed_time_second() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
                     single_query_record.reset();
