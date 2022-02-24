@@ -60,3 +60,6 @@ target_link_libraries(bscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP:
 
 add_executable(t1 test.cpp)
 target_link_libraries(t1 PRIVATE spdlog::spdlog)
+
+add_executable(distancepair testDistancePair.cpp)
+add_executable(double testDouble.cpp)

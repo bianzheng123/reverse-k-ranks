@@ -9,7 +9,6 @@
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "struct/DistancePair.hpp"
 #include "struct/MethodBase.hpp"
 #include <fstream>
 #include <vector>
@@ -101,7 +100,6 @@ namespace ReverseMIPS::DiskBruteForce {
             if (!index_stream_) {
                 std::printf("error in writing index\n");
             }
-            index_stream_.read((char *) &this->n_data_item_, sizeof(int));
 
             if (topk > user_.n_vector_) {
                 printf("top-k is too large, program exit\n");
@@ -157,7 +155,7 @@ namespace ReverseMIPS::DiskBruteForce {
 
             for (int bth_idx = 1; bth_idx < n_batch; bth_idx++) {
                 record.reset();
-                index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(DistancePair));
+                index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
                 read_disk_time_ += record.get_elapsed_time_second();
 
                 for (int cacheID = 0; cacheID < n_cache; cacheID++) {
@@ -258,7 +256,6 @@ namespace ReverseMIPS::DiskBruteForce {
         const int vec_dim = data_item.vec_dim_;
         const int n_batch = user.n_vector_ / write_every_;
         const int n_remain = user.n_vector_ % write_every_;
-        out.write((char *) &n_data_item, sizeof(int));
 
         TimeRecord batch_report_record;
         batch_report_record.reset();
