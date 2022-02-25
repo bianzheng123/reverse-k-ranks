@@ -42,9 +42,9 @@ add_executable(bfdi src/apps/DiskBruteForce.cpp)
 target_include_directories(bfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
 target_link_libraries(bfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-#add_executable(bscb src/apps/BinarySearchCacheBound.cpp)
-#target_include_directories(bscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-#target_link_libraries(bscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+add_executable(bscb src/apps/BinarySearchCacheBound.cpp)
+target_include_directories(bscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(bscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
 add_executable(bbfdi src/apps/BatchDiskBruteForce.cpp)
 target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
@@ -60,6 +60,3 @@ target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP
 
 add_executable(t1 test.cpp)
 target_link_libraries(t1 PRIVATE spdlog::spdlog)
-
-add_executable(distancepair testDistancePair.cpp)
-add_executable(double testDouble.cpp)

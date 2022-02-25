@@ -1,7 +1,7 @@
 import os
 
-method_arr = ['BatchDiskBruteForce', 'DiskBruteForce', 'MemoryBruteForce']
-dataset_arr = ['movielens-1m', 'movielens-small']
+method_arr = ['BinarySearchCacheBound', 'DiskBruteForce', 'MemoryBruteForce']
+dataset_arr = ['fake', 'movielens-small']
 # dataset_arr = ['movielens-small']
 type_arr = ['index', 'IP', 'rank']
 
@@ -14,4 +14,6 @@ for ds in dataset_arr:
                                      '{}-{}-top10-{}.csv'.format(ds, method_arr[i], _type))
                 second = os.path.join('/home', 'bianzheng', 'reverse-k-ranks', 'result', 'rank',
                                       '{}-{}-top10-{}.csv'.format(ds, method_arr[j], _type))
-                os.system("diff {} {}".format(first, second))
+                cmd = "diff {} {}".format(first, second)
+                print(cmd)
+                os.system(cmd)

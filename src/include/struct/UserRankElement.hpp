@@ -69,18 +69,18 @@ namespace ReverseMIPS {
             if (rank_ != other.rank_) {
                 return rank_ > other.rank_;
             }else if(queryIP_ != other.queryIP_){
-                return queryIP_ > other.queryIP_;
+                return queryIP_ < other.queryIP_;
             }
-            return userID_ > other.userID_;
+            return userID_ < other.userID_;
         }
 
         inline bool operator>=(const UserRankElement &other) const {
             if (rank_ != other.rank_) {
                 return rank_ >= other.rank_;
             }else if(queryIP_ != other.queryIP_){
-                return queryIP_ > other.queryIP_;
+                return queryIP_ < other.queryIP_;
             }
-            return userID_ > other.userID_;
+            return userID_ < other.userID_;
         }
     };
 }
