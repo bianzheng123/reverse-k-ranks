@@ -70,11 +70,11 @@ namespace ReverseMIPS::MemoryBruteForce {
         VectorMatrix data_item_, user_;
         std::vector<double> distance_table_; // n_user_ * n_data_item_
         int n_user_, n_data_item_;
-        
+
         int vec_dim_;
         int preprocess_report_every_ = 100;
         double inner_product_time_, binary_search_time_;
-        TimeRecord record_;
+        TimeRecord preprocess_record_, inner_product_record_, binary_search_record_;
 
         Index() {}
 
@@ -91,7 +91,7 @@ namespace ReverseMIPS::MemoryBruteForce {
             int n_user = user_.n_vector_;
             std::vector<double> preprocess_matrix(n_user * n_data_item);
 
-            record_.reset();
+            preprocess_record_.reset();
             for (int userID = 0; userID < n_user; userID++) {
 
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -106,13 +106,13 @@ namespace ReverseMIPS::MemoryBruteForce {
 
                 if (userID % preprocess_report_every_ == 0) {
                     std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                              << record_.get_elapsed_time_second() << " s/iter" << " Mem: "
+                              << preprocess_record_.get_elapsed_time_second() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
-                    record_.reset();
+                    preprocess_record_.reset();
                 }
 
             }
-            
+
             this->distance_table_ = preprocess_matrix;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
@@ -136,9 +136,16 @@ namespace ReverseMIPS::MemoryBruteForce {
                 minHeap.resize(topk);
 
                 for (int userID = 0; userID < topk; userID++) {
-                    int tmp_rank = getRank(query_item_vec, userID);
+                    inner_product_record_.reset();
+                    double *user_vec = user_.getVector(userID);
+                    double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+                    this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
-                    UserRankElement rankElement(userID, tmp_rank);
+                    binary_search_record_.reset();
+                    int tmp_rank = BinarySearch(queryIP, userID);
+                    this->binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+
+                    UserRankElement rankElement(userID, tmp_rank, queryIP);
                     minHeap[userID] = rankElement;
                 }
 
@@ -146,10 +153,18 @@ namespace ReverseMIPS::MemoryBruteForce {
 
                 UserRankElement minHeapEle = minHeap.front();
                 for (int userID = topk; userID < n_user; userID++) {
-                    int tmpRank = getRank(query_item_vec, userID);
 
-                    UserRankElement rankElement(userID, tmpRank);
-                    if (minHeapEle.rank_ > rankElement.rank_) {
+                    inner_product_record_.reset();
+                    double *user_vec = user_.getVector(userID);
+                    double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+                    this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+
+                    binary_search_record_.reset();
+                    int tmp_rank = BinarySearch(queryIP, userID);
+                    this->binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+
+                    UserRankElement rankElement(userID, tmp_rank, queryIP);
+                    if (minHeapEle > rankElement) {
                         std::pop_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                         minHeap.pop_back();
                         minHeap.push_back(rankElement);
@@ -166,22 +181,16 @@ namespace ReverseMIPS::MemoryBruteForce {
             return results;
         }
 
-        int getRank(double *query_item_vec, int userID) {
-            double *user_vec = user_.getVector(userID);
-            record_.reset();
-            double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
-            this->inner_product_time_ += record_.get_elapsed_time_second();
+        int BinarySearch(double queryIP, int userID) {
             int n_data_item = data_item_.n_vector_;
             auto iter_begin = distance_table_.begin() + userID * n_data_item_;
             auto iter_end = distance_table_.begin() + (userID + 1) * n_data_item_;
-            
-            record_.reset();
+
 
             auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
                                            [](const double &arrIP, double queryIP) {
                                                return arrIP > queryIP;
                                            });
-            this->binary_search_time_ += record_.get_elapsed_time_second();
             return (int) (lb_ptr - iter_begin) + 1;
         }
 

@@ -23,7 +23,7 @@ if __name__ == '__main__':
     data_item_l = np.random.normal(scale=10, size=(n_data_item, n_dim))
     user_l = np.random.normal(scale=10, size=(n_user, n_dim))
 
-    dataset = 'fake-big'
+    dataset = 'fakebig'
     output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
     delete_file_if_exist(output_dir)
     os.mkdir(output_dir)

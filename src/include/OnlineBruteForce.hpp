@@ -80,20 +80,23 @@ namespace ReverseMIPS::OnlineBruteForce {
                 std::vector<UserRankElement> &minHeap = results[qID];
 
                 for (int userID = 0; userID < topk; userID++) {
-                    int tmp_rank = getRank(query_item_vec, user_.getVector(userID));
-                    UserRankElement rankElement(userID, tmp_rank);
-                    minHeap[userID] = rankElement;
+                    double queryIP = InnerProduct(query_item_vec, user_.getVector(userID), vec_dim_);
+                    int tmp_rank = getRank(queryIP, user_.getVector(userID));
+                    UserRankElement element(userID, tmp_rank, queryIP);
+                    minHeap[userID] = element;
                 }
 
                 std::make_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                 UserRankElement minHeapEle = minHeap.front();
                 for (int userID = topk; userID < n_user; userID++) {
-                    int tmpRank = getRank(query_item_vec, user_.getVector(userID));
-                    UserRankElement rankElement(userID, tmpRank);
-                    if (minHeapEle.rank_ > rankElement.rank_) {
+                    double queryIP = InnerProduct(query_item_vec, user_.getVector(userID), vec_dim_);
+                    int tmp_rank = getRank(queryIP, user_.getVector(userID));
+                    UserRankElement element(userID, tmp_rank, queryIP);
+
+                    if (minHeapEle > element) {
                         std::pop_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                         minHeap.pop_back();
-                        minHeap.push_back(rankElement);
+                        minHeap.push_back(element);
                         std::push_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                         minHeapEle = minHeap.front();
                     }
@@ -112,15 +115,14 @@ namespace ReverseMIPS::OnlineBruteForce {
             return results;
         }
 
-        int getRank(double *query_item_vec, double *user_vec) {
+        int getRank(double queryIP, double *user_vec) {
 
-            double query_dist = InnerProduct(query_item_vec, user_vec, vec_dim_);
             int n_data_item = data_item_.n_vector_;
             int rank = 1;
 
             for (int i = 0; i < n_data_item; i++) {
                 double data_dist = InnerProduct(data_item_.getVector(i), user_vec, vec_dim_);
-                rank += data_dist > query_dist ? 1 : 0;
+                rank += data_dist > queryIP ? 1 : 0;
             }
 
             return rank;

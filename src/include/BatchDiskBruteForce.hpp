@@ -1,9 +1,9 @@
 //
-// Created by BianZheng on 2022/2/25.
+// Created by BianZheng on 2021/12/22.
 //
 
-#ifndef REVERSE_KRANKS_DISKBRUTEFORCE_HPP
-#define REVERSE_KRANKS_DISKBRUTEFORCE_HPP
+#ifndef REVERSE_KRANKS_BATCH_DISKBRUTEFORCE_HPP
+#define REVERSE_KRANKS_BATCH_DISKBRUTEFORCE_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "util/VectorIO.hpp"
@@ -96,15 +96,15 @@ namespace ReverseMIPS::DiskBruteForce {
         }
 
         std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) override {
-            TimeRecord query_record;
+            TimeRecord record, batch_report_record;
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
-                spdlog::error("error in writing index");
+                std::printf("error in writing index\n");
             }
 
             if (topk > user_.n_vector_) {
-                spdlog::error("top-k is too large, program exit");
+                printf("top-k is too large, program exit\n");
                 exit(-1);
             }
 
@@ -117,79 +117,138 @@ namespace ReverseMIPS::DiskBruteForce {
             int n_user = user_.n_vector_;
             int n_batch = (int) (n_user / n_cache);
             int n_remain = (int) (n_user % n_cache);
-            const int report_query_every_ = 100;
+            const int report_batch_every_ = 5;
 
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
-            std::vector<double> queryIP_l(n_user);
-            std::vector<int> rank_l(n_user);
+            record.reset();
+            index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
+            read_disk_time_ += record.get_elapsed_time_second();
 
-            query_record.reset();
-            for (int qID = 0; qID < n_query_item; qID++) {
-                //calculate distance
-                double *query_item_vec = query_item.getVector(qID);
-                inner_product_record_.reset();
-                for (int userID = 0; userID < n_user; userID++) {
+            for (int cacheID = 0; cacheID < topk; cacheID++) {
+                int userID = cacheID;
+                for (int qID = 0; qID < n_query_item; qID++) {
+                    double *query_item_vec = query_item.getVector(qID);
+
+                    inner_product_record_.reset();
                     double *user_vec = user_.getVector(userID);
                     double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
-                    queryIP_l[userID] = queryIP;
-                }
-                this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
-
-                for (int batchID = 0; batchID < n_batch; batchID++) {
-                    read_disk_record_.reset();
-                    index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
-                    read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+                    this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
                     binary_search_record_.reset();
-                    for (int cacheID = 0; cacheID < n_cache; cacheID++) {
-                        int userID = batchID * n_cache + cacheID;
-                        int tmp_rank = BinarySearch(queryIP_l[userID], cacheID, distance_cache);
-                        rank_l[userID] = tmp_rank;
+                    int tmp_rank = BinarySearch(queryIP, cacheID, distance_cache);
+                    this->binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+
+                    query_heap_l[qID][cacheID].userID_ = userID;
+                    query_heap_l[qID][cacheID].rank_ = tmp_rank;
+                    query_heap_l[qID][cacheID].queryIP_ = queryIP;
+                }
+            }
+            for (int qID = 0; qID < n_query_item; qID++) {
+                std::make_heap(query_heap_l[qID].begin(), query_heap_l[qID].end(), std::less<UserRankElement>());
+            }
+
+            for (int cacheID = topk; cacheID < n_cache; cacheID++) {
+//                spdlog::info("processing cache {} of total {}", cacheID, n_cache);
+                int userID = cacheID;
+                for (int qID = 0; qID < n_query_item; qID++) {
+                    std::vector<UserRankElement> &tmp_heap = query_heap_l[qID];
+                    UserRankElement min_heap_ele = tmp_heap.front();
+                    double *query_item_vec = query_item.getVector(qID);
+
+                    inner_product_record_.reset();
+                    double *user_vec = user_.getVector(userID);
+                    double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+                    this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+
+                    binary_search_record_.reset();
+                    int tmp_rank = BinarySearch(queryIP, cacheID, distance_cache);
+                    this->binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+                    UserRankElement element(userID, tmp_rank, queryIP);
+
+                    if (min_heap_ele > element) {
+                        std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<UserRankElement>());
+                        tmp_heap.pop_back();
+                        tmp_heap.push_back(element);
+                        std::push_heap(tmp_heap.begin(), tmp_heap.end(), std::less<UserRankElement>());
                     }
-                    binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+                }
+            }
+
+            for (int bth_idx = 1; bth_idx < n_batch; bth_idx++) {
+                record.reset();
+                index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
+                read_disk_time_ += record.get_elapsed_time_second();
+
+                for (int cacheID = 0; cacheID < n_cache; cacheID++) {
+                    int userID = bth_idx * n_cache + cacheID;
+                    for (int qID = 0; qID < n_query_item; qID++) {
+                        std::vector<UserRankElement> &tmp_heap = query_heap_l[qID];
+                        UserRankElement min_heap_ele = tmp_heap.front();
+                        double *query_item_vec = query_item.getVector(qID);
+
+                        inner_product_record_.reset();
+                        double *user_vec = user_.getVector(userID);
+                        double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+                        this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+
+                        binary_search_record_.reset();
+                        int tmp_rank = BinarySearch(queryIP, cacheID, distance_cache);
+                        this->binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+                        UserRankElement element(userID, tmp_rank, queryIP);
+
+                        if (min_heap_ele > element) {
+                            std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<UserRankElement>());
+                            tmp_heap.pop_back();
+                            tmp_heap.push_back(element);
+                            std::push_heap(tmp_heap.begin(), tmp_heap.end(),
+                                           std::less<UserRankElement>());
+                        }
+                    }
 
                 }
 
-                read_disk_record_.reset();
-                index_stream_.read((char *) distance_cache.data(), n_remain * n_data_item_ * sizeof(double));
-                read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+                if (bth_idx % report_batch_every_ == 0) {
+                    std::cout << "top-" << topk << " retrieval batch " << bth_idx / (0.01 * n_batch) << " %, "
+                              << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                              << get_current_RSS() / 1000000 << " Mb \n";
+                    batch_report_record.reset();
+                }
 
-                binary_search_record_.reset();
+            }
+
+            if (n_remain != 0) {
+                record.reset();
+                index_stream_.read((char *) distance_cache.data(),
+                                   n_remain * n_data_item_ * sizeof(double));
+                read_disk_time_ += record.get_elapsed_time_second();
+
                 for (int cacheID = 0; cacheID < n_remain; cacheID++) {
                     int userID = n_batch * n_cache + cacheID;
-                    int tmp_rank = BinarySearch(queryIP_l[userID], cacheID, distance_cache);
-                    rank_l[userID] = tmp_rank;
-                }
-                binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+                    for (int qID = 0; qID < n_query_item; qID++) {
+                        std::vector<UserRankElement> &tmp_heap = query_heap_l[qID];
+                        UserRankElement min_heap_ele = tmp_heap.front();
+                        double *query_item_vec = query_item.getVector(qID);
 
-                std::vector<UserRankElement> &query_heap = query_heap_l[qID];
-                for (int userID = 0; userID < topk; userID++) {
-                    query_heap[userID] = UserRankElement(userID, rank_l[userID], queryIP_l[userID]);
-                }
+                        inner_product_record_.reset();
+                        double *user_vec = user_.getVector(userID);
+                        double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+                        this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
-                std::make_heap(query_heap_l[qID].begin(), query_heap_l[qID].end(), std::less<UserRankElement>());
+                        binary_search_record_.reset();
+                        int tmp_rank = BinarySearch(queryIP, cacheID, distance_cache);
+                        this->binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+                        UserRankElement element(userID, tmp_rank, queryIP);
 
-                for (int userID = topk; userID < n_user; userID++) {
-                    UserRankElement min_heap_ele = query_heap.front();
-                    int tmp_rank = rank_l[userID];
-                    double queryIP = queryIP_l[userID];
-                    UserRankElement element(userID, tmp_rank, queryIP);
-                    if (min_heap_ele > element) {
-                        std::pop_heap(query_heap.begin(), query_heap.end(), std::less<UserRankElement>());
-                        query_heap.pop_back();
-                        query_heap.push_back(element);
-                        std::push_heap(query_heap.begin(), query_heap.end(), std::less<UserRankElement>());
+                        if (min_heap_ele > element) {
+                            std::pop_heap(tmp_heap.begin(), tmp_heap.end(), std::less<UserRankElement>());
+                            tmp_heap.pop_back();
+                            tmp_heap.push_back(element);
+                            std::push_heap(tmp_heap.begin(), tmp_heap.end(),
+                                           std::less<UserRankElement>());
+                        }
                     }
                 }
-
-                if (qID % report_query_every_ == 0) {
-                    std::cout << "top-" << topk << " retrieval batch " << qID / (0.01 * n_query_item) << " %, "
-                              << query_record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                              << get_current_RSS() / 1000000 << " Mb \n";
-                    query_record.reset();
-                }
-
             }
 
             index_stream_.close();
@@ -201,10 +260,9 @@ namespace ReverseMIPS::DiskBruteForce {
             return query_heap_l;
         }
 
-        int BinarySearch(double queryIP, int cacheID, std::vector<double> &distance_cache) const {
+        int BinarySearch(double queryIP, int cacheID, std::vector<double> &distance_cache) {
             auto iter_begin = distance_cache.begin() + cacheID * n_data_item_;
             auto iter_end = distance_cache.begin() + (cacheID + 1) * n_data_item_;
-
             auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
                                            [](const double &arrIP, double queryIP) {
                                                return arrIP > queryIP;
@@ -226,7 +284,7 @@ namespace ReverseMIPS::DiskBruteForce {
     Index BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user, const char *index_path) {
         std::ofstream out(index_path, std::ios::binary | std::ios::out);
         if (!out) {
-            spdlog::error("error in write result");
+            std::printf("error in write result\n");
         }
         const int n_data_item = data_item.n_vector_;
         std::vector<double> distance_cache(write_every_ * n_data_item);
@@ -280,4 +338,4 @@ namespace ReverseMIPS::DiskBruteForce {
 
 }
 
-#endif //REVERSE_KRANKS_DISKBRUTEFORCE_HPP
+#endif //REVERSE_KRANKS_BATCH_DISKBRUTEFORCE_HPP

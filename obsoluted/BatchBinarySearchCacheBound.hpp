@@ -2,12 +2,11 @@
 // Created by BianZheng on 2022/2/20.
 //
 
-#ifndef REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
-#define REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
+#ifndef REVERSE_KRANKS_BATCH_BINARYSEARCHCACHEBOUND_HPP
+#define REVERSE_KRANKS_BATCH_BINARYSEARCHCACHEBOUND_HPP
 
 #include "struct/VectorMatrix.hpp"
-#include "struct/DistancePair.hpp"
-#include "struct/UserBucketElement.hpp"
+#include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "util/TimeMemory.hpp"
@@ -140,7 +139,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
             std::vector<std::unordered_map<int, std::vector<std::pair<int, double>>>> candidates_invert_index_l(
                     n_user_, std::unordered_map<int, std::vector<std::pair<int, double>>>());
             //store the bucketID that queryIP fall in, for each query. used for coarse binary search
-            std::vector<UserBucketElement> user_bucket_l(n_user_);
+            std::vector<UserRankElement> user_bucket_l(n_user_);
 
             for (int queryID = 0; queryID < n_query_item; ++queryID) {
                 for (int userID = 0; userID < n_user_; ++userID) {
@@ -153,18 +152,18 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                     int bucketID = MemoryBinarySearch(queryIP, userID);
                     this->coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
                     assert(0 <= bucketID && bucketID <= n_cache_rank_);
-                    user_bucket_l[userID] = UserBucketElement(userID, bucketID, queryIP);
+                    user_bucket_l[userID] = UserRankElement(userID, bucketID, queryIP);
                 }
                 //small bucketID means higher rank
-                std::sort(user_bucket_l.begin(), user_bucket_l.end(), std::less<UserBucketElement>());
-                int topk_bucketID = user_bucket_l[topk - 1].bucketID_;
+                std::sort(user_bucket_l.begin(), user_bucket_l.end(), std::less<UserRankElement>());
+                int topk_bucketID = user_bucket_l[topk - 1].rank_;
                 int end_ptr = topk;
-                while (end_ptr < n_user_ && topk_bucketID == user_bucket_l[end_ptr].bucketID_) {
+                while (end_ptr < n_user_ && topk_bucketID == user_bucket_l[end_ptr].rank_) {
                     ++end_ptr;
                 }
                 for (int i = 0; i < end_ptr; ++i) {
                     int tmp_userID = user_bucket_l[i].userID_;
-                    int tmp_bucketID = user_bucket_l[i].bucketID_;
+                    int tmp_bucketID = user_bucket_l[i].rank_;
                     double tmp_queryIP = user_bucket_l[i].queryIP_;
 
                     auto find_iter = candidates_invert_index_l[tmp_userID].find(tmp_bucketID);
@@ -213,12 +212,12 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                         int base_rank = bucketID == 0 ? 0 : known_rank_idx_l_[bucketID - 1] + 1;
                         int rank = base_rank + offset_rank + 1;
                         if (query_heap_l[queryID].size() < topk) {
-                            query_heap_l[queryID].emplace_back(userID, rank);
+                            query_heap_l[queryID].emplace_back(userID, rank, queryIP);
                         } else {
                             std::vector<UserRankElement> &minHeap = query_heap_l[queryID];
                             std::make_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                             UserRankElement minHeapEle = minHeap.front();
-                            UserRankElement rankElement(userID, rank);
+                            UserRankElement rankElement(userID, rank, queryIP);
                             if (minHeapEle.rank_ > rankElement.rank_) {
                                 std::pop_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                                 minHeap.pop_back();
@@ -342,4 +341,4 @@ namespace ReverseMIPS::BinarySearchCacheBound {
     }
 
 }
-#endif //REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
+#endif //REVERSE_KRANKS_BATCH_BINARYSEARCHCACHEBOUND_HPP

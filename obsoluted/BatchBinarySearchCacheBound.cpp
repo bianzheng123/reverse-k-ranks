@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "BinarySearchCacheBound.hpp"
+#include "BatchBinarySearchCacheBound.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    printf("BinarySearchCacheBound dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
+    printf("BatchBinarySearchCacheBound dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < n_topk; i++) {
         cout << retrieval_res_l[i].ToString() << endl;
-        writeRank(result_rank_l[i], dataset_name, "BinarySearchCacheBound");
+        writeRank(result_rank_l[i], dataset_name, "BatchBinarySearchCacheBound");
     }
 
     map<string, string> performance_m;
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n_topk; i++) {
         retrieval_res_l[i].AddMap(performance_m);
     }
-    writePerformance(dataset_name, "BinarySearchCacheBound", performance_m);
+    writePerformance(dataset_name, "BatchBinarySearchCacheBound", performance_m);
 
     return 0;
 }

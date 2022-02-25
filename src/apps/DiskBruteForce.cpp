@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2021/12/22.
+// Created by BianZheng on 2022/2/25.
 //
 
 #include "util/VectorIO.hpp"
@@ -8,6 +8,7 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "DiskBruteForce.hpp"
+#include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -28,7 +29,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    printf("DiskBruteForceIndex dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
+    spdlog::info("DiskBruteForce dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     double total_build_index_time;
     char index_path[256];
@@ -40,7 +41,7 @@ int main(int argc, char **argv) {
     double *data_item_ptr = data[0].get();
     double *user_ptr = data[1].get();
     double *query_item_ptr = data[2].get();
-    printf("n_data_item %d, n_query_item %d, n_user %d, vec_dim %d\n", n_data_item, n_query_item, n_user, vec_dim);
+    spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
     VectorMatrix data_item, user, query_item;
     data_item.init(data_item_ptr, n_data_item, vec_dim);
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
     record.reset();
     DiskBruteForce::Index index = DiskBruteForce::BuildIndex(data_item, user, index_path);
     total_build_index_time = record.get_elapsed_time_second();
-    printf("finish preprocess and save the index\n");
+    spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{10, 20, 30, 40, 50};
     vector<DiskBruteForce::RetrievalResult> retrieval_res_l;
@@ -71,7 +72,7 @@ int main(int argc, char **argv) {
                                      second_per_query, topk);
     }
 
-    printf("build index time: total %.3fs\n", total_build_index_time);
+    spdlog::info("build index time: total %.3fs", total_build_index_time);
     int n_topk = (int) topk_l.size();
 
     for (int i = 0; i < n_topk; i++) {

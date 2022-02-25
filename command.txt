@@ -15,4 +15,6 @@
 ./bfdi movielens-1m
 ./bscb movielens-1m
 
+./bfdi fake-big
+
 cmake -DCMAKE_BUILD_TYPE=Release ..

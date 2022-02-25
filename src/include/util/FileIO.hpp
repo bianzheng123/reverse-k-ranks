@@ -8,23 +8,9 @@
 #include <string>
 #include <map>
 #include <iomanip>
-//#include <experimental/filesystem>
 
 namespace ReverseMIPS {
     
-//    void recreateFile(std::string_view path) {
-//        namespace fs = std::experimental::filesystem;
-//        std::error_code e;
-//        if (not fs::create_directory(path, e)) {
-//            printf("can not make directory, delete directory\n");
-//            if (fs::remove(path, e)) {
-//                fs::create_directory(path, e);
-//            } else {
-//                printf("fail to delete the directory command");
-//            }
-//        }
-//    }
-
     void writeRank(std::vector<std::vector<UserRankElement>> &result, const char *dataset_name, const char *method_name) {
         int n_query_item = (int) result.size();
         int topk = (int) result[0].size();
@@ -55,6 +41,20 @@ namespace ReverseMIPS {
                 file << result[i][j].rank_ << ",";
             }
             file << result[i][topk - 1].rank_ << std::endl;
+        }
+        file.close();
+
+        std::sprintf(resPath, "../result/rank/%s-%s-top%d-IP.csv", dataset_name, method_name, topk);
+        file.open(resPath);
+        if (!file) {
+            std::printf("error in write result\n");
+        }
+
+        for (int i = 0; i < n_query_item; i++) {
+            for (int j = 0; j < topk - 1; j++) {
+                file << result[i][j].queryIP_ << ",";
+            }
+            file << result[i][topk - 1].queryIP_ << std::endl;
         }
         file.close();
     }
