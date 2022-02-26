@@ -92,6 +92,7 @@ namespace ReverseMIPS::MemoryBruteForce {
             std::vector<double> preprocess_matrix(n_user * n_data_item);
 
             preprocess_record_.reset();
+#pragma omp parallel for default(none) shared(n_user, preprocess_matrix, std::cout, n_data_item)
             for (int userID = 0; userID < n_user; userID++) {
 
                 for (int itemID = 0; itemID < n_data_item; itemID++) {

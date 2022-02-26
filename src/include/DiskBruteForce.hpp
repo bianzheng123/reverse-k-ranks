@@ -136,6 +136,7 @@ namespace ReverseMIPS::DiskBruteForce {
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
+                index_stream_.seekg(0, std::ios::beg);
                 for (int batchID = 0; batchID < n_batch; batchID++) {
                     read_disk_record_.reset();
                     index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));

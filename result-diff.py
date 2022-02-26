@@ -1,7 +1,7 @@
 import os
 
 method_arr = ['BinarySearchCacheBound', 'DiskBruteForce', 'MemoryBruteForce']
-dataset_arr = ['fake', 'movielens-small']
+dataset_arr = ['fake', 'movielens-small', 'movielens-1m']
 # dataset_arr = ['movielens-small']
 type_arr = ['index', 'IP', 'rank']
 

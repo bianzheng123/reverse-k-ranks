@@ -205,7 +205,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                         }
                     }
                     if(queryID == 277 && userID == 21){
-
+                        printf("this crank %d, queryIP %.3f, userID %d\n\t prev crank %d, queryIP %.3f, userID %d\n", crank, queryIP, userID, element.rank_, element.queryIP_, element.userID_);
                     }
                 }
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
@@ -267,10 +267,11 @@ namespace ReverseMIPS::BinarySearchCacheBound {
         //return the index of the bucket it belongs to
         [[nodiscard]] inline int CoarseBinarySearchBound(double queryIP, int userID, int bound_rank_id) const {
             auto iter_begin = bound_distance_table_.begin() + userID * n_cache_rank_;
-            if (iter_begin[bound_rank_id] > queryIP) {
+            if (bound_rank_id != n_cache_rank_ && iter_begin[bound_rank_id] > queryIP) {
                 return -1;
             }
-            auto iter_end = iter_begin + bound_rank_id + 1;
+            int offset_size = bound_rank_id == n_cache_rank_ ? n_cache_rank_ - 1:bound_rank_id;
+            auto iter_end = iter_begin + offset_size + 1;
 
             auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
                                            [](const double &arrIP, double queryIP) {
