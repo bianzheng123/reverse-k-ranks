@@ -117,7 +117,7 @@ namespace ReverseMIPS::DiskBruteForce {
             int n_user = user_.n_vector_;
             int n_batch = (int) (n_user / n_cache);
             int n_remain = (int) (n_user % n_cache);
-            const int report_query_every_ = 100;
+            const int report_query_every_ = 30;
 
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
@@ -185,9 +185,8 @@ namespace ReverseMIPS::DiskBruteForce {
                 }
 
                 if (qID % report_query_every_ == 0) {
-                    std::cout << "top-" << topk << " retrieval batch " << qID / (0.01 * n_query_item) << " %, "
-                              << query_record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                              << get_current_RSS() / 1000000 << " Mb \n";
+                    spdlog::info("top-{} retrieal batch {}%, {} s/iter Mem: {} Mb", topk, qID / (0.01 * n_query_item),
+                                 query_record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                     query_record.reset();
                 }
 
@@ -251,9 +250,8 @@ namespace ReverseMIPS::DiskBruteForce {
             out.write((char *) distance_cache.data(), distance_cache.size() * sizeof(double));
 
             if (i % report_batch_every_ == 0) {
-                std::cout << "preprocessed " << i / (0.01 * n_batch) << " %, "
-                          << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                          << get_current_RSS() / 1000000 << " Mb \n";
+                spdlog::info("preprocessed {}%, {} s/iter Mem: {} Mb", i / (0.01 * n_batch),
+                             batch_report_record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                 batch_report_record.reset();
             }
 

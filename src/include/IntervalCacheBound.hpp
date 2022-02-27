@@ -1,9 +1,9 @@
 //
-// Created by BianZheng on 2022/2/25.
+// Created by BianZheng on 2022/2/27.
 //
 
-#ifndef REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
-#define REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
+#ifndef REVERSE_K_RANKS_INTERVALCACHEBOUND_HPP
+#define REVERSE_K_RANKS_INTERVALCACHEBOUND_HPP
 
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
@@ -11,6 +11,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
+#include "util/FileIO.hpp"
 #include <string>
 #include <fstream>
 #include <vector>
@@ -21,7 +22,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::BinarySearchCacheBound {
+namespace ReverseMIPS::IntervalCacheBound {
 
     class RetrievalResult {
     public:
@@ -196,8 +197,9 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                             }
                         }
                     }
-                    if(queryID == 277 && userID == 21){
-                        printf("this crank %d, queryIP %.3f, userID %d\n\t prev crank %d, queryIP %.3f, userID %d\n", crank, queryIP, userID, element.rank_, element.queryIP_, element.userID_);
+                    if (queryID == 277 && userID == 21) {
+                        printf("this crank %d, queryIP %.3f, userID %d\n\t prev crank %d, queryIP %.3f, userID %d\n",
+                               crank, queryIP, userID, element.rank_, element.queryIP_, element.userID_);
                     }
                 }
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
@@ -230,7 +232,8 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                 // reuse the max heap in coarse binary search
                 for (int candID = 0; candID < max_heap_size; candID++) {
                     int crank = max_heap[candID].rank_;
-                    int offset_rank = FineBinarySearch(max_heap[candID].queryIP_, read_count_l[candID], distance_cache[candID]);
+                    int offset_rank = FineBinarySearch(max_heap[candID].queryIP_, read_count_l[candID],
+                                                       distance_cache[candID]);
                     int base_rank = crank == 0 ? 0 : known_rank_idx_l_[crank - 1] + 1;
                     int rank = base_rank + offset_rank + 1;
                     max_heap[candID].rank_ = rank;
@@ -262,7 +265,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
             if (bound_rank_id != n_cache_rank_ && iter_begin[bound_rank_id] > queryIP) {
                 return -1;
             }
-            int offset_size = bound_rank_id == n_cache_rank_ ? n_cache_rank_ - 1:bound_rank_id;
+            int offset_size = bound_rank_id == n_cache_rank_ ? n_cache_rank_ - 1 : bound_rank_id;
             auto iter_end = iter_begin + offset_size + 1;
 
             auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
@@ -306,7 +309,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
         const int n_batch = user.n_vector_ / write_every_;
         const int n_remain = user.n_vector_ % write_every_;
 
-        //隔着多少个建模
+        //
         const int cache_bound_every = 10;
         const int n_cache_rank = n_data_item / cache_bound_every;
         std::vector<int> known_rank_idx_l;
@@ -314,7 +317,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
              known_rank_idx < n_data_item; known_rank_idx += cache_bound_every) {
             known_rank_idx_l.emplace_back(known_rank_idx);
         }
-        
+
         assert(known_rank_idx_l[0] == known_rank_idx_l[1] - (known_rank_idx_l[0] + 1));
         int n_max_read = std::max(known_rank_idx_l[0], n_data_item - (known_rank_idx_l[n_cache_rank - 1] + 1));
         assert(known_rank_idx_l.size() == n_cache_rank);
@@ -379,4 +382,4 @@ namespace ReverseMIPS::BinarySearchCacheBound {
 
 }
 
-#endif //REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
+#endif //REVERSE_K_RANKS_INTERVALCACHEBOUND_HPP
