@@ -8,9 +8,9 @@ test.py
 /motivation/data/
 /motivation/result/
 index
-/skyline-partition/build/
-/skyline-partition/data/
-/skyline-partition/result/
+/attribution/build/
+/attribution/data/
+/attribution/result/
 /dataset/
 cmake-build-debug/
 cmake-build-release/

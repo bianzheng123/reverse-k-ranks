@@ -9,8 +9,8 @@ if __name__ == '__main__':
     # dataset_l = ['netflix', 'yahoomusic']
     dataset_l = ['netflix', 'movielens-20m']
     for ds in dataset_l:
-        base, dim = vecs_io.fvecs_read('/home/bianzheng/skyline-partition/data/%s/%s_item.fvecs' % (ds, ds))
-        query, dim = vecs_io.fvecs_read('/home/bianzheng/skyline-partition/data/%s/%s_user.fvecs' % (ds, ds))
+        base, dim = vecs_io.fvecs_read('/home/bianzheng/attribution/data/%s/%s_item.fvecs' % (ds, ds))
+        query, dim = vecs_io.fvecs_read('/home/bianzheng/attribution/data/%s/%s_user.fvecs' % (ds, ds))
         base = base.T
 
         u, sigma, v_prime = np.linalg.svd(base, full_matrices=False)
@@ -36,11 +36,11 @@ if __name__ == '__main__':
         b2 = b2.T
         q2 = q2.T
         print(ds, b2.shape, q2.shape)
-        vecs_io.fvecs_write('/home/bianzheng/skyline-partition/data/%s/%s_item_fexipro_svd.fvecs' % (ds, ds), b2)
-        vecs_io.fvecs_write('/home/bianzheng/skyline-partition/data/%s/%s_user_fexipro_svd.fvecs' % (ds, ds), q2)
+        vecs_io.fvecs_write('/home/bianzheng/attribution/data/%s/%s_item_fexipro_svd.fvecs' % (ds, ds), b2)
+        vecs_io.fvecs_write('/home/bianzheng/attribution/data/%s/%s_user_fexipro_svd.fvecs' % (ds, ds), q2)
 
         b3 = b3.T
         q3 = q3.T
         print(ds, b3.shape, q3.shape)
-        vecs_io.fvecs_write('/home/bianzheng/skyline-partition/data/%s/%s_item_svd.fvecs' % (ds, ds), b3)
-        vecs_io.fvecs_write('/home/bianzheng/skyline-partition/data/%s/%s_user_svd.fvecs' % (ds, ds), q3)
+        vecs_io.fvecs_write('/home/bianzheng/attribution/data/%s/%s_item_svd.fvecs' % (ds, ds), b3)
+        vecs_io.fvecs_write('/home/bianzheng/attribution/data/%s/%s_user_svd.fvecs' % (ds, ds), q3)

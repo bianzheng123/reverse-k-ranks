@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <iostream>
-#include "../struct/UserRankElement.hpp"
+#include "struct/UserRankElement.hpp"
 #include <vector>
 #include <ostream>
 #include <string>
@@ -10,8 +10,9 @@
 #include <iomanip>
 
 namespace ReverseMIPS {
-    
-    void writeRank(std::vector<std::vector<UserRankElement>> &result, const char *dataset_name, const char *method_name) {
+
+    void
+    writeRank(std::vector<std::vector<UserRankElement>> &result, const char *dataset_name, const char *method_name) {
         int n_query_item = (int) result.size();
         int topk = (int) result[0].size();
 

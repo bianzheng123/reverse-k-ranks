@@ -14,8 +14,6 @@
 #include <string>
 #include <map>
 
-//预处理时不做任何动作, 在线计算全部的向量, 然后返回最大的k个rank
-
 using namespace std;
 using namespace ReverseMIPS;
 

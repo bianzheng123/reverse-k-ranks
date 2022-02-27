@@ -24,6 +24,8 @@ find_package(Armadillo)
 
 find_package(OpenMP)
 
+add_subdirectory(attribution)
+
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
 #
