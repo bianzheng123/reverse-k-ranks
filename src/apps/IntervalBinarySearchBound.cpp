@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/2/27.
+// Created by BianZheng on 2022/3/1.
 //
 
 #include "util/VectorIO.hpp"
@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "IntervalCacheBound.hpp"
+#include "IntervalBinarySearchBound.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
@@ -27,42 +27,37 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    spdlog::info("IntervalCacheBound dataset_name {}, basic_dir {}", dataset_name, basic_dir);
+    spdlog::info("IntervalBinarySearchBound dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                                 vec_dim);
-    double *data_item_ptr = data[0].get();
-    double *user_ptr = data[1].get();
-    double *query_item_ptr = data[2].get();
+    vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
+    VectorMatrix &user = data[0];
+    VectorMatrix &data_item = data[1];
+    VectorMatrix &query_item = data[2];
     spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
-    VectorMatrix data_item, user, query_item;
-    data_item.init(data_item_ptr, n_data_item, vec_dim);
-    user.init(user_ptr, n_user, vec_dim);
-    query_item.init(query_item_ptr, n_query_item, vec_dim);
-
     char index_path[256];
-    sprintf(index_path, "../index/%s.icb", dataset_name);
+    sprintf(index_path, "../index/%s.index", dataset_name);
 
     TimeRecord record;
     record.reset();
-    IntervalCacheBound::Index bscb = IntervalCacheBound::BuildIndex(data_item, user, index_path);
+    IntervalBinarySearchBound::Index &ibsb = IntervalBinarySearchBound::BuildIndex(data_item, user, index_path);
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{10, 20, 30, 40, 50};
-    vector<IntervalCacheBound::RetrievalResult> retrieval_res_l;
+    vector<IntervalBinarySearchBound::RetrievalResult> retrieval_res_l;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = bscb.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = ibsb.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double read_disk_time = bscb.read_disk_time_;
-        double inner_product_time = bscb.inner_product_time_;
-        double coarse_binary_search_time = bscb.coarse_binary_search_time_;
-        double fine_binary_search_time = bscb.fine_binary_search_time_;
+        double read_disk_time = ibsb.read_disk_time_;
+        double inner_product_time = ibsb.inner_product_time_;
+        double coarse_binary_search_time = ibsb.coarse_binary_search_time_;
+        double fine_binary_search_time = ibsb.fine_binary_search_time_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
@@ -75,7 +70,7 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < n_topk; i++) {
         cout << retrieval_res_l[i].ToString() << endl;
-        writeRank(result_rank_l[i], dataset_name, "IntervalCacheBound");
+        writeRank(result_rank_l[i], dataset_name, "IntervalBinarySearchBound");
     }
 
     map<string, string> performance_m;
@@ -83,7 +78,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n_topk; i++) {
         retrieval_res_l[i].AddMap(performance_m);
     }
-    writePerformance(dataset_name, "IntervalCacheBound", performance_m);
+    writePerformance(dataset_name, "IntervalBinarySearchBound", performance_m);
 
     return 0;
 }

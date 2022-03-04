@@ -1,11 +1,17 @@
-#include <cmath>
+//
+// Created by BianZheng on 2022/2/20.
+//
 
-#pragma once
+#ifndef REVERSE_KRANKS_VECTORMATRIX_HPP
+#define REVERSE_KRANKS_VECTORMATRIX_HPP
+
+#include <cmath>
+#include <memory>
+
 namespace ReverseMIPS {
     class VectorMatrix {
-
+        std::unique_ptr<double[]> rawData_;
     public:
-        double *rawData_;
         int n_vector_;
         int vec_dim_;
 
@@ -18,13 +24,24 @@ namespace ReverseMIPS {
         ~VectorMatrix() = default;
 
         [[nodiscard]] double *getVector(const int vec_idx) const {
-            return rawData_ + vec_idx * vec_dim_;
+            return rawData_.get() + vec_idx * vec_dim_;
         }
 
-        void init(double *rawData, const int n_vector, const int vec_dim) {
+        void init(std::unique_ptr<double[]> &rawData, const int n_vector, const int vec_dim) {
+            this->rawData_ = std::move(rawData);
             this->n_vector_ = n_vector;
             this->vec_dim_ = vec_dim;
-            this->rawData_ = rawData;
+        }
+
+        VectorMatrix &operator=(VectorMatrix &&other) noexcept {
+            this->rawData_ = std::move(other.rawData_);
+            this->n_vector_ = other.n_vector_;
+            this->vec_dim_ = other.vec_dim_;
+            return *this;
+        }
+
+        [[nodiscard]] double *getRawData() const {
+            return this->getVector(0);
         }
 
         void vectorNormalize() {
@@ -43,3 +60,4 @@ namespace ReverseMIPS {
 
     };
 }
+#endif //REVERSE_KRANKS_VECTORMATRIX_HPP

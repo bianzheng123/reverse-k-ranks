@@ -31,24 +31,19 @@ int main(int argc, char **argv) {
 
     double total_build_index_time;
     char index_path[256];
-    sprintf(index_path, "../index/%s.bfi", dataset_name);
+    sprintf(index_path, "../index/%s.index", dataset_name);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                                 vec_dim);
-    double *data_item_ptr = data[0].get();
-    double *user_ptr = data[1].get();
-    double *query_item_ptr = data[2].get();
+    vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
+    VectorMatrix &user = data[0];
+    VectorMatrix &data_item = data[1];
+    VectorMatrix &query_item = data[2];
     spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
-
-    VectorMatrix data_item, user, query_item;
-    data_item.init(data_item_ptr, n_data_item, vec_dim);
-    user.init(user_ptr, n_user, vec_dim);
-    query_item.init(query_item_ptr, n_query_item, vec_dim);
 
     TimeRecord record;
     record.reset();
-    DiskBruteForce::Index index = DiskBruteForce::BuildIndex(data_item, user, index_path);
+    DiskBruteForce::Index &index = DiskBruteForce::BuildIndex(data_item, user, index_path);
     total_build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 

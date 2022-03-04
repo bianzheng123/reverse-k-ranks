@@ -2,7 +2,8 @@ import os
 
 
 def run_attribution():
-    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    dataset_l = ['movielens-27m']
     for ds in dataset_l:
         os.system('cd build/attribution && ./bd {}'.format(ds))
         os.system('cd attribution/bound-distribution && python3 plot.py -ds {}'.format(ds))

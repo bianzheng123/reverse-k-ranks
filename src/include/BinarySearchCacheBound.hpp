@@ -114,11 +114,11 @@ namespace ReverseMIPS::BinarySearchCacheBound {
             this->n_max_read_ = n_max_read;
         }
 
-        void setUserItemMatrix(const VectorMatrix &user, const VectorMatrix &data_item) {
-            this->user_ = user;
-            this->n_user_ = user.n_vector_;
-            this->n_data_item_ = data_item.n_vector_;
+        void setUserItemMatrix(VectorMatrix &user, const VectorMatrix &data_item) {
             this->vec_dim_ = user.vec_dim_;
+            this->n_user_ = user.n_vector_;
+            this->user_ = std::move(user);
+            this->n_data_item_ = data_item.n_vector_;
         }
 
         std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int topk) override {
@@ -196,9 +196,6 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                             }
                         }
                     }
-                    if(queryID == 277 && userID == 21){
-                        printf("this crank %d, queryIP %.3f, userID %d\n\t prev crank %d, queryIP %.3f, userID %d\n", crank, queryIP, userID, element.rank_, element.queryIP_, element.userID_);
-                    }
                 }
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
 
@@ -230,7 +227,8 @@ namespace ReverseMIPS::BinarySearchCacheBound {
                 // reuse the max heap in coarse binary search
                 for (int candID = 0; candID < max_heap_size; candID++) {
                     int crank = max_heap[candID].rank_;
-                    int offset_rank = FineBinarySearch(max_heap[candID].queryIP_, read_count_l[candID], distance_cache[candID]);
+                    int offset_rank = FineBinarySearch(max_heap[candID].queryIP_, read_count_l[candID],
+                                                       distance_cache[candID]);
                     int base_rank = crank == 0 ? 0 : known_rank_idx_l_[crank - 1] + 1;
                     int rank = base_rank + offset_rank + 1;
                     max_heap[candID].rank_ = rank;
@@ -262,7 +260,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
             if (bound_rank_id != n_cache_rank_ && iter_begin[bound_rank_id] > queryIP) {
                 return -1;
             }
-            int offset_size = bound_rank_id == n_cache_rank_ ? n_cache_rank_ - 1:bound_rank_id;
+            int offset_size = bound_rank_id == n_cache_rank_ ? n_cache_rank_ - 1 : bound_rank_id;
             auto iter_end = iter_begin + offset_size + 1;
 
             auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
@@ -295,7 +293,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    Index BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user, const char *index_path) {
+    Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path) {
         std::ofstream out(index_path, std::ios::binary | std::ios::out);
         if (!out) {
             spdlog::error("error in write result");
@@ -314,7 +312,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
              known_rank_idx < n_data_item; known_rank_idx += cache_bound_every) {
             known_rank_idx_l.emplace_back(known_rank_idx);
         }
-        
+
         assert(known_rank_idx_l[0] == known_rank_idx_l[1] - (known_rank_idx_l[0] + 1));
         int n_max_read = std::max(known_rank_idx_l[0], n_data_item - (known_rank_idx_l[n_cache_rank - 1] + 1));
         assert(known_rank_idx_l.size() == n_cache_rank);
@@ -355,8 +353,8 @@ namespace ReverseMIPS::BinarySearchCacheBound {
         for (int cacheID = 0; cacheID < n_remain; cacheID++) {
             int userID = write_every_ * n_batch + cacheID;
             for (int itemID = 0; itemID < data_item.n_vector_; itemID++) {
-                double ip = InnerProduct(data_item.rawData_ + itemID * vec_dim,
-                                         user.rawData_ + userID * vec_dim, vec_dim);
+                double ip = InnerProduct(data_item.getRawData() + itemID * vec_dim,
+                                         user.getRawData() + userID * vec_dim, vec_dim);
                 write_distance_cache[cacheID * data_item.n_vector_ + itemID] = ip;
             }
 
@@ -372,7 +370,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
 
         out.write((char *) write_distance_cache.data(),
                   n_remain * data_item.n_vector_ * sizeof(double));
-        Index index(bound_distance_table, known_rank_idx_l, index_path, n_max_read);
+        static Index index(bound_distance_table, known_rank_idx_l, index_path, n_max_read);
         index.setUserItemMatrix(user, data_item);
         return index;
     }

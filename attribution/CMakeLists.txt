@@ -4,8 +4,10 @@
 
 #include_directories(${PROJECT_SOURCE_DIR}/Gorder)
 
-add_executable(t2 test.cpp)
-
 add_executable(bd bound-distribution/BoundDistribution.cpp)
-target_include_directories(bd PRIVATE ../src/include)
-target_link_libraries(bd PRIVATE OpenMP::OpenMP_CXX)
+target_include_directories(bd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include)
+target_link_libraries(bd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+
+add_executable(cp evaluation-sequence/CauchyPercentile.cpp)
+target_include_directories(cp PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include)
+target_link_libraries(cp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)

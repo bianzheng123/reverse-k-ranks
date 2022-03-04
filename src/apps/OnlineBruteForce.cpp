@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace ReverseMIPS;
@@ -24,16 +25,12 @@ int main(int argc, char **argv) {
     printf("OnlineBruteForce dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector<unique_ptr<double[]>> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user, vec_dim);
-    double *data_item_ptr = data[0].get();
-    double *user_ptr = data[1].get();
-    double *query_item_ptr = data[2].get();
-    printf("n_data_item %d, n_query_item %d, n_user %d, vec_dim %d\n", n_data_item, n_query_item, n_user, vec_dim);
-
-    VectorMatrix data_item, user, query_item;
-    data_item.init(data_item_ptr, n_data_item, vec_dim);
-    user.init(user_ptr, n_user, vec_dim);
-    query_item.init(query_item_ptr, n_query_item, vec_dim);
+    vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
+    VectorMatrix &user = data[0];
+    VectorMatrix &data_item = data[1];
+    VectorMatrix &query_item = data[2];
+    spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
     TimeRecord record;
     record.reset();

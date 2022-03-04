@@ -53,10 +53,9 @@ namespace ReverseMIPS::OnlineBruteForce {
         inline Index() {}
 
         inline Index(VectorMatrix &data_item, VectorMatrix &user) {
-            this->data_item_ = data_item;
-            this->user_ = user;
-
+            this->data_item_ = std::move(data_item);
             vec_dim_ = user.vec_dim_;
+            this->user_ = std::move(user);
         }
 
         inline ~Index() {}

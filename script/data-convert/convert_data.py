@@ -19,7 +19,7 @@ if __name__ == '__main__':
     n_query_item = 1000
 
     # ds_l = ['movielens-small', 'movielens-27m', 'netflix', 'yelp']
-    ds_l = ['movielens-small', 'movielens-1m', 'movielens-10m']
+    ds_l = ['movielens-27m']
     for dataset in ds_l:
         input_dir = '/home/bianzheng/Dataset/MIPS'
 

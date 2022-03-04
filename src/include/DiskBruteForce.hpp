@@ -87,11 +87,11 @@ namespace ReverseMIPS::DiskBruteForce {
 
         Index() {}
 
-        Index(const char *index_path, const int n_data_item, const VectorMatrix &user) {
+        Index(const char *index_path, const int n_data_item, VectorMatrix &user) {
             this->index_path_ = index_path;
-            this->user_ = user;
-            this->n_data_item_ = n_data_item;
             this->vec_dim_ = user.vec_dim_;
+            this->user_ = std::move(user);
+            this->n_data_item_ = n_data_item;
             this->n_cache = std::min(user_.n_vector_, 10000);
         }
 
@@ -185,7 +185,8 @@ namespace ReverseMIPS::DiskBruteForce {
                 }
 
                 if (qID % report_query_every_ == 0) {
-                    spdlog::info("top-{} retrieal batch {}%, {} s/iter Mem: {} Mb", topk, qID / (0.01 * n_query_item),
+                    spdlog::info("top-{} retrieval query number {}%, {} s/iter Mem: {} Mb", topk,
+                                 qID / (0.01 * n_query_item),
                                  query_record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                     query_record.reset();
                 }
@@ -223,7 +224,7 @@ namespace ReverseMIPS::DiskBruteForce {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    Index BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user, const char *index_path) {
+    Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path) {
         std::ofstream out(index_path, std::ios::binary | std::ios::out);
         if (!out) {
             spdlog::error("error in write result");
@@ -260,8 +261,8 @@ namespace ReverseMIPS::DiskBruteForce {
         for (int cacheID = 0; cacheID < n_remain; cacheID++) {
             int userID = cacheID + write_every_ * n_batch;
             for (int itemID = 0; itemID < data_item.n_vector_; itemID++) {
-                double ip = InnerProduct(data_item.rawData_ + itemID * vec_dim,
-                                         user.rawData_ + userID * vec_dim, vec_dim);
+                double ip = InnerProduct(data_item.getRawData() + itemID * vec_dim,
+                                         user.getRawData() + userID * vec_dim, vec_dim);
                 distance_cache[cacheID * data_item.n_vector_ + itemID] = ip;
             }
 
@@ -273,7 +274,7 @@ namespace ReverseMIPS::DiskBruteForce {
         out.write((char *) distance_cache.data(),
                   n_remain * data_item.n_vector_ * sizeof(double));
 
-        Index index(index_path, n_data_item, user);
+        static Index index(index_path, n_data_item, user);
         return index;
     }
 

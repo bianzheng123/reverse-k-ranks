@@ -79,9 +79,9 @@ namespace ReverseMIPS::MemoryBruteForce {
         Index() {}
 
         Index(VectorMatrix &data_item, VectorMatrix &user) {
-            this->data_item_ = data_item;
-            this->user_ = user;
             this->vec_dim_ = user.vec_dim_;
+            this->data_item_ = std::move(data_item);
+            this->user_ = std::move(user);
         }
 
         ~Index() {}

@@ -48,21 +48,18 @@ add_executable(bscb src/apps/BinarySearchCacheBound.cpp)
 target_include_directories(bscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
 target_link_libraries(bscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-#add_executable(icb src/apps/IntervalCacheBound.cpp)
-#target_include_directories(icb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-#target_link_libraries(icb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+add_executable(ibsb src/apps/IntervalBinarySearchBound.cpp)
+target_include_directories(ibsb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(ibsb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
 add_executable(bbfdi src/apps/BatchDiskBruteForce.cpp)
 target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
 target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-#add_executable(bbscb obsoluted/BatchBinarySearchCacheBound.cpp)
-#target_include_directories(bbscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-#target_link_libraries(bbscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
-#add_executable(iscb src/apps/IntervalSearchCacheBound.cpp)
-#target_include_directories(iscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-#target_link_libraries(iscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
 add_executable(t1 test.cpp)
-target_link_libraries(t1 PRIVATE spdlog::spdlog)
+target_include_directories(t1 PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+
+add_executable(t2 test2.cpp)
+target_include_directories(t2 PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(t2 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "struct/VectorMatrix.hpp"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -33,34 +34,39 @@ namespace ReverseMIPS {
         return data;
     }
 
-    std::vector<std::unique_ptr<double[]>>
+    std::vector<VectorMatrix>
     readData(const char *basic_dir, const char *dataset_name, int &n_data_item, int &n_query_item, int &n_user,
-             int &data_dim) {
+             int &vec_dim) {
         n_data_item = 0;
         n_query_item = 0;
         n_user = 0;
-        data_dim = 0;
+        vec_dim = 0;
 
         char path[256];
         std::printf("load data item\n");
         std::sprintf(path, "%s/%s/%s_data_item.dvecs", basic_dir, dataset_name, dataset_name);
-        std::unique_ptr<double[]> data_item = loadVector<double>(path, n_data_item, data_dim);
+        std::unique_ptr<double[]> data_item_ptr = loadVector<double>(path, n_data_item, vec_dim);
 //        std::printf("%.3f %.3f %.3f %.3f\n", data_item[0], data_item[1], data_item[2], data_item[3]);
 
         std::printf("load user\n");
         sprintf(path, "%s/%s/%s_user.dvecs", basic_dir, dataset_name, dataset_name);
-        std::unique_ptr<double[]> user = loadVector<double>(path, n_user, data_dim);
+        std::unique_ptr<double[]> user_ptr = loadVector<double>(path, n_user, vec_dim);
 //        std::printf("%.3f %.3f %.3f %.3f\n", user[0], user[1], user[2], user[3]);
 
         std::printf("load query item\n");
         sprintf(path, "%s/%s/%s_query_item.dvecs", basic_dir, dataset_name, dataset_name);
-        std::unique_ptr<double[]> query_item = loadVector<double>(path, n_query_item, data_dim);
+        std::unique_ptr<double[]> query_item_ptr = loadVector<double>(path, n_query_item, vec_dim);
 //        std::printf("%.3f %.3f %.3f %.3f\n", query_item[0], query_item[1], query_item[2], query_item[3]);
 
-        std::vector<std::unique_ptr<double[]>> res{};
-        res.emplace_back(std::move(data_item));
-        res.emplace_back(std::move(user));
-        res.emplace_back(std::move(query_item));
+        static VectorMatrix user, data_item, query_item;
+        user.init(user_ptr, n_user, vec_dim);
+        data_item.init(data_item_ptr, n_data_item, vec_dim);
+        query_item.init(query_item_ptr, n_query_item, vec_dim);
+
+        std::vector<VectorMatrix> res(3);
+        res[0] = std::move(user);
+        res[1] = std::move(data_item);
+        res[2] = std::move(query_item);
         return res;
     }
 }

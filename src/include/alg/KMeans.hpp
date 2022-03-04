@@ -5,15 +5,17 @@
 #ifndef REVERSE_KRANKS_KMEANS_HPP
 #define REVERSE_KRANKS_KMEANS_HPP
 
+#include "alg/SpaceInnerProduct.hpp"
+#include "struct/VectorMatrix.hpp"
 #include <fstream>
 #include <algorithm>
 #include <cfloat>
 #include <armadillo>
 
-namespace ReverseMIPS {
+namespace ReverseMIPS::KMeans {
 
-    std::vector<int> BuildKMeans(VectorMatrix &user, int n_merge_user) {
-        arma::mat data(user.rawData_, user.vec_dim_, user.n_vector_, false, true);
+    std::vector<int> Build(VectorMatrix &user, int n_merge_user) {
+        arma::mat data(user.getRawData(), user.vec_dim_, user.n_vector_, false, true);
         arma::mat means;
 
         // Reference: http://arma.sourceforge.net/docs.html#kmeans

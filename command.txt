@@ -1,9 +1,10 @@
 ./bfon fake
 ./bfmi fake
 ./bfdi fake
-./rkbkt fake
-./itvvec fake
+./bbfdi fake
 ./bscb fake
+./ibsb fake
+
 
 ./bfdi movielens-small /home/zhengbian/Dataset/ReverseMIPS
 ./bscb movielens-small /home/zhengbian/Dataset/ReverseMIPS
