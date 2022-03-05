@@ -59,8 +59,7 @@ int main(int argc, char **argv) {
     printf("%.3f %.3f %.3f %.3f\n", user_normal_ptr[0], user_normal_ptr[1], user_normal_ptr[2], user_normal_ptr[3]);
 
     VectorMatrix transfer_item;
-    std::vector<double> eigen_l(vec_dim);
-
+    std::vector<double> eigen_l;
     const double SIGMA = 0.7;
     int check_dim = SVD::SVD(user, data_item, transfer_item, eigen_l, SIGMA);
 

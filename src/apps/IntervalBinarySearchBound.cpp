@@ -46,7 +46,8 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_l{10, 20, 30, 40, 50};
+//    vector<int> topk_l{10, 20, 30, 40, 50};
+    vector<int> topk_l{10};
     vector<IntervalBinarySearchBound::RetrievalResult> retrieval_res_l;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {

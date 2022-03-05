@@ -32,7 +32,7 @@ namespace ReverseMIPS {
 
         std::string ToString() {
             char arr[256];
-            sprintf(arr, "userId %d, queryIP %.3f, lower_rank %d, upper_rank %d", userID_, queryIP_, lower_rank_, upper_rank_);
+            sprintf(arr, "userID %d, queryIP %.3f, lower_rank %d, upper_rank %d", userID_, queryIP_, lower_rank_, upper_rank_);
             std::string str(arr);
             return str;
         }

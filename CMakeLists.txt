@@ -48,9 +48,9 @@ add_executable(bscb src/apps/BinarySearchCacheBound.cpp)
 target_include_directories(bscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
 target_link_libraries(bscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-add_executable(ibsb src/apps/IntervalBinarySearchBound.cpp)
-target_include_directories(ibsb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-target_link_libraries(ibsb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+#add_executable(ibsb src/apps/IntervalBinarySearchBound.cpp)
+#target_include_directories(ibsb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+#target_link_libraries(ibsb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
 add_executable(bbfdi src/apps/BatchDiskBruteForce.cpp)
 target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)

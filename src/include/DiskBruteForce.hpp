@@ -110,14 +110,18 @@ namespace ReverseMIPS::DiskBruteForce {
 
 //            size_t avail_memory = get_avail_memory();
             size_t a = user_.n_vector_;
-            size_t b = (size_t) 2000000000 / n_data_item_;
-            n_cache = a > b ? b : a;
+//            size_t b = (size_t) 4000000000 / n_data_item_;
+//            size_t b = (size_t) 4000000 / n_data_item_;
+            size_t b = 10000;
+            n_cache = std::min(a, b);
+//            n_cache = a > b ? b : a;
             std::vector<double> distance_cache(n_cache * n_data_item_);
             int n_query_item = query_item.n_vector_;
             int n_user = user_.n_vector_;
             int n_batch = (int) (n_user / n_cache);
             int n_remain = (int) (n_user % n_cache);
             const int report_query_every_ = 30;
+            spdlog::info("n_user {}, n_batch {}, n_remain {}, n_cache {}", n_user, n_batch, n_remain, n_cache);
 
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
