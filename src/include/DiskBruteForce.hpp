@@ -128,6 +128,12 @@ namespace ReverseMIPS::DiskBruteForce {
             std::vector<double> queryIP_l(n_user);
             std::vector<int> rank_l(n_user);
 
+            TimeRecord heap_record;
+            double tmp_inner_product_time = 0;
+            double tmp_binary_search_time = 0;
+            double tmp_read_disk_time = 0;
+            double tmp_other_time = 0;
+
             query_record.reset();
             for (int qID = 0; qID < n_query_item; qID++) {
                 //calculate distance
@@ -139,12 +145,14 @@ namespace ReverseMIPS::DiskBruteForce {
                     queryIP_l[userID] = queryIP;
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+                tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
 
                 index_stream_.seekg(0, std::ios::beg);
                 for (int batchID = 0; batchID < n_batch; batchID++) {
                     read_disk_record_.reset();
                     index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
                     read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+                    tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
 
                     binary_search_record_.reset();
                     for (int cacheID = 0; cacheID < n_cache; cacheID++) {
@@ -153,12 +161,14 @@ namespace ReverseMIPS::DiskBruteForce {
                         rank_l[userID] = tmp_rank;
                     }
                     binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+                    tmp_binary_search_time = binary_search_record_.get_elapsed_time_second();
 
                 }
 
                 read_disk_record_.reset();
                 index_stream_.read((char *) distance_cache.data(), n_remain * n_data_item_ * sizeof(double));
                 read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+                tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
 
                 binary_search_record_.reset();
                 for (int cacheID = 0; cacheID < n_remain; cacheID++) {
@@ -167,7 +177,9 @@ namespace ReverseMIPS::DiskBruteForce {
                     rank_l[userID] = tmp_rank;
                 }
                 binary_search_time_ += binary_search_record_.get_elapsed_time_second();
+                tmp_binary_search_time = binary_search_record_.get_elapsed_time_second();
 
+                heap_record.reset();
                 std::vector<UserRankElement> &query_heap = query_heap_l[qID];
                 for (int userID = 0; userID < topk; userID++) {
                     query_heap[userID] = UserRankElement(userID, rank_l[userID], queryIP_l[userID]);
@@ -187,12 +199,19 @@ namespace ReverseMIPS::DiskBruteForce {
                         std::push_heap(query_heap.begin(), query_heap.end(), std::less<UserRankElement>());
                     }
                 }
+                tmp_other_time = heap_record.get_elapsed_time_second();
 
                 if (qID % report_query_every_ == 0) {
                     spdlog::info("top-{} retrieval query number {}%, {} s/iter Mem: {} Mb", topk,
                                  qID / (0.01 * n_query_item),
                                  query_record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                     query_record.reset();
+                    spdlog::info("tmp: inner product {}s, binary search {}s, read disk {}s, other {}s",
+                                 tmp_inner_product_time, tmp_binary_search_time, tmp_read_disk_time, tmp_other_time);
+                    tmp_inner_product_time = 0;
+                    tmp_binary_search_time = 0;
+                    tmp_read_disk_time = 0;
+                    tmp_other_time = 0;
                 }
 
             }
