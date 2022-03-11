@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "IntervalBinarySearchBound.hpp"
+#include "IntervalBinarySearchBoundMono.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
@@ -42,32 +42,29 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    IntervalBinarySearchBound::Index &ibsb = IntervalBinarySearchBound::BuildIndex(user, data_item, index_path);
+    IntervalBinarySearchBoundMono::Index &ibsbmn = IntervalBinarySearchBoundMono::BuildIndex(data_item, user,
+                                                                                             index_path);
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
+//    vector<int> topk_l{10, 20, 30, 40, 50};
     vector<int> topk_l{10};
-    vector<IntervalBinarySearchBound::RetrievalResult> retrieval_res_l;
+    vector<IntervalBinarySearchBoundMono::RetrievalResult> retrieval_res_l;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = ibsb.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = ibsbmn.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double interval_search_time = ibsb.interval_search_time_;
-        double inner_product_time = ibsb.inner_product_time_;
-        double coarse_binary_search_time = ibsb.coarse_binary_search_time_;
-        double fine_binary_search_time = ibsb.fine_binary_search_time_;
-        double read_disk_time = ibsb.read_disk_time_;
-
-        double interval_prune_ratio = ibsb.interval_prune_ratio_;
-        double binary_search_prune_ratio = ibsb.binary_search_prune_ratio_;
+        double read_disk_time = ibsbmn.read_disk_time_;
+        double inner_product_time = ibsbmn.inner_product_time_;
+        double coarse_binary_search_time = ibsbmn.coarse_binary_search_time_;
+        double fine_binary_search_time = ibsbmn.fine_binary_search_time_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
-        retrieval_res_l.emplace_back(retrieval_time, interval_search_time, inner_product_time,
-                                     coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                                     interval_prune_ratio, binary_search_prune_ratio, second_per_query, topk);
+        retrieval_res_l.emplace_back(retrieval_time, read_disk_time, inner_product_time, coarse_binary_search_time,
+                                     fine_binary_search_time, second_per_query, topk);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);

@@ -1,9 +1,11 @@
 import os
 
-method_arr = ['BinarySearchCacheBound', 'DiskBruteForce', 'MemoryBruteForce']
-dataset_arr = ['fake', 'movielens-small', 'movielens-1m']
+method_arr = ['IntervalBinarySearchBound', 'DiskBruteForce', 'MemoryBruteForce']
+# dataset_arr = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+dataset_arr = ['movielens-small']
 # dataset_arr = ['movielens-small']
-type_arr = ['index', 'IP', 'rank']
+# type_arr = ['index', 'IP', 'rank']
+type_arr = ['index', 'rank']
 
 length = len(method_arr)
 for ds in dataset_arr:

@@ -27,17 +27,20 @@ namespace ReverseMIPS::BinarySearchCacheBound {
     public:
         //unit: second
         double total_time, read_disk_time, inner_product_time, coarse_binary_search_time, fine_binary_search_time, second_per_query;
+        double prune_ratio_;
         int topk;
 
         inline RetrievalResult(double total_time, double read_disk_time, double inner_product_time,
                                double coarse_binary_search_time, double fine_binary_search_time,
-                               double second_per_query, int topk) {
+                               double second_per_query, double prune_ratio, int topk) {
             this->total_time = total_time;
             this->read_disk_time = read_disk_time;
             this->inner_product_time = inner_product_time;
             this->coarse_binary_search_time = coarse_binary_search_time;
             this->fine_binary_search_time = fine_binary_search_time;
             this->second_per_query = second_per_query;
+
+            this->prune_ratio_ = prune_ratio;
 
             this->topk = topk;
         }
@@ -67,6 +70,10 @@ namespace ReverseMIPS::BinarySearchCacheBound {
             sprintf(buff, "top%d retrieval\t\t second per query time", topk);
             std::string str6(buff);
             performance_m.emplace(str6, double2string(second_per_query));
+
+            sprintf(buff, "top%d retrieval\t\t prune ratio", topk);
+            std::string str7(buff);
+            performance_m.emplace(str7, double2string(prune_ratio_));
         }
 
         [[nodiscard]] std::string ToString() const {
@@ -88,6 +95,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
             inner_product_time_ = 0;
             coarse_binary_search_time_ = 0;
             fine_binary_search_time_ = 0;
+            prune_ratio_ = 0;
         }
 
     public:
@@ -103,6 +111,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
         int vec_dim_, n_data_item_, n_user_;
         double read_disk_time_, inner_product_time_, coarse_binary_search_time_, fine_binary_search_time_;
         TimeRecord read_disk_record_, inner_product_record_, coarse_binary_search_record_, fine_binary_search_record_;
+        double prune_ratio_;
 
         Index(const std::vector<double> &bound_distance_table,
               const std::vector<int> &known_rank_idx_l,
@@ -201,11 +210,10 @@ namespace ReverseMIPS::BinarySearchCacheBound {
 
                 assert(max_heap.size() >= topk);
 
-                //read from disk
-
-                // store the data of fine binary search
-                read_disk_record_.reset();
                 int max_heap_size = max_heap.size();
+                prune_ratio_ = 1.0 * (n_user_ - max_heap_size) / n_user_;
+                //read from disk
+                read_disk_record_.reset();
                 std::vector<int> read_count_l(max_heap_size);
                 std::vector<std::vector<double>> distance_cache(max_heap_size, std::vector<double>(n_max_read_));
                 for (int candID = 0; candID < max_heap_size; candID++) {
@@ -303,6 +311,7 @@ namespace ReverseMIPS::BinarySearchCacheBound {
         const int vec_dim = data_item.vec_dim_;
         const int n_batch = user.n_vector_ / write_every_;
         const int n_remain = user.n_vector_ % write_every_;
+        user.vectorNormalize();
 
         //隔着多少个建模
         const int cache_bound_every = 10;

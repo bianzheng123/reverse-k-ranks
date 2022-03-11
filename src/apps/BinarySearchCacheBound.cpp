@@ -59,10 +59,11 @@ int main(int argc, char **argv) {
         double coarse_binary_search_time = bscb.coarse_binary_search_time_;
         double fine_binary_search_time = bscb.fine_binary_search_time_;
         double second_per_query = retrieval_time / n_query_item;
+        double prune_ratio = bscb.prune_ratio_;
 
         result_rank_l.emplace_back(result_rk);
         retrieval_res_l.emplace_back(retrieval_time, read_disk_time, inner_product_time, coarse_binary_search_time,
-                                     fine_binary_search_time, second_per_query, topk);
+                                     fine_binary_search_time, second_per_query, prune_ratio, topk);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);

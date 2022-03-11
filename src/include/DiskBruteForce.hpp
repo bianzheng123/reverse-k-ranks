@@ -257,6 +257,7 @@ namespace ReverseMIPS::DiskBruteForce {
         const int vec_dim = data_item.vec_dim_;
         const int n_batch = user.n_vector_ / write_every_;
         const int n_remain = user.n_vector_ % write_every_;
+        user.vectorNormalize();
 
         TimeRecord batch_report_record;
         batch_report_record.reset();
@@ -291,7 +292,6 @@ namespace ReverseMIPS::DiskBruteForce {
 
             std::sort(distance_cache.begin() + cacheID * n_data_item,
                       distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater<double>());
-
         }
 
         out.write((char *) distance_cache.data(),

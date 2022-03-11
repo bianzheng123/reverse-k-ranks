@@ -5,16 +5,17 @@
 ./bscb fake
 ./ibsb fake
 
-
 ./bfdi movielens-small /home/zhengbian/Dataset/ReverseMIPS
 ./bscb movielens-small /home/zhengbian/Dataset/ReverseMIPS
 ./bfmi movielens-small /home/zhengbian/Dataset/ReverseMIPS
 
 ./bfdi movielens-small
-./bscb movielens-small
+./bfmi movielens-small
+./ibsb movielens-small
 
 ./bfdi movielens-1m
-./bscb movielens-1m
+./bfmi movielens-1m
+./ibsb movielens-1m
 
 ./bfdi movielens-10m
 

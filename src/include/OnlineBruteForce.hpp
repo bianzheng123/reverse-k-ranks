@@ -56,6 +56,7 @@ namespace ReverseMIPS::OnlineBruteForce {
             this->data_item_ = std::move(data_item);
             vec_dim_ = user.vec_dim_;
             this->user_ = std::move(user);
+            this->user_.vectorNormalize();
         }
 
         inline ~Index() {}
