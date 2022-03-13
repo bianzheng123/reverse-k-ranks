@@ -111,7 +111,7 @@ namespace ReverseMIPS {
 
         void SortItemAndCountSize() {
             //the update function should be stopped
-            //TODO check whether it is all updated
+            //TODO.txt check whether it is all updated
             std::sort(item_list_.begin(), item_list_.end(), std::less<ItemInfo>());
 
 //            for(int i=0;i<n_data_item_;i++){

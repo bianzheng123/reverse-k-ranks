@@ -24,15 +24,13 @@ namespace ReverseMIPS::SVD {
 
     }
 
-    int SVD(VectorMatrix &user, VectorMatrix &data_item, VectorMatrix &transfer_item, std::vector<double> &eigen_l,
-            const double SIGMA) {
+    int SVD(VectorMatrix &user, VectorMatrix &data_item, VectorMatrix &transfer_item, const double &SIGMA) {
         const int vec_dim = user.vec_dim_; // p->colNum, m
         const int n_user = user.n_vector_; // p->rowNum, n
         const int n_data_item = data_item.n_vector_;
 
         std::unique_ptr<double[]> transfer_ptr = std::make_unique<double[]>(vec_dim * vec_dim);
         transfer_item.init(transfer_ptr, vec_dim, vec_dim);
-        eigen_l.resize(vec_dim);
 
         //Q is item, since a new query would be added
         //U is user, since user matrix would not changed
@@ -43,7 +41,7 @@ namespace ReverseMIPS::SVD {
         arma::mat V;
 
         // see: http://arma.sourceforge.net/docs.html#svd_econ
-//	svd_econ(U_t, s, V, P_t, "both", "std");
+        //	svd_econ(U_t, s, V, P_t, "both", "std");
         arma::svd(U_t, s, V, P_t, "std"); // P = U * sigma * V_t
 
         U_t = U_t.t();
@@ -60,10 +58,6 @@ namespace ReverseMIPS::SVD {
             for (int colIndex = 0; colIndex < vec_dim; colIndex++) {
                 user.getRawData()[rowIndex * vec_dim + colIndex] = V(rowIndex, colIndex);
             }
-        }
-
-        for (int dim = 0; dim < vec_dim; dim++) {
-            eigen_l[dim] = s[dim];
         }
 
         for (int itemID = 0; itemID < n_data_item; itemID++) {

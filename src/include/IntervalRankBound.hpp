@@ -27,7 +27,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::IntervalBinarySearchBound {
+namespace ReverseMIPS::IntervalRankBound {
 
     class RetrievalResult {
     public:
@@ -118,7 +118,7 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                                            [](const double &arrIP, double queryIP) {
                                                return arrIP > queryIP;
                                            });
-            if (userID_ == 609 && queryID == 987) {
+            if (userID_ == 964 && queryID == 0) {
                 printf("count rank: read_count %d, base_rank %d, queryIP %.3f\n", read_count_, base_rank_, queryIP_);
                 for (int i = 0; i < read_count_; i++) {
                     printf("%.3f ", disk_cache_[i]);
@@ -155,6 +155,10 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
         std::vector<double> interval_dist_l_;
         std::vector<std::pair<double, double>> user_ip_bound_l_; // first is lower bound, second is upper bound
         int n_interval_;
+        //interval bound (SVD)
+        std::vector<double> user_part_norm_l_;
+        VectorMatrix transfer_item_;
+        int check_dim_, remain_dim_;
 
         //for rank search, store in memory
         std::vector<double> bound_distance_table_; // n_user * n_cache_rank_
@@ -175,10 +179,12 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                 //interval search
                 const std::vector<int> &interval_table, const std::vector<double> &interval_dist_l,
                 const std::vector<std::pair<double, double>> &user_ip_bound_l,
-                const int n_interval,
+                const int &n_interval,
+                //interval search bound
+                std::vector<double> &user_part_norm_l, VectorMatrix &transfer_item, const int &check_dim,
                 // rank search
                 const std::vector<double> &bound_distance_table, const std::vector<int> &known_rank_idx_l,
-                const int n_max_disk_read, const int cache_bound_every,
+                const int &n_max_disk_read, const int &cache_bound_every,
                 //general retrieval
                 const char *index_path) {
             //interval search
@@ -186,6 +192,10 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
             this->interval_dist_l_ = interval_dist_l;
             this->user_ip_bound_l_ = user_ip_bound_l;
             this->n_interval_ = n_interval;
+            //interval search bound
+            this->user_part_norm_l_ = user_part_norm_l;
+            this->transfer_item_ = std::move(transfer_item);
+            this->check_dim_ = check_dim;
             //rank search
             this->bound_distance_table_ = bound_distance_table;
             this->known_rank_idx_l_ = known_rank_idx_l;
@@ -204,8 +214,11 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
             this->user_int_ = std::move(user_int);
             this->n_data_item_ = n_data_item;
             assert(this->user_int_.n_vector_ == this->user_double_.n_vector_);
-            assert(this->user_int_.vec_dim_ == this->user_double_.vec_dim_);
+            assert(0 < this->user_int_.vec_dim_ && this->user_int_.vec_dim_ <= this->user_double_.vec_dim_);
             assert(interval_dist_l_.size() == n_user_);
+            assert(this->transfer_item_.n_vector_ == this->vec_dim_);
+            assert(this->transfer_item_.vec_dim_ == this->vec_dim_);
+            this->remain_dim_ = vec_dim_ - check_dim_;
         }
 
         std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int topk) override {
@@ -227,42 +240,54 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
             }
 
             // store queryIP
-            std::vector<int> query_int(vec_dim_);
-            std::vector<double> query_double(vec_dim_);
+            std::vector<int> query_int(vec_dim_ - check_dim_);
             std::vector<RankBoundElement> rank_bound_l(n_user_);
-            std::vector<int> queryIP_int_l(n_user_);
             std::vector<double> queryIP_l(n_user_);
             std::vector<char> prune_l(n_user_, 0);
-
+            std::vector<std::pair<double, double>> queryIP_bound_l(n_user_);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-                ScaleIntegerPrune::ConvertQuery(query_item.getVector(queryID), vec_dim_, query_double, query_int);
-                assert(query_int.size() == vec_dim_);
+                double *query_double_vecs = query_item.getVector(queryID);
+                ConveryQuery(query_double_vecs, query_int);
+                assert(query_int.size() == remain_dim_);
 
-                //calculate integer IP bound
+                //calculate the interval search bound, by computing part dimension, integer and cauchy inequality
                 int *query_int_vecs = query_int.data();
-                double *query_double_vecs = query_double.data();
+                double *query_remain_vecs = query_double_vecs + check_dim_;
+                double query_part_norm = std::sqrt(InnerProduct(query_remain_vecs, query_remain_vecs, remain_dim_));
                 inner_product_record_.reset();
                 for (int userID = 0; userID < n_user_; userID++) {
+                    double *user_double_vecs = user_double_.getVector(userID);
+                    double partIP = InnerProduct(query_double_vecs, user_double_vecs, check_dim_);
+                    queryIP_l[userID] = partIP;
                     int *user_int_vecs = user_int_.getVector(userID);
-                    std::tuple<int, int, int> bound_tuple = InnerProductBound(query_int_vecs, user_int_vecs, vec_dim_);
-                    queryIP_int_l[userID] = std::get<2>(bound_tuple);
-                    rank_bound_l[userID] = RankBoundElement(userID, bound_tuple);
+                    std::pair<int, int> bound_int_pair = InnerProductBound(query_int_vecs, user_int_vecs,
+                                                                           remain_dim_);
+                    double part_norm = query_part_norm * user_part_norm_l_[userID];
+                    std::pair<double, double> bound_double_pair = std::make_pair(-part_norm, part_norm);
+                    if (userID == 964 && queryID == 0) {
+                        printf("userID %d, int lowerIP %.3f, double lowerIP %.3f, int upperIP %.3f, double upperIP %.3f\n",
+                               userID, bound_int_pair.first + partIP, bound_double_pair.first + partIP,
+                               bound_int_pair.second + partIP, bound_double_pair.second + partIP);
+                    }
+                    bound_double_pair.first =
+                            std::max(bound_double_pair.first, (double) bound_int_pair.first) + partIP;
+                    bound_double_pair.second =
+                            std::min(bound_double_pair.second, (double) bound_int_pair.second) + partIP;
+                    queryIP_bound_l[userID] = bound_double_pair;
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
                 interval_search_record_.reset();
                 //interval search
                 for (int userID = 0; userID < n_user_; userID++) {
-                    int &lowerIP = rank_bound_l[userID].lower_rank_;
-                    int &upperIP = rank_bound_l[userID].upper_rank_;
-                    if (userID == 609 && queryID == 987) {
-                        printf("userID %d, lowerIP: %d, upperIP %d\n", userID, lowerIP, upperIP);
+                    std::pair<double, double> IP_bound = queryIP_bound_l[userID];
+                    if (userID == 964 && queryID == 0) {
+                        printf("userID %d, lowerIP: %.3f, upperIP %.3f\n", userID, IP_bound.first, IP_bound.second);
                         printf("global %.3f %.3f\n", user_ip_bound_l_[userID].first, user_ip_bound_l_[userID].second);
                     }
-                    std::pair<int, int> pair = IntervalSearch(lowerIP, upperIP, userID, queryID);
-                    lowerIP = pair.first;
-                    upperIP = pair.second;
-                    if (userID == 609 && queryID == 987) {
+                    std::pair<int, int> pair = IntervalSearch(IP_bound, userID, queryID);
+                    rank_bound_l[userID] = RankBoundElement(userID, pair);
+                    if (userID == 964 && queryID == 0) {
                         std::cout << "after interval search: " << rank_bound_l[userID].ToString() << std::endl;
                     }
                 }
@@ -279,8 +304,9 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                 inner_product_record_.reset();
                 for (int candID = 0; candID < n_rank_bound; candID++) {
                     int userID = rank_bound_l[candID].userID_;
-                    queryIP_l[userID] = InnerProduct(user_double_.getVector(userID), query_double_vecs, vec_dim_);
-                    if (userID == 609 && queryID == 987) {
+                    queryIP_l[userID] += InnerProduct(user_double_.getVector(userID) + vec_dim_, query_remain_vecs,
+                                                      remain_dim_);
+                    if (userID == 964 && queryID == 0) {
                         printf("userID %d, actual queryIP %.3f\n", userID, queryIP_l[userID]);
                     }
                 }
@@ -305,7 +331,7 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                     if (candID >= topk && global_lower_rank < upper_rank) {
                         prune_l[candID] = 1; //true
 
-                        if (userID == 609 && queryID == 987) {
+                        if (userID == 964 && queryID == 0) {
                             printf("global lower rank %d\n", global_lower_rank);
                             std::cout << "pruned coarse binary search:" << rank_bound_l[candID].ToString() << std::endl;
                         }
@@ -314,8 +340,8 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                     CoarseBinarySearch(queryIP, userID, lower_rank, upper_rank, queryID);
                 }
                 PruneCandidateByBound(rank_bound_l, n_rank_bound, topk, n_remain, prune_l.data(), queryID, true);
-                if (queryID == 987) {
-                    printf("is pruned by coarse binary search userID %d, is pruned %d\n", 609, prune_l[609]);
+                if (queryID == 0) {
+                    printf("is pruned by coarse binary search userID %d, is pruned %d\n", 964, prune_l[964]);
                 }
                 int origin_size = n_rank_bound;
                 n_rank_bound = topk + n_remain;
@@ -343,7 +369,7 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                     bound_cache_l[candID].userID_ = userID;
                     bound_cache_l[candID].queryIP_ = queryIP;
 
-                    if (userID == 609 && queryID == 987) {
+                    if (userID == 964 && queryID == 0) {
                         printf("read disk: start %d, end %d\n", start_idx, end_idx);
                     }
                 }
@@ -359,7 +385,7 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                     int userID = element.userID_;
                     double queryIP = element.queryIP_;
                     max_heap.emplace_back(userID, rank, queryIP);
-                    if (userID == 609 && queryID == 987) {
+                    if (userID == 964 && queryID == 0) {
                         printf("final rank userID %d, rank %d\n", userID, rank);
                     }
                 }
@@ -370,6 +396,11 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
             }
 
             return query_heap_l;
+        }
+
+        void ConveryQuery(double *query_vecs, std::vector<int> &query_int) const {
+            SVD::TransferItem(query_vecs, transfer_item_, vec_dim_);
+            ScaleIntegerPrune::ConvertQuery(query_vecs, vec_dim_, query_int, check_dim_);
         }
 
         //return the index of the bucket it belongs to
@@ -393,6 +424,11 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
             int tmp_rank_lb = known_rank_idx_l_[bucket_idx];
             int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
 
+            if (queryID == 0 && userID == 964) {
+                printf("coarse binary search before convert userID %d, bucket_ub %d, bucket_lb %d\n", userID, bucket_ub, bucket_lb);
+                printf("iter_begin %.3f\n", *iter_begin);
+            }
+
             if (lb_ptr == iter_end) {
                 rank_ub = tmp_rank_ub;
             } else if (lb_ptr == iter_begin) {
@@ -402,19 +438,19 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                 rank_ub = tmp_rank_ub;
             }
 
-            if (queryID == 987 && userID == 609) {
+            if (queryID == 0 && userID == 964) {
                 printf("coarse binary search userID %d, bucket_ub %d, bucket_lb %d\n", userID, bucket_ub, bucket_lb);
                 printf("coarse binary search userID %d, rank_ub %d, rank_lb %d\n", userID, rank_ub, rank_lb);
                 printf("coarse binary search offset %d\n", (int) (lb_ptr - iter_begin));
             }
         }
 
-        std::pair<int, int> IntervalSearch(const int &lowerIP, const int &upperIP, const int &userID, int queryID) {
+        std::pair<int, int> IntervalSearch(const std::pair<double, double> &IPbound, const int &userID, int queryID) {
             std::pair<double, double> &ip_bound_pair = user_ip_bound_l_[userID];
             double itv_dist = interval_dist_l_[userID];
             //for interval id, the higher rank value means the lower queryiP
-            int itv_lb_idx = std::ceil((ip_bound_pair.second - lowerIP) / itv_dist);
-            int itv_ub_idx = (int) std::floor((ip_bound_pair.second - upperIP) / itv_dist) - 1;
+            int itv_lb_idx = std::ceil((ip_bound_pair.second - IPbound.first) / itv_dist);
+            int itv_ub_idx = (int) std::floor((ip_bound_pair.second - IPbound.second) / itv_dist) - 1;
             assert(itv_ub_idx <= itv_lb_idx);
 
             if (itv_ub_idx <= -1) {
@@ -431,7 +467,7 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
             int rank_lb = itv_lb_idx == -1 ? 0 : rank_ptr[itv_lb_idx];
             int rank_ub = itv_ub_idx == -1 ? 0 : rank_ptr[itv_ub_idx];
 
-            if (userID == 609 && queryID == 987) {
+            if (userID == 964 && queryID == 0) {
                 printf("interval search, rank_ub %d, rank_lb %d\n", rank_ub, rank_lb);
                 printf("interval search, itv_ub_idx %d, itv_lb_idx %d\n", itv_ub_idx, itv_lb_idx);
             }
@@ -441,11 +477,18 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
 
     };
 
-    void TransformUserItem(VectorMatrix &user, VectorMatrix &data_item, IntVectorMatrix &user_int) {
+    void TransformUserItem(VectorMatrix &user, VectorMatrix &data_item, IntVectorMatrix &user_int,
+                           VectorMatrix &transfer_item, int &check_dim) {
         //user normalization
         user.vectorNormalize();
+
+        const double SIGMA = 0.7;
+        check_dim = SVD::SVD(user, data_item, transfer_item, SIGMA);
+
         //monotonicity  reduction
-        ScaleIntegerPrune::ScaleIntegerPrune(user, data_item, user_int);
+        ScaleIntegerPrune::ScaleIntegerPrune(user, data_item, user_int, check_dim);
+
+//        ScaleIntegerPrune::ScaleTransferItem(transfer_item);
     }
 
     const int write_every_ = 100;
@@ -458,7 +501,10 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
 
     Index &BuildIndex(VectorMatrix &user, VectorMatrix &data_item, const char *index_path) {
         IntVectorMatrix user_int;
-        TransformUserItem(user, data_item, user_int);
+        VectorMatrix transfer_item;
+        int check_dim;
+        TransformUserItem(user, data_item, user_int, transfer_item, check_dim);
+        std::vector<double> user_part_norm_l(user.n_vector_);
 
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
@@ -481,7 +527,7 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
              known_rank_idx < n_data_item; known_rank_idx += cache_bound_every) {
             known_rank_idx_l.emplace_back(known_rank_idx);
         }
-        spdlog::info("binary search bound: cache_bound_every {}, n_cache_rank {}", cache_bound_every, n_cache_rank);
+        spdlog::info("rank bound: cache_bound_every {}, n_cache_rank {}", cache_bound_every, n_cache_rank);
 
         assert(known_rank_idx_l[0] == known_rank_idx_l[1] - (known_rank_idx_l[0] + 1));
         int n_max_disk_read = std::max(known_rank_idx_l[0], n_data_item - (known_rank_idx_l[n_cache_rank - 1] + 1));
@@ -503,7 +549,7 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
         TimeRecord batch_report_record;
         batch_report_record.reset();
         for (int i = 0; i < n_batch; i++) {
-//#pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, bound_distance_table, known_rank_idx_l, bound_l, interval_table, interval_dist_l, n_interval) shared(n_cache_rank, write_every_, n_data_item, vec_dim)
+#pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, bound_distance_table, known_rank_idx_l, bound_l, interval_table, interval_dist_l, user_part_norm_l, check_dim) shared(n_cache_rank, write_every_, n_data_item, vec_dim, n_interval)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -532,6 +578,10 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                     interval_ptr[intervalID] += interval_ptr[intervalID - 1];
                 }
                 assert(interval_ptr[n_interval - 1] == n_data_item);
+                //interval search bound
+                double norm2IP = InnerProduct(user.getVector(userID) + check_dim,
+                                              user.getVector(userID) + check_dim, vec_dim - check_dim);
+                user_part_norm_l[userID] = std::sqrt(norm2IP);
 
                 //rank search
                 auto array_begin = write_distance_cache.begin() + cacheID * n_data_item;
@@ -580,8 +630,12 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
                 interval_ptr[intervalID] += interval_ptr[intervalID - 1];
             }
             assert(interval_ptr[n_interval - 1] == n_data_item);
+            //interval search bound
+            double norm2IP = InnerProduct(user.getVector(userID) + check_dim,
+                                          user.getVector(userID) + check_dim, vec_dim - check_dim);
+            user_part_norm_l[userID] = std::sqrt(norm2IP);
 
-            if (userID == 609) {
+            if (userID == 964) {
                 printf("build index lower bound %.3f, upper bound %.3f, interval distance %.3f\n",
                        lower_bound, upper_bound, interval_distance);
                 for (int j = 150; j < 200; j++) {
@@ -607,6 +661,8 @@ namespace ReverseMIPS::IntervalBinarySearchBound {
         static Index index(
                 //interval search
                 interval_table, interval_dist_l, bound_l, n_interval,
+                //interval search bound
+                user_part_norm_l, transfer_item, check_dim,
                 //rank search
                 bound_distance_table, known_rank_idx_l, n_max_disk_read, cache_bound_every,
                 //general retrieval

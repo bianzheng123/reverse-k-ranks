@@ -19,12 +19,6 @@ namespace ReverseMIPS {
             this->upper_rank_ = bound_pair.second;
         }
 
-        RankBoundElement(const int &userID, const std::tuple<int, int, int> &bound_tuple) {
-            this->userID_ = userID;
-            this->lower_rank_ = std::get<0>(bound_tuple);
-            this->upper_rank_ = std::get<1>(bound_tuple);
-        }
-
         RankBoundElement() {
             userID_ = -1;
             upper_rank_ = -1;

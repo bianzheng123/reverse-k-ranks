@@ -10,13 +10,13 @@ def run_attribution():
 
 
 def run():
-    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    dataset_l = ['fake', 'fakebig']
     # dataset_l = ['movielens-small', 'movielens-1m']
     method_m = {
         'DiskBruteForce': 'bfdi',
         'MemoryBruteForce': 'bfmi',
-        # 'BinarySearchCacheBound': 'bscb',
-        'IntervalBinarySearchBound': 'ibsb'
+        'IntervalRankBound': 'irb'
     }
     for ds in dataset_l:
         for method in method_m:
@@ -40,5 +40,11 @@ def run():
             os.system(cmd)
 
 
+def run_bound_selection():
+    arr = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    for ds in arr:
+        os.system("cd build/attribution && ./bs %s" % ds)
+
+
 if __name__ == '__main__':
-    run()
+    run_bound_selection()

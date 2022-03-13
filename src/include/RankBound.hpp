@@ -2,8 +2,8 @@
 // Created by BianZheng on 2022/2/25.
 //
 
-#ifndef REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
-#define REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
+#ifndef REVERSE_KRANKS_RANKBOUND_HPP
+#define REVERSE_KRANKS_RANKBOUND_HPP
 
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
@@ -21,7 +21,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::BinarySearchCacheBound {
+namespace ReverseMIPS::RankBound {
 
     class RetrievalResult {
     public:
@@ -386,4 +386,4 @@ namespace ReverseMIPS::BinarySearchCacheBound {
 
 }
 
-#endif //REVERSE_KRANKS_BINARYSEARCHCACHEBOUND_HPP
+#endif //REVERSE_KRANKS_RANKBOUND_HPP

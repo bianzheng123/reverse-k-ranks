@@ -25,12 +25,12 @@ namespace ReverseMIPS {
 
         for (int candID = topk; candID < size; candID++) {
             std::pair<int, int> rank_bound = rank_bound_l[candID].rank_pair();
-            if (test && queryID == 987 && rank_bound_l[candID].userID_ == 609) {
+            if (test && queryID == 35 && rank_bound_l[candID].userID_ == 651) {
                 printf("in prune method rank_bound_l\n");
                 std::cout << "\t" << "topk_ele " << topk_ele.ToString() << std::endl;
                 std::cout << "\t" << "this_rank_bound_l " << rank_bound_l[candID].ToString() << std::endl;
             }
-            if (test && queryID == 987 && topk_ele.userID_ == 609) {
+            if (test && queryID == 35 && topk_ele.userID_ == 651) {
                 printf("in prune method topk_ele\n");
                 std::cout << "\t" << "topk_ele " << topk_ele.ToString() << std::endl;
                 std::cout << "\t" << "this_rank_bound_l " << rank_bound_l[candID].ToString() << std::endl;

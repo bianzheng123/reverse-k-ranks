@@ -24,8 +24,8 @@ find_package(Armadillo)
 
 find_package(OpenMP)
 
-set(BUILD_TEST OFF)
-set(BUILD_FINISH ON)
+set(BUILD_TEST ON)
+set(BUILD_FINISH OFF)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
@@ -46,20 +46,22 @@ if (BUILD_FINISH)
     target_include_directories(bfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
     target_link_libraries(bfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    add_executable(bscb src/apps/BinarySearchCacheBound.cpp)
-    target_include_directories(bscb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(bscb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    add_executable(rb src/apps/RankBound.cpp)
+    target_include_directories(rb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+    target_link_libraries(rb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
     add_executable(bbfdi src/apps/BatchDiskBruteForce.cpp)
     target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
     target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 endif ()
 
-add_executable(ibsb src/apps/IntervalBinarySearchBound.cpp)
-target_include_directories(ibsb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-target_link_libraries(ibsb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+add_executable(irb src/apps/IntervalRankBound.cpp)
+target_include_directories(irb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
 add_executable(t1 test.cpp)
+target_include_directories(t1 PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
+target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
 if (BUILD_TEST)
     add_subdirectory(attribution)

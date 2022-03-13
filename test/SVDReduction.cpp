@@ -16,7 +16,7 @@ int TransformUserItem(VectorMatrix &user, VectorMatrix &data_item, VectorMatrix 
                       std::vector<double> &eigen_l) {
 
     //SVD
-    int check_dim = SVD::SVD(user, data_item, transfer_item, eigen_l, SIGMA);
+    int check_dim = SVD::SVD(user, data_item, transfer_item, SIGMA);
 
     //monotonicity  reduction
     MonotonicityReduction::ConvertUserItem(user, data_item, eigen_l);

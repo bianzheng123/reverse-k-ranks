@@ -27,6 +27,10 @@ namespace ReverseMIPS {
             return rawData_.get() + vec_idx * vec_dim_;
         }
 
+        [[nodiscard]] double *getVector(const int vec_idx, const int offset) const {
+            return rawData_.get() + vec_idx * vec_dim_ + offset;
+        }
+
         void init(std::unique_ptr<double[]> &rawData, const int n_vector, const int vec_dim) {
             this->rawData_ = std::move(rawData);
             this->n_vector_ = n_vector;
