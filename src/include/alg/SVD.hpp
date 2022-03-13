@@ -42,7 +42,7 @@ namespace ReverseMIPS::SVD {
 
         // see: http://arma.sourceforge.net/docs.html#svd_econ
         //	svd_econ(U_t, s, V, P_t, "both", "std");
-        arma::svd(U_t, s, V, P_t, "std"); // P = U * sigma * V_t
+        arma::svd_econ(U_t, s, V, P_t, "both","std"); // P = U * sigma * V_t
 
         U_t = U_t.t();
 

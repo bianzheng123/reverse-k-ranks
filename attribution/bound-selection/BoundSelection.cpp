@@ -514,37 +514,59 @@ int main(int argc, char **argv) {
     }
 
     std::vector<Config> config_l;
-    std::vector<double> lb_l;
-    std::vector<double> ub_l;
-    double time_used = FullNorm(user, query_item, lb_l, ub_l, check_dim);
-    std::pair<double, double> tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
-    printf("finish evaluate %s\n", "FullNorm");
-    config_l.emplace_back(time_used, tightness_pair, "FullNorm");
+    {
+        std::vector<double> lb_l;
+        std::vector<double> ub_l;
+        double time_used = FullNorm(user, query_item, lb_l, ub_l, check_dim);
+        std::pair<double, double> tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
+        printf("finish evaluate %s\n", "FullNorm");
+        config_l.emplace_back(time_used, tightness_pair, "FullNorm");
+    }
 
-    time_used = PartIntPartNorm(user, query_item, lb_l, ub_l, check_dim);
-    tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
-    printf("finish evaluate %s\n", "PartIntPartNorm");
-    config_l.emplace_back(time_used, tightness_pair, "PartIntPartNorm");
+    {
+        std::vector<double> lb_l;
+        std::vector<double> ub_l;
+        double time_used = PartIntPartNorm(user, query_item, lb_l, ub_l, check_dim);
+        std::pair<double, double> tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
+        printf("finish evaluate %s\n", "PartIntPartNorm");
+        config_l.emplace_back(time_used, tightness_pair, "PartIntPartNorm");
+    }
 
-    time_used = FullInt(user, query_item, lb_l, ub_l, check_dim);
-    tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
-    printf("finish evaluate %s\n", "FullInt");
-    config_l.emplace_back(time_used, tightness_pair, "FullInt");
+    {
+        std::vector<double> lb_l;
+        std::vector<double> ub_l;
+        double time_used = FullInt(user, query_item, lb_l, ub_l, check_dim);
+        std::pair<double, double> tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
+        printf("finish evaluate %s\n", "FullInt");
+        config_l.emplace_back(time_used, tightness_pair, "FullInt");
+    }
 
-    time_used = PartDimPartNorm(user, query_item, lb_l, ub_l, check_dim);
-    tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
-    printf("finish evaluate %s\n", "PartDimPartNorm");
-    config_l.emplace_back(time_used, tightness_pair, "PartDimPartNorm");
+    {
+        std::vector<double> lb_l;
+        std::vector<double> ub_l;
+        double time_used = PartDimPartNorm(user, query_item, lb_l, ub_l, check_dim);
+        std::pair<double, double> tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
+        printf("finish evaluate %s\n", "PartDimPartNorm");
+        config_l.emplace_back(time_used, tightness_pair, "PartDimPartNorm");
+    }
 
-    time_used = PartDimPartInt(user, query_item, lb_l, ub_l, check_dim);
-    tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
-    printf("finish evaluate %s\n", "PartDimPartInt");
-    config_l.emplace_back(time_used, tightness_pair, "PartDimPartInt");
+    {
+        std::vector<double> lb_l;
+        std::vector<double> ub_l;
+        double time_used = PartDimPartInt(user, query_item, lb_l, ub_l, check_dim);
+        std::pair<double, double> tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
+        printf("finish evaluate %s\n", "PartDimPartInt");
+        config_l.emplace_back(time_used, tightness_pair, "PartDimPartInt");
+    }
 
-    time_used = FullDim(user, query_item, lb_l, ub_l, check_dim);
-    tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
-    printf("finish evaluate %s\n", "FullDim");
-    config_l.emplace_back(time_used, tightness_pair, "FullDim");
+    {
+        std::vector<double> lb_l;
+        std::vector<double> ub_l;
+        double time_used = FullDim(user, query_item, lb_l, ub_l, check_dim);
+        std::pair<double, double> tightness_pair = Tightness(exactIP_l, lb_l, ub_l);
+        printf("finish evaluate %s\n", "FullDim");
+        config_l.emplace_back(time_used, tightness_pair, "FullDim");
+    }
 
 
     AttributionWrite(config_l, dataset_name, "FullDimension");
