@@ -30,5 +30,11 @@ def run():
             os.system(cmd)
 
 
+def run_bound_selection():
+    arr = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    for ds in arr:
+        os.system("cd build/attribution && ./bs %s /run/media/hdd/ReverseMIPS" % ds)
+
+
 if __name__ == '__main__':
     run_attribution()
