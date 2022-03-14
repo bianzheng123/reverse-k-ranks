@@ -413,13 +413,14 @@ namespace ReverseMIPS {
                 query_int_ptr[dim] = std::floor(tmp_query_vecs[dim] * qratio);
                 query_int_sum += std::abs(query_int_ptr[dim]);
             }
+            int *query_int_vecs = query_int_ptr.get();
 
             for (int userID = 0; userID < n_user; userID++) {
                 double *user_vecs = user.getVector(userID);
                 double partIP = InnerProduct(user_vecs, query_vecs, check_dim);
 
                 int *user_int_vecs = user_int_ptr.get() + userID * remain_dim;
-                int intIP = InnerProduct(user_int_vecs, query_int_ptr.get(), remain_dim);
+                int intIP = InnerProduct(user_int_vecs, query_int_vecs, remain_dim);
                 int int_otherIP = user_int_sum_ptr[userID] + query_int_sum;
                 int lb_int_part = intIP - int_otherIP;
                 int ub_int_part = intIP + int_otherIP;
@@ -427,9 +428,9 @@ namespace ReverseMIPS {
                 double lb_part = lb_int_part * convert_coe;
                 double ub_part = ub_int_part * convert_coe;
 
-                lb_l[qID * n_user + userID] = partIP + lb_part;
-                ub_l[qID * n_user + userID] = partIP + ub_part;
-
+                int arr_offset = qID * n_user + userID;
+                lb_l[arr_offset] = partIP + lb_part;
+                ub_l[arr_offset] = partIP + ub_part;
             }
         }
 
@@ -569,6 +570,6 @@ int main(int argc, char **argv) {
     }
 
 
-    AttributionWrite(config_l, dataset_name, "FullDimension");
+    AttributionWrite(config_l, dataset_name, "BoundSelection");
     return 0;
 }

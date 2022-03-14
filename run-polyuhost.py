@@ -31,7 +31,7 @@ def run():
 
 
 def run_bound_selection():
-    arr = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    arr = ['movielens-small', 'movielens-27m']
     for ds in arr:
         os.system("cd build/attribution && ./bs %s /run/media/hdd/ReverseMIPS" % ds)
 
@@ -45,4 +45,5 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
+    run_bound_selection()
     run_rankbound_sample_rate()

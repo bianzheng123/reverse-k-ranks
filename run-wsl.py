@@ -91,4 +91,5 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    run_rankbound_sample_rate()
+    run_bound_selection()
+    # run_rankbound_sample_rate()
