@@ -36,5 +36,13 @@ def run_bound_selection():
         os.system("cd build/attribution && ./bs %s /run/media/hdd/ReverseMIPS" % ds)
 
 
+def run_rankbound_sample_rate():
+    dataset_name_l = ['movielens-27m']
+    cache_bound_every_l = [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+    for ds in dataset_name_l:
+        for para in cache_bound_every_l:
+            os.system('cd build && ./rb --dataset_name {} --cache_bound_every {}'.format(ds, para))
+
+
 if __name__ == '__main__':
-    run_attribution()
+    run_rankbound_sample_rate()
