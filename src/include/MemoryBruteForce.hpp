@@ -12,50 +12,34 @@
 
 namespace ReverseMIPS::MemoryBruteForce {
 
-    class RetrievalResult {
+    class RetrievalResult : public RetrievalResultBase {
     public:
         //unit: second
-        double total_time, inner_product_time, binary_search_time, second_per_query;
-        int topk;
+        //double total_time, inner_product_time, binary_search_time
+        //double second_per_query;
+        //int topk;
 
-        inline RetrievalResult(double total_time, double inner_product_time,
-                               double binary_search_time, double second_per_query, int topk) {
-            this->total_time = total_time;
-            this->inner_product_time = inner_product_time;
-            this->binary_search_time = binary_search_time;
-            this->second_per_query = second_per_query;
+        inline RetrievalResult() = default;
 
-            this->topk = topk;
+        void AddPreprocess(double build_index_time) {
+            char buff[1024];
+            sprintf(buff, "build index time %.3f", build_index_time);
+            std::string str(buff);
+            this->config_l.emplace_back(str);
         }
 
-        void AddMap(std::map<std::string, std::string> &performance_m) {
-            char buff[256];
-            sprintf(buff, "top%d total retrieval time", topk);
-            std::string str1(buff);
-            performance_m.emplace(str1, double2string(total_time));
+        std::string AddResultConfig(const int &topk,
+                                    const double &total_time, const double &inner_product_time,
+                                    const double &binary_search_time, const double &second_per_query) {
+            char buff[1024];
 
-            sprintf(buff, "top%d retrieval inner product time", topk);
-            std::string str2(buff);
-            performance_m.emplace(str2, double2string(inner_product_time));
-
-            sprintf(buff, "top%d retrieval binary search time", topk);
-            std::string str3(buff);
-            performance_m.emplace(str3, double2string(binary_search_time));
-
-            sprintf(buff, "top%d second per query", topk);
-            std::string str4(buff);
-            performance_m.emplace(str4, double2string(second_per_query));
-        }
-
-        [[nodiscard]] std::string ToString() const {
-            char arr[256];
-            sprintf(arr,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, binary search %.3fs, million second per query %.3fms",
-                    topk, total_time, inner_product_time, binary_search_time, second_per_query * 1000);
-            std::string str(arr);
+            sprintf(buff,
+                    "top%d retrieval time:\n\ttotal %.3fs, inner product %.3fs\n\tbinary search %.3fs, million second per query %.3fms",
+                    topk, total_time, inner_product_time, binary_search_time, second_per_query);
+            std::string str(buff);
+            this->config_l.emplace_back(str);
             return str;
         }
-
 
     };
 

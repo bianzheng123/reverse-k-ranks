@@ -6,7 +6,6 @@
 #include "OnlineBruteForce.hpp"
 #include <iostream>
 #include <vector>
-#include <map>
 #include <spdlog/spdlog.h>
 
 using namespace std;
@@ -22,7 +21,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    printf("OnlineBruteForce dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
+    spdlog::info("OnlineBruteForce dataset_name {}, basic_dir {}\n", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -38,10 +37,10 @@ int main(int argc, char **argv) {
     obf.Preprocess();
     double preprocessed_time = record.get_elapsed_time_second();
     record.reset();
-    printf("finish preprocess\n");
+    spdlog::info("finish preprocess\n");
 
-    vector<int> topk_l{10, 20, 30, 40, 50};
-    vector<OnlineBruteForce::RetrievalResult> retrieval_res_l;
+    vector<int> topk_l{50, 40, 30, 20, 10};
+    OnlineBruteForce::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
@@ -51,23 +50,18 @@ int main(int argc, char **argv) {
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
-        retrieval_res_l.emplace_back(retrieval_time, second_per_query, topk);
+        string str = config.AddResultConfig(topk, retrieval_time, second_per_query);
+        spdlog::info("{}", str);
     }
 
 
-    printf("build index time: total %.3fs\n", preprocessed_time);
+    spdlog::info("build index time: total {}s\n", preprocessed_time);
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
-        cout << retrieval_res_l[i].ToString() << endl;
+        cout << config.config_l[i] << endl;
         writeRank(result_rank_l[i], dataset_name, "OnlineBruteForce");
     }
-
-    map<string, string> performance_m;
-    performance_m.emplace("preprocess time", double2string(preprocessed_time));
-    for (int i = 0; i < n_topk; i++) {
-        retrieval_res_l[i].AddMap(performance_m);
-    }
-    writePerformance(dataset_name, "OnlineBruteForce", performance_m);
-
+    config.AddPreprocess(preprocessed_time);
+    config.writePerformance(dataset_name, "OnlineBruteForce");
     return 0;
 }

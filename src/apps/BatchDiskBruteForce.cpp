@@ -11,7 +11,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <map>
 
 using namespace std;
 using namespace ReverseMIPS;
@@ -26,7 +25,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    printf("BatchDiskBruteForce dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
+    spdlog::info("BatchDiskBruteForce dataset_name {}, basic_dir {}\n", dataset_name, basic_dir);
 
     double total_build_index_time;
     char index_path[256];
@@ -44,12 +43,12 @@ int main(int argc, char **argv) {
     record.reset();
     DiskBruteForce::Index &index = DiskBruteForce::BuildIndex(data_item, user, index_path);
     total_build_index_time = record.get_elapsed_time_second();
-    printf("finish preprocess and save the index\n");
+    spdlog::info("finish preprocess and save the index\n");
 
-    vector<int> topk_l{10, 20, 30, 40, 50};
-    vector<DiskBruteForce::RetrievalResult> retrieval_res_l;
+    vector<int> topk_l{50, 40, 30, 20, 10};
+    DiskBruteForce::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
-    for (int topk: topk_l) {
+    for (const int &topk: topk_l) {
         record.reset();
         vector<vector<UserRankElement>> result_rk = index.Retrieval(query_item, topk);
 
@@ -60,24 +59,21 @@ int main(int argc, char **argv) {
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
-        retrieval_res_l.emplace_back(retrieval_time, read_disk_time, inner_product_time, binary_search_time,
-                                     second_per_query, topk);
+        string str = config.AddResultConfig(topk, retrieval_time, read_disk_time, inner_product_time,
+                                            binary_search_time,
+                                            second_per_query);
+        spdlog::info("{}", str);
     }
 
-    printf("build index time: total %.3fs\n", total_build_index_time);
+    spdlog::info("build index time: total %.3fs", total_build_index_time);
     int n_topk = (int) topk_l.size();
-
     for (int i = 0; i < n_topk; i++) {
-        cout << retrieval_res_l[i].ToString() << endl;
+        cout << config.config_l[i] << endl;
         writeRank(result_rank_l[i], dataset_name, "BatchDiskBruteForce");
     }
 
-    map<string, string> performance_m;
-    performance_m.emplace("build index total time", double2string(total_build_index_time));
-    for (int i = 0; i < n_topk; i++) {
-        retrieval_res_l[i].AddMap(performance_m);
-    }
-    writePerformance(dataset_name, "BatchDiskBruteForce", performance_m);
+    config.AddPreprocess(total_build_index_time);
+    config.writePerformance(dataset_name, "BatchDiskBruteForce");
 
     return 0;
 }

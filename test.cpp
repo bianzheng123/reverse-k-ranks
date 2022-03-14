@@ -1,90 +1,49 @@
-//
-// Created by BianZheng on 2022/3/11.
-//
-
-#include "util/VectorIO.hpp"
-#include "util/TimeMemory.hpp"
-#include "struct/UserRankElement.hpp"
-#include "struct/VectorMatrix.hpp"
-#include "alg/SVD.hpp"
-#include "alg/SpaceInnerProduct.hpp"
+#include <string>
 #include <iostream>
-#include <vector>
-#include <spdlog/spdlog.h>
 
 using namespace std;
-using namespace ReverseMIPS;
 
-//output bound tightness and time consumption
-int main(int argc, char **argv) {
-    if (!(argc == 2 or argc == 3)) {
-        cout << argv[0] << " dataset_name [basic_dir]" << endl;
-        return 0;
-    }
-    const char *dataset_name = argv[1];
-    const char *basic_dir = "/home/bianzheng/Dataset/ReverseMIPS";
-    if (argc == 3) {
-        basic_dir = argv[2];
-    }
-    printf("FullCauchy dataset_name %s, basic_dir %s\n", dataset_name, basic_dir);
+class Base {
+public:
+    virtual string ToString() { return "base"; };
 
-    int n_data_item, n_query_item, n_user, vec_dim;
-    vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                         vec_dim);
-    VectorMatrix &user = data[0];
-    VectorMatrix &data_item = data[1];
-    VectorMatrix &query_item = data[2];
-    spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user,
-                 vec_dim);
+    virtual string SaySomething() { return ToString() + "base"; }
+};
 
-    TimeRecord record;
-    record.reset();
-    double avg_double = 0;
-    for (int userID = 0; userID < n_user; userID++) {
-        double *user_vecs = user.getVector(userID);
-        for (int itemID = 0; itemID < n_data_item; itemID++) {
-            double *item_vecs = data_item.getVector(itemID);
-            double IP = InnerProduct(user_vecs, item_vecs, vec_dim);
-            avg_double += IP;
-        }
-    }
-    double double_time = record.get_elapsed_time_second();
-
-    unique_ptr<int[]> user_int_ptr = make_unique<int[]>(n_user * vec_dim);
-
-    for (int userID = 0; userID < n_user; userID++) {
-        int *user_int_vecs = user_int_ptr.get() + userID * vec_dim;
-        double *user_double_vecs = user.getVector(userID);
-        for (int dim = 0; dim < vec_dim; dim++) {
-            user_int_vecs[dim] = std::floor(user_double_vecs[dim]);
-        }
+class Impl1 : public Base {
+    string tmp;
+public:
+    inline Impl1(string tmp1) {
+        this->tmp = tmp1;
     }
 
-    unique_ptr<int[]> data_item_int_ptr = make_unique<int[]>(n_data_item * vec_dim);
-    for (int itemID = 0; itemID < n_data_item; itemID++) {
-        int *item_int_vecs = data_item_int_ptr.get() + itemID * vec_dim;
-        double *item_double_vecs = data_item.getVector(itemID);
-        for (int dim = 0; dim < vec_dim; dim++) {
-            item_int_vecs[dim] = std::floor(item_double_vecs[dim]);
-        }
+    string ToString() override {
+        return tmp;
+    }
+};
+
+class Impl2 : public Base {
+    string tmp, tmp2;
+public:
+    inline Impl2(string tmp1, string tmp2) {
+        this->tmp = tmp1;
+        this->tmp2 = tmp2;
     }
 
-    record.reset();
-
-    int avg_int= 0;
-    for(int userID=0;userID < n_user;userID++){
-        int *user_vecs = user_int_ptr.get() + userID * vec_dim;
-        for(int itemID =0 ;itemID < n_data_item;itemID++){
-            int* item_vecs = data_item_int_ptr.get() + itemID * vec_dim;
-            int ip = InnerProduct(user_vecs, item_vecs, vec_dim);
-            avg_int += ip;
-        }
+    string ToString() override {
+        return tmp + tmp2;
     }
-    double int_time = record.get_elapsed_time_second();
+};
 
-    printf("time used double: %.3f int: %.3f\n", double_time, int_time);
+void test(Base &b) {
+    cout << b.SaySomething() << endl;
+}
 
-    printf("%.3f %d\n", avg_double, avg_int);
-
-    return 0;
+int main() {
+    Base a;
+    Impl1 b("b");
+    Impl2 c("c", "d");
+    test(a);
+    test(b);
+    test(c);
 }

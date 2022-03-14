@@ -2,7 +2,7 @@
 ./bfmi fake
 ./bfdi fake
 ./bbfdi fake
-./rb fake
+./rb fake 20
 ./irb fake
 
 ./bfdi movielens-small /home/zhengbian/Dataset/ReverseMIPS

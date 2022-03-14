@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_Release} -O3")
 
+find_package(Boost COMPONENTS program_options)
+
 find_package(spdlog REQUIRED)
 
 set(BUILD_STATIC_LIBS ON)
@@ -24,8 +26,8 @@ find_package(Armadillo)
 
 find_package(OpenMP)
 
-set(BUILD_TEST ON)
-set(BUILD_FINISH OFF)
+set(BUILD_TEST OFF)
+set(BUILD_FINISH ON)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
@@ -35,44 +37,44 @@ set(BUILD_FINISH OFF)
 
 if (BUILD_FINISH)
     add_executable(bfon src/apps/OnlineBruteForce.cpp)
-    target_include_directories(bfon PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(bfon PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    target_include_directories(bfon PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bfon PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(bfmi src/apps/MemoryBruteForce.cpp)
-    target_include_directories(bfmi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(bfmi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    target_include_directories(bfmi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bfmi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(bfdi src/apps/DiskBruteForce.cpp)
-    target_include_directories(bfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(bfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    target_include_directories(bfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(rb src/apps/RankBound.cpp)
-    target_include_directories(rb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(rb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    target_include_directories(rb PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(rb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(bbfdi src/apps/BatchDiskBruteForce.cpp)
-    target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 add_executable(irb src/apps/IntervalRankBound.cpp)
-target_include_directories(irb PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+target_include_directories(irb PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 add_executable(t1 test.cpp)
-target_include_directories(t1 PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+target_include_directories(t1 PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 if (BUILD_TEST)
     add_subdirectory(attribution)
 
     add_executable(tsvd test/SVD.cpp)
-    target_include_directories(tsvd PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(tsvd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    target_include_directories(tsvd PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(tsvd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(tsvdr test/SVDReduction.cpp)
-    target_include_directories(tsvdr PRIVATE ${armadillo_SOURCE_DIR}/include src/include)
-    target_link_libraries(tsvdr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    target_include_directories(tsvdr PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(tsvdr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 

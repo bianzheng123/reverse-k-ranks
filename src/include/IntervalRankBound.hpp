@@ -29,63 +29,42 @@
 
 namespace ReverseMIPS::IntervalRankBound {
 
-    class RetrievalResult {
+    class RetrievalResult : public RetrievalResultBase {
     public:
         //unit: second
-        double total_time, read_disk_time, inner_product_time, coarse_binary_search_time, fine_binary_search_time, interval_search_time;
-        double interval_prune_ratio, binary_search_prune_ratio;
-        double second_per_query;
-        int topk;
+        //double total_time, read_disk_time, inner_product_time,
+        //          coarse_binary_search_time, fine_binary_search_time, interval_search_time;
+        //double interval_prune_ratio, binary_search_prune_ratio;
+        //double second_per_query;
+        //int topk;
 
-        inline RetrievalResult(double total_time, double interval_search_time,
-                               double inner_product_time, double coarse_binary_search_time,
-                               double read_disk_time, double fine_binary_search_time,
-
-                               double interval_prune_ratio, double binary_search_prune_ratio,
-                               double second_per_query, int topk) {
-            this->total_time = total_time;
-            this->interval_search_time = interval_search_time;
-            this->inner_product_time = inner_product_time;
-            this->coarse_binary_search_time = coarse_binary_search_time;
-            this->read_disk_time = read_disk_time;
-            this->fine_binary_search_time = fine_binary_search_time;
-
-            this->interval_prune_ratio = interval_prune_ratio;
-            this->binary_search_prune_ratio = binary_search_prune_ratio;
-            this->second_per_query = second_per_query;
-
-            this->topk = topk;
+        inline RetrievalResult() {
         }
 
-        void ConvertAddString(std::map<std::string, std::string> &performance_m, double val, const char *string) {
-            char buff[256];
-            sprintf(buff, "top%d retrieval\t\t %s", topk, string);
+        void AddPreprocess(double build_index_time) {
+            char buff[1024];
+            sprintf(buff, "build index time %.3f", build_index_time);
             std::string str(buff);
-            performance_m.emplace(str, double2string(val));
+            this->config_l.emplace_back(str);
         }
 
-        void AddMap(std::map<std::string, std::string> &performance_m) {
-            ConvertAddString(performance_m, total_time, "total time");
-            ConvertAddString(performance_m, interval_search_time, "interval search time");
-            ConvertAddString(performance_m, inner_product_time, "inner product time");
-            ConvertAddString(performance_m, coarse_binary_search_time, "coarse binary search time");
-            ConvertAddString(performance_m, read_disk_time, "read disk time");
-            ConvertAddString(performance_m, fine_binary_search_time, "fine binary search time");
+        std::string AddResultConfig(const int &topk,
+                                    const double &total_time, const double &read_disk_time,
+                                    const double &inner_product_time,
+                                    const double &coarse_binary_search_time, const double &fine_binary_search_time,
+                                    const double &interval_search_time,
+                                    const double &interval_prune_ratio, const double &binary_search_prune_ratio,
+                                    const double &second_per_query) {
+            char buff[1024];
 
-            ConvertAddString(performance_m, interval_prune_ratio, "interval prune ratio");
-            ConvertAddString(performance_m, binary_search_prune_ratio, "binary search prune ratio");
-
-            ConvertAddString(performance_m, second_per_query, "second per query time");
-        }
-
-        [[nodiscard]] std::string ToString() const {
-            char arr[512];
-            sprintf(arr,
-                    "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, fine binary search %.3fs, million second per query %.3fms",
+            sprintf(buff,
+                    "top%d retrieval time:\\n\\total %.3fs, read disk %.3fs\\n\\inner product %.3fs, coarse binary search %.3fs, fine binary search %.3fs\n\tinterval search time %.3f, interval prune ratio %.3f, binary search prune ratio %.3f\n\tmillion second per query %.3fms",
                     topk, total_time, read_disk_time, inner_product_time, coarse_binary_search_time,
-                    fine_binary_search_time,
-                    second_per_query * 1000);
-            std::string str(arr);
+                    fine_binary_search_time, interval_search_time,
+                    interval_prune_ratio, binary_search_prune_ratio,
+                    second_per_query);
+            std::string str(buff);
+            this->config_l.emplace_back(str);
             return str;
         }
 
@@ -425,7 +404,8 @@ namespace ReverseMIPS::IntervalRankBound {
             int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
 
             if (queryID == 0 && userID == 964) {
-                printf("coarse binary search before convert userID %d, bucket_ub %d, bucket_lb %d\n", userID, bucket_ub, bucket_lb);
+                printf("coarse binary search before convert userID %d, bucket_ub %d, bucket_lb %d\n", userID, bucket_ub,
+                       bucket_lb);
                 printf("iter_begin %.3f\n", *iter_begin);
             }
 
@@ -541,7 +521,7 @@ namespace ReverseMIPS::IntervalRankBound {
             spdlog::error("error in write result");
         }
 
-        std::vector<double> write_distance_cache(write_every_ * n_data_item);
+        std::vector<double> write_distance_cache(write_every_ *n_data_item);
         const int n_batch = n_user / write_every_;
         const int n_remain = n_user % write_every_;
         spdlog::info("write_every_ {}, n_batch {}, n_remain {}", write_every_, n_batch, n_remain);

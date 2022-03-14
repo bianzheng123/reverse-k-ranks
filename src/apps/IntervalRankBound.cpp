@@ -12,7 +12,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <map>
 
 using namespace std;
 using namespace ReverseMIPS;
@@ -47,9 +46,9 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{10};
-    vector<IntervalRankBound::RetrievalResult> retrieval_res_l;
+    IntervalRankBound::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
-    for (int topk: topk_l) {
+    for (const int &topk: topk_l) {
         record.reset();
         vector<vector<UserRankElement>> result_rk = ibsb.Retrieval(query_item, topk);
 
@@ -65,25 +64,21 @@ int main(int argc, char **argv) {
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
-        retrieval_res_l.emplace_back(retrieval_time, interval_search_time, inner_product_time,
-                                     coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                                     interval_prune_ratio, binary_search_prune_ratio, second_per_query, topk);
+        string str = config.AddResultConfig(topk, retrieval_time, read_disk_time, inner_product_time,
+                               coarse_binary_search_time, fine_binary_search_time,
+                               interval_search_time,
+                               interval_prune_ratio, binary_search_prune_ratio, second_per_query);
+        spdlog::info("{}", str);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);
     int n_topk = (int) topk_l.size();
-
     for (int i = 0; i < n_topk; i++) {
-        cout << retrieval_res_l[i].ToString() << endl;
+        cout << config.config_l[i] << endl;
         writeRank(result_rank_l[i], dataset_name, "IntervalRankBound");
     }
 
-    map<string, string> performance_m;
-    performance_m.emplace("build index total time", double2string(build_index_time));
-    for (int i = 0; i < n_topk; i++) {
-        retrieval_res_l[i].AddMap(performance_m);
-    }
-    writePerformance(dataset_name, "IntervalRankBound", performance_m);
-
+    config.AddPreprocess(build_index_time);
+    config.writePerformance(dataset_name, "IntervalRankBound");
     return 0;
 }

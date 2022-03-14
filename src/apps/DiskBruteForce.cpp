@@ -12,7 +12,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <map>
 
 using namespace std;
 using namespace ReverseMIPS;
@@ -47,10 +46,10 @@ int main(int argc, char **argv) {
     total_build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_l{10, 20, 30, 40, 50};
-    vector<DiskBruteForce::RetrievalResult> retrieval_res_l;
+    vector<int> topk_l{50, 40, 30, 20, 10};
+    DiskBruteForce::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
-    for (int topk: topk_l) {
+    for (const int &topk: topk_l) {
         record.reset();
         vector<vector<UserRankElement>> result_rk = index.Retrieval(query_item, topk);
 
@@ -61,24 +60,20 @@ int main(int argc, char **argv) {
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
-        retrieval_res_l.emplace_back(retrieval_time, read_disk_time, inner_product_time, binary_search_time,
-                                     second_per_query, topk);
+        string str = config.AddResultConfig(topk, retrieval_time, read_disk_time, inner_product_time,
+                                            binary_search_time,
+                                            second_per_query);
+        spdlog::info("{}", str);
     }
 
     spdlog::info("build index time: total %.3fs", total_build_index_time);
     int n_topk = (int) topk_l.size();
-
     for (int i = 0; i < n_topk; i++) {
-        cout << retrieval_res_l[i].ToString() << endl;
+        cout << config.config_l[i] << endl;
         writeRank(result_rank_l[i], dataset_name, "DiskBruteForce");
     }
 
-    map<string, string> performance_m;
-    performance_m.emplace("build index total time", double2string(total_build_index_time));
-    for (int i = 0; i < n_topk; i++) {
-        retrieval_res_l[i].AddMap(performance_m);
-    }
-    writePerformance(dataset_name, "DiskBruteForce", performance_m);
-
+    config.AddPreprocess(total_build_index_time);
+    config.writePerformance(dataset_name, "DiskBruteForce");
     return 0;
 }
