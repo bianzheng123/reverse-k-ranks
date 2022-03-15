@@ -266,7 +266,7 @@ namespace ReverseMIPS::RankBound {
     };
 
     const int write_every_ = 100;
-    const int report_batch_every_ = 5;
+    const int report_batch_every_ = 100;
 
     /*
      * bruteforce index

@@ -499,10 +499,11 @@ int main(int argc, char **argv) {
 
     VectorMatrix transfer_item;
     const double SIGMA = 0.7;
-    int check_dim = SVD::SVD(user, data_item, transfer_item, SIGMA);
+    SVD svd_ins;
+    int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
 
     for (int queryID = 0; queryID < n_query_item; queryID++) {
-        SVD::TransferItem(query_item.getVector(queryID), transfer_item, vec_dim);
+        svd_ins.TransferItem(query_item.getVector(queryID), vec_dim);
     }
 
     //calc exact bound

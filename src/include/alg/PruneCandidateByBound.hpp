@@ -13,7 +13,7 @@
 namespace ReverseMIPS {
 
     void PruneCandidateByBound(std::vector<RankBoundElement> &rank_bound_l, const int &size, const int &topk,
-                               int &n_remain, const char *can_prune_l, int queryID, bool test = false) {
+                               int &n_remain, const char *can_prune_l) {
         assert(rank_bound_l.size() >= size);
         assert(size >= topk);
 
@@ -25,16 +25,6 @@ namespace ReverseMIPS {
 
         for (int candID = topk; candID < size; candID++) {
             std::pair<int, int> rank_bound = rank_bound_l[candID].rank_pair();
-            if (test && queryID == 35 && rank_bound_l[candID].userID_ == 651) {
-                printf("in prune method rank_bound_l\n");
-                std::cout << "\t" << "topk_ele " << topk_ele.ToString() << std::endl;
-                std::cout << "\t" << "this_rank_bound_l " << rank_bound_l[candID].ToString() << std::endl;
-            }
-            if (test && queryID == 35 && topk_ele.userID_ == 651) {
-                printf("in prune method topk_ele\n");
-                std::cout << "\t" << "topk_ele " << topk_ele.ToString() << std::endl;
-                std::cout << "\t" << "this_rank_bound_l " << rank_bound_l[candID].ToString() << std::endl;
-            }
 
             assert(rank_bound.first >= rank_bound.second);
             if (can_prune_l[candID]) {

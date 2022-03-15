@@ -1,13 +1,14 @@
 //
-// Created by BianZheng on 2022/3/1.
+// Created by BianZheng on 2022/3/15.
 //
+
 
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "IntervalRankBound.hpp"
+#include "IntervalSearch/IRBFullDim.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
@@ -45,7 +46,7 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_l{10};
+    vector<int> topk_l{50, 40, 30, 20, 10};
     IntervalRankBound::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
@@ -59,27 +60,26 @@ int main(int argc, char **argv) {
         double read_disk_time = ibsb.read_disk_time_;
         double fine_binary_search_time = ibsb.fine_binary_search_time_;
 
-        double full_norm_prune_ratio = ibsb.full_norm_prune_ratio_;
-        double part_int_part_norm_prune_ratio = ibsb.part_int_part_norm_prune_ratio_;
+        double interval_search_prune_ratio = ibsb.interval_search_prune_ratio_;
         double binary_search_prune_ratio = ibsb.binary_search_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
         config.AddResultConfig(topk, retrieval_time, interval_search_time, inner_product_time,
-                                            coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                                            full_norm_prune_ratio, part_int_part_norm_prune_ratio,
-                                            binary_search_prune_ratio,
-                                            second_per_query);
+                               coarse_binary_search_time, read_disk_time, fine_binary_search_time,
+                               interval_search_prune_ratio,
+                               binary_search_prune_ratio,
+                               second_per_query);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRank(result_rank_l[i], dataset_name, "IntervalRankBound");
+        writeRank(result_rank_l[i], dataset_name, "IRBFullDim");
     }
 
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, "IntervalRankBound");
+    config.writePerformance(dataset_name, "IRBFullDim");
     return 0;
 }

@@ -9,49 +9,35 @@ def run_attribution():
         os.system('cd attribution/bound-distribution && python3 plot.py -ds {}'.format(ds))
 
 
-def run():
+def run(method_name='IntervalRankBound', program_name='irb'):
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    # dataset_l = ['fake', 'fakebig', 'movielens-small']
-    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    dataset_l = ['fake']
     # dataset_l = ['movielens-small', 'movielens-1m']
     method_m = {
         # 'OnlineBruteForce': 'bfon',
         'MemoryBruteForce': 'bfmi',
         'DiskBruteForce': 'bfdi',
-        'RankBound': 'rb',
         'BatchDiskBruteForce': 'bbfdi',
         # 'IntervalRankBound': 'irb'
     }
     for ds in dataset_l:
-        for method in method_m:
-            # os.system('cd build && ./bfon %s' % ds)
-            os.system('cd build && ./{} {}'.format(method_m[method], ds))
+        os.system('cd build && ./{} {}'.format(program_name, ds))
+        # for method in method_m:
+        #     os.system('cd build && ./bfon %s' % ds)
+        # os.system('cd build && ./{} {}'.format(method_m[method], ds))
 
     type_arr = ['index', 'IP', 'rank']
-    type_arr = ['index', 'rank']
 
     for ds in dataset_l:
-        for _type in type_arr:
-            # bfon = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'OnlineBruteForce', _type))
-            bfmi = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'MemoryBruteForce', _type))
-            bfdi = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'DiskBruteForce', _type))
-            rb = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'RankBound', _type))
-            bbfdi = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'BatchDiskBruteForce', _type))
-            # cmd = "diff {} {}".format(bfon, bfmi)
-            # print(cmd)
-            # os.system(cmd)
+        for method in method_m:
+            for _type in type_arr:
+                # bfon = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'OnlineBruteForce', _type))
+                base_method = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, method, _type))
+                test_method = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, method_name, _type))
 
-            cmd = "diff {} {}".format(bfmi, bfdi)
-            print(cmd)
-            os.system(cmd)
-
-            cmd = "diff {} {}".format(bfmi, rb)
-            print(cmd)
-            os.system(cmd)
-
-            cmd = "diff {} {}".format(bfmi, bbfdi)
-            print(cmd)
-            os.system(cmd)
+                cmd = "diff {} {}".format(base_method, test_method)
+                print(cmd)
+                os.system(cmd)
 
 
 def run_bound_selection():
@@ -91,5 +77,10 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    run_bound_selection()
+    test_method_name_l = ['IRBFullDim', 'IRBFullInt', 'IRBFullNorm', 'IRBPartDimPartInt', 'IRBPartDimPartNorm',
+                          'IRBPartIntPartNorm']
+    test_program_name_l = ['irbfd', 'irbfi', 'irbfn', 'irbpdpi', 'irbpdpn', 'irbpipn']
+    assert len(test_method_name_l) == len(test_program_name_l)
+    for i in range(len(test_method_name_l)):
+        run(method_name=test_method_name_l[i], program_name=test_program_name_l[i])
     # run_rankbound_sample_rate()

@@ -30,6 +30,16 @@ def run():
             os.system(cmd)
 
 
+def run_program():
+    test_method_name_l = ['IRBFullDim', 'IRBFullInt', 'IRBFullNorm', 'IRBPartDimPartInt', 'IRBPartDimPartNorm',
+                          'IRBPartIntPartNorm']
+    test_program_name_l = ['irbfd', 'irbfi', 'irbfn', 'irbpdpi', 'irbpdpn', 'irbpipn']
+    dataset_l = ['movielens-27m']
+    for ds in dataset_l:
+        for i in range(len(test_method_name_l)):
+            os.system('cd build && ./{} {} /run/media/hdd/ReverseMIPS'.format(test_program_name_l[i], ds))
+
+
 def run_bound_selection():
     arr = ['movielens-small', 'movielens-27m']
     for ds in arr:
@@ -45,5 +55,4 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    run_bound_selection()
-    run_rankbound_sample_rate()
+    run_program()

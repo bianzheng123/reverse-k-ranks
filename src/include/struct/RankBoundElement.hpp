@@ -10,7 +10,8 @@
 namespace ReverseMIPS {
     class RankBoundElement {
     public:
-        int userID_, upper_rank_, lower_rank_;
+        int userID_, lower_rank_, upper_rank_;
+        double lower_bound_, upper_bound_;
 
         //by default, value of upper rank is smaller than lower rank
         RankBoundElement(const int &userID, const std::pair<int, int> &bound_pair) {
@@ -19,14 +20,29 @@ namespace ReverseMIPS {
             this->upper_rank_ = bound_pair.second;
         }
 
+        RankBoundElement(const int &userID, const int &lower_rank, const int &upper_rank,
+                         const double &lower_bound, const double &upper_bound) {
+            this->userID_ = userID;
+            this->lower_rank_ = lower_rank;
+            this->upper_rank_ = upper_rank;
+            this->lower_bound_ = lower_bound;
+            this->upper_bound_ = upper_bound;
+        }
+
+        std::pair<double, double> IPBound() {
+            return std::make_pair(lower_bound_, upper_bound_);
+        }
+
+        std::pair<int, int> rank_pair() {
+            return std::make_pair(lower_rank_, upper_rank_);
+        }
+
         RankBoundElement() {
             userID_ = -1;
             upper_rank_ = -1;
             lower_rank_ = -1;
-        }
-
-        inline std::pair<int, int> rank_pair() {
-            return std::make_pair(lower_rank_, upper_rank_);
+            lower_bound_ = -1;
+            upper_bound_ = -1;
         }
 
         ~RankBoundElement() = default;

@@ -1,5 +1,3 @@
-#include <algorithm>
-#include <iostream>
 #include <vector>
 #include "alg/SVD.hpp"
 #include "util/VectorIO.hpp"
@@ -57,10 +55,11 @@ int main(int argc, char **argv) {
 
     VectorMatrix transfer_item;
     const double SIGMA = 0.7;
-    int check_dim = SVD::SVD(user, data_item, transfer_item, SIGMA);
+    SVD svd;
+    svd.Preprocess(user, data_item, SIGMA);
 
     for (int queryID = 0; queryID < n_query_item; queryID++) {
-        SVD::TransferItem(query_item.getVector(queryID), transfer_item, vec_dim);
+        svd.TransferItem(query_item.getVector(queryID), vec_dim);
     }
 
     for (int itemID = 0; itemID < n_data_item; itemID++) {

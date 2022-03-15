@@ -26,8 +26,9 @@ find_package(Armadillo)
 
 find_package(OpenMP)
 
-set(BUILD_TEST ON)
-set(BUILD_FINISH ON)
+set(BUILD_TEST OFF)
+set(BUILD_FINISH OFF)
+set(BUILD_INTERVAL_SEARCH ON)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
@@ -71,10 +72,32 @@ if (BUILD_TEST)
     add_executable(tsvd test/SVD.cpp)
     target_include_directories(tsvd PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(tsvd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+endif ()
 
-    add_executable(tsvdr test/SVDReduction.cpp)
-    target_include_directories(tsvdr PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(tsvdr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+if (BUILD_INTERVAL_SEARCH)
+    add_executable(irbfd src/apps/IntervalSearch/IRBFullDim.cpp)
+    target_include_directories(irbfd PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irbfd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(irbfi src/apps/IntervalSearch/IRBFullInt.cpp)
+    target_include_directories(irbfi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irbfi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(irbfn src/apps/IntervalSearch/IRBFullNorm.cpp)
+    target_include_directories(irbfn PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irbfn PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(irbpdpi src/apps/IntervalSearch/IRBPartDimPartInt.cpp)
+    target_include_directories(irbpdpi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irbpdpi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(irbpdpn src/apps/IntervalSearch/IRBPartDimPartNorm.cpp)
+    target_include_directories(irbpdpn PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irbpdpn PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(irbpipn src/apps/IntervalSearch/IRBPartIntPartNorm.cpp)
+    target_include_directories(irbpipn PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irbpipn PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 
