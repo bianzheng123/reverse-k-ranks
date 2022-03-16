@@ -75,7 +75,7 @@ namespace ReverseMIPS::DiskBruteForce {
             this->n_cache = std::min(user_.n_vector_, 10000);
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
             TimeRecord record, batch_report_record;
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);

@@ -25,6 +25,15 @@ namespace ReverseMIPS {
 
         }
 
+        void TransferQuery(const double *query_vecs, const int vec_dim, double *query_write_vecs) {
+            for (int trans_dim = 0; trans_dim < vec_dim; trans_dim++) {
+                double *transfer_vecs = transfer_item_.getVector(trans_dim);
+                data_item_cache_[trans_dim] = InnerProduct(transfer_vecs, query_vecs, vec_dim);
+            }
+            memcpy(query_write_vecs, data_item_cache_.data(), vec_dim * sizeof(double));
+
+        }
+
         int Preprocess(VectorMatrix &user, VectorMatrix &data_item, const double &SIGMA) {
             const int vec_dim = user.vec_dim_; // p->colNum, m
             const int n_user = user.n_vector_; // p->rowNum, n

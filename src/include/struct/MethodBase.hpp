@@ -12,7 +12,7 @@
 namespace ReverseMIPS {
     class BaseIndex {
     public:
-        virtual std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, int topk) = 0;
+        virtual std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) = 0;
 
         virtual ~BaseIndex() = default;
 

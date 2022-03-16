@@ -102,7 +102,7 @@ namespace ReverseMIPS::RankBound {
             this->n_data_item_ = data_item.n_vector_;
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
@@ -183,7 +183,7 @@ namespace ReverseMIPS::RankBound {
                 assert(max_heap.size() >= topk);
 
                 int max_heap_size = max_heap.size();
-                prune_ratio_ += 1.0 * (n_user_ - max_heap_size) / n_user_;
+                prune_ratio_ += (1.0 * (n_user_ - max_heap_size) / n_user_);
                 //read from disk
                 read_disk_record_.reset();
                 std::vector<int> read_count_l(max_heap_size);
