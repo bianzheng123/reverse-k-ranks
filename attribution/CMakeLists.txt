@@ -15,3 +15,9 @@ target_link_libraries(cp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::O
 add_executable(bs bound-selection/BoundSelection.cpp)
 target_include_directories(bs PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(bs PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+
+add_executable(dvd DiskReadVSDistanceComputation/DiskReadVSDistanceComputation.cpp)
+target_include_directories(dvd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(dvd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+
+

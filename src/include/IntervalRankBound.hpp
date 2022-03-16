@@ -232,26 +232,18 @@ namespace ReverseMIPS::IntervalRankBound {
                     rank_bound_l[userID].userID_ = userID;
                 }
 
-                printf("after transfer query\n");
-
                 interval_search_record_.reset();
                 //full norm
                 full_norm_prune_.QueryBound(query_vecs, user_, n_user_, rank_bound_l, true);
 
-                printf("after full norm query bound\n");
-
                 int n_candidate = n_user_;
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
-
-                printf("after full norm all interval search\n");
 
                 full_norm_prune_ratio_ += 1.0 * n_candidate / n_user_;
 
                 part_int_part_norm_prune_.QueryBound(query_vecs, user_, n_candidate, rank_bound_l, true);
-                printf("after pipn query bound\n");
 
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
-                printf("after pipn all interval search\n");
 
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 part_int_part_norm_prune_ratio_ += 1.0 * n_candidate / n_user_;
@@ -264,8 +256,6 @@ namespace ReverseMIPS::IntervalRankBound {
                     element.lower_bound_ = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
-
-                printf("after exact inner product\n");
 
                 //coarse binary search
                 coarse_binary_search_record_.reset();
@@ -322,7 +312,11 @@ namespace ReverseMIPS::IntervalRankBound {
                 fine_binary_search_record_.reset();
                 // reuse the max heap in coarse binary search
                 int total_cand_size = (int) bound_cache_l.size();
-                std::vector<UserRankElement> &max_heap = query_heap_l[queryID];
+
+                printf("after add max heap\n");
+
+                std::vector<UserRankElement> max_heap;
+                max_heap.reserve(total_cand_size);
                 for (int candID = 0; candID < total_cand_size; candID++) {
                     BinarySearchBoundElement element = bound_cache_l[candID];
                     int rank = element.CountRank();
@@ -333,7 +327,22 @@ namespace ReverseMIPS::IntervalRankBound {
                 fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
 
                 std::sort(max_heap.begin(), max_heap.end(), std::less<UserRankElement>());
-                max_heap.resize(topk);
+                for (int candID = 0; candID < topk; candID++) {
+                    query_heap_l[queryID].emplace_back(max_heap[candID]);
+                }
+
+//                std::vector<UserRankElement> &max_heap = query_heap_l[queryID];
+//                for (int candID = 0; candID < total_cand_size; candID++) {
+//                    BinarySearchBoundElement element = bound_cache_l[candID];
+//                    int rank = element.CountRank();
+//                    int userID = element.userID_;
+//                    double queryIP = element.queryIP_;
+//                    max_heap.emplace_back(userID, rank, queryIP);
+//                }
+//                fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
+//
+//                std::sort(max_heap.begin(), max_heap.end(), std::less<UserRankElement>());
+//                max_heap.resize(topk);
             }
 
             full_norm_prune_ratio_ /= n_query_item;
