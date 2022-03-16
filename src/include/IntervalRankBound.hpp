@@ -313,10 +313,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 // reuse the max heap in coarse binary search
                 int total_cand_size = (int) bound_cache_l.size();
 
-                printf("after add max heap\n");
-
-                std::vector<UserRankElement> max_heap;
-                max_heap.reserve(total_cand_size);
+                std::vector<UserRankElement> &max_heap = query_heap_l[queryID];
                 for (int candID = 0; candID < total_cand_size; candID++) {
                     BinarySearchBoundElement element = bound_cache_l[candID];
                     int rank = element.CountRank();
@@ -327,22 +324,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
 
                 std::sort(max_heap.begin(), max_heap.end(), std::less<UserRankElement>());
-                for (int candID = 0; candID < topk; candID++) {
-                    query_heap_l[queryID].emplace_back(max_heap[candID]);
-                }
-
-//                std::vector<UserRankElement> &max_heap = query_heap_l[queryID];
-//                for (int candID = 0; candID < total_cand_size; candID++) {
-//                    BinarySearchBoundElement element = bound_cache_l[candID];
-//                    int rank = element.CountRank();
-//                    int userID = element.userID_;
-//                    double queryIP = element.queryIP_;
-//                    max_heap.emplace_back(userID, rank, queryIP);
-//                }
-//                fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
-//
-//                std::sort(max_heap.begin(), max_heap.end(), std::less<UserRankElement>());
-//                max_heap.resize(topk);
+                max_heap.resize(topk);
             }
 
             full_norm_prune_ratio_ /= n_query_item;

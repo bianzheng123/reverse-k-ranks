@@ -70,6 +70,7 @@ int main(int argc, char **argv) {
                                full_norm_prune_ratio, part_int_part_norm_prune_ratio,
                                binary_search_prune_ratio,
                                second_per_query);
+        spdlog::info("finish top-{}", topk);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);

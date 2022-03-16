@@ -2,78 +2,93 @@
 // Created by BianZheng on 2022/3/16.
 //
 
-#include "util/VectorIO.hpp"
+#include "alg/SpaceInnerProduct.hpp"
 #include "util/TimeMemory.hpp"
-#include "util/FileIO.hpp"
-#include "struct/UserRankElement.hpp"
-#include "struct/VectorMatrix.hpp"
-#include "BatchDiskBruteForce.hpp"
 #include <iostream>
 #include <vector>
-#include <string>
+#include <random>
+#include <memory>
+#include <fstream>
+#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace ReverseMIPS;
 
+std::unique_ptr<double[]> GenRandom(const int &n_eval, const int &n_dim) {
+    std::random_device rd;  // Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis(1.0, 1000.0);
+
+    std::unique_ptr<double[]> random_l = make_unique<double[]>(n_eval * n_dim);
+
+    for (int itemID = 0; itemID < n_eval; itemID++) {
+        for (int dim = 0; dim < n_dim; dim++) {
+            int id = itemID * n_dim + dim;
+            double random = dis(gen);
+            random_l[id] = random;
+        }
+    }
+    return random_l;
+}
+
+void
+BuildWriteIndex(const char *index_path, const double *vecs1, const double *vecs2, const int &n_eval, const int &dim) {
+
+    size_t write_size = n_eval * n_eval;
+    std::vector<double> write_array(write_size);
+#pragma omp parallel for default(none) shared(n_eval, vecs1, vecs2, write_array, dim)
+    for (int xID = 0; xID < n_eval; xID++) {
+        const double *x_vecs = vecs1 + xID * dim;
+        for (int yID = 0; yID < n_eval; yID++) {
+            const double *y_vecs = vecs2 + yID * dim;
+            double ip = InnerProduct(x_vecs, y_vecs, dim);
+            int id = xID * n_eval + yID;
+            write_array[id] = ip;
+        }
+    }
+
+    //build and write index
+    std::ofstream out(index_path, std::ios::binary | std::ios::out);
+    if (!out) {
+        spdlog::error("error in write result");
+    }
+
+    out.write((char *) write_array.data(), n_eval * n_eval * sizeof(double));
+}
+
 int main(int argc, char **argv) {
-    if (!(argc == 2 or argc == 3)) {
-        cout << argv[0] << " dataset_name [basic_dir]" << endl;
-        return 0;
-    }
-    const char *dataset_name = argv[1];
-    const char *basic_dir = "/home/bianzheng/Dataset/ReverseMIPS";
-    if (argc == 3) {
-        basic_dir = argv[2];
-    }
-    spdlog::info("BatchDiskBruteForce dataset_name {}, basic_dir {}\n", dataset_name, basic_dir);
+    vector<int> dim_l{10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200};
+    const int n_eval = 1000000;
+    const char *index_path = "../../index/DiskRead.index";
 
-    double total_build_index_time;
-    char index_path[256];
-    sprintf(index_path, "../index/%s.index", dataset_name);
+    for (const int &dimension: dim_l) {
+        std::unique_ptr<double[]> vecs1 = GenRandom(n_eval, dimension);
+        std::unique_ptr<double[]> vecs2 = GenRandom(n_eval, dimension);
+        std::unique_ptr<double[]> res = make_unique<double[]>(n_eval * n_eval);
 
-    int n_data_item, n_query_item, n_user, vec_dim;
-    vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                         vec_dim);
-    VectorMatrix &user = data[0];
-    VectorMatrix &data_item = data[1];
-    VectorMatrix &query_item = data[2];
-    spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
-
-    TimeRecord record;
-    record.reset();
-    DiskBruteForce::Index &index = DiskBruteForce::BuildIndex(data_item, user, index_path);
-    total_build_index_time = record.get_elapsed_time_second();
-    spdlog::info("finish preprocess and save the index\n");
-
-    vector<int> topk_l{50, 40, 30, 20, 10};
-    DiskBruteForce::RetrievalResult config;
-    vector<vector<vector<UserRankElement>>> result_rank_l;
-    for (const int &topk: topk_l) {
+        TimeRecord record;
         record.reset();
-        vector<vector<UserRankElement>> result_rk = index.Retrieval(query_item, topk);
+        for (int xID = 0; xID < n_eval; xID++) {
+            double *x_vecs = vecs1.get() + xID * dimension;
+            for (int yID = 0; yID < n_eval; yID++) {
+                double *y_vecs = vecs2.get() + yID * dimension;
+                double ip = InnerProduct(x_vecs, y_vecs, dimension);
+                int id = xID * n_eval + yID;
+                res[id] = ip;
+            }
+        }
+        double comp_time = record.get_elapsed_time_second();
 
-        double retrieval_time = record.get_elapsed_time_second();
-        double read_disk_time = index.read_disk_time_;
-        double inner_product_time = index.inner_product_time_;
-        double binary_search_time = index.binary_search_time_;
-        double second_per_query = retrieval_time / n_query_item;
+        BuildWriteIndex(index_path, vecs1.get(), vecs2.get(), n_eval, dimension);
 
-        result_rank_l.emplace_back(result_rk);
-        string str = config.AddResultConfig(topk, retrieval_time, read_disk_time, inner_product_time,
-                                            binary_search_time,
-                                            second_per_query);
-        spdlog::info("{}", str);
+        std::vector<double> read_array(n_eval * n_eval);
+        std::ifstream in(index_path, std::ios::binary | std::ios::in);
+        size_t read_size = (size_t) n_eval * n_eval * sizeof(double);
+        record.reset();
+        in.read((char *) read_array.data(), read_size);
+        double read_disk_time = record.get_elapsed_time_second();
+        spdlog::info("dimension {}, computation time {}, read disk time{}", dimension, comp_time, read_disk_time);
     }
-
-    spdlog::info("build index time: total %.3fs", total_build_index_time);
-    int n_topk = (int) topk_l.size();
-    for (int i = 0; i < n_topk; i++) {
-        cout << config.config_l[i] << endl;
-        writeRank(result_rank_l[i], dataset_name, "BatchDiskBruteForce");
-    }
-
-    config.AddPreprocess(total_build_index_time);
-    config.writePerformance(dataset_name, "BatchDiskBruteForce");
 
     return 0;
 }
