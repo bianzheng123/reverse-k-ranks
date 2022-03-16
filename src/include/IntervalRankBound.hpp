@@ -232,22 +232,29 @@ namespace ReverseMIPS::IntervalRankBound {
                     rank_bound_l[userID].userID_ = userID;
                 }
 
+                printf("after transfer query\n");
+
                 interval_search_record_.reset();
                 //full norm
                 full_norm_prune_.QueryBound(query_vecs, user_, n_user_, rank_bound_l, true);
 
+                printf("after full norm query bound\n");
+
                 int n_candidate = n_user_;
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
+
+                printf("after full norm all interval search\n");
 
                 full_norm_prune_ratio_ += 1.0 * n_candidate / n_user_;
 
                 part_int_part_norm_prune_.QueryBound(query_vecs, user_, n_candidate, rank_bound_l, true);
+                printf("after pipn query bound\n");
 
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
+                printf("after pipn all interval search\n");
 
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 part_int_part_norm_prune_ratio_ += 1.0 * n_candidate / n_user_;
-
 
                 //calculate the exact IP
                 inner_product_record_.reset();
@@ -257,6 +264,8 @@ namespace ReverseMIPS::IntervalRankBound {
                     element.lower_bound_ = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+
+                printf("after exact inner product\n");
 
                 //coarse binary search
                 coarse_binary_search_record_.reset();

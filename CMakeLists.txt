@@ -27,7 +27,7 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST OFF)
-set(BUILD_FINISH ON)
+set(BUILD_FINISH OFF)
 set(BUILD_INTERVAL_SEARCH OFF)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
