@@ -217,11 +217,15 @@ namespace ReverseMIPS::IntervalRankBound {
                 }
 
                 interval_search_record_.reset();
+
                 //full norm
                 itv_search_prune_.QueryBound(query_vecs, user_, n_user_, rank_bound_l, true);
 
                 int n_candidate = n_user_;
-                std::memset(prune_l.data(), 0, sizeof(char) * n_user_);
+                for (int userID = 0; userID < n_user_; userID++) {
+                    prune_l[userID] = 0;
+                }
+
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
 
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
@@ -230,9 +234,9 @@ namespace ReverseMIPS::IntervalRankBound {
                 //calculate the exact IP
                 inner_product_record_.reset();
                 for (int candID = 0; candID < n_candidate; candID++) {
-                    RankBoundElement &element = rank_bound_l[candID];
+                    RankBoundElement element = rank_bound_l[candID];
                     int userID = element.userID_;
-                    element.lower_bound_ = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
+                    rank_bound_l[candID].lower_bound_ = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 

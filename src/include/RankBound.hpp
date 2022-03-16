@@ -183,7 +183,7 @@ namespace ReverseMIPS::RankBound {
                 assert(max_heap.size() >= topk);
 
                 int max_heap_size = max_heap.size();
-                prune_ratio_ = 1.0 * (n_user_ - max_heap_size) / n_user_;
+                prune_ratio_ += 1.0 * (n_user_ - max_heap_size) / n_user_;
                 //read from disk
                 read_disk_record_.reset();
                 std::vector<int> read_count_l(max_heap_size);
@@ -218,6 +218,7 @@ namespace ReverseMIPS::RankBound {
                 std::sort(max_heap.begin(), max_heap.end(), std::less<UserRankElement>());
                 max_heap.resize(topk);
             }
+            prune_ratio_ /= n_query_item;
 
             return query_heap_l;
         }

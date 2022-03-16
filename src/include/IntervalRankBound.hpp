@@ -222,6 +222,7 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 double *query_vecs = query_item.getVector(queryID);
                 svd_ins_.TransferItem(query_vecs, vec_dim_);
+                assert(rank_bound_l.size() == n_user_);
                 for (int userID = 0; userID < n_user_; userID++) {
                     rank_bound_l[userID].userID_ = userID;
                 }
@@ -232,13 +233,13 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 int n_candidate = n_user_;
                 std::memset(prune_l.data(), 0, sizeof(char) * n_user_);
-                AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
+                AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk, queryID);
 
                 full_norm_prune_ratio_ = 1.0 * n_candidate / n_user_;
 
-                part_int_part_norm_prune_.QueryBound(query_vecs, user_, n_candidate, rank_bound_l, false);
-
-                AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
+//                part_int_part_norm_prune_.QueryBound(query_vecs, user_, n_candidate, rank_bound_l, true);
+//
+//                AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk, queryID);
 
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 part_int_part_norm_prune_ratio_ = 1.0 * n_candidate / n_user_;
@@ -357,14 +358,16 @@ namespace ReverseMIPS::IntervalRankBound {
         }
 
         void AllIntervalSearch(std::vector<RankBoundElement> &candidate_l, std::vector<char> &prune_l,
-                               int &n_candidate, const int &topk) {
+                               int &n_candidate, const int &topk, const int &queryID) {
+            assert(candidate_l.size() >= n_candidate);
             for (int candID = 0; candID < n_candidate; candID++) {
-                RankBoundElement &tmp_element = candidate_l[candID];
+                RankBoundElement tmp_element = candidate_l[candID];
                 int userID = tmp_element.userID_;
                 std::pair<double, double> IP_bound = tmp_element.IPBound();
-                std::pair<int, int> pair = IntervalSearch(IP_bound, userID);
-                tmp_element.lower_rank_ = pair.first;
-                tmp_element.upper_rank_ = pair.second;
+                assert(IP_bound.first <= IP_bound.second);
+                std::pair<int, int> pair = IntervalSearch(IP_bound, userID, queryID);
+                candidate_l[candID].lower_rank_ = pair.first;
+                candidate_l[candID].upper_rank_ = pair.second;
             }
 
             int n_remain;
@@ -372,13 +375,18 @@ namespace ReverseMIPS::IntervalRankBound {
             n_candidate = topk + n_remain;
         }
 
-        std::pair<int, int> IntervalSearch(const std::pair<double, double> &IPbound, const int &userID) {
-            std::pair<double, double> &ip_bound_pair = user_ip_bound_l_[userID];
+        std::pair<int, int>
+        IntervalSearch(const std::pair<double, double> &IPbound, const int &userID, const int &queryID) {
+            std::pair<double, double> ip_bound_pair = user_ip_bound_l_[userID];
             double itv_dist = interval_dist_l_[userID];
+            assert(ip_bound_pair.first <= ip_bound_pair.second);
             //for interval id, the higher rank value means the lower queryiP
-            int itv_lb_idx = std::ceil((ip_bound_pair.second - IPbound.first) / itv_dist);
-            int itv_ub_idx = (int) std::floor((ip_bound_pair.second - IPbound.second) / itv_dist) - 1;
-            assert(itv_ub_idx <= itv_lb_idx);
+
+            long long l_lb = std::ceil((ip_bound_pair.second - IPbound.first) / itv_dist);
+            long long l_ub = std::floor((ip_bound_pair.second - IPbound.second) / itv_dist) - 1;
+
+            int itv_lb_idx = (int) (l_lb % 1000000000);
+            int itv_ub_idx = (int) (l_ub % 1000000000);
 
             if (itv_ub_idx <= -1) {
                 itv_ub_idx = -1;
@@ -390,6 +398,7 @@ namespace ReverseMIPS::IntervalRankBound {
             } else if (itv_lb_idx >= n_interval_ - 1) {
                 itv_lb_idx = n_interval_ - 1;
             }
+            assert(itv_ub_idx <= itv_lb_idx);
             int *rank_ptr = interval_table_.data() + userID * n_interval_;
             int rank_lb = itv_lb_idx == -1 ? 0 : rank_ptr[itv_lb_idx];
             int rank_ub = itv_ub_idx == -1 ? 0 : rank_ptr[itv_ub_idx];

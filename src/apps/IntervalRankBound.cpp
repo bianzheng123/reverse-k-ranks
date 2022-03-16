@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_l{10};
+    vector<int> topk_l{50, 40, 30, 20, 10};
     IntervalRankBound::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
@@ -66,10 +66,10 @@ int main(int argc, char **argv) {
 
         result_rank_l.emplace_back(result_rk);
         config.AddResultConfig(topk, retrieval_time, interval_search_time, inner_product_time,
-                                            coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                                            full_norm_prune_ratio, part_int_part_norm_prune_ratio,
-                                            binary_search_prune_ratio,
-                                            second_per_query);
+                               coarse_binary_search_time, read_disk_time, fine_binary_search_time,
+                               full_norm_prune_ratio, part_int_part_norm_prune_ratio,
+                               binary_search_prune_ratio,
+                               second_per_query);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);
