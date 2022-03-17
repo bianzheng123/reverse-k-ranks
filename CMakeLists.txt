@@ -27,7 +27,8 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST OFF)
-set(BUILD_FINISH OFF)
+set(BUILD_FINISH ON)
+set(BUILD_TEST_PROGRAM ON)
 set(BUILD_INTERVAL_SEARCH OFF)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
@@ -35,6 +36,12 @@ set(BUILD_INTERVAL_SEARCH OFF)
 #
 #target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
 #target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
+
+if (BUILD_TEST_PROGRAM)
+    add_executable(bbfdi src/apps/BatchDiskBruteForce.cpp)
+    target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+endif ()
 
 if (BUILD_FINISH)
     add_executable(bfon src/apps/OnlineBruteForce.cpp)
@@ -52,10 +59,6 @@ if (BUILD_FINISH)
     add_executable(rb src/apps/RankBound.cpp)
     target_include_directories(rb PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(rb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(bbfdi src/apps/BatchDiskBruteForce.cpp)
-    target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 add_executable(irb src/apps/IntervalRankBound.cpp)

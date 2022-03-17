@@ -219,6 +219,7 @@ namespace ReverseMIPS::IntervalRankBound {
             std::vector<std::pair<double, double>> ip_bound_l(n_user_);
             std::vector<char> prune_l(n_user_);
             std::unique_ptr<double[]> query_ptr = std::make_unique<double[]>(vec_dim_);
+            std::vector<int> rank_search_topk_max_heap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
 
                 for (int userID = 0; userID < n_user_; userID++) {
@@ -264,12 +265,24 @@ namespace ReverseMIPS::IntervalRankBound {
                     int userID = rank_bound_l[candID].userID_;
                     int &lower_rank = rank_bound_l[candID].lower_rank_;
                     int &upper_rank = rank_bound_l[candID].upper_rank_;
+                    assert(upper_rank <= lower_rank);
                     double queryIP = rank_bound_l[candID].lower_bound_;
 
                     if (candID < topk) {
-                        global_lower_rank = std::max(global_lower_rank, lower_rank);
-                    } else {
-                        global_lower_rank = std::min(global_lower_rank, lower_rank);
+                        rank_search_topk_max_heap[candID] = lower_rank;
+                        if (candID == topk - 1) {
+                            std::make_heap(rank_search_topk_max_heap.begin(),
+                                           rank_search_topk_max_heap.end(),
+                                           std::less());
+                            global_lower_rank = rank_search_topk_max_heap.front();
+                        }
+                    } else if (lower_rank < global_lower_rank) {
+                        std::pop_heap(rank_search_topk_max_heap.begin(), rank_search_topk_max_heap.end(),
+                                      std::less());
+                        rank_search_topk_max_heap[topk - 1] = global_lower_rank;
+                        std::push_heap(rank_search_topk_max_heap.begin(), rank_search_topk_max_heap.end(),
+                                       std::less());
+                        global_lower_rank = rank_search_topk_max_heap.front();
                     }
 
                     if (candID >= topk && global_lower_rank < upper_rank) {
