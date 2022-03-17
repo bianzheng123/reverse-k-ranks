@@ -115,9 +115,9 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    run_check_baseline()
-    # run_check_baseline(
-    #     compare_method=['IRBFullDim', 'IRBFullInt', 'IRBFullNorm', 'IRBPartDimPartInt', 'IRBPartDimPartNorm',
-    #                     'IRBPartIntPartNorm'],
-    #     compare_program=['irbfd', 'irbfi', 'irbfn', 'irbpdpi', 'irbpdpn', 'irbpipn'])
+    # run_check_baseline()
+    run_check_baseline(
+        compare_method=['IRBFullDim', 'IRBFullInt', 'IRBFullNorm', 'IRBPartDimPartInt', 'IRBPartDimPartNorm',
+                        'IRBPartIntPartNorm'],
+        compare_program=['irbfd', 'irbfi', 'irbfn', 'irbpdpi', 'irbpdpn', 'irbpipn'])
     # run_rankbound_sample_rate()

@@ -7,7 +7,6 @@
 
 
 #include "alg/PartIntPartNormPrune.hpp"
-
 #include "alg/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
@@ -55,62 +54,23 @@ namespace ReverseMIPS::IntervalRankBound {
                                     const double &inner_product_time,
                                     const double &coarse_binary_search_time, const double &read_disk_time,
                                     const double &fine_binary_search_time,
-                                    const double &interval_prune_ratio,
+                                    const double &interval_search_prune_ratio,
                                     const double &binary_search_prune_ratio,
                                     const double &second_per_query) {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, interval search %.3fs, inner product %.3fs\n\tcoarse binary search %.3fs, read disk time %.3f, fine binary search %.3fs\n\tinterval prune ratio %.7f, binary search prune ratio %.7f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs, interval search %.3fs, inner product %.3fs\n\tcoarse binary search %.3fs, read disk time %.3f, fine binary search %.3fs\n\tinterval search prune ratio %.7f, binary search prune ratio %.7f\n\tmillion second per query %.3fms",
                     topk,
                     total_time, interval_search_time, inner_product_time,
                     coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                    interval_prune_ratio, binary_search_prune_ratio,
+                    interval_search_prune_ratio, binary_search_prune_ratio,
                     second_per_query);
             std::string str(buff);
             this->config_l.emplace_back(str);
             return str;
         }
 
-    };
-
-    class BinarySearchBoundElement {
-    public:
-        int read_count_, base_rank_, userID_;
-        double queryIP_;
-        std::vector<double> disk_cache_;
-
-        inline BinarySearchBoundElement(const int max_n_cache) {
-            disk_cache_.reserve(max_n_cache);
-        }
-
-        inline void ReadDisk(std::ifstream &index_stream, int read_count) {
-            this->read_count_ = read_count;
-            disk_cache_.resize(read_count);
-            index_stream.read((char *) disk_cache_.data(), read_count * sizeof(double));
-        }
-
-        inline int CountRank() {
-            if (disk_cache_.empty()) {
-                return base_rank_ + 1;
-            }
-            auto iter_begin = disk_cache_.begin();
-            auto iter_end = disk_cache_.begin() + read_count_;
-
-            auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP_,
-                                           [](const double &arrIP, double queryIP) {
-                                               return arrIP > queryIP;
-                                           });
-            return (int) (lb_ptr - iter_begin) + base_rank_ + 1;
-        }
-
-        std::string ToString() {
-            char arr[256];
-            sprintf(arr, "userID %d, queryIP %.3f, read_count_ %d, base_rank %d", userID_, queryIP_, read_count_,
-                    base_rank_);
-            std::string str(arr);
-            return str;
-        }
     };
 
     class Index : public BaseIndex {
@@ -207,11 +167,13 @@ namespace ReverseMIPS::IntervalRankBound {
             }
 
             // store queryIP
+            std::vector<UserRankElement> user_topk_cache_l(n_user_);
             std::vector<RankBoundElement> rank_bound_l(n_user_);
             std::vector<std::pair<double, double>> ip_bound_l(n_user_);
             std::vector<char> prune_l(n_user_);
             std::unique_ptr<double[]> query_ptr = std::make_unique<double[]>(vec_dim_);
             std::vector<int> rank_search_topk_max_heap(topk);
+            std::vector<double> disk_cache(2 * n_max_disk_read_);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
 
                 for (int userID = 0; userID < n_user_; userID++) {
@@ -231,7 +193,6 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 int n_candidate = n_user_;
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
-
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
@@ -283,52 +244,61 @@ namespace ReverseMIPS::IntervalRankBound {
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
                 binary_search_prune_ratio_ = 1.0 * (n_user_ - n_candidate) / n_user_;
 
-                // read from disk
-                // store the data of fine binary search
-                read_disk_record_.reset();
-                std::vector<BinarySearchBoundElement> bound_cache_l(n_candidate,
-                                                                    BinarySearchBoundElement(2 * n_max_disk_read_));
+                //read disk and fine binary search
                 for (int candID = 0; candID < n_candidate; candID++) {
                     RankBoundElement element = rank_bound_l[candID];
                     int end_idx = element.lower_rank_;
                     int start_idx = element.upper_rank_;
                     int userID = element.userID_;
                     double queryIP = element.lower_bound_;
+                    int &base_rank = start_idx;
+                    int read_count = end_idx - start_idx;
 
                     assert(start_idx <= end_idx);
-                    int read_count = end_idx - start_idx;
-                    index_stream_.seekg((element.userID_ * n_data_item_ + start_idx) * sizeof(double),
-                                        std::ios::beg);
-                    bound_cache_l[candID].ReadDisk(index_stream_, read_count);
 
-                    bound_cache_l[candID].base_rank_ = start_idx;
-                    bound_cache_l[candID].userID_ = userID;
-                    bound_cache_l[candID].queryIP_ = queryIP;
+                    read_disk_record_.reset();
+                    ReadDisk(index_stream_, userID, start_idx, read_count, disk_cache);
+                    read_disk_time_ += read_disk_record_.get_elapsed_time_second();
 
+                    fine_binary_search_record_.reset();
+                    int rank = FineBinarySearch(disk_cache, queryIP, userID, base_rank, read_count);
+                    fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
+
+                    user_topk_cache_l[candID] = UserRankElement(userID, rank, queryIP);
                 }
-                read_disk_time_ += read_disk_record_.get_elapsed_time_second();
-
-                fine_binary_search_record_.reset();
-                // reuse the max heap in coarse binary search
-                int total_cand_size = (int) bound_cache_l.size();
-
-                std::vector<UserRankElement> &max_heap = query_heap_l[queryID];
-                for (int candID = 0; candID < total_cand_size; candID++) {
-                    BinarySearchBoundElement element = bound_cache_l[candID];
-                    int rank = element.CountRank();
-                    int userID = element.userID_;
-                    double queryIP = element.queryIP_;
-                    max_heap.emplace_back(userID, rank, queryIP);
+                std::sort(user_topk_cache_l.begin(), user_topk_cache_l.begin() + n_candidate,
+                          std::less<UserRankElement>());
+                for (int candID = 0; candID < topk; candID++) {
+                    query_heap_l[queryID].emplace_back(user_topk_cache_l[candID]);
                 }
-                fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
-
-                std::sort(max_heap.begin(), max_heap.end(), std::less<UserRankElement>());
-                max_heap.resize(topk);
             }
 
             interval_prune_ratio_ /= n_query_item;
 
             return query_heap_l;
+        }
+
+        inline void
+        ReadDisk(std::ifstream &index_stream, const int &userID, const int &start_idx, const int &read_count,
+                 std::vector<double> &disk_cache) const {
+            index_stream.seekg((userID * n_data_item_ + start_idx) * sizeof(double), std::ios::beg);
+            index_stream.read((char *) disk_cache.data(), read_count * sizeof(double));
+        }
+
+        inline int FineBinarySearch(const std::vector<double> &disk_cache, const double &queryIP, const int &userID,
+                                    const int &base_rank,
+                                    const int &read_count) {
+            if (read_count == 0) {
+                return base_rank + 1;
+            }
+            auto iter_begin = disk_cache.begin();
+            auto iter_end = disk_cache.begin() + read_count;
+
+            auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
+                                           [](const double &arrIP, double queryIP) {
+                                               return arrIP > queryIP;
+                                           });
+            return (int) (lb_ptr - iter_begin) + base_rank + 1;
         }
 
         //return the index of the bucket it belongs to
