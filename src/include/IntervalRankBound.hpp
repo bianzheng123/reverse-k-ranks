@@ -66,7 +66,7 @@ namespace ReverseMIPS::IntervalRankBound {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, interval search %.3fs, inner product %.3fs\n\tcoarse binary search %.3fs, read disk time %.3f, fine binary search %.3fs\n\tfull norm prune ratio %.3f, part int part norm prune ratio %.3f, binary search prune ratio %.3f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs, interval search %.3fs, inner product %.3fs\n\tcoarse binary search %.3fs, read disk time %.3f, fine binary search %.3fs\n\tfull norm prune ratio %.7f, part int part norm prune ratio %.7f, binary search prune ratio %.7f\n\tmillion second per query %.3fms",
                     topk,
                     total_time, interval_search_time, inner_product_time,
                     coarse_binary_search_time, read_disk_time, fine_binary_search_time,
@@ -234,20 +234,23 @@ namespace ReverseMIPS::IntervalRankBound {
                 }
 
                 interval_search_record_.reset();
+                printf("happen before query bound queryID %d, topk %d\n", queryID, topk);
                 //full norm
                 full_norm_prune_.QueryBound(query_vecs, user_, n_user_, rank_bound_l, true);
+                printf("happen after query bound queryID %d, topk %d\n", queryID, topk);
 
                 int n_candidate = n_user_;
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
+                printf("happen after all interval search queryID %d, topk %d\n", queryID, topk);
 
-                full_norm_prune_ratio_ += 1.0 * n_candidate / n_user_;
+                full_norm_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 part_int_part_norm_prune_.QueryBound(query_vecs, user_, n_candidate, rank_bound_l, true);
 
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
 
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
-                part_int_part_norm_prune_ratio_ += 1.0 * n_candidate / n_user_;
+                part_int_part_norm_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //calculate the exact IP
                 inner_product_record_.reset();
@@ -257,6 +260,7 @@ namespace ReverseMIPS::IntervalRankBound {
                     element.lower_bound_ = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+                printf("happen after inner product queryID %d, topk %d\n", queryID, topk);
 
                 //coarse binary search
                 coarse_binary_search_record_.reset();
@@ -291,11 +295,13 @@ namespace ReverseMIPS::IntervalRankBound {
                     }
                     CoarseBinarySearch(queryIP, userID, lower_rank, upper_rank);
                 }
+                printf("happen after coarse binary search queryID %d, topk %d\n", queryID, topk);
                 int n_remain;
                 PruneCandidateByBound(rank_bound_l, n_candidate, topk, n_remain, prune_l.data());
+                printf("happen after coarse binary search prune queryID %d, topk %d\n", queryID, topk);
                 n_candidate = topk + n_remain;
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
-                binary_search_prune_ratio_ = 1.0 * n_candidate / n_user_;
+                binary_search_prune_ratio_ = 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 // read from disk
                 // store the data of fine binary search
@@ -321,6 +327,7 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 }
                 read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+                printf("happen after read disk queryID %d, topk %d\n", queryID, topk);
 
                 fine_binary_search_record_.reset();
                 // reuse the max heap in coarse binary search
@@ -335,6 +342,7 @@ namespace ReverseMIPS::IntervalRankBound {
                     max_heap.emplace_back(userID, rank, queryIP);
                 }
                 fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
+                printf("happen after fine binary search queryID %d, topk %d\n", queryID, topk);
 
                 std::sort(max_heap.begin(), max_heap.end(), std::less<UserRankElement>());
                 max_heap.resize(topk);

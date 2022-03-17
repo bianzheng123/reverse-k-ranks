@@ -51,7 +51,7 @@ namespace ReverseMIPS::RankBound {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, fine binary search %.3fs\n\tprune ratio %.3f, million second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, fine binary search %.3fs\n\tprune ratio %.7f, million second per query %.3fms",
                     topk, total_time, read_disk_time, inner_product_time, coarse_binary_search_time,
                     fine_binary_search_time, prune_ratio, second_per_query);
             std::string str(buff);

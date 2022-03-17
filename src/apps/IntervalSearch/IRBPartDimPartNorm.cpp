@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/3/15.
+// Created by BianZheng on 2022/3/17.
 //
 
 
@@ -60,16 +60,17 @@ int main(int argc, char **argv) {
         double read_disk_time = ibsb.read_disk_time_;
         double fine_binary_search_time = ibsb.fine_binary_search_time_;
 
-        double interval_search_prune_ratio = ibsb.interval_search_prune_ratio_;
+        double interval_prune_ratio = ibsb.interval_prune_ratio_;
         double binary_search_prune_ratio = ibsb.binary_search_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
         config.AddResultConfig(topk, retrieval_time, interval_search_time, inner_product_time,
                                coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                               interval_search_prune_ratio,
+                               interval_prune_ratio,
                                binary_search_prune_ratio,
                                second_per_query);
+        spdlog::info("finish top-{}", topk);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);

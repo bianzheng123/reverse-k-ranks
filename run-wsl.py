@@ -44,10 +44,10 @@ def run(method_name='IntervalRankBound', program_name='irb'):
                     os.system(cmd)
 
 
-def run_check_baseline(compare_method='IntervalRankBound', compare_program='irb'):
+def run_check_baseline(compare_method=['IntervalRankBound'], compare_program=['irb']):
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     # dataset_l = ['movielens-small', 'movielens-1m']
-    dataset_l = ['movielens-small', 'movielens-1m']
+    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     method_m = {
         # 'OnlineBruteForce': 'bfon',
         'MemoryBruteForce': 'bfmi',
@@ -57,7 +57,8 @@ def run_check_baseline(compare_method='IntervalRankBound', compare_program='irb'
     }
 
     for ds in dataset_l:
-        os.system('cd build && ./{} {}'.format(compare_program, ds))
+        for i in range(len(compare_method)):
+            os.system('cd build && ./{} {}'.format(compare_program[i], ds))
 
     type_arr = ['index', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50]
@@ -65,15 +66,16 @@ def run_check_baseline(compare_method='IntervalRankBound', compare_program='irb'
     for ds in dataset_l:
         for topk in topk_l:
             for _type in type_arr:
-                # bfon = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'OnlineBruteForce', _type))
-                base_method = os.path.join('result', 'rank',
-                                           '{}-{}-top{}-{}.csv'.format(ds, 'BatchDiskBruteForce', topk, _type))
-                test_method = os.path.join('result', 'rank',
-                                           '{}-{}-top{}-{}.csv'.format(ds, compare_method, topk, _type))
+                for i in range(len(compare_method)):
+                    # bfon = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'OnlineBruteForce', _type))
+                    base_method = os.path.join('result', 'rank',
+                                               '{}-{}-top{}-{}.csv'.format(ds, 'BatchDiskBruteForce', topk, _type))
+                    test_method = os.path.join('result', 'rank',
+                                               '{}-{}-top{}-{}.csv'.format(ds, compare_method[i], topk, _type))
 
-                cmd = "diff {} {}".format(base_method, test_method)
-                print(cmd)
-                os.system(cmd)
+                    cmd = "diff {} {}".format(base_method, test_method)
+                    print(cmd)
+                    os.system(cmd)
 
 
 def run_bound_selection():
@@ -114,4 +116,8 @@ def run_rankbound_sample_rate():
 
 if __name__ == '__main__':
     run_check_baseline()
+    # run_check_baseline(
+    #     compare_method=['IRBFullDim', 'IRBFullInt', 'IRBFullNorm', 'IRBPartDimPartInt', 'IRBPartDimPartNorm',
+    #                     'IRBPartIntPartNorm'],
+    #     compare_program=['irbfd', 'irbfi', 'irbfn', 'irbpdpi', 'irbpdpn', 'irbpipn'])
     # run_rankbound_sample_rate()
