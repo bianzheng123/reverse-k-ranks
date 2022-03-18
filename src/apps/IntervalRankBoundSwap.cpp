@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/3/17.
+// Created by BianZheng on 2022/3/1.
 //
 
 #include "util/VectorIO.hpp"
@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "IntervalRankBound.hpp"
+#include "IntervalRankBoundSwap.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    spdlog::info("IntervalRankBound dataset_name {}, basic_dir {}", dataset_name, basic_dir);
+    spdlog::info("IntervalRankBoundSwap dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -41,32 +41,33 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    IntervalRankBound::Index &irb = IntervalRankBound::BuildIndex(user, data_item, index_path);
+    IntervalRankBoundSwap::Index &ibsb = IntervalRankBoundSwap::BuildIndex(user, data_item, index_path);
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{50, 40, 30, 20, 10};
-    IntervalRankBound::RetrievalResult config;
+    IntervalRankBoundSwap::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = irb.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = ibsb.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double interval_search_time = irb.interval_search_time_;
-        double inner_product_time = irb.inner_product_time_;
-        double coarse_binary_search_time = irb.coarse_binary_search_time_;
-        double read_disk_time = irb.read_disk_time_;
-        double fine_binary_search_time = irb.fine_binary_search_time_;
+        double interval_search_time = ibsb.interval_search_time_;
+        double inner_product_time = ibsb.inner_product_time_;
+        double coarse_binary_search_time = ibsb.coarse_binary_search_time_;
+        double read_disk_time = ibsb.read_disk_time_;
+        double fine_binary_search_time = ibsb.fine_binary_search_time_;
 
-        double interval_prune_ratio = irb.interval_prune_ratio_;
-        double binary_search_prune_ratio = irb.binary_search_prune_ratio_;
+        double full_norm_prune_ratio = ibsb.full_norm_prune_ratio_;
+        double part_int_part_norm_prune_ratio = ibsb.part_int_part_norm_prune_ratio_;
+        double binary_search_prune_ratio = ibsb.binary_search_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
         config.AddResultConfig(topk, retrieval_time, interval_search_time, inner_product_time,
                                coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                               interval_prune_ratio,
+                               full_norm_prune_ratio, part_int_part_norm_prune_ratio,
                                binary_search_prune_ratio,
                                second_per_query);
         spdlog::info("finish top-{}", topk);
@@ -76,10 +77,10 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRank(result_rank_l[i], dataset_name, "IntervalRankBound");
+        writeRank(result_rank_l[i], dataset_name, "IntervalRankBoundSwap");
     }
 
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, "IntervalRankBound");
+    config.writePerformance(dataset_name, "IntervalRankBoundSwap");
     return 0;
 }

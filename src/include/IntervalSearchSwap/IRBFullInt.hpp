@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_IRBFULLINT_HPP
 
 
-#include "alg/FullIntPrune.hpp"
+#include "alg/interval_search_swap/FullIntPrune.hpp"
 #include "alg/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
@@ -190,10 +190,10 @@ namespace ReverseMIPS::IntervalRankBound {
                 interval_search_record_.reset();
                 //full norm
                 interval_prune_.QueryBound(query_vecs, user_, n_user_, rank_bound_l, true);
-
+                this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 int n_candidate = n_user_;
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
-                this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
+
                 interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //calculate the exact IP

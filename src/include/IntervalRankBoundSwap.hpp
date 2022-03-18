@@ -1,12 +1,18 @@
 //
-// Created by BianZheng on 2022/3/17.
+// Created by BianZheng on 2022/3/1.
 //
 
-#ifndef REVERSE_KRANKS_IRBPARTDIMPARTNORM_HPP
-#define REVERSE_KRANKS_IRBPARTDIMPARTNORM_HPP
+#ifndef REVERSE_K_RANKS_INTERVALBOUND_HPP
+#define REVERSE_K_RANKS_INTERVALBOUND_HPP
 
+#include "alg/interval_search_swap/FullDimPrune.hpp"
+#include "alg/interval_search_swap/FullIntPrune.hpp"
+#include "alg/interval_search_swap/FullNormPrune.hpp"
 
-#include "alg/PartDimPartNormPrune.hpp"
+#include "alg/interval_search_swap/PartDimPartIntPrune.hpp"
+#include "alg/interval_search_swap/PartDimPartNormPrune.hpp"
+#include "alg/interval_search_swap/PartIntPartNormPrune.hpp"
+
 #include "alg/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
@@ -28,7 +34,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::IntervalRankBound {
+namespace ReverseMIPS::IntervalRankBoundSwap {
 
     class RetrievalResult : public RetrievalResultBase {
     public:
@@ -54,17 +60,17 @@ namespace ReverseMIPS::IntervalRankBound {
                                     const double &inner_product_time,
                                     const double &coarse_binary_search_time, const double &read_disk_time,
                                     const double &fine_binary_search_time,
-                                    const double &interval_search_prune_ratio,
+                                    const double &full_norm_prune_ratio, const double &part_int_part_norm_prune_ratio,
                                     const double &binary_search_prune_ratio,
                                     const double &second_per_query) {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, interval search %.3fs, inner product %.3fs\n\tcoarse binary search %.3fs, read disk time %.3f, fine binary search %.3fs\n\tinterval search prune ratio %.7f, binary search prune ratio %.7f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs, interval search %.3fs, inner product %.3fs\n\tcoarse binary search %.3fs, read disk time %.3f, fine binary search %.3fs\n\tfull norm prune ratio %.7f, part int part norm prune ratio %.7f, binary search prune ratio %.7f\n\tmillion second per query %.3fms",
                     topk,
                     total_time, interval_search_time, inner_product_time,
                     coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                    interval_search_prune_ratio, binary_search_prune_ratio,
+                    full_norm_prune_ratio, part_int_part_norm_prune_ratio, binary_search_prune_ratio,
                     second_per_query);
             std::string str(buff);
             this->config_l.emplace_back(str);
@@ -80,7 +86,8 @@ namespace ReverseMIPS::IntervalRankBound {
             coarse_binary_search_time_ = 0;
             fine_binary_search_time_ = 0;
             interval_search_time_ = 0;
-            interval_prune_ratio_ = 0;
+            full_norm_prune_ratio_ = 0;
+            part_int_part_norm_prune_ratio_ = 0;
             binary_search_prune_ratio_ = 0;
         }
 
@@ -92,7 +99,8 @@ namespace ReverseMIPS::IntervalRankBound {
         int n_interval_;
         //interval search bound
         SVD svd_ins_;
-        PartDimPartNormPrune interval_prune_;
+        FullNormPrune full_norm_prune_;
+        PartIntPartNormPrune part_int_part_norm_prune_;
 
         //for rank search, store in memory
         std::vector<double> bound_distance_table_; // n_user * n_cache_rank_
@@ -106,7 +114,7 @@ namespace ReverseMIPS::IntervalRankBound {
         int vec_dim_, n_data_item_, n_user_;
         double interval_search_time_, inner_product_time_, coarse_binary_search_time_, read_disk_time_, fine_binary_search_time_;
         TimeRecord read_disk_record_, inner_product_record_, coarse_binary_search_record_, fine_binary_search_record_, interval_search_record_;
-        double interval_prune_ratio_, binary_search_prune_ratio_;
+        double full_norm_prune_ratio_, part_int_part_norm_prune_ratio_, binary_search_prune_ratio_;
 
         Index(
                 //interval search
@@ -114,7 +122,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 const std::vector<std::pair<double, double>> &user_ip_bound_l,
                 const int &n_interval,
                 //interval search bound
-                SVD &svd_ins, PartDimPartNormPrune &interval_prune,
+                SVD &svd_ins, FullNormPrune &full_norm_prune, PartIntPartNormPrune &part_int_part_norm_prune,
                 // rank search
                 const std::vector<double> &bound_distance_table, const std::vector<int> &known_rank_idx_l,
                 const int &n_max_disk_read, const int &cache_bound_every,
@@ -127,7 +135,8 @@ namespace ReverseMIPS::IntervalRankBound {
             this->n_interval_ = n_interval;
             //interval search bound
             this->svd_ins_ = std::move(svd_ins);
-            this->interval_prune_ = std::move(interval_prune);
+            this->full_norm_prune_ = std::move(full_norm_prune);
+            this->part_int_part_norm_prune_ = std::move(part_int_part_norm_prune);
             //rank search
             this->bound_distance_table_ = bound_distance_table;
             this->known_rank_idx_l_ = known_rank_idx_l;
@@ -189,12 +198,19 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 interval_search_record_.reset();
                 //full norm
-                interval_prune_.QueryBound(query_vecs, user_, n_user_, rank_bound_l, true);
+                full_norm_prune_.QueryBound(query_vecs, user_, n_user_, rank_bound_l, true);
 
                 int n_candidate = n_user_;
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
+
+                full_norm_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+
+                part_int_part_norm_prune_.QueryBound(query_vecs, user_, n_candidate, rank_bound_l, true);
+
+                AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
+
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
-                interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                part_int_part_norm_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //calculate the exact IP
                 inner_product_record_.reset();
@@ -273,7 +289,8 @@ namespace ReverseMIPS::IntervalRankBound {
                 }
             }
 
-            interval_prune_ratio_ /= n_query_item;
+            full_norm_prune_ratio_ /= n_query_item;
+            part_int_part_norm_prune_ratio_ /= n_query_item;
 
             return query_heap_l;
         }
@@ -404,8 +421,11 @@ namespace ReverseMIPS::IntervalRankBound {
         SVD svd_ins;
         int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
 
-        PartDimPartNormPrune interval_prune;
-        interval_prune.Preprocess(user, check_dim);
+        FullNormPrune full_norm_prune;
+        full_norm_prune.Preprocess(user);
+
+        PartIntPartNormPrune part_int_part_norm_prune;
+        part_int_part_norm_prune.Preprocess(user, check_dim, scale);
 
         //interval search
         const int n_interval = std::min(n_data_item / 10, 5000);
@@ -538,7 +558,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 //interval search
                 interval_table, interval_dist_l, bound_l, n_interval,
                 //interval search bound
-                svd_ins, interval_prune,
+                svd_ins, full_norm_prune, part_int_part_norm_prune,
                 //rank search
                 bound_distance_table, known_rank_idx_l, n_max_disk_read, cache_bound_every,
                 //general retrieval
@@ -549,4 +569,4 @@ namespace ReverseMIPS::IntervalRankBound {
 
 }
 
-#endif //REVERSE_KRANKS_IRBPARTDIMPARTNORM_HPP
+#endif //REVERSE_K_RANKS_INTERVALBOUND_HPP

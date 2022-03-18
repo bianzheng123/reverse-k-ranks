@@ -100,23 +100,6 @@ namespace ReverseMIPS {
         file.close();
     }
 
-//    void writePerformance(const char *dataset_name, const char *method_name,
-//                          const std::map<std::string, std::string> &perform_m) {
-//        char resPath[256];
-//        std::sprintf(resPath, "../result/performance/%s-%s-config.txt", dataset_name, method_name);
-//        std::ofstream file(resPath);
-//        if (!file) {
-//            std::printf("error in write result\n");
-//        }
-//
-//        for (const std::pair<const std::string, std::string> &iter: perform_m) {
-//            file << iter.first << ": " << iter.second << "s" << std::endl;
-//        }
-//
-//        file.close();
-//    }
-
-
     std::string double2string(double number) {
         char tmp_char[25];
         sprintf(tmp_char, "%.3f", number);

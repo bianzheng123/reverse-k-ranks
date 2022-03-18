@@ -2,13 +2,12 @@
 // Created by BianZheng on 2022/3/17.
 //
 
-
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "IntervalSearch/IRBPartDimPartNorm.hpp"
+#include "IntervalSearchSwap/IRBPartDimPartInt.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
@@ -27,7 +26,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    spdlog::info("IRBPartDimPartNorm dataset_name {}, basic_dir {}", dataset_name, basic_dir);
+    spdlog::info("IRBPartDimPartInt dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -77,10 +76,10 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRank(result_rank_l[i], dataset_name, "IRBPartDimPartNorm");
+        writeRank(result_rank_l[i], dataset_name, "IRBPartDimPartInt");
     }
 
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, "IRBPartDimPartNorm");
+    config.writePerformance(dataset_name, "IRBPartDimPartInt");
     return 0;
 }

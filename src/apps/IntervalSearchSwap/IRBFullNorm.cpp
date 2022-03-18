@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "IntervalSearch/IRBFullNorm.hpp"
+#include "IntervalSearchSwap/IRBFullNorm.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>

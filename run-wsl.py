@@ -23,9 +23,9 @@ def run(method_name='IntervalRankBound', program_name='irb'):
     }
     for ds in dataset_l:
         os.system('cd build && ./{} {}'.format(program_name, ds))
-        for method in method_m:
+        # for method in method_m:
             # os.system('cd build && ./bfon %s' % ds)
-            os.system('cd build && ./{} {}'.format(method_m[method], ds))
+            # os.system('cd build && ./{} {}'.format(method_m[method], ds))
 
     type_arr = ['index', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50]
@@ -115,9 +115,9 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    # run_check_baseline()
-    run_check_baseline(
-        compare_method=['IRBFullDim', 'IRBFullInt', 'IRBFullNorm', 'IRBPartDimPartInt', 'IRBPartDimPartNorm',
-                        'IRBPartIntPartNorm'],
-        compare_program=['irbfd', 'irbfi', 'irbfn', 'irbpdpi', 'irbpdpn', 'irbpipn'])
+    run_check_baseline()
+    # run_check_baseline(
+    #     compare_method=['IRBFullDim', 'IRBFullInt', 'IRBFullNorm', 'IRBPartDimPartInt', 'IRBPartDimPartNorm',
+    #                     'IRBPartIntPartNorm'],
+    #     compare_program=['irbfd', 'irbfi', 'irbfn', 'irbpdpi', 'irbpdpn', 'irbpipn'])
     # run_rankbound_sample_rate()

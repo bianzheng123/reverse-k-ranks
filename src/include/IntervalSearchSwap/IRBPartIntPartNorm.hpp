@@ -2,11 +2,11 @@
 // Created by BianZheng on 2022/3/17.
 //
 
-#ifndef REVERSE_KRANKS_IRBPARTDIMPARTINT_HPP
-#define REVERSE_KRANKS_IRBPARTDIMPARTINT_HPP
+#ifndef REVERSE_KRANKS_IRBPARTINTPARTNORM_HPP
+#define REVERSE_KRANKS_IRBPARTINTPARTNORM_HPP
 
 
-#include "alg/PartDimPartIntPrune.hpp"
+#include "alg/interval_search_swap/PartIntPartNormPrune.hpp"
 #include "alg/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
@@ -92,7 +92,7 @@ namespace ReverseMIPS::IntervalRankBound {
         int n_interval_;
         //interval search bound
         SVD svd_ins_;
-        PartDimPartIntPrune interval_prune_;
+        PartIntPartNormPrune interval_prune_;
 
         //for rank search, store in memory
         std::vector<double> bound_distance_table_; // n_user * n_cache_rank_
@@ -114,7 +114,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 const std::vector<std::pair<double, double>> &user_ip_bound_l,
                 const int &n_interval,
                 //interval search bound
-                SVD &svd_ins, PartDimPartIntPrune &interval_prune,
+                SVD &svd_ins, PartIntPartNormPrune &interval_prune,
                 // rank search
                 const std::vector<double> &bound_distance_table, const std::vector<int> &known_rank_idx_l,
                 const int &n_max_disk_read, const int &cache_bound_every,
@@ -190,10 +190,10 @@ namespace ReverseMIPS::IntervalRankBound {
                 interval_search_record_.reset();
                 //full norm
                 interval_prune_.QueryBound(query_vecs, user_, n_user_, rank_bound_l, true);
-
+                this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 int n_candidate = n_user_;
                 AllIntervalSearch(rank_bound_l, prune_l, n_candidate, topk);
-                this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
+
                 interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //calculate the exact IP
@@ -404,7 +404,7 @@ namespace ReverseMIPS::IntervalRankBound {
         SVD svd_ins;
         int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
 
-        PartDimPartIntPrune interval_prune;
+        PartIntPartNormPrune interval_prune;
         interval_prune.Preprocess(user, check_dim, scale);
 
         //interval search
@@ -549,4 +549,4 @@ namespace ReverseMIPS::IntervalRankBound {
 
 }
 
-#endif //REVERSE_KRANKS_IRBPARTDIMPARTINT_HPP
+#endif //REVERSE_KRANKS_IRBPARTINTPARTNORM_HPP
