@@ -171,7 +171,7 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 interval_search_record_.reset();
                 //get the ip bound
-                interval_prune_.QueryBound(query_vecs, user_, prune_l_, ip_bound_l_);
+                interval_prune_.QueryBound(query_vecs, user_, prune_l_, ip_bound_l_, queryID, topk);
                 //count rank bound
                 interval_ins_.Query(ip_bound_l_, topk, prune_l_, rank_bound_l_);
                 //prune the bound
@@ -280,7 +280,7 @@ namespace ReverseMIPS::IntervalRankBound {
         user.vectorNormalize();
 
         const double SIGMA = 0.7;
-        const double scale = 100;
+        const double scale = 1;
         SVD svd_ins;
         int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
 

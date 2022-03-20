@@ -26,7 +26,8 @@ find_package(Armadillo)
 
 find_package(OpenMP)
 
-set(BUILD_TEST OFF)
+set(BUILD_TEST_MODULE OFF)
+set(BUILD_ATTRIBUTION ON)
 set(BUILD_FINISH OFF)
 set(BUILD_CHECK_PROGRAM ON)
 set(BUILD_INTERVAL_SEARCH OFF)
@@ -73,12 +74,12 @@ add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-if (BUILD_TEST)
+if (BUILD_ATTRIBUTION)
     add_subdirectory(attribution)
+endif ()
 
-    add_executable(tsvd test/SVD.cpp)
-    target_include_directories(tsvd PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(tsvd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+if (BUILD_TEST_MODULE)
+    add_subdirectory(test)
 endif ()
 
 if (BUILD_INTERVAL_SEARCH)

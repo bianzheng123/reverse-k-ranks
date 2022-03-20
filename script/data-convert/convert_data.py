@@ -14,12 +14,11 @@ def delete_file_if_exist(dire):
 
 if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
-    rank_k = 10
-    dimension = 150
+    dimension = 30
     n_query_item = 1000
 
     # ds_l = ['movielens-small', 'movielens-27m', 'netflix', 'yelp']
-    ds_l = ['movielens-27m']
+    ds_l = ['movielens-small', 'movielens-1m', 'movielens-10m', 'movielens-27m']
     for dataset in ds_l:
         input_dir = '/home/bianzheng/Dataset/MIPS'
 

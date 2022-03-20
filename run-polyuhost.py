@@ -2,10 +2,20 @@ import os
 
 
 def run_attribution():
-    dataset_l = ['fake', 'movielens-27m']
+    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    dataset_l = ['movielens-27m']
     for ds in dataset_l:
-        os.system('cd build/attribution && ./bd {} /run/media/hdd/ReverseMIPS'.format(ds))
-        os.system('cd attribution/bound-distribution && python3 plot.py -ds {}'.format(ds))
+        os.system('cd build/attribution && ./ipc {} /run/media/hdd/ReverseMIPS'.format(ds))
+
+    os.system('cd build/attribution && ./pi')
+
+    os.system('cd build/attribution && ./pp')
+
+    for ds in dataset_l:
+        os.system('cd build/attribution && ./dvd {} /run/media/hdd/ReverseMIPS'.format(ds))
+        os.system('cd attribution/svd-compare && python3 plot_curve.py -ds {}'.format(ds))
+
+        os.system('cd build/attribution && ./svdcmp {} /run/media/hdd/ReverseMIPS'.format(ds))
 
 
 def run():

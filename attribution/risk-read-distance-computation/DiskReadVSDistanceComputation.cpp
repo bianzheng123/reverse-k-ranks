@@ -18,8 +18,9 @@ std::unique_ptr<double[]> GenRandom(const int &n_eval, const int &n_dim) {
     std::random_device rd;  // Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(1.0, 1000.0);
+    size_t length = n_eval * n_eval;
 
-    std::unique_ptr<double[]> random_l = make_unique<double[]>(n_eval * n_dim);
+    std::unique_ptr<double[]> random_l = make_unique<double[]>(length);
 
     for (int itemID = 0; itemID < n_eval; itemID++) {
         for (int dim = 0; dim < n_dim; dim++) {
@@ -56,15 +57,39 @@ BuildWriteIndex(const char *index_path, const double *vecs1, const double *vecs2
     out.write((char *) write_array.data(), n_eval * n_eval * sizeof(double));
 }
 
+void AttributionWrite(const std::vector<std::pair<double, double>> &result_l, const std::vector<int> &dim_l) {
+
+    char resPath[256];
+    std::sprintf(resPath, "../../result/attribution/DiskReadVSDistanceComputation/result.txt");
+    std::ofstream file(resPath);
+    if (!file) {
+        std::printf("error in write result\n");
+    }
+
+    assert(result_l.size() == dim_l.size());
+    int size = (int) dim_l.size();
+
+    for (int i = 0; i < size; i++) {
+        file << "dimension=" << dim_l[i] << ", computation time " << std::to_string(result_l[i].first)
+             << "s, read disk time " << std::to_string(result_l[i].second) << "s" << std::endl;
+    }
+
+    file.close();
+}
+
 int main(int argc, char **argv) {
     vector<int> dim_l{10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200};
-    const int n_eval = 1000000;
+    const int n_eval = 100000;
     const char *index_path = "../../index/DiskRead.index";
+    spdlog::info("DiskReadVSDistanceComputation");
+
+    vector<pair<double, double>> result_l;
 
     for (const int &dimension: dim_l) {
         std::unique_ptr<double[]> vecs1 = GenRandom(n_eval, dimension);
         std::unique_ptr<double[]> vecs2 = GenRandom(n_eval, dimension);
-        std::unique_ptr<double[]> res = make_unique<double[]>(n_eval * n_eval);
+        size_t length = (size_t) n_eval * n_eval;
+        std::unique_ptr<double[]> res = make_unique<double[]>(length);
 
         TimeRecord record;
         record.reset();
@@ -81,14 +106,16 @@ int main(int argc, char **argv) {
 
         BuildWriteIndex(index_path, vecs1.get(), vecs2.get(), n_eval, dimension);
 
-        std::vector<double> read_array(n_eval * n_eval);
+        std::vector<double> read_array(length);
         std::ifstream in(index_path, std::ios::binary | std::ios::in);
         size_t read_size = (size_t) n_eval * n_eval * sizeof(double);
         record.reset();
         in.read((char *) read_array.data(), read_size);
         double read_disk_time = record.get_elapsed_time_second();
-        spdlog::info("dimension {}, computation time {}, read disk time{}", dimension, comp_time, read_disk_time);
+        spdlog::info("dimension {}, computation time {}s, read disk time {}s", dimension, comp_time, read_disk_time);
+        result_l.emplace_back(comp_time, read_disk_time);
     }
+    AttributionWrite(result_l, dim_l);
 
     return 0;
 }

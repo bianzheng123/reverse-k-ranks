@@ -33,6 +33,7 @@ namespace ReverseMIPS {
             this->vec_dim_ = user.vec_dim_;
             this->check_dim_ = check_dim;
             this->remain_dim_ = vec_dim_ - check_dim_;
+            assert(vec_dim_ > check_dim_);
             this->scale_ = scale;
 
             user_int_ptr_ = std::make_unique<int[]>(n_user_ * vec_dim_);
@@ -76,7 +77,7 @@ namespace ReverseMIPS {
 
         void
         QueryBound(const double *query_vecs, const VectorMatrix &user, const std::vector<bool> &prune_l,
-                   std::vector<std::pair<double, double>> &ip_bound_l) {
+                   std::vector<std::pair<double, double>> &ip_bound_l, int queryID, int topk) {
             assert(ip_bound_l.size() == n_user_);
             assert(prune_l.size() == n_user_);
 
@@ -126,6 +127,32 @@ namespace ReverseMIPS {
                 double upper_bound = convert_coe_.first * ub_left_part + convert_coe_.second * ub_right_part;
 
                 ip_bound_l[userID] = std::make_pair(lower_bound, upper_bound);
+                if (lower_bound > upper_bound) {
+                    printf("queryID %d, topk %d, userID %d, lower_bound %.3f, upper_bound %.3f, check_dim %d\n",
+                           queryID, topk, userID, lower_bound, upper_bound, check_dim_);
+                    printf("leftIP %d, left_otherIP %d, rightIP %d, right_otherIP %d\n", leftIP, left_otherIP, rightIP, right_otherIP);
+                    printf("left convert %.3f, right convert %.3f\n", convert_coe_.first, convert_coe_.second);
+                    printf("query max dim left %.3f, right %.3f\n", query_max_dim.first, query_max_dim.second);
+                    printf("query ratio left %.5f, right %.3f\n", qratio.first, qratio.second);
+                    printf("scale %.5f, max_dim first %.5f\n", scale_, query_max_dim.first);
+                    printf("query:\n");
+                    for(int dim = 0;dim < vec_dim_;dim++){
+                        printf("%6.3f ", query_vecs[dim]);
+                    }
+                    printf("\nquery int vecs:\n");
+                    for(int dim = 0;dim < vec_dim_;dim++){
+                        printf("%6d ", query_int_vecs[dim]);
+                    }
+                    printf("\nuser:\n");
+                    for(int dim =0; dim < vec_dim_;dim++){
+                        printf("%6.3f ", user.getVector(userID)[dim]);
+                    }
+                    printf("\nuser int vecs:\n");
+                    for(int dim = 0;dim < vec_dim_;dim++){
+                        printf("%6d ", user_int_vecs[dim]);
+                    }
+                    printf("\n");
+                }
                 assert(lower_bound <= upper_bound);
             }
 
