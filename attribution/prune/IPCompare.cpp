@@ -104,6 +104,8 @@ int main(int argc, char **argv) {
     std::vector<RankBoundElement> integrate_l;
     double integrate_used = IPIntegrate(user, query_item, integrate_l);
 
+    spdlog::info("IPCompare single {}s, integrate {}s", single_used, integrate_used);
+
     AttributionWrite(single_used, integrate_used, dataset_name);
     return 0;
 }

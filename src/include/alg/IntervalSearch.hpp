@@ -14,6 +14,7 @@
 namespace ReverseMIPS {
 
     class IntervalSearch {
+    public:
 
         int n_interval_, n_user_, n_data_item_;
         // n_user * n_interval, the last element of an interval column must be n_data_item
@@ -22,7 +23,7 @@ namespace ReverseMIPS {
         std::unique_ptr<double[]> interval_dist_l_;
         // n_user, bound for column, first is lower bound, second is upper bound
         std::unique_ptr<std::pair<double, double>[]> user_ip_bound_l_;
-    public:
+
 
         inline IntervalSearch() = default;
 
@@ -63,11 +64,12 @@ namespace ReverseMIPS {
         }
 
         //convert ip_bound to rank_bound
-        void Query(const std::vector<std::pair<double, double>> &ip_bound_l, const int &topk,
-                   const std::vector<bool> &prune_l, std::vector<std::pair<int, int>> &rank_bound_l) {
+        void RankBound(const std::vector<std::pair<double, double>> &ip_bound_l, const std::vector<bool> &prune_l,
+                       const int &topk,
+                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) {
 
             assert(prune_l.size() == n_user_);
-            assert(rank_bound_l.size() == n_user_);
+            assert(rank_lb_l.size() == n_user_ && rank_ub_l.size() == n_user_);
             assert(ip_bound_l.size() == n_user_);
 
             for (int userID = 0; userID < n_user_; userID++) {
@@ -102,7 +104,8 @@ namespace ReverseMIPS {
                 int rank_lb = itv_lb_idx == -1 ? 0 : rank_ptr[itv_lb_idx];
                 int rank_ub = itv_ub_idx == -1 ? 0 : rank_ptr[itv_ub_idx];
 
-                rank_bound_l[userID] = std::make_pair(rank_lb, rank_ub);
+                rank_lb_l[userID] = rank_lb;
+                rank_ub_l[userID] = rank_ub;
             }
         }
 

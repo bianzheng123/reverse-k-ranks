@@ -26,15 +26,14 @@ def run(method_name='IntervalRankBound', program_name='irb'):
     method_m = {
         # 'OnlineBruteForce': 'bfon',
         'MemoryBruteForce': 'bfmi',
-        'DiskBruteForce': 'bfdi',
+        # 'DiskBruteForce': 'bfdi',
         'BatchDiskBruteForce': 'bbfdi',
         # 'IntervalRankBound': 'irb'
     }
     for ds in dataset_l:
-        os.system('cd build && ./{} {}'.format(program_name, ds))
-        # for method in method_m:
-        # os.system('cd build && ./bfon %s' % ds)
-        # os.system('cd build && ./{} {}'.format(method_m[method], ds))
+        os.system('cd build && ./{} --dataset_name {}'.format(program_name, ds))
+        for method in method_m:
+            os.system('cd build && ./{} {}'.format(method_m[method], ds))
 
     type_arr = ['index', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50]
@@ -118,7 +117,8 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    run_attribution()
+    run(method_name='RankBound', program_name='rb')
+    # run(method_name='IntervalRankBound', program_name='irb')
     # run_check_baseline()
     # run_check_baseline(
     #     compare_method=['IRBFullDim', 'IRBFullInt', 'IRBFullNorm', 'IRBPartDimPartInt', 'IRBPartDimPartNorm',

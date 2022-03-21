@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 #define REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 
-#include "alg/interval_search/FullIntPrune.hpp"
+#include "alg/bound/FullIntPrune.hpp"
 #include "alg/IntervalSearch.hpp"
 #include "alg/RankSearch.hpp"
 #include "alg/PruneCandidateByBound.hpp"
@@ -107,7 +107,8 @@ namespace ReverseMIPS::IntervalRankBound {
         std::vector<bool> prune_l_;
         std::vector<std::pair<double, double>> ip_bound_l_;
         std::vector<double> queryIP_l_;
-        std::vector<std::pair<int, int>> rank_bound_l_;
+        std::vector<int> rank_lb_l_;
+        std::vector<int> rank_ub_l_;
 
         Index(
                 //interval search
@@ -139,7 +140,8 @@ namespace ReverseMIPS::IntervalRankBound {
             this->prune_l_.resize(n_user_);
             this->ip_bound_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
-            this->rank_bound_l_.resize(n_user_);
+            this->rank_lb_l_.resize(n_user_);
+            this->rank_ub_l_.resize(n_user_);
         }
 
         std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
@@ -171,12 +173,15 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 interval_search_record_.reset();
                 //get the ip bound
-                interval_prune_.QueryBound(query_vecs, user_, prune_l_, ip_bound_l_, queryID, topk);
+                interval_prune_.IPBound(query_vecs, user_, prune_l_, ip_bound_l_, queryID);
                 //count rank bound
-                interval_ins_.Query(ip_bound_l_, topk, prune_l_, rank_bound_l_);
+                interval_ins_.RankBound(ip_bound_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
                 //prune the bound
                 int n_candidate = n_user_;
-                PruneCandidateByBound(rank_bound_l_, n_user_, topk, prune_l_, n_candidate, queryID);
+                PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
+                                      n_user_, topk,
+                                      prune_l_, rank_topk_max_heap,
+                                      n_candidate);
                 assert(n_candidate >= topk);
 
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
@@ -194,10 +199,16 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 //coarse binary search
                 coarse_binary_search_record_.reset();
-                rank_ins_.QueryBound(queryIP_l_, topk, rank_topk_max_heap, rank_bound_l_, prune_l_, n_candidate, queryID);
-                PruneCandidateByBound(rank_bound_l_, n_user_, topk, prune_l_, n_candidate, queryID);
+                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, prune_l_, rank_topk_max_heap,
+                                    n_candidate);
+
+                PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
+                                      n_user_, topk,
+                                      prune_l_, rank_topk_max_heap,
+                                      n_candidate);
+
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
-                binary_search_prune_ratio_ = 1.0 * (n_user_ - n_candidate) / n_user_;
+                binary_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
                 n_candidate = 0;
@@ -205,8 +216,8 @@ namespace ReverseMIPS::IntervalRankBound {
                     if (prune_l_[userID]) {
                         continue;
                     }
-                    int end_idx = rank_bound_l_[userID].first;
-                    int start_idx = rank_bound_l_[userID].second;
+                    int end_idx = rank_lb_l_[userID];
+                    int start_idx = rank_ub_l_[userID];
                     double queryIP = queryIP_l_[userID];
                     int &base_rank = start_idx;
                     int read_count = end_idx - start_idx;
@@ -236,6 +247,7 @@ namespace ReverseMIPS::IntervalRankBound {
             }
 
             interval_prune_ratio_ /= n_query_item;
+            binary_search_prune_ratio_ /= n_query_item;
             return query_heap_l;
         }
 
@@ -280,7 +292,7 @@ namespace ReverseMIPS::IntervalRankBound {
         user.vectorNormalize();
 
         const double SIGMA = 0.7;
-        const double scale = 1;
+        const double scale = 100;
         SVD svd_ins;
         int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
 
@@ -292,7 +304,7 @@ namespace ReverseMIPS::IntervalRankBound {
         IntervalSearch interval_ins(n_interval, n_user, n_data_item);
 
         //rank search
-        const int cache_bound_every = 10;
+        const int cache_bound_every = 500;
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
         //build and write index

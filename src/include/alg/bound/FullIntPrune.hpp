@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/3/15.
+// Created by BianZheng on 2022/3/17.
 //
 
 #ifndef REVERSE_KRANKS_FULLINTPRUNE_HPP
@@ -20,8 +20,9 @@ namespace ReverseMIPS {
         std::unique_ptr<int[]> user_int_ptr_;
         std::unique_ptr<std::pair<int, int>[]> user_int_sum_ptr_;
 
-        std::unique_ptr<std::pair<double, double>[]> ip_bound_l_;
         std::unique_ptr<int[]> query_int_ptr_;
+        std::pair<double, double> user_convert_coe_;
+
         std::pair<double, double> convert_coe_;
     public:
         FullIntPrune() = default;
@@ -32,6 +33,7 @@ namespace ReverseMIPS {
             this->vec_dim_ = user.vec_dim_;
             this->check_dim_ = check_dim;
             this->remain_dim_ = vec_dim_ - check_dim_;
+            assert(vec_dim_ > check_dim_);
             this->scale_ = scale;
 
             user_int_ptr_ = std::make_unique<int[]>(n_user_ * vec_dim_);
@@ -40,7 +42,6 @@ namespace ReverseMIPS {
             user_max_dim_.first = user.getVector(0)[0];
             user_max_dim_.second = user.getVector(0)[check_dim];
             query_int_ptr_ = std::make_unique<int[]>(vec_dim_);
-            ip_bound_l_ = std::make_unique<std::pair<double, double>[]>(n_user_);
 
             //compute the integer bound for the first part
             for (int userID = 0; userID < n_user_; userID++) {
@@ -52,6 +53,8 @@ namespace ReverseMIPS {
                     user_max_dim_.second = std::max(user_max_dim_.second, user_vecs[dim]);
                 }
             }
+            user_max_dim_.first = std::abs(user_max_dim_.first);
+            user_max_dim_.second = std::abs(user_max_dim_.second);
 
             for (int userID = 0; userID < n_user_; userID++) {
                 int *user_int_vecs = user_int_ptr_.get() + userID * vec_dim_;
@@ -70,16 +73,15 @@ namespace ReverseMIPS {
 
             }
 
-            convert_coe_.first = user_max_dim_.first / (scale_ * scale_);
-            convert_coe_.second = user_max_dim_.second / (scale_ * scale_);
+            user_convert_coe_.first = user_max_dim_.first / (scale_ * scale_);
+            user_convert_coe_.second = user_max_dim_.second / (scale_ * scale_);
         }
 
         void
-        QueryBound(const double *query_vecs, const VectorMatrix &user, const int &n_candidate,
-                   std::vector<RankBoundElement> &candidate_l, bool assign) {
-            assert(candidate_l.size() == n_user_);
-            assert(n_candidate <= n_user_);
-            assert(n_candidate <= candidate_l.size());
+        IPBound(const double *query_vecs, const VectorMatrix &user, const std::vector<bool> &prune_l,
+                std::vector<std::pair<double, double>> &ip_bound_l, int queryID) {
+            assert(ip_bound_l.size() == n_user_);
+            assert(prune_l.size() == n_user_);
 
             std::pair<double, double> query_max_dim(query_vecs[0], query_vecs[check_dim_]);
             for (int dim = 1; dim < check_dim_; dim++) {
@@ -88,8 +90,10 @@ namespace ReverseMIPS {
             for (int dim = check_dim_ + 1; dim < vec_dim_; dim++) {
                 query_max_dim.second = std::max(query_max_dim.second, query_vecs[dim]);
             }
-            double left_convert_coe = convert_coe_.first * query_max_dim.first;
-            double right_convert_coe = convert_coe_.second * query_max_dim.second;
+            query_max_dim.first = std::abs(query_max_dim.first);
+            query_max_dim.second = std::abs(query_max_dim.second);
+            convert_coe_ = std::make_pair(user_convert_coe_.first * query_max_dim.first,
+                                          user_convert_coe_.second * query_max_dim.second);
 
             std::pair<double, double> qratio(scale_ / query_max_dim.first,
                                              scale_ / query_max_dim.second);
@@ -107,8 +111,10 @@ namespace ReverseMIPS {
             }
 
             int *query_remain_int_vecs = query_int_vecs + check_dim_;
-            for (int candID = 0; candID < n_candidate; candID++) {
-                int userID = candidate_l[candID].userID_;
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID]) {
+                    continue;
+                }
                 int *user_int_vecs = user_int_ptr_.get() + userID * vec_dim_;
                 int leftIP = InnerProduct(user_int_vecs, query_int_vecs, check_dim_);
                 int left_otherIP = user_int_sum_ptr_[userID].first + query_int_sum.first;
@@ -121,26 +127,11 @@ namespace ReverseMIPS {
                 int lb_right_part = rightIP - right_otherIP;
                 int ub_right_part = rightIP + right_otherIP;
 
-                double lower_bound = left_convert_coe * lb_left_part + right_convert_coe * lb_right_part;
-                double upper_bound = left_convert_coe * ub_left_part + right_convert_coe * ub_right_part;
+                double lower_bound = convert_coe_.first * lb_left_part + convert_coe_.second * lb_right_part;
+                double upper_bound = convert_coe_.first * ub_left_part + convert_coe_.second * ub_right_part;
 
-                ip_bound_l_[candID].first = lower_bound;
-                ip_bound_l_[candID].second = upper_bound;
+                ip_bound_l[userID] = std::make_pair(lower_bound, upper_bound);
                 assert(lower_bound <= upper_bound);
-            }
-
-            if (assign) {
-                for (int candID = 0; candID < n_candidate; candID++) {
-                    candidate_l[candID].lower_bound_ = ip_bound_l_[candID].first;
-                    candidate_l[candID].upper_bound_ = ip_bound_l_[candID].second;
-                }
-            } else {
-                for (int candID = 0; candID < n_candidate; candID++) {
-                    candidate_l[candID].lower_bound_ = std::max(ip_bound_l_[candID].first,
-                                                                candidate_l[candID].lower_bound_);
-                    candidate_l[candID].upper_bound_ = std::min(ip_bound_l_[candID].second,
-                                                                candidate_l[candID].upper_bound_);
-                }
             }
 
         }

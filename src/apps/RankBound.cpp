@@ -27,7 +27,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
     opts.add_options()
             ("help,h", "help info")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name), "dataset_name")
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(10),
+            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(500),
              "how many numbers would cache a value")
             ("basic_dir,bd",
              po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
         double inner_product_time = bscb.inner_product_time_;
         double coarse_binary_search_time = bscb.coarse_binary_search_time_;
         double fine_binary_search_time = bscb.fine_binary_search_time_;
-        double prune_ratio = bscb.prune_ratio_;
+        double prune_ratio = bscb.rank_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
 
@@ -103,9 +103,11 @@ int main(int argc, char **argv) {
     sprintf(other_name, "cache_bound_every_%d", cache_bound_every);
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRank(result_rank_l[i], dataset_name, "RankBound", other_name);
+//        writeRank(result_rank_l[i], dataset_name, "RankBound", other_name);
+        writeRank(result_rank_l[i], dataset_name, "RankBound");
     }
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, "RankBound", other_name);
+//    config.writePerformance(dataset_name, "RankBound", other_name);
+    config.writePerformance(dataset_name, "RankBound");
     return 0;
 }

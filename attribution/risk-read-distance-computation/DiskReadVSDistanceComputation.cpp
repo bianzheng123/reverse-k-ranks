@@ -79,7 +79,7 @@ void AttributionWrite(const std::vector<std::pair<double, double>> &result_l, co
 
 int main(int argc, char **argv) {
     vector<int> dim_l{10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200};
-    const int n_eval = 100000;
+    const int n_eval = 10000;
     const char *index_path = "../../index/DiskRead.index";
     spdlog::info("DiskReadVSDistanceComputation");
 
