@@ -252,7 +252,7 @@ namespace ReverseMIPS::DiskBruteForce {
 
     };
 
-    const int write_every_ = 30000;
+    const int write_every_ = 10000;
     const int report_batch_every_ = 5;
 
     /*

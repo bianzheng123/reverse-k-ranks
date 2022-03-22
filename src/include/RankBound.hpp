@@ -131,7 +131,6 @@ namespace ReverseMIPS::RankBound {
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
             // for binary search, check the number
-            std::vector<int> rank_topk_max_heap(topk);
             std::vector<UserRankElement> user_topk_cache_l(n_user_);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
                 prune_l_.assign(n_user_, false);
@@ -148,34 +147,18 @@ namespace ReverseMIPS::RankBound {
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
-                if (queryID == 10) {
-                    int userID = 243879;
-                    printf("after inner product queryID %d, userID %d, queryIP %.3f\n\t", queryID, userID,
-                           queryIP_l_[userID]);
-                    printf("rank lb %d, rank ub %d\n\t", rank_lb_l_[userID], rank_ub_l_[userID]);
-                    std::cout << std::boolalpha << "is prune: " << prune_l_[userID] << std::endl;
-                }
+//                if (queryID == 10) {
+//                    int userID = 243879;
+//                    printf("after inner product queryID %d, userID %d, queryIP %.3f\n\t", queryID, userID,
+//                           queryIP_l_[userID]);
+//                    printf("rank lb %d, rank ub %d\n\t", rank_lb_l_[userID], rank_ub_l_[userID]);
+//                    std::cout << std::boolalpha << "is prune: " << prune_l_[userID] << std::endl;
+//                }
 
                 //rank search
                 coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, prune_l_, rank_topk_max_heap, queryID);
-                if (queryID == 10) {
-                    int userID = 243879;
-                    printf("after rank search queryID %d, userID %d, queryIP %.3f\n\t", queryID, userID,
-                           queryIP_l_[userID]);
-                    printf("rank lb %d, rank ub %d\n\t", rank_lb_l_[userID], rank_ub_l_[userID]);
-                    std::cout << std::boolalpha << "is prune: " << prune_l_[userID] << std::endl;
-                }
-                PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_, topk,
-                                      prune_l_, rank_topk_max_heap);
-                if (queryID == 10) {
-                    int userID = 243879;
-                    printf("after prune candidate queryID %d, userID %d, queryIP %.3f\n\t", queryID, userID,
-                           queryIP_l_[userID]);
-                    printf("rank lb %d, rank ub %d\n\t", rank_lb_l_[userID], rank_ub_l_[userID]);
-                    std::cout << std::boolalpha << "is prune: " << prune_l_[userID] << std::endl;
-                }
+                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_,
+                                                                                    rank_ub_l_, prune_l_);
 
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
                 int n_candidate = 0;
@@ -196,7 +179,7 @@ namespace ReverseMIPS::RankBound {
                     int end_idx = rank_lb_l_[userID];
                     int start_idx = rank_ub_l_[userID];
                     double queryIP = queryIP_l_[userID];
-                    int &base_rank = start_idx;
+                    int base_rank = start_idx;
                     int read_count = end_idx - start_idx;
 
                     assert(0 <= read_count && read_count <= disk_cache_.size());

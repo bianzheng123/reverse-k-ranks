@@ -203,10 +203,7 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 //coarse binary search
                 coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, prune_l_, rank_topk_max_heap, queryID);
-                PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_, topk,
-                                      prune_l_, rank_topk_max_heap);
+                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, prune_l_);
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
                 n_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {

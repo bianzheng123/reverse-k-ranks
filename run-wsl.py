@@ -20,12 +20,12 @@ def run_attribution():
 
 def run(method_name='IntervalRankBound', program_name='irb'):
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    # dataset_l = ['fake']
+    # dataset_l = ['movielens-sample']
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     # dataset_l = ['movielens-small', 'movielens-1m']
     method_m = {
         # 'OnlineBruteForce': 'bfon',
-        'MemoryBruteForce': 'bfmi',
+        # 'MemoryBruteForce': 'bfmi',
         # 'DiskBruteForce': 'bfdi',
         'BatchDiskBruteForce': 'bbfdi',
         # 'IntervalRankBound': 'irb'
@@ -87,15 +87,15 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    # run(method_name='RankBound', program_name='rb')
+    run(method_name='RankBound', program_name='rb')
     # run(method_name='IntervalRankBound', program_name='irb')
 
-    run(method_name='IRBFullDimPrune', program_name='irbfdp')
-    run(method_name='IRBFullIntPrune', program_name='irbfip')
-    run(method_name='IRBFullNormPrune', program_name='irbfnp')
-    run(method_name='IRBPartDimPartIntPrune', program_name='irbpdpip')
-    run(method_name='IRBPartDimPartNormPrune', program_name='irbpdpnp')
-    run(method_name='IRBPartIntPartNormPrune', program_name='irbpipnp')
+    # run(method_name='IRBFullDimPrune', program_name='irbfdp')
+    # run(method_name='IRBFullIntPrune', program_name='irbfip')
+    # run(method_name='IRBFullNormPrune', program_name='irbfnp')
+    # run(method_name='IRBPartDimPartIntPrune', program_name='irbpdpip')
+    # run(method_name='IRBPartDimPartNormPrune', program_name='irbpdpnp')
+    # run(method_name='IRBPartIntPartNormPrune', program_name='irbpipnp')
 
     # run_check_baseline()
     # run_check_baseline(
