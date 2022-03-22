@@ -1,9 +1,9 @@
 //
-// Created by BianZheng on 2022/3/17.
+// Created by BianZheng on 2022/3/21.
 //
 
-#ifndef REVERSE_KRANKS_INTERVALRANKBOUND_HPP
-#define REVERSE_KRANKS_INTERVALRANKBOUND_HPP
+#ifndef REVERSE_KRANKS_IRBFULLINTPRUNE_HPP
+#define REVERSE_KRANKS_IRBFULLINTPRUNE_HPP
 
 #include "alg/bound/FullIntPrune.hpp"
 #include "alg/IntervalSearch.hpp"
@@ -388,4 +388,4 @@ namespace ReverseMIPS::IntervalRankBound {
     }
 
 }
-#endif //REVERSE_KRANKS_INTERVALRANKBOUND_HPP
+#endif //REVERSE_KRANKS_IRBFULLINTPRUNE_HPP

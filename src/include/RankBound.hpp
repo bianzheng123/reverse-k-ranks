@@ -144,6 +144,11 @@ namespace ReverseMIPS::RankBound {
                 for (int userID = 0; userID < n_user_; userID++) {
                     double *user_vec = user_.getVector(userID);
                     double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+//                    if (queryID == 0 && userID == 4950) {
+//                        printf("queryID %d, userID %d, rank lb %d, rank ub %d, queryIP %.3f\n", queryID, userID,
+//                               rank_lb_l_[userID], rank_ub_l_[userID], queryIP_l_[userID]);
+//                        std::cout << std::boolalpha << "prune_l: " << prune_l_[userID] << std::endl;
+//                    }
                     queryIP_l_[userID] = queryIP;
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
@@ -153,6 +158,12 @@ namespace ReverseMIPS::RankBound {
                 int n_candidate = n_user_;
                 rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, prune_l_, rank_topk_max_heap,
                                     n_candidate);
+//                if (queryID == 0) {
+//                    const int userID = 4950;
+//                    printf("queryID %d, userID %d, rank lb %d, rank ub %d, queryIP %.3f\n", queryID, userID,
+//                           rank_lb_l_[userID], rank_ub_l_[userID], queryIP_l_[userID]);
+//                    std::cout << std::boolalpha << "prune_l: " << prune_l_[userID] << std::endl;
+//                }
 
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
@@ -246,6 +257,7 @@ namespace ReverseMIPS::RankBound {
         const int vec_dim = data_item.vec_dim_;
         const int n_batch = user.n_vector_ / write_every_;
         const int n_remain = user.n_vector_ % write_every_;
+
         user.vectorNormalize();
 
         //rank search

@@ -56,6 +56,9 @@ namespace ReverseMIPS {
                     l2norm += rawData_[i * vec_dim_ + j] * rawData_[i * vec_dim_ + j];
                 }
                 l2norm = std::sqrt(l2norm);
+                if (l2norm <= 0.001) {
+                    continue;
+                }
                 for (int j = 0; j < vec_dim_; j++) {
                     rawData_[i * vec_dim_ + j] /= l2norm;
                 }

@@ -79,7 +79,7 @@ namespace ReverseMIPS {
 
         void
         IPBound(const double *query_vecs, const VectorMatrix &user, const std::vector<bool> &prune_l,
-                std::vector<std::pair<double, double>> &ip_bound_l, int queryID) {
+                std::vector<std::pair<double, double>> &ip_bound_l) {
             assert(ip_bound_l.size() == n_user_);
             assert(prune_l.size() == n_user_);
 

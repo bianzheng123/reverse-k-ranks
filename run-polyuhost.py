@@ -67,3 +67,10 @@ def run_rankbound_sample_rate():
 if __name__ == '__main__':
     os.system('cd build && ./{} --dataset_name {} --basic_dir /run/media/hdd/ReverseMIPS'.format('rb', 'movielens-27m'))
     os.system('cd build && ./{} {} /run/media/hdd/ReverseMIPS'.format('irb', 'movielens-27m'))
+
+    # os.system('cd build && ./{} {} /run/media/hdd/ReverseMIPS'.format('irbfdp', 'movielens-27m'))
+    # os.system('cd build && ./{} {} /run/media/hdd/ReverseMIPS'.format('irbfip', 'movielens-27m'))
+    # os.system('cd build && ./{} {} /run/media/hdd/ReverseMIPS'.format('irbfnp', 'movielens-27m'))
+    # os.system('cd build && ./{} {} /run/media/hdd/ReverseMIPS'.format('irbpdpip', 'movielens-27m'))
+    # os.system('cd build && ./{} {} /run/media/hdd/ReverseMIPS'.format('irbpdpnp', 'movielens-27m'))
+    # os.system('cd build && ./{} {} /run/media/hdd/ReverseMIPS'.format('irbpipnp', 'movielens-27m'))
