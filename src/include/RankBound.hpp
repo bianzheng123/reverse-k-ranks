@@ -196,7 +196,7 @@ namespace ReverseMIPS::RankBound {
                     int end_idx = rank_lb_l_[userID];
                     int start_idx = rank_ub_l_[userID];
                     double queryIP = queryIP_l_[userID];
-                    int &base_rank = start_idx;
+                    int base_rank = start_idx;
                     int read_count = end_idx - start_idx;
 
                     assert(0 <= read_count && read_count <= disk_cache_.size());
@@ -308,7 +308,7 @@ namespace ReverseMIPS::RankBound {
                 const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
                 rank_ins.LoopPreprocess(distance_ptr, userID);
             }
-            out.write((char *) write_distance_cache.data(), write_distance_cache.size() * sizeof(double));
+            out.write((char *) write_distance_cache.data(), write_every_ * n_data_item * sizeof(double));
 
             if (i % report_batch_every_ == 0) {
                 std::cout << "preprocessed " << i / (0.01 * n_batch) << " %, "
