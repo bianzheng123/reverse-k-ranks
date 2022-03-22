@@ -27,11 +27,11 @@ namespace ReverseMIPS {
             this->n_node_ = n_node;
 
             user_idx_l_ = std::make_unique<int[]>(n_user_);
-            const int *user_idx_vecs = user_idx_l_.get();
+            const int* user_idx_vecs = user_idx_l_.get();
             std::iota(user_idx_vecs, user_idx_vecs + n_user_, 0);
-//            user_idx_l_
-//
-//            const double *user_vecs = user.getVector(0);
+            user_idx_l_
+
+            const double *user_vecs = user.getVector(0);
         }
 
     };

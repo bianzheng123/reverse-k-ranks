@@ -6,12 +6,15 @@
 #include "alg/SVD.hpp"
 #include "util/VectorIO.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "alg/BallSearch.hpp"
 #include <string>
 #include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace ReverseMIPS;
+
+inline bool DoubleEqual(double a, double b) {
+    return std::abs(a - b) < 0.0001;
+}
 
 int main(int argc, char **argv) {
 //    if (!(argc == 2 or argc == 3)) {

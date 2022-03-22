@@ -10,17 +10,11 @@
 
 namespace ReverseMIPS {
 
-    constexpr bool
-    UserRankMaxHeap(const std::pair<int, int> &user_rank, const std::pair<int, int> &other) {
-        return user_rank.second < other.second;
-    }
-
     class RankSearch {
 
         int n_cache_rank_, cache_bound_every_, n_data_item_, n_user_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_cache_rank
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_cache_rank
-        std::unique_ptr<int[]> count_max_heap_;
     public:
         int n_max_disk_read_;
 
@@ -35,7 +29,6 @@ namespace ReverseMIPS {
             this->n_user_ = n_user;
             known_rank_idx_l_ = std::make_unique<int[]>(n_cache_rank_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_cache_rank_);
-            count_max_heap_ = std::make_unique<int[]>(n_cache_rank_ + 1);
 
             Preprocess();
 
@@ -61,9 +54,16 @@ namespace ReverseMIPS {
             }
         }
 
-        inline int
-        CoarseBinarySearch(const double &queryIP, const int &userID, const int &rank_lb, const int &rank_ub) const {
+        inline bool
+        CoarseBinarySearch(const double &queryIP, const int &userID, const int &global_lower_bucket,
+                           int &rank_lb, int &rank_ub, int queryID, int topk) const {
             double *search_iter = bound_distance_table_.get() + userID * n_cache_rank_;
+
+            assert(0 <= global_lower_bucket && global_lower_bucket <= n_cache_rank_);
+            if (global_lower_bucket < n_cache_rank_ &&
+                queryIP < search_iter[global_lower_bucket]) {
+                return true;
+            }
 
             int bucket_ub = std::ceil(1.0 * (rank_ub - cache_bound_every_ + 1) / cache_bound_every_);
             int bucket_lb = std::floor(1.0 * (rank_lb - cache_bound_every_ + 1) / cache_bound_every_);
@@ -76,94 +76,94 @@ namespace ReverseMIPS {
                                                   return arrIP > queryIP;
                                               });
             int bucket_idx = bucket_ub + (int) (lb_ptr - iter_begin);
-            return bucket_idx;
-        }
+            int tmp_rank_lb = known_rank_idx_l_[bucket_idx];
+            int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
 
-        //return the index of the bucket it belongs to
-        [[nodiscard]] inline int
-        CoarseBinarySearchBound(const double &queryIP, const int &userID, const int &bound_rank_id,
-                                const int &rank_lb, const int &rank_ub) const {
-            auto iter_begin = bound_distance_table_.get() + userID * n_cache_rank_;
-            if (bound_rank_id != n_cache_rank_ && iter_begin[bound_rank_id] > queryIP) {
-                return -1;
+            if (lb_ptr == iter_end) {
+                rank_ub = tmp_rank_ub;
+            } else if (lb_ptr == iter_begin) {
+                rank_lb = tmp_rank_lb;
+            } else {
+                rank_lb = tmp_rank_lb;
+                rank_ub = tmp_rank_ub;
             }
-            int bucket_ub = std::ceil(1.0 * (rank_ub - cache_bound_every_ + 1) / cache_bound_every_);
-            int bucket_lb = std::floor(1.0 * (rank_lb - cache_bound_every_ + 1) / cache_bound_every_);
-            iter_begin += bucket_ub;
-
-            int offset_size = bound_rank_id == n_cache_rank_ ? n_cache_rank_ - 1 : bound_rank_id;
-            auto iter_end = iter_begin + std::min(offset_size, bucket_lb) + 1;
-
-            auto lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
-                                           [](const double &arrIP, double queryIP) {
-                                               return arrIP > queryIP;
-                                           });
-            return (int) (lb_ptr - iter_begin) + bucket_ub;
+            return false;
         }
 
         void RankBound(const std::vector<double> &queryIP_l, const int &topk,
-                       std::vector<int> &rank_lb_l,
-                       std::vector<int> &rank_ub_l,
-                       std::vector<bool> &prune_l) {
-            std::vector<std::pair<int, int>> topk_max_heap;
-            topk_max_heap.reserve(topk);
-            std::memset(count_max_heap_.get(), 0, sizeof(int) * (n_cache_rank_ + 1));
-            for (int userID = 0; userID < topk; userID++) {
+                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
+                       std::vector<bool> &prune_l,
+                       std::vector<int> &rank_topk_max_heap, int queryID) const {
+            assert(rank_topk_max_heap.size() == topk);
+            int count = 0;
+            int userID = 0;
+            while (count < topk) {
                 if (prune_l[userID]) {
+                    userID++;
                     continue;
                 }
+                int lower_rank = rank_lb_l[userID];
+                int upper_rank = rank_ub_l[userID];
+                assert(upper_rank <= lower_rank);
                 double queryIP = queryIP_l[userID];
-                int crank = CoarseBinarySearch(queryIP, userID, rank_lb_l[userID], rank_ub_l[userID]);
-                topk_max_heap.emplace_back(userID, crank);
-                count_max_heap_[crank]++;
-            }
 
-            std::make_heap(topk_max_heap.begin(), topk_max_heap.end(), UserRankMaxHeap);
-            for (int userID = topk; userID < n_user_; userID++) {
+                CoarseBinarySearch(queryIP, userID, n_cache_rank_, lower_rank, upper_rank, queryID, topk);
+                rank_topk_max_heap[count] = lower_rank;
+                rank_lb_l[userID] = lower_rank;
+                rank_ub_l[userID] = upper_rank;
+                count++;
+                userID++;
+            }
+            assert(count == topk);
+            std::make_heap(rank_topk_max_heap.begin(),
+                           rank_topk_max_heap.end(),
+                           std::less());
+            int global_lower_rank = rank_topk_max_heap.front();
+            int global_lower_bucket =
+                    std::floor(1.0 * (global_lower_rank - cache_bound_every_ + 1) / cache_bound_every_) + 1;
+            assert(global_lower_bucket >= 0);
+            const int topk_1 = topk - 1;
+
+            while (userID < n_user_) {
                 if (prune_l[userID]) {
+                    userID++;
                     continue;
                 }
+
+                int lower_rank = rank_lb_l[userID];
+                int upper_rank = rank_ub_l[userID];
+                assert(upper_rank <= lower_rank);
                 double queryIP = queryIP_l[userID];
-                int global_crank = topk_max_heap.front().second;
-                int crank = CoarseBinarySearchBound(queryIP, userID, global_crank, rank_lb_l[userID],
-                                                    rank_ub_l[userID]);
-                if (crank != -1) {
-                    if (crank == global_crank) {
-                        topk_max_heap.emplace_back(userID, crank);
-                        std::push_heap(topk_max_heap.begin(), topk_max_heap.end(), UserRankMaxHeap);
-                        count_max_heap_[crank]++;
-                    } else { // crank < global_crank
-                        int min_rank_count = count_max_heap_[global_crank];
-                        if (topk_max_heap.size() - min_rank_count + 1 == topk) {
-                            // the other greater rank is enough to fill the top-k, delete all the minimum rank
-                            while (topk_max_heap.size() >= topk) {
-                                int del_userID = topk_max_heap.front().first;
-                                prune_l[del_userID] = true;
-                                std::pop_heap(topk_max_heap.begin(), topk_max_heap.end(), UserRankMaxHeap);
-                                topk_max_heap.pop_back();
-                            }
-                            topk_max_heap.emplace_back(userID, crank);
-                            std::push_heap(topk_max_heap.begin(), topk_max_heap.end(), UserRankMaxHeap);
-                            count_max_heap_[crank]++;
-                            count_max_heap_[global_crank] = 0;
-                        } else {
-                            topk_max_heap.emplace_back(userID, crank);
-                            std::push_heap(topk_max_heap.begin(), topk_max_heap.end(), UserRankMaxHeap);
-                            count_max_heap_[crank]++;
-                        }
-                    }
+
+                if (global_lower_rank < upper_rank) {
+                    prune_l[userID] = true;
+                    userID++;
+                    continue;
                 }
+                bool prune = CoarseBinarySearch(queryIP, userID, global_lower_bucket, lower_rank, upper_rank, queryID, topk);
+
+                if (prune) {
+                    prune_l[userID] = true;
+                    userID++;
+                    continue;
+                }
+
+                if (lower_rank < global_lower_rank) {
+                    std::pop_heap(rank_topk_max_heap.begin(), rank_topk_max_heap.end(),
+                                  std::less());
+                    rank_topk_max_heap[topk_1] = global_lower_rank;
+                    std::push_heap(rank_topk_max_heap.begin(), rank_topk_max_heap.end(),
+                                   std::less());
+                    global_lower_rank = rank_topk_max_heap.front();
+                    global_lower_bucket =
+                            std::floor(1.0 * (global_lower_rank - cache_bound_every_ + 1) / cache_bound_every_) + 1;
+                }
+
+                rank_lb_l[userID] = lower_rank;
+                rank_ub_l[userID] = upper_rank;
+                userID++;
             }
 
-            int n_candidate = (int) topk_max_heap.size();
-            for (int candID = 0; candID < n_candidate; candID++) {
-                int userID = topk_max_heap[candID].first;
-                int crank = topk_max_heap[candID].second;
-                int start_idx = crank == 0 ? 0 : known_rank_idx_l_[crank - 1] + 1;
-                int end_idx = crank == n_cache_rank_ ? n_data_item_ : known_rank_idx_l_[crank];
-                rank_lb_l[userID] = end_idx;
-                rank_ub_l[userID] = start_idx;
-            }
         }
 
     };
