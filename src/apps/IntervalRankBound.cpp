@@ -46,6 +46,7 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{50, 40, 30, 20, 10};
+//    vector<int> topk_l{10};
     IntervalRankBound::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
@@ -60,14 +61,14 @@ int main(int argc, char **argv) {
         double fine_binary_search_time = irb.fine_binary_search_time_;
 
         double interval_prune_ratio = irb.interval_prune_ratio_;
-        double binary_search_prune_ratio = irb.binary_search_prune_ratio_;
+        double rank_search_prune_ratio = irb.rank_search_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
         config.AddResultConfig(topk, retrieval_time, interval_search_time, inner_product_time,
                                coarse_binary_search_time, read_disk_time, fine_binary_search_time,
                                interval_prune_ratio,
-                               binary_search_prune_ratio,
+                               rank_search_prune_ratio,
                                second_per_query);
         spdlog::info("finish top-{}", topk);
     }

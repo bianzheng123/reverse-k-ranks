@@ -27,7 +27,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
     opts.add_options()
             ("help,h", "help info")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name), "dataset_name")
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(500),
+            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(10),
              "how many numbers would cache a value")
             ("basic_dir,bd",
              po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
@@ -73,8 +73,8 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-//    vector<int> topk_l{50, 40, 30, 20, 10};
-    vector<int> topk_l{10};
+    vector<int> topk_l{50, 40, 30, 20, 10};
+//    vector<int> topk_l{10};
     RankBound::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
         string str = config.AddResultConfig(topk, retrieval_time, read_disk_time, inner_product_time,
                                             coarse_binary_search_time, fine_binary_search_time, prune_ratio,
                                             second_per_query);
-        spdlog::info("{}", str);
+        spdlog::info("finish top-{}", topk);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);

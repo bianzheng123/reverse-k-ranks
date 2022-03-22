@@ -14,8 +14,7 @@ namespace ReverseMIPS {
     void
     PruneCandidateByBound(const std::vector<int> &lb_l, const std::vector<int> &ub_l,
                           const int &n_user, const int &topk,
-                          std::vector<bool> &prune_l, std::vector<int> &topk_lb_heap,
-                          int &n_candidate) {
+                          std::vector<bool> &prune_l, std::vector<int> &topk_lb_heap) {
         assert(lb_l.size() == n_user);
         assert(ub_l.size() == n_user);
         assert(prune_l.size() == n_user);
@@ -44,7 +43,6 @@ namespace ReverseMIPS {
             int tmp_ub = ub_l[userID];
             if (global_lb < tmp_ub) {
                 prune_l[userID] = true;
-                n_candidate--;
             }
         }
 

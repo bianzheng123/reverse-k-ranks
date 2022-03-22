@@ -21,8 +21,7 @@ def run_attribution():
 def run(method_name='IntervalRankBound', program_name='irb'):
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     # dataset_l = ['fake']
-    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    dataset_l = ['movielens-27m']
+    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     # dataset_l = ['movielens-small', 'movielens-1m']
     method_m = {
         # 'OnlineBruteForce': 'bfon',
@@ -32,12 +31,16 @@ def run(method_name='IntervalRankBound', program_name='irb'):
         # 'IntervalRankBound': 'irb'
     }
     for ds in dataset_l:
-        os.system('cd build && ./{} --dataset_name {}'.format(program_name, ds))
-        for method in method_m:
-            os.system('cd build && ./{} {}'.format(method_m[method], ds))
+        if program_name == 'irb':
+            os.system('cd build && ./{} {}'.format(program_name, ds))
+        if program_name == 'rb':
+            os.system('cd build && ./{} --dataset_name {}'.format(program_name, ds))
+
+        # for method in method_m:
+        #     os.system('cd build && ./{} {}'.format(method_m[method], ds))
 
     type_arr = ['index', 'IP', 'rank']
-    topk_l = [10]
+    topk_l = [10, 20, 30, 40, 50]
 
     for ds in dataset_l:
         for topk in topk_l:
@@ -85,7 +88,7 @@ def run_rankbound_sample_rate():
 
 if __name__ == '__main__':
     run(method_name='RankBound', program_name='rb')
-    # run(method_name='IntervalRankBound', program_name='irb')
+    run(method_name='IntervalRankBound', program_name='irb')
 
     # run(method_name='IRBFullDimPrune', program_name='irbfdp')
     # run(method_name='IRBFullIntPrune', program_name='irbfip')
