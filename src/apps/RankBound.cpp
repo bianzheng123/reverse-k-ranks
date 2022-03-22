@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{50, 40, 30, 20, 10};
-//    vector<int> topk_l{10};
+//    vector<int> topk_l{3};
     RankBound::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {

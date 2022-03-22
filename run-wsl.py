@@ -22,12 +22,13 @@ def run(method_name='IntervalRankBound', program_name='irb'):
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     # dataset_l = ['fake']
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    # dataset_l = ['movielens-sample']
     # dataset_l = ['movielens-small', 'movielens-1m']
     method_m = {
         # 'OnlineBruteForce': 'bfon',
         'MemoryBruteForce': 'bfmi',
         # 'DiskBruteForce': 'bfdi',
-        'BatchDiskBruteForce': 'bbfdi',
+        # 'BatchDiskBruteForce': 'bbfdi',
         # 'IntervalRankBound': 'irb'
     }
     for ds in dataset_l:
@@ -36,11 +37,12 @@ def run(method_name='IntervalRankBound', program_name='irb'):
         else:
             os.system('cd build && ./{} {}'.format(program_name, ds))
 
-        # for method in method_m:
-        #     os.system('cd build && ./{} {}'.format(method_m[method], ds))
+        for method in method_m:
+            os.system('cd build && ./{} {}'.format(method_m[method], ds))
 
     type_arr = ['index', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50]
+    # topk_l = [3]
 
     for ds in dataset_l:
         for topk in topk_l:

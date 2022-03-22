@@ -68,8 +68,18 @@ namespace ReverseMIPS {
             int bucket_ub = std::ceil(1.0 * (rank_ub - cache_bound_every_ + 1) / cache_bound_every_);
             int bucket_lb = std::floor(1.0 * (rank_lb - cache_bound_every_ + 1) / cache_bound_every_);
 
+            bucket_lb = bucket_lb == n_cache_rank_ ? n_cache_rank_ - 1 : bucket_lb;
+
             double *iter_begin = search_iter + bucket_ub;
             double *iter_end = search_iter + bucket_lb + 1;
+            if (queryID == 861 && userID == 2) {
+                printf("before coarse bs rank bound queryID %d, userID %d, queryIP %.3f\n\t", queryID, userID,
+                       queryIP);
+                printf("rank lb %d, rank ub %d\n", rank_lb, rank_ub);
+                printf("n cache rank %d\n", n_cache_rank_);
+                printf("bucket lb IP %.3f, bucket ub IP %.3f\n", *iter_begin, *(iter_end - 1));
+                printf("bucket rank lb IP %d, bucket rank ub IP %d\n", bucket_lb, bucket_ub);
+            }
 
             double *lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
                                               [](const double &arrIP, double queryIP) {
@@ -86,6 +96,12 @@ namespace ReverseMIPS {
             } else {
                 rank_lb = tmp_rank_lb;
                 rank_ub = tmp_rank_ub;
+            }
+
+            if (queryID == 861 && userID == 2) {
+                printf("after coarse bs rank bound queryID %d, userID %d, queryIP %.3f\n\t", queryID, userID,
+                       queryIP);
+                printf("rank lb %d, rank ub %d\n", rank_lb, rank_ub);
             }
             return false;
         }
@@ -107,10 +123,23 @@ namespace ReverseMIPS {
                 assert(upper_rank <= lower_rank);
                 double queryIP = queryIP_l[userID];
 
+                if (queryID == 861 && userID == 2) {
+                    printf("before rank bound queryID %d, userID %d, queryIP %.3f\n\t", queryID, userID,
+                           queryIP_l[userID]);
+                    printf("rank lb %d, rank ub %d\n", rank_lb_l[userID], rank_ub_l[userID]);
+                    std::cout << std::boolalpha << "is prune: " << prune_l[userID] << std::endl;
+                }
+
                 CoarseBinarySearch(queryIP, userID, n_cache_rank_, lower_rank, upper_rank, queryID, topk);
                 rank_topk_max_heap[count] = lower_rank;
                 rank_lb_l[userID] = lower_rank;
                 rank_ub_l[userID] = upper_rank;
+                if (queryID == 861 && userID == 2) {
+                    printf("after rank bound queryID %d, userID %d, queryIP %.3f\n\t", queryID, userID,
+                           queryIP_l[userID]);
+                    printf("rank lb %d, rank ub %d\n", rank_lb_l[userID], rank_ub_l[userID]);
+                    std::cout << std::boolalpha << "is prune: " << prune_l[userID] << std::endl;
+                }
                 count++;
                 userID++;
             }
@@ -140,7 +169,8 @@ namespace ReverseMIPS {
                     userID++;
                     continue;
                 }
-                bool prune = CoarseBinarySearch(queryIP, userID, global_lower_bucket, lower_rank, upper_rank, queryID, topk);
+                bool prune = CoarseBinarySearch(queryIP, userID, global_lower_bucket, lower_rank, upper_rank, queryID,
+                                                topk);
 
                 if (prune) {
                     prune_l[userID] = true;
