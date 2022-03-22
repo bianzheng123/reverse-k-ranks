@@ -311,7 +311,7 @@ namespace ReverseMIPS::IntervalRankBound {
         IntervalSearch interval_ins(n_interval, n_user, n_data_item);
 
         //rank search
-        const int cache_bound_every = 10;
+        const int cache_bound_every = 500;
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
         //build and write index

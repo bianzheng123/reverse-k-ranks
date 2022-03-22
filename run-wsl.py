@@ -31,10 +31,10 @@ def run(method_name='IntervalRankBound', program_name='irb'):
         # 'IntervalRankBound': 'irb'
     }
     for ds in dataset_l:
-        if program_name == 'irb':
-            os.system('cd build && ./{} {}'.format(program_name, ds))
         if program_name == 'rb':
             os.system('cd build && ./{} --dataset_name {}'.format(program_name, ds))
+        else:
+            os.system('cd build && ./{} {}'.format(program_name, ds))
 
         # for method in method_m:
         #     os.system('cd build && ./{} {}'.format(method_m[method], ds))
@@ -87,15 +87,15 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    run(method_name='RankBound', program_name='rb')
-    run(method_name='IntervalRankBound', program_name='irb')
+    # run(method_name='RankBound', program_name='rb')
+    # run(method_name='IntervalRankBound', program_name='irb')
 
-    # run(method_name='IRBFullDimPrune', program_name='irbfdp')
-    # run(method_name='IRBFullIntPrune', program_name='irbfip')
-    # run(method_name='IRBFullNormPrune', program_name='irbfnp')
-    # run(method_name='IRBPartDimPartIntPrune', program_name='irbpdpip')
-    # run(method_name='IRBPartDimPartNormPrune', program_name='irbpdpnp')
-    # run(method_name='IRBPartIntPartNormPrune', program_name='irbpipnp')
+    run(method_name='IRBFullDimPrune', program_name='irbfdp')
+    run(method_name='IRBFullIntPrune', program_name='irbfip')
+    run(method_name='IRBFullNormPrune', program_name='irbfnp')
+    run(method_name='IRBPartDimPartIntPrune', program_name='irbpdpip')
+    run(method_name='IRBPartDimPartNormPrune', program_name='irbpdpnp')
+    run(method_name='IRBPartIntPartNormPrune', program_name='irbpipnp')
 
     # run_check_baseline()
     # run_check_baseline(
