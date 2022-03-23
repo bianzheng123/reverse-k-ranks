@@ -197,6 +197,7 @@ namespace ReverseMIPS::RankBound {
 
                     int end_idx = rank_lb_l_[userID];
                     int start_idx = rank_ub_l_[userID];
+                    assert(0 <= start_idx && start_idx <= end_idx && end_idx <= n_data_item_);
                     double queryIP = queryIP_l_[userID];
                     int base_rank = start_idx;
                     int read_count = end_idx - start_idx;
@@ -205,7 +206,8 @@ namespace ReverseMIPS::RankBound {
 
                     assert(start_idx <= end_idx);
                     read_disk_record_.reset();
-                    ReadDisk(index_stream_, userID, start_idx, read_count);
+                    index_stream_.seekg((userID * n_data_item_ + start_idx) * sizeof(double), std::ios::beg);
+                    index_stream_.read((char *) disk_cache_.data(), read_count * sizeof(double));
                     read_disk_time_ += read_disk_record_.get_elapsed_time_second();
                     fine_binary_search_record_.reset();
                     int rank = FineBinarySearch(disk_cache_, queryIP, userID, base_rank, read_count);
@@ -225,13 +227,6 @@ namespace ReverseMIPS::RankBound {
             rank_prune_ratio_ /= n_query_item;
 
             return query_heap_l;
-        }
-
-        inline void
-        ReadDisk(std::ifstream &index_stream, const int &userID, const int &start_idx, const int &read_count) const {
-            index_stream.seekg((userID * n_data_item_ + start_idx) * sizeof(double), std::ios::beg);
-            assert(0 <= read_count && read_count <= disk_cache_.size());
-            index_stream.read((char *) disk_cache_.data(), read_count * sizeof(double));
         }
 
         inline int FineBinarySearch(const std::vector<double> &disk_cache, const double &queryIP, const int &userID,
