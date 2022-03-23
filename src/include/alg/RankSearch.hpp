@@ -29,6 +29,15 @@ namespace ReverseMIPS {
             this->n_user_ = n_user;
             known_rank_idx_l_ = std::make_unique<int[]>(n_cache_rank_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_cache_rank_);
+            if (cache_bound_every >= n_data_item) {
+                std::cout << "cache bound every larger than n_data_item, program exit" << std::endl;
+                exit(-1);
+            }
+            if (n_cache_rank_ <= 0) {
+                std::cout << "cache rank size is too small, program exit\n" << std::endl;
+                exit(-1);
+            }
+            assert(n_cache_rank_ > 0);
 
             Preprocess();
 
@@ -39,6 +48,11 @@ namespace ReverseMIPS {
                  known_rank_idx < n_data_item_; known_rank_idx += cache_bound_every_, idx++) {
                 known_rank_idx_l_[idx] = known_rank_idx;
             }
+
+            for (int id = 0; id < n_cache_rank_; id++) {
+                printf("%d ", known_rank_idx_l_[id]);
+            }
+            printf("\n");
 
             assert(known_rank_idx_l_[0] == known_rank_idx_l_[1] - (known_rank_idx_l_[0] + 1));
             n_max_disk_read_ = std::max(known_rank_idx_l_[0] + 1,

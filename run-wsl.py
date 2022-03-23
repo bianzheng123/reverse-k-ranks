@@ -21,7 +21,8 @@ def run_attribution():
 def run(method_name='IntervalRankBound', program_name='irb'):
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     # dataset_l = ['fake']
-    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    dataset_l = ['fakebig']
     # dataset_l = ['movielens-sample']
     # dataset_l = ['movielens-small', 'movielens-1m']
     method_m = {

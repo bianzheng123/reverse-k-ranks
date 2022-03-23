@@ -30,7 +30,7 @@ set(BUILD_TEST_MODULE OFF)
 set(BUILD_ATTRIBUTION OFF)
 set(BUILD_FINISH ON)
 set(BUILD_CHECK_PROGRAM ON)
-set(BUILD_INTERVAL_SEARCH OFF)
+set(BUILD_INTERVAL_SEARCH ON)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)

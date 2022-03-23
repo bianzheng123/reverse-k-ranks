@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "alg/SVD.hpp"
+#include "alg/BallSearch.hpp"
 #include "util/VectorIO.hpp"
 #include "struct/VectorMatrix.hpp"
 #include <string>
