@@ -30,11 +30,11 @@ namespace ReverseMIPS {
             known_rank_idx_l_ = std::make_unique<int[]>(n_cache_rank_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_cache_rank_);
             if (cache_bound_every >= n_data_item) {
-                std::cout << "cache bound every larger than n_data_item, program exit" << std::endl;
+                spdlog::error("cache bound every larger than n_data_item, program exit");
                 exit(-1);
             }
             if (n_cache_rank_ <= 0) {
-                std::cout << "cache rank size is too small, program exit\n" << std::endl;
+                spdlog::error("cache rank size is too small, program exit");
                 exit(-1);
             }
             assert(n_cache_rank_ > 0);
@@ -49,12 +49,9 @@ namespace ReverseMIPS {
                 known_rank_idx_l_[idx] = known_rank_idx;
             }
 
-            for (int id = 0; id < n_cache_rank_; id++) {
-                printf("%d ", known_rank_idx_l_[id]);
+            if(n_cache_rank_ >= 2){
+                assert(known_rank_idx_l_[0] == known_rank_idx_l_[1] - (known_rank_idx_l_[0] + 1));
             }
-            printf("\n");
-
-            assert(known_rank_idx_l_[0] == known_rank_idx_l_[1] - (known_rank_idx_l_[0] + 1));
             n_max_disk_read_ = std::max(known_rank_idx_l_[0] + 1,
                                         n_data_item_ - known_rank_idx_l_[n_cache_rank_ - 1]);
 
@@ -138,6 +135,7 @@ namespace ReverseMIPS {
             int global_lower_rank = rank_topk_max_heap.front();
             int global_lower_bucket =
                     std::floor(1.0 * (global_lower_rank - cache_bound_every_ + 1) / cache_bound_every_) + 1;
+            global_lower_bucket = global_lower_bucket > n_cache_rank_ ? n_cache_rank_ : global_lower_bucket;
             assert(global_lower_bucket >= 0);
             const int topk_1 = topk - 1;
 
@@ -175,6 +173,7 @@ namespace ReverseMIPS {
                     global_lower_rank = rank_topk_max_heap.front();
                     global_lower_bucket =
                             std::floor(1.0 * (global_lower_rank - cache_bound_every_ + 1) / cache_bound_every_) + 1;
+                    global_lower_bucket = global_lower_bucket > n_cache_rank_ ? n_cache_rank_ : global_lower_bucket;
                 }
 
                 rank_lb_l[userID] = lower_rank;

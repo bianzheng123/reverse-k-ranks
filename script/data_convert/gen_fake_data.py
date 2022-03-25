@@ -1,7 +1,5 @@
 import numpy as np
 import vecs_io
-import multiprocessing
-import time
 import os
 
 
@@ -12,18 +10,11 @@ def delete_file_if_exist(dire):
         os.system(command)
 
 
-if __name__ == '__main__':
-    # reverse k ranks是给定item, 需要输出user
-    n_query_item = 1000
-    n_dim = 100
-    n_data_item = 50
-    n_user = 17000
+def gen_data(n_user, n_data_item, n_query_item, vec_dim, dataset):
+    query_item_l = np.random.normal(scale=0.1, size=(n_query_item, vec_dim))
+    data_item_l = np.random.normal(scale=0.1, size=(n_data_item, vec_dim))
+    user_l = np.random.normal(scale=0.1, size=(n_user, vec_dim))
 
-    query_item_l = np.random.normal(scale=10, size=(n_query_item, n_dim))
-    data_item_l = np.random.normal(scale=10, size=(n_data_item, n_dim))
-    user_l = np.random.normal(scale=10, size=(n_user, n_dim))
-
-    dataset = 'fakebig'
     output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
     delete_file_if_exist(output_dir)
     os.mkdir(output_dir)
@@ -31,3 +22,13 @@ if __name__ == '__main__':
     vecs_io.dvecs_write("%s/%s_query_item.dvecs" % (output_dir, dataset), query_item_l)
     vecs_io.dvecs_write("%s/%s_data_item.dvecs" % (output_dir, dataset), data_item_l)
     vecs_io.dvecs_write("%s/%s_user.dvecs" % (output_dir, dataset), user_l)
+
+
+if __name__ == '__main__':
+    # reverse k ranks是给定item, 需要输出user
+    n_query_item = 1000
+    n_dim = 100
+    n_data_item = 50
+    n_user = 17000
+
+    gen_data(n_user, n_data_item, n_query_item, n_dim, "fakebig")

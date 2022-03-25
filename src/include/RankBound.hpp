@@ -260,6 +260,7 @@ namespace ReverseMIPS::RankBound {
         std::ofstream out(index_path, std::ios::binary | std::ios::out);
         if (!out) {
             spdlog::error("error in write result");
+            exit(-1);
         }
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
@@ -273,24 +274,10 @@ namespace ReverseMIPS::RankBound {
         //rank search
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
-        const int n_cache_rank = n_data_item / cache_bound_every;
-        std::vector<int> known_rank_idx_l;
-        for (int known_rank_idx = cache_bound_every - 1;
-             known_rank_idx < n_data_item; known_rank_idx += cache_bound_every) {
-            known_rank_idx_l.emplace_back(known_rank_idx);
-        }
-
-        assert(known_rank_idx_l[0] == known_rank_idx_l[1] - (known_rank_idx_l[0] + 1));
-        int n_max_read = std::max(known_rank_idx_l[0], n_data_item - (known_rank_idx_l[n_cache_rank - 1] + 1));
-        assert(known_rank_idx_l.size() == n_cache_rank);
-
-        //used for coarse binary search
-        std::vector<double> bound_distance_table(user.n_vector_ * n_cache_rank);
-
         TimeRecord batch_report_record;
         batch_report_record.reset();
         for (int i = 0; i < n_batch; i++) {
-#pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, bound_distance_table, known_rank_idx_l, rank_ins) shared(n_cache_rank, write_every_, n_data_item, vec_dim)
+#pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, rank_ins) shared(write_every_, n_data_item, vec_dim)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;
                 for (int itemID = 0; itemID < n_data_item; itemID++) {

@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
     double preprocessed_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocessing");
 
-//    vector<int> topk_l{50, 40, 30, 20, 10};
-    vector<int> topk_l{3};
+    vector<int> topk_l{50, 40, 30, 20, 10};
+//    vector<int> topk_l{283228};
     MemoryBruteForce::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <memory>
+#include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
 
@@ -43,20 +44,18 @@ namespace ReverseMIPS {
         vec_dim = 0;
 
         char path[256];
-        std::printf("load data item\n");
         std::sprintf(path, "%s/%s/%s_data_item.dvecs", basic_dir, dataset_name, dataset_name);
         std::unique_ptr<double[]> data_item_ptr = loadVector<double>(path, n_data_item, vec_dim);
 //        std::printf("%.3f %.3f %.3f %.3f\n", data_item[0], data_item[1], data_item[2], data_item[3]);
 
-        std::printf("load user\n");
         sprintf(path, "%s/%s/%s_user.dvecs", basic_dir, dataset_name, dataset_name);
         std::unique_ptr<double[]> user_ptr = loadVector<double>(path, n_user, vec_dim);
 //        std::printf("%.3f %.3f %.3f %.3f\n", user[0], user[1], user[2], user[3]);
 
-        std::printf("load query item\n");
         sprintf(path, "%s/%s/%s_query_item.dvecs", basic_dir, dataset_name, dataset_name);
         std::unique_ptr<double[]> query_item_ptr = loadVector<double>(path, n_query_item, vec_dim);
 //        std::printf("%.3f %.3f %.3f %.3f\n", query_item[0], query_item[1], query_item[2], query_item[3]);
+        spdlog::info("load data item, user, query item");
 
         static VectorMatrix user, data_item, query_item;
         user.init(user_ptr, n_user, vec_dim);

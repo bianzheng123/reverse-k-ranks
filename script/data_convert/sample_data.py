@@ -14,13 +14,13 @@ if __name__ == '__main__':
     from_ds = 'movielens-27m'
     to_ds = 'movielens-sample'
     basic_dir = '/home/bianzheng/Dataset/ReverseMIPS'
-    n_user = 10
-    n_item = 5000
+    # n_user = 10
+    n_item = 100
     data_item, d = vecs_io.dvecs_read(os.path.join(basic_dir, from_ds, '%s_data_item.dvecs' % from_ds))
-    # print("len ", data_item.shape)
-    # data_item_idx = np.random.permutation(len(data_item))[:n_item]
-    # data_item = data_item[data_item_idx]
-    # print(data_item.shape)
+    print("len ", data_item.shape)
+    data_item_idx = np.random.permutation(len(data_item))[:n_item]
+    data_item = data_item[data_item_idx]
+    print(data_item.shape)
 
     query_item, d = vecs_io.dvecs_read(os.path.join(basic_dir, from_ds, '%s_query_item.dvecs' % from_ds))
 
@@ -37,9 +37,9 @@ if __name__ == '__main__':
     print("len ", user.shape)
     # user_idx = np.array(np.random.permutation(len(total_user_idx))[:n_user])
     # user_idx = total_user_idx[user_idx]
-    user_idx = np.array([56686, 140269, 71930, 20089, 58076, 268785, 194974, 44600, 131722, 58156])
-    user = user[user_idx]
-    print(user.shape)
+    # user_idx = np.array([56686, 140269, 71930, 20089, 58076, 268785, 194974, 44600, 131722, 58156])
+    # user = user[user_idx]
+    # print(user.shape)
 
     delete_file_if_exist(os.path.join(basic_dir, to_ds))
     os.mkdir(os.path.join(basic_dir, to_ds))
