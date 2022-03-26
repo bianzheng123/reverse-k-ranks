@@ -118,5 +118,12 @@ if __name__ == '__main__':
     basic_dir = os.path.join('run', 'media', 'hdd', 'ReverseMIPS')
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
 
-    os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format('movielens-27m', basic_dir))
-    os.system('cd build && ./rb {} {}'.format('movielens-27m', basic_dir))
+    os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format('movielens-27m', basic_dir))
+    os.system('cd build && ./irb {} {}'.format('movielens-27m', basic_dir))
+
+    os.system('cd build && ./irbfdp {} {}'.format('movielens-27m', basic_dir))
+    os.system('cd build && ./irbfip {} {}'.format('movielens-27m', basic_dir))
+    os.system('cd build && ./irbfnp {} {}'.format('movielens-27m', basic_dir))
+    os.system('cd build && ./irbpdpip {} {}'.format('movielens-27m', basic_dir))
+    os.system('cd build && ./irbpdpnp {} {}'.format('movielens-27m', basic_dir))
+    os.system('cd build && ./irbpipnp {} {}'.format('movielens-27m', basic_dir))

@@ -1,9 +1,9 @@
 //
-// Created by BianZheng on 2022/3/21.
+// Created by BianZheng on 2022/3/17.
 //
 
-#ifndef REVERSE_KRANKS_IRBPARTINTPARTNORMPRUNE_HPP
-#define REVERSE_KRANKS_IRBPARTINTPARTNORMPRUNE_HPP
+#ifndef REVERSE_KRANKS_INTERVALRANKBOUND_HPP
+#define REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 
 #include "alg/bound/PartIntPartNormPrune.hpp"
 #include "alg/IntervalSearch.hpp"
@@ -174,14 +174,13 @@ namespace ReverseMIPS::IntervalRankBound {
                 interval_search_record_.reset();
                 //get the ip bound
                 interval_prune_.IPBound(query_vecs, user_, prune_l_, ip_bound_l_);
+                this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 //count rank bound
                 interval_ins_.RankBound(ip_bound_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
                 //prune the bound
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
-
-                this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 int n_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
                     if (!prune_l_[userID]) {
@@ -233,7 +232,9 @@ namespace ReverseMIPS::IntervalRankBound {
 
                     assert(start_idx <= end_idx);
                     read_disk_record_.reset();
-                    index_stream_.seekg((userID * n_data_item_ + start_idx) * sizeof(double), std::ios::beg);
+                    int64_t offset = (int64_t) userID * n_data_item_ + start_idx;
+                    offset *= sizeof(double);
+                    index_stream_.seekg(offset, std::ios::beg);
                     index_stream_.read((char *) disk_cache_.data(), read_count * sizeof(double));
                     read_disk_time_ += read_disk_record_.get_elapsed_time_second();
 
@@ -277,8 +278,8 @@ namespace ReverseMIPS::IntervalRankBound {
 
     };
 
-    const int write_every_ = 100;
-    const int report_batch_every_ = 5;
+    const int write_every_ = 1000;
+    const int report_batch_every_ = 100;
 
     /*
      * bruteforce index
@@ -305,7 +306,7 @@ namespace ReverseMIPS::IntervalRankBound {
         IntervalSearch interval_ins(n_interval, n_user, n_data_item);
 
         //rank search
-        const int cache_bound_every = 10;
+        const int cache_bound_every = 500;
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
         //build and write index
@@ -389,4 +390,4 @@ namespace ReverseMIPS::IntervalRankBound {
     }
 
 }
-#endif //REVERSE_KRANKS_IRBPARTINTPARTNORMPRUNE_HPP
+#endif //REVERSE_KRANKS_INTERVALRANKBOUND_HPP

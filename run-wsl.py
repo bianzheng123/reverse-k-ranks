@@ -74,8 +74,6 @@ def debug_run():
 
 
 def run_attribution():
-    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    # dataset_l = ['movielens-27m']
     for ds in dataset_l:
         os.system('cd build/attribution && ./ipc {}'.format(ds))
 
@@ -90,12 +88,7 @@ def run_attribution():
         os.system('cd build/attribution && ./svdcmp {}'.format(ds))
 
 
-def run(method_name='IntervalRankBound', program_name='irb',
-        dataset_l=['fake', 'fakebig', 'movielens-small', 'movielens-1m']):
-    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    # dataset_l = ['fakebig']
-    # dataset_l = ['movielens-sample']
-    # dataset_l = ['movielens-small', 'movielens-1m']
+def run(method_name='IntervalRankBound', program_name='irb'):
     method_m = {
         # 'OnlineBruteForce': 'bfon',
         # 'MemoryBruteForce': 'bfmi',
@@ -134,15 +127,13 @@ def run(method_name='IntervalRankBound', program_name='irb',
 
 
 def run_rankbound_sample_rate():
-    # dataset_name_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    dataset_name_l = ['fake', 'movielens-small', 'movielens-1m']
     cache_bound_every_l = [20, 40, 60, 80]
-    for ds in dataset_name_l:
+    for ds in dataset_l:
         for para in cache_bound_every_l:
             os.system('cd build && ./rb --dataset_name {} --cache_bound_every {}'.format(ds, para))
 
     flag = True
-    for ds in dataset_name_l:
+    for ds in dataset_l:
         for topk in [10, 20, 30, 40, 50]:
             for i in range(len(cache_bound_every_l)):
                 if i != 0:
@@ -178,8 +169,17 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    run(method_name='IntervalRankBound', program_name='irb', dataset_l=['movielens-27m'])
-    run(method_name='RankBound', program_name='rb', dataset_l=['movielens-27m'])
+    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    # run(method_name='IntervalRankBound', program_name='irb')
+    # run(method_name='RankBound', program_name='rb')
+
+    run(method_name='IRBFullDimPrune', program_name='irbfdp')
+    run(method_name='IRBFullIntPrune', program_name='irbfip')
+    run(method_name='IRBFullNormPrune', program_name='irbfnp')
+    run(method_name='IRBPartDimPartIntPrune', program_name='irbpdpip')
+    run(method_name='IRBPartDimPartNormPrune', program_name='irbpdpnp')
+    run(method_name='IRBPartIntPartNormPrune', program_name='irbpipnp')
+
     # debug_run()
     # run_rankbound_sample_rate()
     # run(method_name='IntervalRankBound', program_name='irb')
