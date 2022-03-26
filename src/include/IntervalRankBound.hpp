@@ -279,8 +279,8 @@ namespace ReverseMIPS::IntervalRankBound {
 
     };
 
-    const int write_every_ = 100;
-    const int report_batch_every_ = 5;
+    const int write_every_ = 1000;
+    const int report_batch_every_ = 100;
 
     /*
      * bruteforce index
