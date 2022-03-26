@@ -128,7 +128,10 @@ namespace ReverseMIPS::RankBound {
             //coarse binary search
             const int n_query_item = query_item.n_vector_;
 
-            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
+            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
+            for (int qID = 0; qID < n_query_item; qID++) {
+                query_heap_l[qID].reserve(topk);
+            }
 
             // for binary search, check the number
             std::vector<int> rank_topk_max_heap(topk);
@@ -206,7 +209,9 @@ namespace ReverseMIPS::RankBound {
 
                     assert(start_idx <= end_idx);
                     read_disk_record_.reset();
-                    index_stream_.seekg((userID * n_data_item_ + start_idx) * sizeof(double), std::ios::beg);
+                    int64_t offset = (int64_t) userID * n_data_item_ + start_idx;
+                    offset *= sizeof(double);
+                    index_stream_.seekg(offset, std::ios::beg);
                     index_stream_.read((char *) disk_cache_.data(), read_count * sizeof(double));
                     read_disk_time_ += read_disk_record_.get_elapsed_time_second();
                     fine_binary_search_record_.reset();
@@ -220,7 +225,7 @@ namespace ReverseMIPS::RankBound {
                 std::sort(user_topk_cache_l.begin(), user_topk_cache_l.begin() + n_candidate,
                           std::less());
                 for (int candID = 0; candID < topk; candID++) {
-                    query_heap_l[queryID][candID] = user_topk_cache_l[candID];
+                    query_heap_l[queryID].emplace_back(user_topk_cache_l[candID]);
                 }
                 assert(query_heap_l[queryID].size() == topk);
             }

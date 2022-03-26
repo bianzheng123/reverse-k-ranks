@@ -44,7 +44,9 @@ def debug_run():
         cache_bound_every_l = [20, 80, 320, 800, 900]
         for n_bound in cache_bound_every_l:
             method = 'rb'
-            os.system('cd build && ./{} --dataset_name {} --cache_bound_every {} > {}-{}.log'.format(method, dataset, n_bound, method, n_bound))
+            os.system(
+                'cd build && ./{} --dataset_name {} --cache_bound_every {} > {}-{}.log'.format(method, dataset, n_bound,
+                                                                                               method, n_bound))
 
         method = 'bbfdi'
         os.system('cd build && ./{} {} > {}.log'.format(method, dataset, method))
@@ -60,7 +62,7 @@ def debug_run():
                                                '{}-{}-top{}-{}.csv'.format(dataset, 'BatchDiskBruteForce', topk, _type))
                     test_method = os.path.join('result', 'rank',
                                                '{}-RankBound-top{}-cache_bound_every_{}-{}.csv'.format(dataset, topk,
-                                                                                                        n_bound, _type))
+                                                                                                       n_bound, _type))
 
                     flag = cmp_file(base_method, test_method)
                     flag = False
@@ -88,10 +90,11 @@ def run_attribution():
         os.system('cd build/attribution && ./svdcmp {}'.format(ds))
 
 
-def run(method_name='IntervalRankBound', program_name='irb'):
-    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+def run(method_name='IntervalRankBound', program_name='irb',
+        dataset_l=['fake', 'fakebig', 'movielens-small', 'movielens-1m']):
+    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     # dataset_l = ['fakebig']
-    dataset_l = ['movielens-sample']
+    # dataset_l = ['movielens-sample']
     # dataset_l = ['movielens-small', 'movielens-1m']
     method_m = {
         # 'OnlineBruteForce': 'bfon',
@@ -110,8 +113,8 @@ def run(method_name='IntervalRankBound', program_name='irb'):
             os.system('cd build && ./{} {}'.format(method_m[method], ds))
 
     type_arr = ['index', 'IP', 'rank']
-    # topk_l = [10, 20, 30, 40, 50]
-    topk_l = [283228]
+    topk_l = [10, 20, 30, 40, 50]
+    # topk_l = [283228]
 
     flag = True
     for ds in dataset_l:
@@ -175,7 +178,8 @@ def run_rankbound_sample_rate():
 
 
 if __name__ == '__main__':
-    # run(method_name='RankBound', program_name='rb')
-    debug_run()
+    run(method_name='IntervalRankBound', program_name='irb', dataset_l=['movielens-27m'])
+    run(method_name='RankBound', program_name='rb', dataset_l=['movielens-27m'])
+    # debug_run()
     # run_rankbound_sample_rate()
     # run(method_name='IntervalRankBound', program_name='irb')

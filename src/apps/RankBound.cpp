@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{50, 40, 30, 20, 10};
-//    vector<int> topk_l{283228};
+//    vector<int> topk_l{20};
     RankBound::RetrievalResult config;
     vector < vector < vector < UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
@@ -104,11 +104,11 @@ int main(int argc, char **argv) {
     sprintf(other_name, "cache_bound_every_%d", cache_bound_every);
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRank(result_rank_l[i], dataset_name, "RankBound", other_name);
-//        writeRank(result_rank_l[i], dataset_name, "RankBound");
+//        writeRank(result_rank_l[i], dataset_name, "RankBound", other_name);
+        writeRank(result_rank_l[i], dataset_name, "RankBound");
     }
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, "RankBound", other_name);
-//    config.writePerformance(dataset_name, "RankBound");
+//    config.writePerformance(dataset_name, "RankBound", other_name);
+    config.writePerformance(dataset_name, "RankBound");
     return 0;
 }

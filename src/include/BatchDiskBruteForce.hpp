@@ -102,7 +102,8 @@ namespace ReverseMIPS::DiskBruteForce {
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
             record.reset();
-            index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
+            int64_t read_count = (int64_t) n_cache * n_data_item_ * sizeof(double);
+            index_stream_.read((char *) distance_cache.data(), read_count);
             read_disk_time_ += record.get_elapsed_time_second();
 
             for (int cacheID = 0; cacheID < topk; cacheID++) {
@@ -157,7 +158,8 @@ namespace ReverseMIPS::DiskBruteForce {
 
             for (int bth_idx = 1; bth_idx < n_batch; bth_idx++) {
                 record.reset();
-                index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
+                read_count = (int64_t) n_cache * n_data_item_ * sizeof(double);
+                index_stream_.read((char *) distance_cache.data(), read_count);
                 read_disk_time_ += record.get_elapsed_time_second();
 
                 for (int cacheID = 0; cacheID < n_cache; cacheID++) {
@@ -199,8 +201,9 @@ namespace ReverseMIPS::DiskBruteForce {
 
             if (n_remain != 0) {
                 record.reset();
+                read_count = (int64_t) n_remain * n_data_item_ * sizeof(double);
                 index_stream_.read((char *) distance_cache.data(),
-                                   n_remain * n_data_item_ * sizeof(double));
+                                   read_count);
                 read_disk_time_ += record.get_elapsed_time_second();
 
                 for (int cacheID = 0; cacheID < n_remain; cacheID++) {

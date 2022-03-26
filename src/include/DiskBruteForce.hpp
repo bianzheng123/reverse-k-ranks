@@ -36,7 +36,7 @@ namespace ReverseMIPS::DiskBruteForce {
         }
 
         std::string AddResultConfig(int topk, double total_time, double read_disk_time, double inner_product_time,
-                             double binary_search_time, double second_per_query) {
+                                    double binary_search_time, double second_per_query) {
             char buff[1024];
 
             sprintf(buff,
@@ -75,7 +75,7 @@ namespace ReverseMIPS::DiskBruteForce {
             this->n_cache = std::min(user_.n_vector_, 10000);
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int& topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
             TimeRecord query_record;
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
@@ -130,7 +130,8 @@ namespace ReverseMIPS::DiskBruteForce {
                 index_stream_.seekg(0, std::ios::beg);
                 for (int batchID = 0; batchID < n_batch; batchID++) {
                     read_disk_record_.reset();
-                    index_stream_.read((char *) distance_cache.data(), n_cache * n_data_item_ * sizeof(double));
+                    int64_t read_count = (int64_t) n_cache * n_data_item_ * sizeof(double);
+                    index_stream_.read((char *) distance_cache.data(), read_count);
                     read_disk_time_ += read_disk_record_.get_elapsed_time_second();
                     tmp_read_disk_time += read_disk_record_.get_elapsed_time_second();
 
@@ -146,7 +147,8 @@ namespace ReverseMIPS::DiskBruteForce {
                 }
 
                 read_disk_record_.reset();
-                index_stream_.read((char *) distance_cache.data(), n_remain * n_data_item_ * sizeof(double));
+                int64_t read_count = (int64_t) n_remain * n_data_item_ * sizeof(double);
+                index_stream_.read((char *) distance_cache.data(), read_count);
                 read_disk_time_ += read_disk_record_.get_elapsed_time_second();
                 tmp_read_disk_time += read_disk_record_.get_elapsed_time_second();
 

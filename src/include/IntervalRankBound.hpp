@@ -233,7 +233,9 @@ namespace ReverseMIPS::IntervalRankBound {
 
                     assert(start_idx <= end_idx);
                     read_disk_record_.reset();
-                    index_stream_.seekg((userID * n_data_item_ + start_idx) * sizeof(double), std::ios::beg);
+                    int64_t offset = (int64_t) userID * n_data_item_ + start_idx;
+                    offset *= sizeof(double);
+                    index_stream_.seekg(offset, std::ios::beg);
                     index_stream_.read((char *) disk_cache_.data(), read_count * sizeof(double));
                     read_disk_time_ += read_disk_record_.get_elapsed_time_second();
 

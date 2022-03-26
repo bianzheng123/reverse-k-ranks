@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocessing");
 
     vector<int> topk_l{50, 40, 30, 20, 10};
-//    vector<int> topk_l{283228};
+//    vector<int> topk_l{10};
     MemoryBruteForce::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
