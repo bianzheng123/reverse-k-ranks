@@ -104,8 +104,8 @@ namespace ReverseMIPS {
                 int rank_lb = itv_lb_idx == -1 ? 0 : rank_ptr[itv_lb_idx];
                 int rank_ub = itv_ub_idx == -1 ? 0 : rank_ptr[itv_ub_idx];
 
-                rank_lb_l[userID] = rank_lb;
-                rank_ub_l[userID] = rank_ub;
+                rank_lb_l[userID] = std::min(rank_lb, rank_lb_l[userID]);
+                rank_ub_l[userID] = std::max(rank_ub, rank_ub_l[userID]);
             }
         }
 

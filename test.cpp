@@ -4,19 +4,17 @@
 
 #include <iostream>
 #include <vector>
+#include <queue>
 
 using namespace std;
 
 int main(int argc, char **argv) {
-    int a = 283228;
-    int b = 52889;
-    int64_t res = (int64_t) sizeof(double) * a * b;
-    std::cout << res << std::endl;
+    std::vector<std::vector<int>> vecs_l;
+    std::vector<int> vecs = {1, 2, 3, 4, 5, 6};
+    vecs_l.push_back(vecs);
 
-    int64_t res1 = (int64_t) a * b * sizeof(double);
-    std::cout << res1 << std::endl;
-
-    cout << sizeof(std::basic_istream<char>::off_type) << endl;
-    cout << sizeof(long) << endl;
+    std::vector<int> vecs1 = {1, 2, 3};
+    vecs_l[0] = vecs1;
+    printf("%d, %d\n", (int) vecs.size(), (int) vecs_l[0].size());
     return 0;
 }

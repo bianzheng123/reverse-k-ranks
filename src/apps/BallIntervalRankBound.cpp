@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/3/21.
+// Created by BianZheng on 2022/3/27.
 //
 
 #include "util/VectorIO.hpp"
@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "IntervalSearch/IRBFullDimPrune.hpp"
+#include "BallIntervalRankBound.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    spdlog::info("IRBFullDimPrune dataset_name {}, basic_dir {}", dataset_name, basic_dir);
+    spdlog::info("BallIntervalRankBound dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -41,33 +41,35 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    IntervalRankBound::Index &irb = IntervalRankBound::BuildIndex(user, data_item, index_path);
+    BallIntervalRankBound::Index &birb = BallIntervalRankBound::BuildIndex(user, data_item, index_path);
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-    IntervalRankBound::RetrievalResult config;
+//    vector<int> topk_l{10};
+    BallIntervalRankBound::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = irb.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = birb.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double interval_search_time = irb.interval_search_time_;
-        double inner_product_time = irb.inner_product_time_;
-        double coarse_binary_search_time = irb.coarse_binary_search_time_;
-        double read_disk_time = irb.read_disk_time_;
-        double fine_binary_search_time = irb.fine_binary_search_time_;
+        double ball_search_time = birb.ball_search_time_;
+        double interval_search_time = birb.interval_search_time_;
+        double inner_product_time = birb.inner_product_time_;
+        double coarse_binary_search_time = birb.coarse_binary_search_time_;
+        double read_disk_time = birb.read_disk_time_;
+        double fine_binary_search_time = birb.fine_binary_search_time_;
 
-        double interval_prune_ratio = irb.interval_prune_ratio_;
-        double rank_search_prune_ratio = irb.rank_search_prune_ratio_;
+        double ball_prune_ratio = birb.ball_prune_ratio_;
+        double interval_prune_ratio = birb.interval_prune_ratio_;
+        double rank_search_prune_ratio = birb.rank_search_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
-        config.AddResultConfig(topk, retrieval_time, interval_search_time, inner_product_time,
+        config.AddResultConfig(topk, retrieval_time, ball_search_time, interval_search_time, inner_product_time,
                                coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                               interval_prune_ratio,
-                               rank_search_prune_ratio,
+                               ball_prune_ratio, interval_prune_ratio, rank_search_prune_ratio,
                                second_per_query);
         spdlog::info("finish top-{}", topk);
     }
@@ -76,10 +78,10 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRank(result_rank_l[i], dataset_name, "IRBFullDimPrune");
+        writeRank(result_rank_l[i], dataset_name, "BallIntervalRankBound");
     }
 
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, "IRBFullDimPrune");
+    config.writePerformance(dataset_name, "BallIntervalRankBound");
     return 0;
 }

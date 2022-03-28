@@ -106,7 +106,7 @@ def run(method_name='IntervalRankBound', program_name='irb'):
             os.system('cd build && ./{} {}'.format(method_m[method], ds))
 
     type_arr = ['index', 'IP', 'rank']
-    topk_l = [10, 20, 30, 40, 50]
+    topk_l = [10, 20, 30, 40, 50, 60, 70]
     # topk_l = [283228]
 
     flag = True
@@ -170,15 +170,17 @@ def run_rankbound_sample_rate():
 
 if __name__ == '__main__':
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    run(method_name='BallIntervalRankBound', program_name='birb')
     # run(method_name='IntervalRankBound', program_name='irb')
     # run(method_name='RankBound', program_name='rb')
 
-    run(method_name='IRBFullDimPrune', program_name='irbfdp')
-    run(method_name='IRBFullIntPrune', program_name='irbfip')
-    run(method_name='IRBFullNormPrune', program_name='irbfnp')
-    run(method_name='IRBPartDimPartIntPrune', program_name='irbpdpip')
-    run(method_name='IRBPartDimPartNormPrune', program_name='irbpdpnp')
-    run(method_name='IRBPartIntPartNormPrune', program_name='irbpipnp')
+
+    # run(method_name='IRBFullDimPrune', program_name='irbfdp')
+    # run(method_name='IRBFullIntPrune', program_name='irbfip')
+    # run(method_name='IRBFullNormPrune', program_name='irbfnp')
+    # run(method_name='IRBPartDimPartIntPrune', program_name='irbpdpip')
+    # run(method_name='IRBPartDimPartNormPrune', program_name='irbpdpnp')
+    # run(method_name='IRBPartIntPartNormPrune', program_name='irbpipnp')
 
     # debug_run()
     # run_rankbound_sample_rate()
