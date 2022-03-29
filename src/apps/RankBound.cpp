@@ -89,7 +89,6 @@ int main(int argc, char **argv) {
         double prune_ratio = bscb.rank_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
-
         result_rank_l.emplace_back(result_rk);
         string str = config.AddResultConfig(topk, retrieval_time, read_disk_time, inner_product_time,
                                             coarse_binary_search_time, fine_binary_search_time, prune_ratio,

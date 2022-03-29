@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    spdlog::info("BatchDiskBruteForce dataset_name {}, basic_dir {}\n", dataset_name, basic_dir);
+    spdlog::info("BatchDiskBruteForce dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     double total_build_index_time;
     char index_path[256];

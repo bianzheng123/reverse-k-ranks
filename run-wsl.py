@@ -121,7 +121,8 @@ def run(method_name='IntervalRankBound', program_name='irb'):
 
                     flag = cmp_file(base_method, test_method)
                     if not flag:
-                        print("file diff {} {}".format(base_method, test_method))
+                        print("file have diff {} {}".format(base_method, test_method))
+                        exit(-1)
     if flag:
         print("no error, no bug")
 
@@ -170,7 +171,8 @@ def run_rankbound_sample_rate():
 
 if __name__ == '__main__':
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    run(method_name='BallIntervalRankBound', program_name='birb')
+    run(method_name='BPlusTree', program_name='bpt')
+    # run(method_name='BallIntervalRankBound', program_name='birb')
     # run(method_name='IntervalRankBound', program_name='irb')
     # run(method_name='RankBound', program_name='rb')
 

@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    spdlog::info("OnlineBruteForce dataset_name {}, basic_dir {}\n", dataset_name, basic_dir);
+    spdlog::info("OnlineBruteForce dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
