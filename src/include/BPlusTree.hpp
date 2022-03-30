@@ -207,6 +207,9 @@ namespace ReverseMIPS::BPlusTree {
             size_t base_offset = userID * tree_size_byte_;
             assert(in_stream_);
             int rank = 0;
+            read_disk_time = 0;
+            binary_search_time = 0;
+
             for (int layer = 0; layer < n_layer_; layer++) {
                 int base_rank = rank * sample_every_;
                 size_t layer_offset = layer == 0 ? 0 : n_ip_cum_layer_byte_l_[layer - 1];
@@ -308,7 +311,6 @@ namespace ReverseMIPS::BPlusTree {
             double tmp_inner_product_time = 0;
             double tmp_binary_search_time = 0;
             double tmp_read_disk_time = 0;
-            double tmp_other_time = 0;
             query_record.reset();
             for (int qID = 0; qID < n_query_item; qID++) {
                 //calculate distance
@@ -320,6 +322,7 @@ namespace ReverseMIPS::BPlusTree {
                     queryIP_l[userID] = queryIP;
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+                tmp_inner_product_time += inner_product_record_.get_elapsed_time_second();
 
                 for (int userID = 0; userID < topk; userID++) {
                     int rank = tree_ins_.Retrieval(queryIP_l[userID], userID, read_disk_time_, binary_search_time_,
@@ -332,8 +335,15 @@ namespace ReverseMIPS::BPlusTree {
 
                 for (int userID = topk; userID < n_user; userID++) {
                     UserRankElement min_heap_ele = query_heap_l[qID].front();
-                    int rank = tree_ins_.Retrieval(queryIP_l[userID], userID, read_disk_time_, binary_search_time_,
+                    double single_read_disk_time, single_binary_search_time;
+                    int rank = tree_ins_.Retrieval(queryIP_l[userID], userID, single_read_disk_time,
+                                                   single_binary_search_time,
                                                    qID);
+                    read_disk_time_ += single_read_disk_time;
+                    binary_search_time_ += single_binary_search_time;
+                    tmp_read_disk_time += single_read_disk_time;
+                    tmp_binary_search_time += single_binary_search_time;
+
                     double queryIP = queryIP_l[userID];
                     UserRankElement element(userID, rank, queryIP);
                     if (min_heap_ele > element) {
@@ -352,11 +362,11 @@ namespace ReverseMIPS::BPlusTree {
                                  qID / (0.01 * n_query_item),
                                  query_record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                     query_record.reset();
-                    printf("tmp: inner product %.3fs, binary search %.3fs, read disk %.3fs, other %.3fs\n", tmp_inner_product_time, tmp_binary_search_time, tmp_read_disk_time, tmp_other_time);
+                    printf("tmp: inner product %.3fs, binary search %.3fs, read disk %.3fs\n",
+                           tmp_inner_product_time, tmp_binary_search_time, tmp_read_disk_time);
                     tmp_inner_product_time = 0;
                     tmp_binary_search_time = 0;
                     tmp_read_disk_time = 0;
-                    tmp_other_time = 0;
                 }
             }
 
