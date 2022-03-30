@@ -276,6 +276,7 @@ namespace ReverseMIPS::BPlusTree {
         int vec_dim_, n_data_item_;
         double read_disk_time_, inner_product_time_, binary_search_time_;
         TimeRecord read_disk_record_, inner_product_record_, binary_search_record_;
+        const int report_query_every_ = 5;
 
         Index() {}
 
@@ -303,6 +304,12 @@ namespace ReverseMIPS::BPlusTree {
 
             std::vector<double> queryIP_l(n_user);
 
+            TimeRecord query_record;
+            double tmp_inner_product_time = 0;
+            double tmp_binary_search_time = 0;
+            double tmp_read_disk_time = 0;
+            double tmp_other_time = 0;
+            query_record.reset();
             for (int qID = 0; qID < n_query_item; qID++) {
                 //calculate distance
                 double *query_item_vec = query_item.getVector(qID);
@@ -338,13 +345,22 @@ namespace ReverseMIPS::BPlusTree {
                     }
                 }
 
-            }
-
-            for (int qID = 0; qID < n_query_item; qID++) {
                 std::sort(query_heap_l[qID].begin(), query_heap_l[qID].end(), std::less<UserRankElement>());
+
+                if (qID % report_query_every_ == 0) {
+                    spdlog::info("top-{} retrieval query number {}%, {} s/iter Mem: {} Mb", topk,
+                                 qID / (0.01 * n_query_item),
+                                 query_record.get_elapsed_time_second(), get_current_RSS() / 1000000);
+                    query_record.reset();
+                    printf("tmp: inner product %.3fs, binary search %.3fs, read disk %.3fs, other %.3fs\n", tmp_inner_product_time, tmp_binary_search_time, tmp_read_disk_time, tmp_other_time);
+                    tmp_inner_product_time = 0;
+                    tmp_binary_search_time = 0;
+                    tmp_read_disk_time = 0;
+                    tmp_other_time = 0;
+                }
             }
 
-//            tree_ins_.in_stream_.close();
+            tree_ins_.in_stream_.close();
             return query_heap_l;
         }
 
