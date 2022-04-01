@@ -10,7 +10,7 @@
 #include "struct/MethodBase.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
-#include "alg/MonotonicityReduction.hpp"
+#include "MonotonicityReduction.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
 #include "util/FileIO.hpp"

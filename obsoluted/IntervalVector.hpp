@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_INTERVALVECTOR_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/KMeans.hpp"
+#include "KMeans.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/MethodBase.hpp"
 #include <vector>

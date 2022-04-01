@@ -14,7 +14,6 @@
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
-#include "struct/IntVectorMatrix.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
 #include "util/FileIO.hpp"

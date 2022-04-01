@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/3/29.
+// Created by BianZheng on 2022/3/28.
 //
 
 #include "util/VectorIO.hpp"
@@ -7,8 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "DiskBruteForce.hpp"
-#include <spdlog/spdlog.h>
+#include "RkRank/BPlusTree.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -26,7 +25,9 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    spdlog::info("DiskBruteForce dataset_name {}, basic_dir {}", dataset_name, basic_dir);
+    const char *method_name = "BPlusTree";
+    const char *problem_name = "RkRank";
+    spdlog::info("{} {} dataset_name {}, basic_dir {}", problem_name, method_name, dataset_name, basic_dir);
 
     double total_build_index_time;
     char index_path[256];
@@ -42,13 +43,13 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    DiskBruteForce::Index &index = DiskBruteForce::BuildIndex(data_item, user, index_path);
+    BPlusTree::Index &index = BPlusTree::BuildIndex(data_item, user, index_path);
     total_build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_l{50, 40, 30, 20, 10};
+    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{10};
-    DiskBruteForce::RetrievalResult config;
+    BPlusTree::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
         record.reset();
@@ -64,17 +65,18 @@ int main(int argc, char **argv) {
         string str = config.AddResultConfig(topk, retrieval_time, read_disk_time, inner_product_time,
                                             binary_search_time,
                                             second_per_query);
-        spdlog::info("{}", str);
+        spdlog::info("finish top-{}", topk);
     }
 
-    spdlog::info("build index time: total %.3fs", total_build_index_time);
+    spdlog::info("build index time: total {}s", total_build_index_time);
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRank(result_rank_l[i], dataset_name, "DiskBruteForce");
+        writeRkRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
     config.AddPreprocess(total_build_index_time);
-    config.writePerformance(dataset_name, "DiskBruteForce");
+    config.writePerformance(problem_name, dataset_name, method_name);
+
     return 0;
 }

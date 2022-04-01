@@ -13,9 +13,15 @@ namespace ReverseMIPS {
         int userID_, rank_;
         double queryIP_;
 
-        UserRankElement(int userID, int rank, double queryIP) {
+        UserRankElement(const int &userID, const int &rank, const double &queryIP) {
             this->userID_ = userID;
             this->rank_ = rank;
+            this->queryIP_ = queryIP;
+        }
+
+        UserRankElement(const int &userID, const double &queryIP) {
+            this->userID_ = userID;
+            this->rank_ = -1;
             this->queryIP_ = queryIP;
         }
 
@@ -49,7 +55,7 @@ namespace ReverseMIPS {
         inline bool operator<(const UserRankElement &other) const {
             if (rank_ != other.rank_) {
                 return rank_ < other.rank_;
-            }else if(queryIP_ != other.queryIP_){
+            } else if (queryIP_ != other.queryIP_) {
                 return queryIP_ > other.queryIP_;
             }
             return userID_ > other.userID_;
@@ -58,7 +64,7 @@ namespace ReverseMIPS {
         inline bool operator<=(const UserRankElement &other) const {
             if (rank_ != other.rank_) {
                 return rank_ <= other.rank_;
-            }else if(queryIP_ != other.queryIP_){
+            } else if (queryIP_ != other.queryIP_) {
                 return queryIP_ > other.queryIP_;
             }
             return userID_ > other.userID_;
@@ -68,7 +74,7 @@ namespace ReverseMIPS {
         inline bool operator>(const UserRankElement &other) const {
             if (rank_ != other.rank_) {
                 return rank_ > other.rank_;
-            }else if(queryIP_ != other.queryIP_){
+            } else if (queryIP_ != other.queryIP_) {
                 return queryIP_ < other.queryIP_;
             }
             return userID_ < other.userID_;
@@ -77,11 +83,16 @@ namespace ReverseMIPS {
         inline bool operator>=(const UserRankElement &other) const {
             if (rank_ != other.rank_) {
                 return rank_ >= other.rank_;
-            }else if(queryIP_ != other.queryIP_){
+            } else if (queryIP_ != other.queryIP_) {
                 return queryIP_ < other.queryIP_;
             }
             return userID_ < other.userID_;
         }
+
+        static bool UserIDMinFirst(const UserRankElement &element, const UserRankElement &other) {
+            return element.userID_ < other.userID_;
+        }
+
     };
 }
 

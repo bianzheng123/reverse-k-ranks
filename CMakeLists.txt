@@ -28,8 +28,12 @@ find_package(OpenMP)
 
 set(BUILD_TEST_MODULE OFF)
 set(BUILD_ATTRIBUTION OFF)
-set(BUILD_FINISH OFF)
+
+set(BUILD_RKRANK OFF)
+set(BUILD_RKRANK_FINISH OFF)
 set(BUILD_INTERVAL_SEARCH OFF)
+
+set(BUILD_RTOPK ON)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
@@ -37,40 +41,79 @@ set(BUILD_INTERVAL_SEARCH OFF)
 #target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
 #target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
 
-if (BUILD_FINISH)
-    add_executable(bfon src/apps/OnlineBruteForce.cpp)
-    target_include_directories(bfon PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bfon PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+if (BUILD_RKRANK)
+    add_executable(bbfdi src/RkRank/BatchDiskBruteForce.cpp)
+    target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-    add_executable(bfmi src/apps/MemoryBruteForce.cpp)
-    target_include_directories(bfmi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bfmi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    add_executable(bpt src/RkRank/BPlusTree.cpp)
+    target_include_directories(bpt PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bpt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-    add_executable(bfdi src/apps/DiskBruteForce.cpp)
-    target_include_directories(bfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    add_executable(rb src/RkRank/RankBound.cpp)
+    target_include_directories(rb PRIVATE src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(rb PRIVATE OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(irb src/RkRank/IntervalRankBound.cpp)
+    target_include_directories(irb PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    if (BUILD_RKRANK_FINISH)
+        add_executable(bfon src/RkRank/OnlineBruteForce.cpp)
+        target_include_directories(bfon PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(bfon PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(bfmi src/RkRank/MemoryBruteForce.cpp)
+        target_include_directories(bfmi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(bfmi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(bfdi src/RkRank/DiskBruteForce.cpp)
+        target_include_directories(bfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(bfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(birb src/RkRank/BallIntervalRankBound.cpp)
+        target_include_directories(birb PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(birb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    endif ()
+
+    if (BUILD_INTERVAL_SEARCH)
+        add_executable(irbfdp src/RkRank/IntervalSearch/IRBFullDimPrune.cpp)
+        target_include_directories(irbfdp PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(irbfdp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(irbfip src/RkRank/IntervalSearch/IRBFullIntPrune.cpp)
+        target_include_directories(irbfip PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(irbfip PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(irbfnp src/RkRank/IntervalSearch/IRBFullNormPrune.cpp)
+        target_include_directories(irbfnp PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(irbfnp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(irbpdpip src/RkRank/IntervalSearch/IRBPartDimPartIntPrune.cpp)
+        target_include_directories(irbpdpip PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(irbpdpip PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(irbpdpnp src/RkRank/IntervalSearch/IRBPartDimPartNormPrune.cpp)
+        target_include_directories(irbpdpnp PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(irbpdpnp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(irbpipnp src/RkRank/IntervalSearch/IRBPartIntPartNormPrune.cpp)
+        target_include_directories(irbpipnp PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(irbpipnp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    endif ()
 
 endif ()
 
-add_executable(bbfdi src/apps/BatchDiskBruteForce.cpp)
-target_include_directories(bbfdi PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(bbfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+if (BUILD_RTOPK)
+    add_executable(bfdi_rtk src/RTopk/DiskBruteForce.cpp)
+    target_include_directories(bfdi_rtk PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bfdi_rtk PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-add_executable(bpt src/apps/BPlusTree.cpp)
-target_include_directories(bpt PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(bpt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    add_executable(bfmi_rtk src/RTopk/MemoryBruteForce.cpp)
+    target_include_directories(bfmi_rtk PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(bfmi_rtk PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+endif ()
 
-add_executable(rb src/apps/RankBound.cpp)
-target_include_directories(rb PRIVATE src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(rb PRIVATE OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-add_executable(irb src/apps/IntervalRankBound.cpp)
-target_include_directories(irb PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-add_executable(birb src/apps/BallIntervalRankBound.cpp)
-target_include_directories(birb PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(birb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
@@ -83,31 +126,3 @@ endif ()
 if (BUILD_TEST_MODULE)
     add_subdirectory(test)
 endif ()
-
-if (BUILD_INTERVAL_SEARCH)
-    add_executable(irbfdp src/apps/IntervalSearch/IRBFullDimPrune.cpp)
-    target_include_directories(irbfdp PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irbfdp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(irbfip src/apps/IntervalSearch/IRBFullIntPrune.cpp)
-    target_include_directories(irbfip PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irbfip PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(irbfnp src/apps/IntervalSearch/IRBFullNormPrune.cpp)
-    target_include_directories(irbfnp PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irbfnp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(irbpdpip src/apps/IntervalSearch/IRBPartDimPartIntPrune.cpp)
-    target_include_directories(irbpdpip PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irbpdpip PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(irbpdpnp src/apps/IntervalSearch/IRBPartDimPartNormPrune.cpp)
-    target_include_directories(irbpdpnp PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irbpdpnp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(irbpipnp src/apps/IntervalSearch/IRBPartIntPartNormPrune.cpp)
-    target_include_directories(irbpipnp PRIVATE ${armadillo_SOURCE_DIR}/include src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irbpipnp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-endif ()
-
-

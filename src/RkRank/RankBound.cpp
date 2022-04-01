@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "RankBound.hpp"
+#include "RkRank/RankBound.hpp"
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -53,7 +53,9 @@ int main(int argc, char **argv) {
     const char *dataset_name = para.dataset_name.c_str();
     const char *basic_dir = para.basic_dir.c_str();
     const int cache_bound_every = para.cache_bound_every;
-    spdlog::info("RankBound dataset_name {}, basic_dir {} cache_bound_every {}", dataset_name, basic_dir,
+    const char *method_name = "RankBound";
+    const char *problem_name = "RkRank";
+    spdlog::info("{} {} dataset_name {}, basic_dir {} cache_bound_every {}", problem_name, method_name, dataset_name, basic_dir,
                  cache_bound_every);
 
     int n_data_item, n_query_item, n_user, vec_dim;
@@ -103,11 +105,11 @@ int main(int argc, char **argv) {
     sprintf(other_name, "cache_bound_every_%d", cache_bound_every);
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-//        writeRank(result_rank_l[i], dataset_name, "RankBound", other_name);
-        writeRank(result_rank_l[i], dataset_name, "RankBound");
+//        writeRkRankResult(result_rank_l[i], dataset_name, method_name, other_name);
+        writeRkRankResult(result_rank_l[i], dataset_name, method_name);
     }
     config.AddPreprocess(build_index_time);
-//    config.writePerformance(dataset_name, "RankBound", other_name);
-    config.writePerformance(dataset_name, "RankBound");
+//    config.writePerformance(problem_name, dataset_name, method_name, other_name);
+    config.writePerformance(problem_name, dataset_name, method_name);
     return 0;
 }

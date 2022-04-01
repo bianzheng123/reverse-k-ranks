@@ -7,7 +7,7 @@
 
 #include "struct/DistancePair_cpy.hpp"
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/KMeans.hpp"
+#include "KMeans.hpp"
 #include <vector>
 #include <cfloat>
 #include <cstring>

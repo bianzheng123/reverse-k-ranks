@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_SAMPLEINDEX_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/KMeans.hpp"
+#include "KMeans.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
