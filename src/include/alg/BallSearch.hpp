@@ -176,7 +176,6 @@ namespace ReverseMIPS {
                                 const std::pair<int, int> &cuserID_pair,
                                 std::vector<int> &candidate_l1, std::vector<int> &candidate_l2) const {
             //candidate with larger user size should be the first
-            //TODO have bug
             int user_size = (int) candidate_l.size();
             int cuserID1 = cuserID_pair.first;
             int cuserID2 = cuserID_pair.second;

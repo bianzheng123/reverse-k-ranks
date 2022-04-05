@@ -73,72 +73,29 @@ def run(method_name='IntervalRankBound', program_name='irb'):
 
 def run_rankbound_sample_rate():
     # dataset_name_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    cache_bound_every_l = [20, 40, 60, 80]
+    cache_bound_every_l = [8, 16, 32, 64, 128, 256, 512, 1024, 2048]
     for ds in dataset_l:
         for para in cache_bound_every_l:
-            os.system('cd build && ./rb --dataset_name {} --cache_bound_every {}'.format(ds, para))
-
-    flag = True
-    for ds in dataset_l:
-        for topk in [10, 20, 30, 40, 50]:
-            for i in range(len(cache_bound_every_l)):
-                if i != 0:
-                    file1 = "result/rank/{}-RankBound-top{}-cache_bound_every_{}-index.csv".format(ds, topk,
-                                                                                                   cache_bound_every_l[
-                                                                                                       0])
-                    file2 = "result/rank/{}-RankBound-top{}-cache_bound_every_{}-index.csv".format(ds, topk,
-                                                                                                   cache_bound_every_l[
-                                                                                                       i])
-                    flag = cmp_file(file1, file2)
-                    if not flag:
-                        print("file diff {} {}".format(file1, file2))
-
-                    file1 = "result/rank/{}-RankBound-top{}-cache_bound_every_{}-IP.csv".format(ds, topk,
-                                                                                                cache_bound_every_l[0])
-                    file2 = "result/rank/{}-RankBound-top{}-cache_bound_every_{}-IP.csv".format(ds, topk,
-                                                                                                cache_bound_every_l[i])
-                    flag = cmp_file(file1, file2)
-                    if not flag:
-                        print("file diff {} {}".format(file1, file2))
-
-                    file1 = "result/rank/{}-RankBound-top{}-cache_bound_every_{}-rank.csv".format(ds, topk,
-                                                                                                  cache_bound_every_l[
-                                                                                                      0])
-                    file2 = "result/rank/{}-RankBound-top{}-cache_bound_every_{}-rank.csv".format(ds, topk,
-                                                                                                  cache_bound_every_l[
-                                                                                                      i])
-                    flag = cmp_file(file1, file2)
-                    if not flag:
-                        print("file diff {} {}".format(file1, file2))
-    if flag:
-        print("no error, no bug")
+            os.system(
+                'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, para, basic_dir))
 
 
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
-    dataset_l = ['movielens-27m', 'netflix', 'yelp']
+    # dataset_l = ['movielens-27m', 'netflix', 'yelp']
+    dataset_l = ['movielens-27m']
 
-    for ds in dataset_l:
-        os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
-        os.system('cd build && ./irb {} {}'.format(ds, basic_dir))
-        os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
-        os.system('cd build && ./bpt {} {}'.format(ds, basic_dir))
+    run_rankbound_sample_rate()
 
-        os.system('cd build && ./irbfdp {} {}'.format(ds, basic_dir))
-        os.system('cd build && ./irbfip {} {}'.format(ds, basic_dir))
-        os.system('cd build && ./irbfnp {} {}'.format(ds, basic_dir))
-        os.system('cd build && ./irbpdpip {} {}'.format(ds, basic_dir))
-        os.system('cd build && ./irbpdpnp {} {}'.format(ds, basic_dir))
-        os.system('cd build && ./irbpipnp {} {}'.format(ds, basic_dir))
-
-    # os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format('movielens-27m', basic_dir))
-    # os.system('cd build && ./irb {} {}'.format('movielens-27m', basic_dir))
-    # os.system('cd build && ./birb {} {}'.format('movielens-27m', basic_dir))
-    # os.system('cd build && ./bpt {} {}'.format('movielens-27m', basic_dir))
+    # for ds in dataset_l:
+    #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./irb {} {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./bpt {} {}'.format(ds, basic_dir))
     #
-    # os.system('cd build && ./irbfdp {} {}'.format('movielens-27m', basic_dir))
-    # os.system('cd build && ./irbfip {} {}'.format('movielens-27m', basic_dir))
-    # os.system('cd build && ./irbfnp {} {}'.format('movielens-27m', basic_dir))
-    # os.system('cd build && ./irbpdpip {} {}'.format('movielens-27m', basic_dir))
-    # os.system('cd build && ./irbpdpnp {} {}'.format('movielens-27m', basic_dir))
-    # os.system('cd build && ./irbpipnp {} {}'.format('movielens-27m', basic_dir))
+    #     os.system('cd build && ./irbfdp {} {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./irbfip {} {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./irbfnp {} {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./irbpdpip {} {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./irbpdpnp {} {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./irbpipnp {} {}'.format(ds, basic_dir))

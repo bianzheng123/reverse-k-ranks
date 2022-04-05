@@ -41,41 +41,34 @@ def cmp_file_all(method_name_l, type_arr, dire, dataset_l, topk_l):
 
 def run_RkRank():
     method_m = {
-        # 'RankBound': 'rb',
+        'RankBound': 'rb',
         'BatchDiskBruteForce': 'bbfdi',
-        # 'BPlusTree': 'bpt',
-        # 'IntervalRankBound': 'irb',
+        'BPlusTree': 'bpt',
+        'IntervalRankBound': 'irb',
         # 'OnlineBruteForce': 'bfon',
         # 'MemoryBruteForce': 'bfmi',
         # 'DiskBruteForce': 'bfdi',
-        # 'BallIntervalRankBound': 'birb',
+        'BallIntervalRankBound': 'birb',
 
-        'IRBFullDimPrune': 'irbfdp',
-        'IRBFullIntPrune': 'irbfip',
-        'IRBFullNormPrune': 'irbfnp',
-        'IRBPartDimPartIntPrune': 'irbpdpip',
-        'IRBPartDimPartNormPrune': 'irbpdpnp',
-        'IRBPartIntPartNormPrune': 'irbpipnp',
+        # 'IRBFullDimPrune': 'irbfdp',
+        # 'IRBFullIntPrune': 'irbfip',
+        # 'IRBFullNormPrune': 'irbfnp',
+        # 'IRBPartDimPartIntPrune': 'irbpdpip',
+        # 'IRBPartDimPartNormPrune': 'irbpdpnp',
+        # 'IRBPartIntPartNormPrune': 'irbpipnp',
     }
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     # os.system('cd build && ./{} {}'.format('bbfdi', ds))
-    # os.system('cd build && ./{} {}'.format('bpt', ds))
-    # os.system('cd build && ./{} {}'.format('irb', ds))
-    # os.system('cd build && ./{} {}'.format('bfon', ds))
-    # os.system('cd build && ./{} {}'.format('bfmi', ds))
-    # os.system('cd build && ./{} {}'.format('bfdi', ds))
-    # os.system('cd build && ./{} {}'.format('birb', ds))
 
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     for ds in dataset_l:
-        os.system('cd build && ./{} {}'.format('bbfdi', ds))
-
-        os.system('cd build && ./{} {}'.format('irbfdp', ds))
-        os.system('cd build && ./{} {}'.format('irbfip', ds))
-        os.system('cd build && ./{} {}'.format('irbfnp', ds))
-        os.system('cd build && ./{} {}'.format('irbpdpip', ds))
-        os.system('cd build && ./{} {}'.format('irbpdpnp', ds))
-        os.system('cd build && ./{} {}'.format('irbpipnp', ds))
+    #     os.system('cd build && ./{} {}'.format('bbfdi', ds))
+        os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
+    #
+    #     os.system('cd build && ./{} {}'.format('bpt', ds))
+    #     os.system('cd build && ./{} {}'.format('irb', ds))
+    #     os.system('cd build && ./{} {}'.format('bfdi', ds))
+    #     os.system('cd build && ./{} {}'.format('birb', ds))
 
     # for ds in dataset_l:
     #     if program_name == 'rb':
@@ -116,7 +109,8 @@ def run_RTopk():
 if __name__ == '__main__':
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     # run(method_name='BPlusTree', program_name='bpt')
-    run_RTopk()
+    # run_RTopk()
+    run_RkRank()
     # run(method_name='BallIntervalRankBound', program_name='birb')
     # run(method_name='IntervalRankBound', program_name='irb')
     # run(method_name='RankBound', program_name='rb')
