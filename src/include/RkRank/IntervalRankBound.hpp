@@ -289,7 +289,8 @@ namespace ReverseMIPS::IntervalRankBound {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    Index &BuildIndex(VectorMatrix &user, VectorMatrix &data_item, const char *index_path) {
+    Index &BuildIndex(VectorMatrix &user, VectorMatrix &data_item, const char *index_path,
+                      const int &cache_bound_every, const int &n_interval) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -305,11 +306,9 @@ namespace ReverseMIPS::IntervalRankBound {
         interval_prune.Preprocess(user, check_dim, scale);
 
         //interval search
-        const int n_interval = std::min(n_data_item / 10, 5000);
         IntervalSearch interval_ins(n_interval, n_user, n_data_item);
 
         //rank search
-        const int cache_bound_every = 500;
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
         //build and write index

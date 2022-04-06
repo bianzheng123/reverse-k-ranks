@@ -66,7 +66,7 @@ def run_RkRank():
         os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     #
     #     os.system('cd build && ./{} {}'.format('bpt', ds))
-    #     os.system('cd build && ./{} {}'.format('irb', ds))
+        os.system('cd build && ./{} --dataset_name {}'.format('irb', ds))
     #     os.system('cd build && ./{} {}'.format('bfdi', ds))
     #     os.system('cd build && ./{} {}'.format('birb', ds))
 

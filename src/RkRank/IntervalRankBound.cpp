@@ -9,26 +9,57 @@
 #include "struct/VectorMatrix.hpp"
 #include "RkRank/IntervalRankBound.hpp"
 #include <spdlog/spdlog.h>
+#include <boost/program_options.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
+
+class Parameter {
+public:
+    int cache_bound_every, n_interval;
+    std::string dataset_name, basic_dir;
+};
+
+void LoadOptions(int argc, char **argv, Parameter &para) {
+    namespace po = boost::program_options;
+
+    po::options_description opts("Allowed options");
+    opts.add_options()
+            ("help,h", "help info")
+            ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake"), "dataset_name")
+            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(1000),
+             "how many numbers would cache a value")
+            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(500),
+             "the numer of interval")
+            ("basic_dir,bd",
+             po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
+             "basic directory");
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, opts), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        std::cout << opts << std::endl;
+        exit(0);
+    }
+}
 
 using namespace std;
 using namespace ReverseMIPS;
 
 int main(int argc, char **argv) {
-    if (!(argc == 2 or argc == 3)) {
-        cout << argv[0] << " dataset_name [basic_dir]" << endl;
-        return 0;
-    }
-    const char *dataset_name = argv[1];
-    const char *basic_dir = "/home/bianzheng/Dataset/ReverseMIPS";
-    if (argc == 3) {
-        basic_dir = argv[2];
-    }
+    Parameter para;
+    LoadOptions(argc, argv, para);
+    const char *dataset_name = para.dataset_name.c_str();
+    const char *basic_dir = para.basic_dir.c_str();
+    const int cache_bound_every = para.cache_bound_every;
+    const int n_interval = para.n_interval;
     const char *method_name = "IntervalRankBound";
     const char *problem_name = "RkRank";
-    spdlog::info("{} {} dataset_name {}, basic_dir {}", problem_name, method_name, dataset_name, basic_dir);
+
+    spdlog::info("{} {} dataset_name {}, basic_dir {}, cache_bound_every {}, n_interval {}", problem_name, method_name,
+                 dataset_name, basic_dir, cache_bound_every, n_interval);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -43,7 +74,7 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    IntervalRankBound::Index &irb = IntervalRankBound::BuildIndex(user, data_item, index_path);
+    IntervalRankBound::Index &irb = IntervalRankBound::BuildIndex(user, data_item, index_path, cache_bound_every, n_interval);
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 

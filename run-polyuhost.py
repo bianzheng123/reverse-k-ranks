@@ -80,12 +80,23 @@ def run_rankbound_sample_rate():
                 'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, para, basic_dir))
 
 
+def run_intervalrankbound_sample_rate():
+    # dataset_name_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    n_interval_l = [8, 16, 32, 64, 128, 256, 512, 1024, 2048]
+    cache_bound_every = 1000
+    for ds in dataset_l:
+        for n_interval in n_interval_l:
+            os.system(
+                'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
+                    ds, basic_dir, cache_bound_every, n_interval))
+
+
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
     dataset_l = ['movielens-27m']
 
-    run_rankbound_sample_rate()
+    run_intervalrankbound_sample_rate()
 
     # for ds in dataset_l:
     #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
