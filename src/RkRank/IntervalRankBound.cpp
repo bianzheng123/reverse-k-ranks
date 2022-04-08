@@ -29,7 +29,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake"), "dataset_name")
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(1000),
              "how many numbers would cache a value")
-            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(500),
+            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
             ("basic_dir,bd",
              po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
