@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/3/28.
+// Created by BianZheng on 2022/3/21.
 //
 
 #include "util/VectorIO.hpp"
@@ -7,7 +7,8 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "RkRank/BPlusTree.hpp"
+#include "IntervalSearch/IRBFullIntPrune.hpp"
+#include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -25,13 +26,8 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    const char *method_name = "BPlusTree";
-    const char *problem_name = "RkRank";
-    spdlog::info("{} {} dataset_name {}, basic_dir {}", problem_name, method_name, dataset_name, basic_dir);
-
-    double total_build_index_time;
-    char index_path[256];
-    sprintf(index_path, "../index/%s.index", dataset_name);
+    const char *method_name = "IRBFullIntPrune";
+    spdlog::info("{} dataset_name {}, basic_dir {}", method_name, dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -41,42 +37,50 @@ int main(int argc, char **argv) {
     VectorMatrix &query_item = data[2];
     spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
+    char index_path[256];
+    sprintf(index_path, "../index/%s.index", dataset_name);
+
     TimeRecord record;
     record.reset();
-    BPlusTree::Index &index = BPlusTree::BuildIndex(data_item, user, index_path);
-    total_build_index_time = record.get_elapsed_time_second();
+    IntervalRankBound::Index &irb = IntervalRankBound::BuildIndex(user, data_item, index_path);
+    double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-//    vector<int> topk_l{10};
-    BPlusTree::RetrievalResult config;
+    IntervalRankBound::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = index.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = irb.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double read_disk_time = index.read_disk_time_;
-        double inner_product_time = index.inner_product_time_;
-        double binary_search_time = index.binary_search_time_;
+        double interval_search_time = irb.interval_search_time_;
+        double inner_product_time = irb.inner_product_time_;
+        double coarse_binary_search_time = irb.coarse_binary_search_time_;
+        double read_disk_time = irb.read_disk_time_;
+        double fine_binary_search_time = irb.fine_binary_search_time_;
+
+        double interval_prune_ratio = irb.interval_prune_ratio_;
+        double rank_search_prune_ratio = irb.rank_search_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
         result_rank_l.emplace_back(result_rk);
-        string str = config.AddResultConfig(topk, retrieval_time, read_disk_time, inner_product_time,
-                                            binary_search_time,
-                                            second_per_query);
+        config.AddResultConfig(topk, retrieval_time, interval_search_time, inner_product_time,
+                               coarse_binary_search_time, read_disk_time, fine_binary_search_time,
+                               interval_prune_ratio,
+                               rank_search_prune_ratio,
+                               second_per_query);
         spdlog::info("finish top-{}", topk);
     }
 
-    spdlog::info("build index time: total {}s", total_build_index_time);
+    spdlog::info("build index time: total {}s", build_index_time);
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRkRankResult(result_rank_l[i], dataset_name, method_name);
+        writeRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
-    config.AddPreprocess(total_build_index_time);
-    config.writePerformance(problem_name, dataset_name, method_name);
-
+    config.AddPreprocess(build_index_time);
+    config.writePerformance(dataset_name, method_name);
     return 0;
 }

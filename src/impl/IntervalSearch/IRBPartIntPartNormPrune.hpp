@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 #define REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 
-#include "alg/bound/FullIntPrune.hpp"
+#include "alg/IPbound/PartIntPartNormPrune.hpp"
 #include "alg/IntervalSearch.hpp"
 #include "alg/RankSearch.hpp"
 #include "alg/PruneCandidateByBound.hpp"
@@ -86,7 +86,7 @@ namespace ReverseMIPS::IntervalRankBound {
         IntervalSearch interval_ins_;
         //interval search bound
         SVD svd_ins_;
-        FullIntPrune interval_prune_;
+        PartIntPartNormPrune interval_prune_;
 
         //for rank search, store in memory
         RankSearch rank_ins_;
@@ -113,7 +113,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 //interval search
                 IntervalSearch &interval_ins,
                 //interval search bound
-                SVD &svd_ins, FullIntPrune &interval_prune,
+                SVD &svd_ins, PartIntPartNormPrune &interval_prune,
                 // rank search
                 RankSearch &rank_ins,
                 //general retrieval
@@ -301,7 +301,7 @@ namespace ReverseMIPS::IntervalRankBound {
         SVD svd_ins;
         int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
 
-        FullIntPrune interval_prune;
+        PartIntPartNormPrune interval_prune;
         interval_prune.Preprocess(user, check_dim, scale);
 
         //interval search

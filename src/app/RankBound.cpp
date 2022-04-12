@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "RkRank/RankBound.hpp"
+#include "RankBound.hpp"
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -54,13 +54,12 @@ int main(int argc, char **argv) {
     const char *basic_dir = para.basic_dir.c_str();
     const int cache_bound_every = para.cache_bound_every;
     const char *method_name = "RankBound";
-    const char *problem_name = "RkRank";
-    spdlog::info("{} {} dataset_name {}, basic_dir {} cache_bound_every {}", problem_name, method_name, dataset_name, basic_dir,
-                 cache_bound_every);
+    spdlog::info("{} dataset_name {}, basic_dir {} cache_bound_every {}",
+                 method_name, dataset_name, basic_dir, cache_bound_every);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector <VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                          vec_dim);
+    vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
     VectorMatrix &user = data[0];
     VectorMatrix &data_item = data[1];
     VectorMatrix &query_item = data[2];
@@ -78,10 +77,10 @@ int main(int argc, char **argv) {
     vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{20};
     RankBound::RetrievalResult config;
-    vector < vector < vector < UserRankElement>>> result_rank_l;
+    vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
-        vector <vector<UserRankElement>> result_rk = bscb.Retrieval(query_item, topk);
+        vector<vector<UserRankElement>> result_rk = bscb.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
         double read_disk_time = bscb.read_disk_time_;
@@ -105,11 +104,11 @@ int main(int argc, char **argv) {
     sprintf(other_name, "cache_bound_every_%d", cache_bound_every);
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-//        writeRkRankResult(result_rank_l[i], dataset_name, method_name, other_name);
-        writeRkRankResult(result_rank_l[i], dataset_name, method_name);
+//        writeRankResult(result_rank_l[i], dataset_name, method_name, other_name);
+        writeRankResult(result_rank_l[i], dataset_name, method_name);
     }
     config.AddPreprocess(build_index_time);
-//    config.writePerformance(problem_name, dataset_name, method_name, other_name);
-    config.writePerformance(problem_name, dataset_name, method_name);
+//    config.writePerformance(dataset_name, method_name, other_name);
+    config.writePerformance(dataset_name, method_name);
     return 0;
 }

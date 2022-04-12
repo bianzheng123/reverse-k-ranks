@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "RkRank/DiskBruteForce.hpp"
+#include "DiskBruteForce.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
@@ -27,8 +27,7 @@ int main(int argc, char **argv) {
         basic_dir = argv[2];
     }
     const char *method_name = "DiskBruteForce";
-    const char *problem_name = "RkRank";
-    spdlog::info("{} {} dataset_name {}, basic_dir {}", problem_name, method_name, dataset_name, basic_dir);
+    spdlog::info("{} dataset_name {}, basic_dir {}", method_name, dataset_name, basic_dir);
 
     double total_build_index_time;
     char index_path[256];
@@ -73,10 +72,10 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRkRankResult(result_rank_l[i], dataset_name, method_name);
+        writeRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
     config.AddPreprocess(total_build_index_time);
-    config.writePerformance(problem_name, dataset_name, method_name);
+    config.writePerformance(dataset_name, method_name);
     return 0;
 }

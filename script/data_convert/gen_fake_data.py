@@ -27,8 +27,8 @@ def gen_data(n_user, n_data_item, n_query_item, vec_dim, dataset):
 if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
     n_query_item = 100
-    n_dim = 100
-    n_data_item = 5000
-    n_user = 5000
+    n_dim = 30
+    n_data_item = 2000
+    n_user = 500
 
-    gen_data(n_user, n_data_item, n_query_item, n_dim, "fakebig")
+    gen_data(n_user, n_data_item, n_query_item, n_dim, "fake")

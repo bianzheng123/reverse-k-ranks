@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 #define REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 
-#include "alg/bound/FullNormPrune.hpp"
+#include "alg/IPbound/FullIntPrune.hpp"
 #include "alg/IntervalSearch.hpp"
 #include "alg/RankSearch.hpp"
 #include "alg/PruneCandidateByBound.hpp"
@@ -86,7 +86,7 @@ namespace ReverseMIPS::IntervalRankBound {
         IntervalSearch interval_ins_;
         //interval search bound
         SVD svd_ins_;
-        FullNormPrune interval_prune_;
+        FullIntPrune interval_prune_;
 
         //for rank search, store in memory
         RankSearch rank_ins_;
@@ -113,7 +113,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 //interval search
                 IntervalSearch &interval_ins,
                 //interval search bound
-                SVD &svd_ins, FullNormPrune &interval_prune,
+                SVD &svd_ins, FullIntPrune &interval_prune,
                 // rank search
                 RankSearch &rank_ins,
                 //general retrieval
@@ -289,7 +289,8 @@ namespace ReverseMIPS::IntervalRankBound {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    Index &BuildIndex(VectorMatrix &user, VectorMatrix &data_item, const char *index_path) {
+    Index &BuildIndex(VectorMatrix &user, VectorMatrix &data_item, const char *index_path,
+                      const int &cache_bound_every, const int &n_interval) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -301,15 +302,13 @@ namespace ReverseMIPS::IntervalRankBound {
         SVD svd_ins;
         int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
 
-        FullNormPrune interval_prune;
-        interval_prune.Preprocess(user, check_dim);
+        FullIntPrune interval_prune;
+        interval_prune.Preprocess(user, check_dim, scale);
 
         //interval search
-        const int n_interval = std::min(n_data_item / 10, 5000);
         IntervalSearch interval_ins(n_interval, n_user, n_data_item);
 
         //rank search
-        const int cache_bound_every = 500;
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
         //build and write index

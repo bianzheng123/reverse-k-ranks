@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "RkRank/IntervalSearch/IRBFullIntPrune.hpp"
+#include "IntervalSearch/IRBFullNormPrune.hpp"
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <vector>
@@ -26,9 +26,8 @@ int main(int argc, char **argv) {
     if (argc == 3) {
         basic_dir = argv[2];
     }
-    const char *method_name = "IRBFullIntPrune";
-    const char *problem_name = "RkRank";
-    spdlog::info("{} {} dataset_name {}, basic_dir {}", problem_name, method_name, dataset_name, basic_dir);
+    const char *method_name = "IRBFullNormPrune";
+    spdlog::info("{} dataset_name {}, basic_dir {}", method_name, dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -78,10 +77,10 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRkRankResult(result_rank_l[i], dataset_name, method_name);
+        writeRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
     config.AddPreprocess(build_index_time);
-    config.writePerformance(problem_name, dataset_name, method_name);
+    config.writePerformance(dataset_name, method_name);
     return 0;
 }
