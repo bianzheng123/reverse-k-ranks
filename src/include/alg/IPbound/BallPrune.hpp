@@ -2,8 +2,8 @@
 // Created by BianZheng on 2022/3/22.
 //
 
-#ifndef REVERSE_KRANKS_TREESEARCH_HPP
-#define REVERSE_KRANKS_TREESEARCH_HPP
+#ifndef REVERSE_KRANKS_BALLPRUNE_HPP
+#define REVERSE_KRANKS_BALLPRUNE_HPP
 
 #include <random>
 #include <algorithm>
@@ -12,6 +12,7 @@
 #include <queue>
 #include <spdlog/spdlog.h>
 #include "alg/SpaceEuclidean.hpp"
+#include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 
 namespace ReverseMIPS {
@@ -38,7 +39,7 @@ namespace ReverseMIPS {
      * Preprocess: 先选择一个两个最远的点进行划分, 然后选择归类, 判断其半径大小
      * 讲半径更大的进行拆分, 直到总共的长度不超过N
      * **/
-    class BallSearch {
+    class BallPrune {
     public:
         // a node contains many users
         int n_user_, vec_dim_, n_node_; // n_node is determined after the tree have built
@@ -52,9 +53,10 @@ namespace ReverseMIPS {
         std::vector<bool> eval_l_; // n_node_, stores if evaluate this node
         std::vector<std::pair<double, double>> node_ip_bound_l;  // n_node_, stores, the IP bound of a node
 
-        inline BallSearch() = default;
+        inline BallPrune() = default;
 
-        inline BallSearch(const VectorMatrix &user, const int node_threshold) {
+        //make bound from offset_dim to vec_dim
+        void Preprocess(const VectorMatrix &user, const int node_threshold) {
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
             this->n_node_ = 0;
@@ -265,4 +267,4 @@ namespace ReverseMIPS {
     };
 
 }
-#endif //REVERSE_KRANKS_TREESEARCH_HPP
+#endif //REVERSE_KRANKS_BALLPRUNE_HPP

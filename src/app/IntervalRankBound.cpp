@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
     char index_path[256];
-    sprintf(index_path, "../index/%s.index", dataset_name);
+    sprintf(index_path, "../index/index");
 
     TimeRecord record;
     record.reset();

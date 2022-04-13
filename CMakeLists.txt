@@ -56,10 +56,6 @@ if (BUILD_RKRANK)
     target_include_directories(irb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-    add_executable(birb src/app/BallIntervalRankBound.cpp)
-    target_include_directories(birb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(birb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
     if (BUILD_RKRANK_FINISH)
         add_executable(bfon src/app/OnlineBruteForce.cpp)
         target_include_directories(bfon PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
@@ -72,7 +68,6 @@ if (BUILD_RKRANK)
         add_executable(bfdi src/app/DiskBruteForce.cpp)
         target_include_directories(bfdi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
         target_link_libraries(bfdi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
     endif ()
 
     if (BUILD_INTERVAL_SEARCH)
@@ -99,6 +94,10 @@ if (BUILD_RKRANK)
         add_executable(irbpipnp src/app/IntervalSearch/IRBPartIntPartNormPrune.cpp)
         target_include_directories(irbpipnp PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
         target_link_libraries(irbpipnp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+        add_executable(irbbp src/app/IntervalSearch/IRBBallPrune.cpp)
+        target_include_directories(irbbp PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+        target_link_libraries(irbbp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
     endif ()
 
 endif ()

@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 
     double total_build_index_time;
     char index_path[256];
-    sprintf(index_path, "../index/%s.index", dataset_name);
+    sprintf(index_path, "../index/index");
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,

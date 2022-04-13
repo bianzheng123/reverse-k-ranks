@@ -43,42 +43,44 @@ def run():
     method_m = {
         'RankBound': 'rb',
         'BatchDiskBruteForce': 'bbfdi',
-        'BPlusTree': 'bpt',
-        'IntervalRankBound': 'irb',
-        'BallIntervalRankBound': 'birb',
+        # 'BPlusTree': 'bpt',
+        # 'IntervalRankBound': 'irb',
+        # 'BallIntervalRankBound': 'birb',
 
-        'OnlineBruteForce': 'bfon',
+        # 'OnlineBruteForce': 'bfon',
         'MemoryBruteForce': 'bfmi',
-        'DiskBruteForce': 'bfdi',
+        # 'DiskBruteForce': 'bfdi',
 
-        'IRBFullDimPrune': 'irbfdp',
-        'IRBFullIntPrune': 'irbfip',
-        'IRBFullNormPrune': 'irbfnp',
-        'IRBPartDimPartIntPrune': 'irbpdpip',
-        'IRBPartDimPartNormPrune': 'irbpdpnp',
-        'IRBPartIntPartNormPrune': 'irbpipnp',
+        # 'IRBFullDimPrune': 'irbfdp',
+        # 'IRBFullIntPrune': 'irbfip',
+        # 'IRBFullNormPrune': 'irbfnp',
+        # 'IRBPartDimPartIntPrune': 'irbpdpip',
+        # 'IRBPartDimPartNormPrune': 'irbpdpnp',
+        # 'IRBPartIntPartNormPrune': 'irbpipnp',
+        'IRBBallPrune': 'irbbp',
     }
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     # os.system('cd build && ./{} {}'.format('bbfdi', ds))
 
-    dataset_l = ['fake']
+    dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     for ds in dataset_l:
         os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
-        os.system('cd build && ./{} {}'.format('bbfdi', ds))
-        os.system('cd build && ./{} {}'.format('bpt', ds))
+        # os.system('cd build && ./{} {}'.format('bbfdi', ds))
+        # os.system('cd build && ./{} {}'.format('bpt', ds))
         os.system('cd build && ./{} --dataset_name {}'.format('irb', ds))
-        os.system('cd build && ./{} {}'.format('birb', ds))
+        # os.system('cd build && ./{} {}'.format('birb', ds))
 
-        os.system('cd build && ./{} {}'.format('bfon', ds))
+        # os.system('cd build && ./{} {}'.format('bfon', ds))
         os.system('cd build && ./{} {}'.format('bfmi', ds))
-        os.system('cd build && ./{} {}'.format('bfdi', ds))
+        # os.system('cd build && ./{} {}'.format('bfdi', ds))
 
-        os.system('cd build && ./{} {}'.format('irbfdp', ds))
-        os.system('cd build && ./{} {}'.format('irbfip', ds))
-        os.system('cd build && ./{} {}'.format('irbfnp', ds))
-        os.system('cd build && ./{} {}'.format('irbpdpip', ds))
-        os.system('cd build && ./{} {}'.format('irbpdpnp', ds))
-        os.system('cd build && ./{} {}'.format('irbpipnp', ds))
+        # os.system('cd build && ./{} {}'.format('irbfdp', ds))
+        # os.system('cd build && ./{} {}'.format('irbfip', ds))
+        # os.system('cd build && ./{} {}'.format('irbfnp', ds))
+        # os.system('cd build && ./{} {}'.format('irbpdpip', ds))
+        # os.system('cd build && ./{} {}'.format('irbpdpnp', ds))
+        # os.system('cd build && ./{} {}'.format('irbpipnp', ds))
+        os.system('cd build && ./{} {}'.format('irbbp', ds))
 
     method_name_l = list(method_m.keys())
     type_arr = ['userID', 'IP', 'rank']
