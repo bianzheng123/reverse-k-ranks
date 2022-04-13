@@ -6,10 +6,10 @@
 #define REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 
 #include "alg/DiskIndex/ReadAll.hpp"
-#include "alg/IPbound/FullIntPrune.hpp"
-#include "alg/IntervalSearch.hpp"
-#include "alg/RankSearch.hpp"
-#include "alg/PruneCandidateByBound.hpp"
+#include "alg/Prune/IPbound/FullIntPrune.hpp"
+#include "alg/Prune/IntervalSearch.hpp"
+#include "alg/Prune/RankSearch.hpp"
+#include "alg/Prune/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -115,6 +115,8 @@ namespace ReverseMIPS::IntervalRankBound {
                 SVD &svd_ins, FullIntPrune &interval_prune,
                 // rank search
                 RankSearch &rank_ins,
+                //disk index
+                ReadAll &disk_ins,
                 //general retrieval
                 VectorMatrix &user, const int &n_data_item, const char *index_path) {
             //interval search
@@ -125,8 +127,7 @@ namespace ReverseMIPS::IntervalRankBound {
             //rank search
             this->rank_ins_ = std::move(rank_ins);
             //read disk
-            const int n_max_disk_read_ = this->rank_ins_.n_max_disk_read_;
-            disk_ins_ = ReadAll(n_user_, n_data_item, index_path, n_max_disk_read_);
+            this->disk_ins_ = std::move(disk_ins);
             //general retrieval
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
@@ -265,11 +266,8 @@ namespace ReverseMIPS::IntervalRankBound {
         //rank search
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
-        //build and write index
-        std::ofstream out(index_path, std::ios::binary | std::ios::out);
-        if (!out) {
-            spdlog::error("error in write result");
-        }
+        //disk index
+        ReadAll disk_ins(n_user, n_data_item, index_path, rank_ins.n_max_disk_read_);
 
         std::vector<double> write_distance_cache(write_every_ * n_data_item);
         const int n_batch = n_user / write_every_;
@@ -299,7 +297,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 //rank search
                 rank_ins.LoopPreprocess(distance_ptr, userID);
             }
-            out.write((char *) write_distance_cache.data(), write_distance_cache.size() * sizeof(double));
+            disk_ins.BuildIndexLoop(write_distance_cache, write_every_);
 
             if (i % report_batch_every_ == 0) {
                 std::cout << "preprocessed " << i / (0.01 * n_batch) << " %, "
@@ -307,32 +305,32 @@ namespace ReverseMIPS::IntervalRankBound {
                           << get_current_RSS() / 1000000 << " Mb \n";
                 batch_report_record.reset();
             }
-
         }
 
-        for (int cacheID = 0; cacheID < n_remain; cacheID++) {
-            int userID = write_every_ * n_batch + cacheID;
-            for (int itemID = 0; itemID < n_data_item; itemID++) {
-                double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
-                write_distance_cache[cacheID * n_data_item + itemID] = ip;
+        {
+            for (int cacheID = 0; cacheID < n_remain; cacheID++) {
+                int userID = write_every_ * n_batch + cacheID;
+                for (int itemID = 0; itemID < n_data_item; itemID++) {
+                    double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
+                    write_distance_cache[cacheID * n_data_item + itemID] = ip;
+                }
+
+                std::sort(write_distance_cache.begin() + cacheID * n_data_item,
+                          write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater<double>());
+
+                //interval search
+                double upper_bound = write_distance_cache[cacheID * n_data_item] + 0.01;
+                double lower_bound = write_distance_cache[(cacheID + 1) * n_data_item - 1] - 0.01;
+                std::pair<double, double> bound_pair = std::make_pair(lower_bound, upper_bound);
+                const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
+                interval_ins.LoopPreprocess(bound_pair, distance_ptr, userID);
+
+                //rank search
+                rank_ins.LoopPreprocess(distance_ptr, userID);
             }
-
-            std::sort(write_distance_cache.begin() + cacheID * n_data_item,
-                      write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater<double>());
-
-            //interval search
-            double upper_bound = write_distance_cache[cacheID * n_data_item] + 0.01;
-            double lower_bound = write_distance_cache[(cacheID + 1) * n_data_item - 1] - 0.01;
-            std::pair<double, double> bound_pair = std::make_pair(lower_bound, upper_bound);
-            const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-            interval_ins.LoopPreprocess(bound_pair, distance_ptr, userID);
-
-            //rank search
-            rank_ins.LoopPreprocess(distance_ptr, userID);
+            disk_ins.BuildIndexLoop(write_distance_cache, n_remain);
         }
 
-        out.write((char *) write_distance_cache.data(),
-                  n_remain * data_item.n_vector_ * sizeof(double));
         static Index index(
                 //interval search
                 interval_ins,
@@ -340,6 +338,8 @@ namespace ReverseMIPS::IntervalRankBound {
                 svd_ins, interval_prune,
                 //rank search
                 rank_ins,
+                //disk index
+                disk_ins,
                 //general retrieval
                 user, n_data_item, index_path);
         return index;

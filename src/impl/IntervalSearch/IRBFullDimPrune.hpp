@@ -5,10 +5,10 @@
 #ifndef REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 #define REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 
-#include "alg/IPbound/FullDimPrune.hpp"
-#include "alg/IntervalSearch.hpp"
-#include "alg/RankSearch.hpp"
-#include "alg/PruneCandidateByBound.hpp"
+#include "alg/Prune/IPbound/FullDimPrune.hpp"
+#include "alg/Prune/IntervalSearch.hpp"
+#include "alg/Prune/RankSearch.hpp"
+#include "alg/Prune/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"

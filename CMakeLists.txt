@@ -26,7 +26,7 @@ find_package(Armadillo)
 
 find_package(OpenMP)
 
-set(BUILD_TEST_MODULE OFF)
+set(BUILD_TEST_MODULE ON)
 set(BUILD_ATTRIBUTION OFF)
 
 set(BUILD_RKRANK ON)
@@ -55,6 +55,10 @@ if (BUILD_RKRANK)
     add_executable(irb src/app/IntervalRankBound.cpp)
     target_include_directories(irb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(irbm src/app/IntervalRankBoundMerge.cpp)
+    target_include_directories(irbm PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irbm PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     if (BUILD_RKRANK_FINISH)
         add_executable(bfon src/app/OnlineBruteForce.cpp)

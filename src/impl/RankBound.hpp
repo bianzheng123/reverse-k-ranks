@@ -6,14 +6,14 @@
 #define REVERSE_KRANKS_RANKBOUND_HPP
 
 #include "alg/DiskIndex/ReadAll.hpp"
-#include "alg/PruneCandidateByBound.hpp"
+#include "alg/Prune/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
-#include "alg/RankSearch.hpp"
+#include "alg/Prune/RankSearch.hpp"
 #include <string>
 #include <fstream>
 #include <vector>
@@ -93,14 +93,15 @@ namespace ReverseMIPS::RankBound {
 
         Index(//rank search
                 RankSearch &rank_ins,
+                //disk index
+                ReadAll &disk_ins,
                 //general retrieval
-                VectorMatrix &user, const int &n_data_item, const char *index_path
+                VectorMatrix &user, const int &n_data_item
         ) {
             //rank search
             this->rank_ins_ = std::move(rank_ins);
             //read disk
-            const int n_max_disk_read_ = this->rank_ins_.n_max_disk_read_;
-            disk_ins_ = ReadAll(n_user_, n_data_item, index_path, n_max_disk_read_);
+            this->disk_ins_ = std::move(disk_ins);
 
             this->user_ = std::move(user);
             this->vec_dim_ = this->user_.vec_dim_;
@@ -192,11 +193,6 @@ namespace ReverseMIPS::RankBound {
 
     Index &
     BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &cache_bound_every) {
-        std::ofstream out(index_path, std::ios::binary | std::ios::out);
-        if (!out) {
-            spdlog::error("error in write result");
-            exit(-1);
-        }
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
         std::vector<double> write_distance_cache(write_every_ * n_data_item);
@@ -208,6 +204,8 @@ namespace ReverseMIPS::RankBound {
 
         //rank search
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
+        //disk index
+        ReadAll disk_ins(n_user, n_data_item, index_path, rank_ins.n_max_disk_read_);
 
         TimeRecord batch_report_record;
         batch_report_record.reset();
@@ -226,7 +224,7 @@ namespace ReverseMIPS::RankBound {
                 const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
                 rank_ins.LoopPreprocess(distance_ptr, userID);
             }
-            out.write((char *) write_distance_cache.data(), write_every_ * n_data_item * sizeof(double));
+            disk_ins.BuildIndexLoop(write_distance_cache, write_every_);
 
             if (i % report_batch_every_ == 0) {
                 std::cout << "preprocessed " << i / (0.01 * n_batch) << " %, "
@@ -237,25 +235,27 @@ namespace ReverseMIPS::RankBound {
 
         }
 
-        for (int cacheID = 0; cacheID < n_remain; cacheID++) {
-            int userID = write_every_ * n_batch + cacheID;
-            for (int itemID = 0; itemID < data_item.n_vector_; itemID++) {
-                double ip = InnerProduct(data_item.getRawData() + itemID * vec_dim,
-                                         user.getRawData() + userID * vec_dim, vec_dim);
-                write_distance_cache[cacheID * data_item.n_vector_ + itemID] = ip;
+        {
+            for (int cacheID = 0; cacheID < n_remain; cacheID++) {
+                int userID = write_every_ * n_batch + cacheID;
+                for (int itemID = 0; itemID < data_item.n_vector_; itemID++) {
+                    double ip = InnerProduct(data_item.getRawData() + itemID * vec_dim,
+                                             user.getRawData() + userID * vec_dim, vec_dim);
+                    write_distance_cache[cacheID * data_item.n_vector_ + itemID] = ip;
+                }
+
+                std::sort(write_distance_cache.begin() + cacheID * n_data_item,
+                          write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
+
+                //rank search
+                const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
+                rank_ins.LoopPreprocess(distance_ptr, userID);
             }
 
-            std::sort(write_distance_cache.begin() + cacheID * n_data_item,
-                      write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
-
-            //rank search
-            const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-            rank_ins.LoopPreprocess(distance_ptr, userID);
+            disk_ins.BuildIndexLoop(write_distance_cache, n_remain);
         }
 
-        out.write((char *) write_distance_cache.data(),
-                  n_remain * data_item.n_vector_ * sizeof(double));
-        static Index index(rank_ins, user, n_data_item, index_path);
+        static Index index(rank_ins, disk_ins, user, n_data_item);
         return index;
     }
 

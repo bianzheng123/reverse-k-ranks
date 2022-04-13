@@ -82,13 +82,12 @@ def run_rankbound_sample_rate():
 
 def run_intervalrankbound_sample_rate():
     # dataset_name_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    n_interval_l = [8, 16, 32, 64, 128, 256, 512, 1024, 2048]
-    cache_bound_every = 1000
+    cache_bound_every_l = [512, 1024, 1536, 2048, 2560, 3072]
     for ds in dataset_l:
-        for n_interval in n_interval_l:
+        for cache_bound_every in cache_bound_every_l:
             os.system(
-                'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
-                    ds, basic_dir, cache_bound_every, n_interval))
+                'cd build && ./rb --dataset_name {} --basic_dir {} --cache_bound_every {}'.format(
+                    ds, basic_dir, cache_bound_every))
 
 
 if __name__ == '__main__':
@@ -98,10 +97,10 @@ if __name__ == '__main__':
 
     run_intervalrankbound_sample_rate()
 
-    for ds in dataset_l:
-        os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
-        os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
-        os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
+    # for ds in dataset_l:
+    #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
     #     os.system('cd build && ./bpt {} {}'.format(ds, basic_dir))
     #
     #     os.system('cd build && ./irbfdp {} {}'.format(ds, basic_dir))

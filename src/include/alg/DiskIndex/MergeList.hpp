@@ -1,17 +1,17 @@
 //
-// Created by BianZheng on 2022/4/12.
+// Created by BianZheng on 2022/4/13.
 //
 
-#ifndef REVERSE_K_RANKS_READALL_HPP
-#define REVERSE_K_RANKS_READALL_HPP
+#ifndef REVERSE_KRANKS_MERGEVECTOR_HPP
+#define REVERSE_KRANKS_MERGEVECTOR_HPP
 
 #include <memory>
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
 
-    class ReadAll {
-        int n_data_item_, n_user_;
+    class MergeList {
+        int n_user_, n_data_item_, n_merge_user_, compress_rank_every_;
         const char *index_path_;
         int n_max_disk_read_;
 
@@ -39,15 +39,6 @@ namespace ReverseMIPS {
             index_stream_.read((char *) disk_cache_.get(), read_count * sizeof(double));
         }
 
-        void
-        BuildIndexPreprocess() {
-            out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
-            if (!out_stream_) {
-                spdlog::error("error in write result");
-                exit(-1);
-            }
-        }
-
     public:
 
         TimeRecord read_disk_record_, fine_binary_search_record_;
@@ -62,18 +53,28 @@ namespace ReverseMIPS {
         int n_candidate_;
         std::vector<UserRankElement> user_topk_cache_l_;
 
+        inline MergeList() {}
 
-        inline ReadAll() {}
-
-        inline ReadAll(const int &n_user, const int &n_data_item, const char *index_path, const int n_max_disk_read) {
+        inline MergeList(const VectorMatrix &user, const int &n_user, const int &n_data_item, const char *index_path,
+                         const int &n_merge_user, const int &compress_rank_every) {
+            assert(user.n_vector_ == n_user);
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->index_path_ = index_path;
-            this->n_max_disk_read_ = n_max_disk_read;
-            this->disk_cache_ = std::make_unique<double[]>(n_max_disk_read);
+            this->n_merge_user_ = n_merge_user;
+            this->compress_rank_every_ = compress_rank_every;
             this->user_topk_cache_l_.resize(n_user);
 
-            BuildIndexPreprocess();
+            BuildIndexPreprocess(user);
+        }
+
+        void
+        BuildIndexPreprocess(const VectorMatrix &user) {
+            out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
+            if (!out_stream_) {
+                spdlog::error("error in write result");
+                exit(-1);
+            }
         }
 
         void BuildIndexLoop(const std::vector<double> &distance_cache, const int &n_write) {
@@ -131,4 +132,4 @@ namespace ReverseMIPS {
 
     };
 }
-#endif //REVERSE_K_RANKS_READALL_HPP
+#endif //REVERSE_KRANKS_MERGEVECTOR_HPP
