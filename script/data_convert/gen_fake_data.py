@@ -11,9 +11,9 @@ def delete_file_if_exist(dire):
 
 
 def gen_data(n_user, n_data_item, n_query_item, vec_dim, dataset):
-    query_item_l = np.random.normal(scale=0.1, size=(n_query_item, vec_dim))
-    data_item_l = np.random.normal(scale=0.1, size=(n_data_item, vec_dim))
-    user_l = np.random.normal(scale=0.1, size=(n_user, vec_dim))
+    query_item_l = np.random.normal(scale=10, size=(n_query_item, vec_dim))
+    data_item_l = np.random.normal(scale=10, size=(n_data_item, vec_dim))
+    user_l = np.random.normal(scale=10, size=(n_user, vec_dim))
 
     output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
     delete_file_if_exist(output_dir)

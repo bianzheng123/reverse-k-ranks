@@ -73,7 +73,7 @@ def run(method_name='IntervalRankBound', program_name='irb'):
 
 def run_rankbound_sample_rate():
     # dataset_name_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    cache_bound_every_l = [8, 16, 32, 64, 128, 256, 512, 1024, 2048]
+    cache_bound_every_l = [512, 1024, 1536, 2048, 2560, 3072, 3584, 4096]
     for ds in dataset_l:
         for para in cache_bound_every_l:
             os.system(
@@ -82,24 +82,25 @@ def run_rankbound_sample_rate():
 
 def run_intervalrankbound_sample_rate():
     # dataset_name_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    cache_bound_every_l = [512, 1024, 1536, 2048, 2560, 3072, 3584, 4096]
+    n_interval_l = [16, 32, 64, 128, 256, 512, 1024, 2048]
     for ds in dataset_l:
-        for cache_bound_every in cache_bound_every_l:
+        for n_interval in n_interval_l:
             os.system(
-                'cd build && ./rb --dataset_name {} --basic_dir {} --cache_bound_every {}'.format(
-                    ds, basic_dir, cache_bound_every))
+                'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
+                    ds, basic_dir, 1024, n_interval))
 
 
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    dataset_l = ['movielens-27m']
+    dataset_l = ['movielens-27m', 'netflix']
 
     run_intervalrankbound_sample_rate()
+    run_rankbound_sample_rate()
 
-    # for ds in dataset_l:
-    #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
+    for ds in dataset_l:
+        os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
+        os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
     #     os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
     #     os.system('cd build && ./bpt {} {}'.format(ds, basic_dir))
     #

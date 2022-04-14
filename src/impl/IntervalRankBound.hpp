@@ -225,6 +225,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 }
                 assert(query_heap_l[queryID].size() == topk);
             }
+            disk_ins_.FinishRetrieval();
 
             fine_binary_search_time_ = disk_ins_.fine_binary_search_time_;
             read_disk_time_ = disk_ins_.read_disk_time_;

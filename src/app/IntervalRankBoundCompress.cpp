@@ -7,7 +7,7 @@
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-#include "IntervalRankBoundMerge.hpp"
+#include "IntervalRankBoundCompress.hpp"
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -27,14 +27,14 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
     opts.add_options()
             ("help,h", "help info")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake"), "dataset_name")
-            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(10),
-             "the number of list user to be merged")
-            ("compress_rank_every, cre", po::value<int>(&para.compress_rank_every)->default_value(10),
-             "how many rank should be compressed")
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(1000),
-             "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
+            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(1000),
+             "how many numbers would cache a value")
+            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
+             "the number of list user to be merged")
+            ("compress_rank_every, cre", po::value<int>(&para.compress_rank_every)->default_value(90),
+             "how many rank should be compressed")
             ("basic_dir,bd",
              po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
              "basic directory");
@@ -80,15 +80,15 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    IntervalRankBoundMerge::Index &irb = IntervalRankBoundMerge::BuildIndex(user, data_item, index_path,
-                                                                            n_merge_user, compress_rank_every,
-                                                                            cache_bound_every, n_interval);
+    IntervalRankBoundCompress::Index &irb = IntervalRankBoundCompress::BuildIndex(user, data_item, index_path,
+                                                                                  n_merge_user, compress_rank_every,
+                                                                                  cache_bound_every, n_interval);
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-//    vector<int> topk_l{10};
-    IntervalRankBoundMerge::RetrievalResult config;
+//    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
+    vector<int> topk_l{10};
+    IntervalRankBoundCompress::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
         record.reset();

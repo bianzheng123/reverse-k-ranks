@@ -126,7 +126,10 @@ namespace ReverseMIPS {
 
             std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_candidate_,
                       std::less());
+        }
 
+        void FinishRetrieval(){
+            index_stream_.close();
         }
 
     };

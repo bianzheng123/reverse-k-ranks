@@ -179,8 +179,11 @@ namespace ReverseMIPS::RankBound {
                 }
                 assert(query_heap_l[queryID].size() == topk);
             }
+            disk_ins_.FinishRetrieval();
+
             read_disk_time_ = disk_ins_.read_disk_time_;
             fine_binary_search_time_ = disk_ins_.fine_binary_search_time_;
+
             rank_prune_ratio_ /= n_query_item;
 
             return query_heap_l;
