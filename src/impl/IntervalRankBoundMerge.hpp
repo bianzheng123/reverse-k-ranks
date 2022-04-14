@@ -248,12 +248,11 @@ namespace ReverseMIPS::IntervalRankBoundMerge {
      */
 
     Index &BuildIndex(VectorMatrix &user, VectorMatrix &data_item, const char *index_path,
+                      const int &n_merge_user, const int &compress_rank_every,
                       const int &cache_bound_every, const int &n_interval) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
-
-        MergeList ml(user, n_user, n_data_item, index_path, 10, 10);
 
         user.vectorNormalize();
 
@@ -272,16 +271,17 @@ namespace ReverseMIPS::IntervalRankBoundMerge {
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path, rank_ins.n_max_disk_read_);
+        MergeList disk_ins(user, n_data_item, index_path, n_merge_user, compress_rank_every);
+        std::vector<std::vector<int>> &eval_seq_l = disk_ins.EvalVector();
+        assert(eval_seq_l.size() == n_merge_user);
 
-        std::vector<double> write_distance_cache(write_every_ * n_data_item);
-        const int n_batch = n_user / write_every_;
-        const int n_remain = n_user % write_every_;
-        spdlog::info("write_every_ {}, n_batch {}, n_remain {}", write_every_, n_batch, n_remain);
+        std::vector<std::vector<int>> ();
 
         TimeRecord batch_report_record;
         batch_report_record.reset();
-        for (int i = 0; i < n_batch; i++) {
+        for (int labelID = 0; labelID < n_merge_user; labelID++) {
+            std::vector<int> &user_l = eval_seq_l[labelID];
+
 #pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, rank_ins, check_dim, interval_ins) shared(write_every_, n_data_item, vec_dim, n_interval)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;

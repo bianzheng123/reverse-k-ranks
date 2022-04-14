@@ -82,7 +82,7 @@ def run_rankbound_sample_rate():
 
 def run_intervalrankbound_sample_rate():
     # dataset_name_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    cache_bound_every_l = [512, 1024, 1536, 2048, 2560, 3072]
+    cache_bound_every_l = [512, 1024, 1536, 2048, 2560, 3072, 3584, 4096]
     for ds in dataset_l:
         for cache_bound_every in cache_bound_every_l:
             os.system(

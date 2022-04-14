@@ -16,7 +16,7 @@
 
 class Parameter {
 public:
-    int cache_bound_every, n_interval;
+    int cache_bound_every, n_interval, n_merge_user, compress_rank_every;
     std::string dataset_name, basic_dir;
 };
 
@@ -27,6 +27,10 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
     opts.add_options()
             ("help,h", "help info")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake"), "dataset_name")
+            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(10),
+             "the number of list user to be merged")
+            ("compress_rank_every, cre", po::value<int>(&para.compress_rank_every)->default_value(10),
+             "how many rank should be compressed")
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(1000),
              "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
@@ -53,12 +57,15 @@ int main(int argc, char **argv) {
     LoadOptions(argc, argv, para);
     const char *dataset_name = para.dataset_name.c_str();
     const char *basic_dir = para.basic_dir.c_str();
+    const int n_merge_user = para.n_merge_user;
+    const int compress_rank_every = para.compress_rank_every;
     const int cache_bound_every = para.cache_bound_every;
     const int n_interval = para.n_interval;
-    const char *method_name = "IntervalRankBound";
+    const char *method_name = "IntervalRankBoundMerge";
 
-    spdlog::info("{} dataset_name {}, basic_dir {}, cache_bound_every {}, n_interval {}", method_name,
-                 dataset_name, basic_dir, cache_bound_every, n_interval);
+    spdlog::info(
+            "{} dataset_name {}, basic_dir {}, n_merge_user {}, compress_rank_every {}, cache_bound_every {}, n_interval {}",
+            method_name, dataset_name, basic_dir, n_merge_user, compress_rank_every, cache_bound_every, n_interval);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -73,8 +80,9 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    IntervalRankBoundMerge::Index &irb = IntervalRankBoundMerge::BuildIndex(user, data_item, index_path, cache_bound_every,
-                                                                  n_interval);
+    IntervalRankBoundMerge::Index &irb = IntervalRankBoundMerge::BuildIndex(user, data_item, index_path,
+                                                                            n_merge_user, compress_rank_every,
+                                                                            cache_bound_every, n_interval);
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 

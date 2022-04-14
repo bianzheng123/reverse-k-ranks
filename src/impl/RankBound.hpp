@@ -44,18 +44,19 @@ namespace ReverseMIPS::RankBound {
             this->config_l.emplace_back(str);
         }
 
-        std::string AddResultConfig(const int &topk,
-                                    const double &total_time, const double &read_disk_time,
-                                    const double &inner_product_time,
-                                    const double &coarse_binary_search_time, const double &fine_binary_search_time,
+        std::string AddResultConfig(const int &topk, const double &total_time,
+                                    const double &inner_product_time, const double &coarse_binary_search_time,
+                                    const double &rank_prune_time,
+                                    const double &read_disk_time, const double &fine_binary_search_time,
                                     const double &rank_prune_ratio,
                                     const double &second_per_query) {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, fine binary search %.3fs\n\trank prune ratio %.7f, million second per query %.3fms",
-                    topk, total_time, read_disk_time, inner_product_time, coarse_binary_search_time,
-                    fine_binary_search_time, rank_prune_ratio, second_per_query);
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, coarse binary search %.3fs\n\trank_prune_time %.3fs, read disk %.3fs, fine binary search %.3fs\n\trank prune ratio %.7f, million second per query %.3fms",
+                    topk, total_time, inner_product_time, coarse_binary_search_time,
+                    rank_prune_time, read_disk_time, fine_binary_search_time,
+                    rank_prune_ratio, second_per_query);
             std::string str(buff);
             this->config_l.emplace_back(str);
             return str;
@@ -65,9 +66,10 @@ namespace ReverseMIPS::RankBound {
 
     class Index : public BaseIndex {
         void ResetTimer() {
-            read_disk_time_ = 0;
             inner_product_time_ = 0;
             coarse_binary_search_time_ = 0;
+            rank_prune_time_ = 0;
+            read_disk_time_ = 0;
             fine_binary_search_time_ = 0;
             rank_prune_ratio_ = 0;
         }
@@ -80,8 +82,8 @@ namespace ReverseMIPS::RankBound {
 
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
-        double inner_product_time_, coarse_binary_search_time_, read_disk_time_, fine_binary_search_time_;
-        TimeRecord inner_product_record_, coarse_binary_search_record_;
+        double inner_product_time_, coarse_binary_search_time_, rank_prune_time_, read_disk_time_, fine_binary_search_time_;
+        TimeRecord inner_product_record_, coarse_binary_search_record_, rank_prune_record_;
         double rank_prune_ratio_;
 
         //temporary retrieval variable
@@ -152,11 +154,14 @@ namespace ReverseMIPS::RankBound {
                 //rank search
                 coarse_binary_search_record_.reset();
                 rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, prune_l_, rank_topk_max_heap, queryID);
+                coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
+
+                rank_prune_record_.reset();
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
+                rank_prune_time_ += rank_prune_record_.get_elapsed_time_second();
 
-                coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
                 int n_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
                     if (!prune_l_[userID]) {

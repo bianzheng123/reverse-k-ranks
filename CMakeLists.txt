@@ -32,12 +32,19 @@ set(BUILD_ATTRIBUTION OFF)
 set(BUILD_RKRANK ON)
 set(BUILD_RKRANK_FINISH ON)
 set(BUILD_INTERVAL_SEARCH ON)
+set(BUILD_DEV OFF)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
 #
 #target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
 #target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
+
+if (BUILD_DEV)
+    add_executable(irbm src/app/IntervalRankBoundMerge.cpp)
+    target_include_directories(irbm PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(irbm PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+endif ()
 
 if (BUILD_RKRANK)
     add_executable(bbfdi src/app/BatchDiskBruteForce.cpp)
@@ -55,10 +62,6 @@ if (BUILD_RKRANK)
     add_executable(irb src/app/IntervalRankBound.cpp)
     target_include_directories(irb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(irbm src/app/IntervalRankBoundMerge.cpp)
-    target_include_directories(irbm PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irbm PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     if (BUILD_RKRANK_FINISH)
         add_executable(bfon src/app/OnlineBruteForce.cpp)
