@@ -41,6 +41,8 @@ namespace ReverseMIPS {
         std::unique_ptr<int[]> user_disk_cache_; //n_max_disk_read_, stores the userID in the disk
         int n_candidate_;
         std::vector<UserRankElement> user_topk_cache_l_;
+        std::vector<bool> item_compute_l_;
+        std::vector<DistancePair> bucket_candidate_l_;
 
         inline RankBucket() {}
 
@@ -65,6 +67,8 @@ namespace ReverseMIPS {
             this->rank_boundary_l_.resize(n_cache_rank_);
 
             this->user_topk_cache_l_.resize(n_user_);
+            this->item_compute_l_.resize(n_data_item_);
+            this->bucket_candidate_l_.resize(n_data_item_);
 
             BuildIndexPreprocess(user);
         }
@@ -137,9 +141,9 @@ namespace ReverseMIPS {
             // cache_bkt_vec: n_cache_rank
             // merge to the cache_bkt_vec
             for (int bucketID = 0; bucketID < n_cache_rank_; bucketID++) {
-                int base_idx = bucketID == 0 ? 0 : rank_boundary_l_[bucketID - 1] + 1;
+                int base_idx = bucketID == 0 ? 0 : rank_boundary_l_[bucketID - 1];
                 int remain_size = n_data_item_ % compress_rank_every_;
-                int bucket_size = bucketID == n_cache_rank_ - 1 ? remain_size : compress_rank_every_;
+                int bucket_size = bucketID == n_cache_rank_ - 1 ? remain_size + 1 : compress_rank_every_ + 1;
                 std::set<int> &bucket_s = cache_bkt_vec[bucketID];
                 for (int candID = 0; candID < bucket_size; candID++) {
                     const int tmp_userID = distance_pair_l[base_idx + candID].ID_;
@@ -238,43 +242,75 @@ namespace ReverseMIPS {
                 if (prune_l[userID]) {
                     continue;
                 }
+                item_compute_l_.assign(n_data_item_, false);
                 assert(0 <= rank_ub_l[userID] && rank_ub_l[userID] <= rank_lb_l[userID] &&
                        rank_lb_l[userID] <= n_data_item_);
 
-                //may have bug
-                int bkt_ub_idx = (rank_ub_l[userID] + 1) / compress_rank_every_;
+                int bkt_ub = (rank_ub_l[userID] + 1) / compress_rank_every_;
                 int bkt_offset = (rank_lb_l[userID] + 1) % compress_rank_every_ == 0 ? 0 : 1;
-                int bkt_lb_idx = (rank_lb_l[userID] + 1) / compress_rank_every_ + bkt_offset;
-                assert(0 <= bkt_ub_idx && bkt_ub_idx <= bkt_lb_idx && bkt_lb_idx <= n_cache_rank_);
+                int bkt_lb = (rank_lb_l[userID] + 1) / compress_rank_every_ + bkt_offset;
+                assert(0 <= bkt_ub && bkt_ub <= bkt_lb && bkt_lb <= n_cache_rank_);
+
+                double IP_lb =
+                        bkt_lb == n_cache_rank_ ? -DBL_MAX : IPbound_l_[userID * n_cache_rank_ + bkt_lb];
+                double IP_ub =
+                        bkt_ub == 0 ? DBL_MAX : IPbound_l_[userID * n_cache_rank_ + bkt_ub - 1];
 
                 double queryIP = queryIP_l[userID];
-                int base_rank = bkt_ub_idx == 0 ? 0 : rank_boundary_l_[bkt_ub_idx - 1];
+                int base_rank = bkt_ub == 0 ? 0 : rank_boundary_l_[bkt_ub - 1];
 
                 uint32_t labelID = merge_label_l_[userID];
-                uint64_t base_user_offset =
-                        labelID == 0 && bkt_ub_idx == 0 ? 0 : index_size_l_[labelID * n_cache_rank_ + bkt_ub_idx - 1];
-                uint64_t read_user_count = index_size_l_[labelID * n_cache_rank_ + bkt_lb_idx] -
-                                           base_user_offset;
 
-                if (queryID == 0 && userID == 468) {
-                    printf("bkt_ub_idx %d, bkt_lb_idx %d, base_rank %d, labelID %d\n", bkt_ub_idx, bkt_lb_idx,
-                           base_rank, labelID);
-                    printf("base_user_offset %ld, read_user_count %ld\n", base_user_offset, read_user_count);
+                if (queryID == 26 && userID == 118) {
+                    printf("queryID %d, userID %d, input lower rank %d, input upper rank %d\n",
+                           userID, queryID, rank_lb_l[userID], rank_ub_l[userID]);
+                    printf("bkt_ub %d, bkt_lb %d, base_rank %d, labelID %d\n",
+                           bkt_ub, bkt_lb, base_rank, labelID);
+                    printf("IP_lb %.3f, IP_ub %.3f\n", IP_lb, IP_ub);
+                    printf("queryIP %.3f\n", queryIP);
+
+                    printf("IP_lb %.3f %.3f %.3f\n",
+                           IPbound_l_[userID * n_cache_rank_ + bkt_lb - 1],
+                           IPbound_l_[userID * n_cache_rank_ + bkt_lb],
+                           IPbound_l_[userID * n_cache_rank_ + bkt_lb + 1]);
                 }
 
-                //TODO: have bug
-                assert(0 <= read_user_count && read_user_count <= n_max_disk_read_);
+                assert(bkt_ub <= bkt_lb);
+                int loc_rk = 0;
+                for (int bktID = bkt_ub; bktID < bkt_lb; bktID++) {
+                    uint64_t base_user_offset =
+                            labelID == 0 && bktID == 0 ?
+                            0 : index_size_l_[labelID * n_cache_rank_ + bktID - 1];
+                    uint64_t read_user_count = index_size_l_[labelID * n_cache_rank_ + bktID] -
+                                               base_user_offset;
 
-                assert(bkt_ub_idx <= bkt_lb_idx);
-                read_disk_record_.reset();
-                ReadDisk(userID, base_user_offset, read_user_count);
-                read_disk_time_ += read_disk_record_.get_elapsed_time_second();
-                fine_binary_search_record_.reset();
-                int loc_rk = RelativeRankInBucket(user, item, queryIP, (int) read_user_count, bkt_ub_idx, bkt_lb_idx,
-                                                  userID);
-                fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
+                    read_disk_record_.reset();
+                    ReadDisk(userID, base_user_offset, read_user_count);
+                    read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+                    fine_binary_search_record_.reset();
+                    int tmp_loc_rk = RelativeRankInBucket(user, item, queryIP, (int) read_user_count, userID,
+                                                          IP_lb, IP_ub, queryID);
+                    loc_rk += tmp_loc_rk;
+                    fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
+
+
+                    if (queryID == 26 && userID == 118) {
+                        printf("queryID %d, userID %d, read_user_count %ld, local rank %d\n",
+                               queryID, userID, read_user_count, loc_rk);
+                    }
+
+                    if (!(0 <= read_user_count && read_user_count <= n_max_disk_read_)) {
+                        printf("rank_lb %d, rank_ub %d", rank_lb_l[userID], rank_ub_l[userID]);
+                        printf("queryID %d, userID %d, read_user_count %ld, n_max_disk_read %d\n", queryID, userID,
+                               read_user_count, n_max_disk_read_);
+                    }
+                    assert(0 <= read_user_count && read_user_count <= n_max_disk_read_);
+                }
 
                 int rank = base_rank + loc_rk + 1;
+                if (queryID == 26 && userID == 118) {
+                    printf("queryID %d, userID %d, rank %d\n", queryID, userID, rank);
+                }
                 user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
                 n_candidate_++;
             }
@@ -286,29 +322,50 @@ namespace ReverseMIPS {
 
         [[nodiscard]] int
         RelativeRankInBucket(const VectorMatrix &user, const VectorMatrix &item, const double &queryIP,
-                             const int &n_candidate,
-                             const int &bucket_ub, const int &bucket_lb, const int &userID) const {
+                             const int &n_candidate, const int &userID,
+                             const double &IP_lb, const double &IP_ub, int queryID) {
             //calculate all the IP, then get the lower bound
             //make different situation by the information
-            std::vector<double> dp_l;
-            double bucket_upper_bound =
-                    bucket_ub == 0 ? DBL_MAX : IPbound_l_[userID * n_cache_rank_ + bucket_ub - 1];
-            double bucket_lower_bound =
-                    bucket_lb == n_cache_rank_ ? -DBL_MAX : IPbound_l_[userID * n_cache_rank_ + bucket_lb];
-            assert(bucket_lower_bound < queryIP && queryIP < bucket_upper_bound);
+            int avail_n_cand = 0;
+            assert(IP_lb < queryIP && queryIP < IP_ub);
+            //TODO comment in running
+#pragma omp parallel for default(none) shared(n_candidate, item, IP_lb, IP_ub, avail_n_cand, user, userID)
             for (int candID = 0; candID < n_candidate; candID++) {
-                double ip = InnerProduct(item.getVector(user_disk_cache_[candID]), user.getVector(userID), vec_dim_);
-                if (bucket_lower_bound < ip && ip < bucket_upper_bound) {
-                    dp_l.emplace_back(ip);
+                int itemID = user_disk_cache_[candID];
+                if (item_compute_l_[itemID]) {
+                    continue;
                 }
+                double ip = InnerProduct(item.getVector(user_disk_cache_[candID]), user.getVector(userID), vec_dim_);
+                if (IP_lb <= ip && ip <= IP_ub) {
+                    bucket_candidate_l_[avail_n_cand] = DistancePair(ip, itemID);
+                    avail_n_cand++;
+                }
+                item_compute_l_[itemID] = true;
             }
-            std::sort(dp_l.begin(), dp_l.end(), std::greater());
+            if (queryID == 26 && userID == 118) {
+                printf("queryID %d, userID %d, n_candidate %d\n",
+                       queryID, userID, avail_n_cand);
+            }
 
-            auto lb_ptr = std::lower_bound(dp_l.begin(), dp_l.end(), queryIP,
-                                           [](const double &info, double value) {
-                                               return info > value;
+            std::sort(bucket_candidate_l_.begin(), bucket_candidate_l_.begin() + avail_n_cand, std::greater());
+
+            auto lb_ptr = std::lower_bound(bucket_candidate_l_.begin(), bucket_candidate_l_.begin() + avail_n_cand,
+                                           queryIP,
+                                           [](const DistancePair &info, double value) {
+                                               return info.dist_ > value;
                                            });
-            return (int) (lb_ptr - dp_l.begin());
+            int loc_rk = (int) (lb_ptr - bucket_candidate_l_.begin());
+
+            if (queryID == 26 && userID == 118) {
+                printf("queryID %d, userID %d, candidateID\n", queryID, userID);
+                for (int candID = 0; candID < loc_rk; candID++) {
+                    printf("%d ", bucket_candidate_l_[candID].ID_);
+                }
+                printf("\n");
+
+            }
+
+            return loc_rk;
         }
 
         void FinishRetrieval() {

@@ -29,11 +29,11 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake"), "dataset_name")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(1000),
+            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(5),
              "how many numbers would cache a value")
-            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
+            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(100),
              "the number of list user to be merged")
-            ("compress_rank_every, cre", po::value<int>(&para.compress_rank_every)->default_value(90),
+            ("compress_rank_every, cre", po::value<int>(&para.compress_rank_every)->default_value(150),
              "how many rank should be compressed")
             ("basic_dir,bd",
              po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     const int compress_rank_every = para.compress_rank_every;
     const int cache_bound_every = para.cache_bound_every;
     const int n_interval = para.n_interval;
-    const char *method_name = "IntervalRankBoundMerge";
+    const char *method_name = "IntervalRankBoundCompress";
 
     spdlog::info(
             "{} dataset_name {}, basic_dir {}, n_merge_user {}, compress_rank_every {}, cache_bound_every {}, n_interval {}",
@@ -86,8 +86,8 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-//    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-    vector<int> topk_l{10};
+    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
+//    vector<int> topk_l{20};
     IntervalRankBoundCompress::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {

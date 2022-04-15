@@ -77,7 +77,8 @@ def run_rankbound_sample_rate():
     for ds in dataset_l:
         for para in cache_bound_every_l:
             os.system(
-                'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, para, basic_dir))
+                'cd build && ./rbnet --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, para,
+                                                                                                     basic_dir))
 
 
 def run_intervalrankbound_sample_rate():
@@ -95,12 +96,12 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
     dataset_l = ['movielens-27m', 'netflix']
 
-    run_intervalrankbound_sample_rate()
+    # run_intervalrankbound_sample_rate()
     run_rankbound_sample_rate()
 
-    for ds in dataset_l:
-        os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
-        os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
+    # for ds in dataset_l:
+    #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
+    #     os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
     #     os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
     #     os.system('cd build && ./bpt {} {}'.format(ds, basic_dir))
     #

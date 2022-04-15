@@ -20,16 +20,35 @@ def cmp_file(file1, file2):
 
 
 def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
+    suffix_m = {
+        'RankBound': 'cache_bound_every_1000',
+        'IntervalRankBound': 'cache_bound_every_1000-n_interval_1024',
+        'RBNoEarlyTermination': 'cache_bound_every_1000'
+    }
     flag = True
     for ds in dataset_l:
         for topk in topk_l:
             for _type in type_arr:
                 for method_idx in range(1, len(method_name_l), 1):
                     # bfon = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'OnlineBruteForce', _type))
-                    base_method = os.path.join('result', 'rank',
-                                               '{}-{}-top{}-{}.csv'.format(ds, method_name_l[0], topk, _type))
-                    test_method = os.path.join('result', 'rank',
-                                               '{}-{}-top{}-{}.csv'.format(ds, method_name_l[method_idx], topk, _type))
+                    baseline_method = method_name_l[0]
+                    cmp_method = method_name_l[method_idx]
+                    if baseline_method in suffix_m:
+                        base_method = os.path.join('result', 'rank',
+                                                   '{}-{}-top{}-{}-{}.csv'.format(
+                                                       ds, method_name_l[0], topk, suffix_m[baseline_method], _type))
+                    else:
+                        base_method = os.path.join('result', 'rank',
+                                                   '{}-{}-top{}-{}.csv'.format(ds, method_name_l[0], topk, _type))
+
+                    if cmp_method in suffix_m:
+                        test_method = os.path.join('result', 'rank',
+                                                   '{}-{}-top{}-{}-{}.csv'.format(
+                                                       ds, method_name_l[method_idx], topk, suffix_m[cmp_method], _type))
+                    else:
+                        test_method = os.path.join('result', 'rank',
+                                                   '{}-{}-top{}-{}.csv'.format(
+                                                       ds, method_name_l[method_idx], topk, _type))
 
                     flag = cmp_file(base_method, test_method)
                     if not flag:
@@ -42,14 +61,15 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
 def run():
     method_m = {
         'RankBound': 'rb',
-        'BatchDiskBruteForce': 'bbfdi',
+        # 'IntervalRankBoundCompress': 'irbc',
+        # 'BatchDiskBruteForce': 'bdbf',
         # 'BPlusTree': 'bpt',
         # 'IntervalRankBound': 'irb',
         # 'BallIntervalRankBound': 'birb',
 
-        # 'OnlineBruteForce': 'bfon',
-        'MemoryBruteForce': 'bfmi',
-        # 'DiskBruteForce': 'bfdi',
+        # 'OnlineBruteForce': 'obf',
+        'MemoryBruteForce': 'mbf',
+        # 'DiskBruteForce': 'dbf',
 
         # 'IRBFullDimPrune': 'irbfdp',
         # 'IRBFullIntPrune': 'irbfip',
@@ -57,22 +77,26 @@ def run():
         # 'IRBPartDimPartIntPrune': 'irbpdpip',
         # 'IRBPartDimPartNormPrune': 'irbpdpnp',
         # 'IRBPartIntPartNormPrune': 'irbpipnp',
-        'IRBBallPrune': 'irbbp',
+        # 'IRBBallPrune': 'irbbp',
+
+        'RBNoEarlyTermination': 'rbnet',
     }
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     # os.system('cd build && ./{} {}'.format('bbfdi', ds))
 
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    # dataset_l = ['fakebig']
     for ds in dataset_l:
         os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
-        # os.system('cd build && ./{} {}'.format('bbfdi', ds))
+        # os.system('cd build && ./{} --dataset_name {}'.format('irbc', ds))
+        # os.system('cd build && ./{} {}'.format('bdbf', ds))
         # os.system('cd build && ./{} {}'.format('bpt', ds))
-        os.system('cd build && ./{} --dataset_name {}'.format('irb', ds))
+        # os.system('cd build && ./{} --dataset_name {}'.format('irb', ds))
         # os.system('cd build && ./{} {}'.format('birb', ds))
 
-        # os.system('cd build && ./{} {}'.format('bfon', ds))
-        os.system('cd build && ./{} {}'.format('bfmi', ds))
-        # os.system('cd build && ./{} {}'.format('bfdi', ds))
+        # os.system('cd build && ./{} {}'.format('obf', ds))
+        os.system('cd build && ./{} {}'.format('mbf', ds))
+        # os.system('cd build && ./{} {}'.format('dbf', ds))
 
         # os.system('cd build && ./{} {}'.format('irbfdp', ds))
         # os.system('cd build && ./{} {}'.format('irbfip', ds))
@@ -80,7 +104,9 @@ def run():
         # os.system('cd build && ./{} {}'.format('irbpdpip', ds))
         # os.system('cd build && ./{} {}'.format('irbpdpnp', ds))
         # os.system('cd build && ./{} {}'.format('irbpipnp', ds))
-        os.system('cd build && ./{} {}'.format('irbbp', ds))
+        # os.system('cd build && ./{} {}'.format('irbbp', ds))
+
+        os.system('cd build && ./{} --dataset_name {}'.format('rbnet', ds))
 
     method_name_l = list(method_m.keys())
     type_arr = ['userID', 'IP', 'rank']
@@ -90,6 +116,7 @@ def run():
 
 if __name__ == '__main__':
     dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    # dataset_l = ['fakebig']
     # run(method_name='BPlusTree', program_name='bpt')
     run()
     # run(method_name='BallIntervalRankBound', program_name='birb')

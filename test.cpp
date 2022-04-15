@@ -12,11 +12,7 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    std::vector<int> haystack{1, 4, 3, 10, 5, 9};
-    std::sort(haystack.begin(), haystack.end(), std::less());
-    for(const int num: haystack){
-        printf("%d ", num);
-    }
-    printf("\n");
+    std::vector<bool> is_prune_l(10);
+    is_prune_l[0] = false;
     return 0;
 }

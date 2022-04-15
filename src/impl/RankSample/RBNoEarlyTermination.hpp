@@ -1,19 +1,19 @@
 //
-// Created by BianZheng on 2022/2/25.
+// Created by BianZheng on 2022/4/15.
 //
 
-#ifndef REVERSE_KRANKS_RANKBOUND_HPP
-#define REVERSE_KRANKS_RANKBOUND_HPP
+#ifndef REVERSE_KRANKS_RBNOEARLYTERMINATION_HPP
+#define REVERSE_KRANKS_RBNOEARLYTERMINATION_HPP
 
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/Prune/PruneCandidateByBound.hpp"
+#include "alg/Prune/RankSearchNoEarlyTermination.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
-#include "alg/Prune/RankSearch.hpp"
 #include <string>
 #include <fstream>
 #include <vector>
@@ -24,7 +24,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::RankBound {
+namespace ReverseMIPS::RBNoEarlyTermination {
 
     class RetrievalResult : public RetrievalResultBase {
     public:
@@ -269,4 +269,4 @@ namespace ReverseMIPS::RankBound {
 
 }
 
-#endif //REVERSE_KRANKS_RANKBOUND_HPP
+#endif //REVERSE_KRANKS_RBNOEARLYTERMINATION_HPP

@@ -1,9 +1,9 @@
 //
-// Created by BianZheng on 2022/3/18.
+// Created by BianZheng on 2022/4/15.
 //
 
-#ifndef REVERSE_KRANKS_RANKSEARCH_HPP
-#define REVERSE_KRANKS_RANKSEARCH_HPP
+#ifndef REVERSE_KRANKS_RANKSEARCHNOEARLYTERMINATION_HPP
+#define REVERSE_KRANKS_RANKSEARCHNOEARLYTERMINATION_HPP
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -49,7 +49,7 @@ namespace ReverseMIPS {
                 known_rank_idx_l_[idx] = known_rank_idx;
             }
 
-            if(n_cache_rank_ >= 2){
+            if (n_cache_rank_ >= 2) {
                 assert(known_rank_idx_l_[0] == known_rank_idx_l_[1] - (known_rank_idx_l_[0] + 1));
             }
             n_max_disk_read_ = std::max(known_rank_idx_l_[0] + 1,
@@ -66,15 +66,9 @@ namespace ReverseMIPS {
         }
 
         inline bool
-        CoarseBinarySearch(const double &queryIP, const int &userID, const int &global_lower_bucket,
+        CoarseBinarySearch(const double &queryIP, const int &userID,
                            int &rank_lb, int &rank_ub) const {
             double *search_iter = bound_distance_table_.get() + userID * n_cache_rank_;
-
-            assert(0 <= global_lower_bucket && global_lower_bucket <= n_cache_rank_);
-            if (global_lower_bucket < n_cache_rank_ &&
-                queryIP < search_iter[global_lower_bucket]) {
-                return true;
-            }
 
             int bucket_ub = std::ceil(1.0 * (rank_ub - cache_bound_every_ + 1) / cache_bound_every_);
             int bucket_lb = std::floor(1.0 * (rank_lb - cache_bound_every_ + 1) / cache_bound_every_);
@@ -109,9 +103,7 @@ namespace ReverseMIPS {
                        std::vector<bool> &prune_l,
                        std::vector<int> &rank_topk_max_heap) const {
             assert(rank_topk_max_heap.size() == topk);
-            int count = 0;
-            int userID = 0;
-            while (count < topk) {
+            for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID]) {
                     userID++;
                     continue;
@@ -121,67 +113,13 @@ namespace ReverseMIPS {
                 assert(upper_rank <= lower_rank);
                 double queryIP = queryIP_l[userID];
 
-                CoarseBinarySearch(queryIP, userID, n_cache_rank_, lower_rank, upper_rank);
-                rank_topk_max_heap[count] = lower_rank;
+                CoarseBinarySearch(queryIP, userID, lower_rank, upper_rank);
                 rank_lb_l[userID] = lower_rank;
                 rank_ub_l[userID] = upper_rank;
-                count++;
-                userID++;
-            }
-            assert(count == topk);
-            std::make_heap(rank_topk_max_heap.begin(),
-                           rank_topk_max_heap.end(),
-                           std::less());
-            int global_lower_rank = rank_topk_max_heap.front();
-            int global_lower_bucket =
-                    std::floor(1.0 * (global_lower_rank - cache_bound_every_ + 1) / cache_bound_every_) + 1;
-            global_lower_bucket = global_lower_bucket > n_cache_rank_ ? n_cache_rank_ : global_lower_bucket;
-            assert(global_lower_bucket >= 0);
-            const int topk_1 = topk - 1;
-
-            while (userID < n_user_) {
-                if (prune_l[userID]) {
-                    userID++;
-                    continue;
-                }
-
-                int lower_rank = rank_lb_l[userID];
-                int upper_rank = rank_ub_l[userID];
-                assert(upper_rank <= lower_rank);
-                double queryIP = queryIP_l[userID];
-
-                if (global_lower_rank < upper_rank) {
-                    prune_l[userID] = true;
-                    userID++;
-                    continue;
-                }
-                bool prune = CoarseBinarySearch(queryIP, userID, global_lower_bucket, lower_rank, upper_rank);
-
-                if (prune) {
-                    prune_l[userID] = true;
-                    userID++;
-                    continue;
-                }
-
-                if (lower_rank < global_lower_rank) {
-                    std::pop_heap(rank_topk_max_heap.begin(), rank_topk_max_heap.end(),
-                                  std::less());
-                    rank_topk_max_heap[topk_1] = global_lower_rank;
-                    std::push_heap(rank_topk_max_heap.begin(), rank_topk_max_heap.end(),
-                                   std::less());
-                    global_lower_rank = rank_topk_max_heap.front();
-                    global_lower_bucket =
-                            std::floor(1.0 * (global_lower_rank - cache_bound_every_ + 1) / cache_bound_every_) + 1;
-                    global_lower_bucket = global_lower_bucket > n_cache_rank_ ? n_cache_rank_ : global_lower_bucket;
-                }
-
-                rank_lb_l[userID] = lower_rank;
-                rank_ub_l[userID] = upper_rank;
-                userID++;
             }
 
         }
 
     };
 }
-#endif //REVERSE_KRANKS_RANKSEARCH_HPP
+#endif //REVERSE_KRANKS_RANKSEARCHNOEARLYTERMINATION_HPP
