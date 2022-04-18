@@ -94,7 +94,7 @@ def run_intervalrankbound_sample_rate():
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    dataset_l = ['movielens-27m', 'netflix']
+    dataset_l = ['movielens-27m']
 
     # run_intervalrankbound_sample_rate()
     run_rankbound_sample_rate()

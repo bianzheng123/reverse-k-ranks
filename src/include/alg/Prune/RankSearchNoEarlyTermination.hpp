@@ -105,7 +105,6 @@ namespace ReverseMIPS {
             assert(rank_topk_max_heap.size() == topk);
             for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID]) {
-                    userID++;
                     continue;
                 }
                 int lower_rank = rank_lb_l[userID];
