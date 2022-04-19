@@ -88,16 +88,16 @@ def run_intervalrankbound_sample_rate():
         for n_interval in n_interval_l:
             os.system(
                 'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
-                    ds, basic_dir, 1024, n_interval))
+                    ds, basic_dir, 512, n_interval))
 
 
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    dataset_l = ['movielens-27m']
+    dataset_l = ['netflix']
 
     # run_intervalrankbound_sample_rate()
-    run_rankbound_sample_rate()
+    run_intervalrankbound_sample_rate()
 
     # for ds in dataset_l:
     #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))

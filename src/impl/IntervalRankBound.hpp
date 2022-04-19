@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_INTERVALRANKBOUND_HPP
 
 #include "alg/DiskIndex/ReadAll.hpp"
-#include "alg/Prune/IPbound/FullIntPrune.hpp"
+#include "alg/Prune/IPbound/PartDimPartIntPrune.hpp"
 #include "alg/Prune/IntervalSearch.hpp"
 #include "alg/Prune/RankSearch.hpp"
 #include "alg/Prune/PruneCandidateByBound.hpp"
@@ -87,7 +87,7 @@ namespace ReverseMIPS::IntervalRankBound {
         IntervalSearch interval_ins_;
         //interval search bound
         SVD svd_ins_;
-        FullIntPrune interval_prune_;
+        PartDimPartIntPrune interval_prune_;
 
         //for rank search, store in memory
         RankSearch rank_ins_;
@@ -112,7 +112,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 //interval search
                 IntervalSearch &interval_ins,
                 //interval search bound
-                SVD &svd_ins, FullIntPrune &interval_prune,
+                SVD &svd_ins, PartDimPartIntPrune &interval_prune,
                 // rank search
                 RankSearch &rank_ins,
                 //disk index
@@ -167,13 +167,12 @@ namespace ReverseMIPS::IntervalRankBound {
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
 
-
                 double *query_vecs = query_ptr_.get();
                 svd_ins_.TransferQuery(query_item.getVector(queryID), vec_dim_, query_vecs);
 
                 interval_search_record_.reset();
                 //get the ip bound
-                interval_prune_.IPBound(query_vecs, user_, prune_l_, ip_bound_l_);
+                interval_prune_.IPBound(query_vecs, user_, prune_l_, ip_bound_l_, queryIP_l_.data());
                 //count rank bound
                 interval_ins_.RankBound(ip_bound_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
                 //prune the bound
@@ -193,11 +192,18 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 //calculate the exact IP
                 inner_product_record_.reset();
+                const int check_dim = interval_prune_.check_dim_;
+                const int remain_dim = interval_prune_.remain_dim_;
+                const double *query_remain_vecs = query_vecs + check_dim;
                 for (int userID = 0; userID < n_user_; userID++) {
                     if (prune_l_[userID]) {
                         continue;
                     }
-                    queryIP_l_[userID] = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
+                    const double *user_vecs = user_.getVector(userID) + check_dim;
+                    double prev_left = queryIP_l_[userID];
+                    double prev_right = InnerProduct(user_vecs, query_remain_vecs, remain_dim);
+                    queryIP_l_[userID] = prev_left + prev_right;
+//                    queryIP_l_[userID] = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
@@ -213,12 +219,17 @@ namespace ReverseMIPS::IntervalRankBound {
                     if (!prune_l_[userID]) {
                         n_candidate++;
                     }
+                    if (queryID == 199 && userID == 111) {
+                        printf("queryID %d, userID %d, queryIP %.6f\n",
+                               queryID, userID, queryIP_l_[userID]);
+                        printf("rank lb %d, rank ub %d\n", rank_lb_l_[userID], rank_ub_l_[userID]);
+                    }
                 }
                 assert(n_candidate >= topk);
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, queryID);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
@@ -258,7 +269,7 @@ namespace ReverseMIPS::IntervalRankBound {
         SVD svd_ins;
         int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
 
-        FullIntPrune interval_prune;
+        PartDimPartIntPrune interval_prune;
         interval_prune.Preprocess(user, check_dim, scale);
 
         //interval search

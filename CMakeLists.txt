@@ -31,8 +31,8 @@ set(BUILD_ATTRIBUTION OFF)
 
 set(BUILD_RKRANK ON)
 set(BUILD_RKRANK_FINISH ON)
-set(BUILD_INTERVAL_SEARCH OFF)
-set(BUILD_RANK_SAMPLE ON)
+set(BUILD_INTERVAL_SEARCH ON)
+set(BUILD_RANK_SAMPLE OFF)
 set(BUILD_DEV ON)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
@@ -56,9 +56,9 @@ if (BUILD_RKRANK)
     target_include_directories(bpt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(bpt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-    add_executable(rb src/app/RankBound.cpp)
-    target_include_directories(rb PRIVATE src/include src/impl ${Boost_INCLUDE_DIRS})
-    target_link_libraries(rb PRIVATE OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+#    add_executable(rb src/app/RankBound.cpp)
+#    target_include_directories(rb PRIVATE src/include src/impl ${Boost_INCLUDE_DIRS})
+#    target_link_libraries(rb PRIVATE OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(irb src/app/IntervalRankBound.cpp)
     target_include_directories(irb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})

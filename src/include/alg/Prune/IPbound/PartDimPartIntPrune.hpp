@@ -15,7 +15,7 @@
 namespace ReverseMIPS {
 
     class PartDimPartIntPrune {
-        int n_user_, vec_dim_, check_dim_, remain_dim_;
+        int n_user_, vec_dim_;
         //int prune
         double scale_;
         std::unique_ptr<int[]> user_int_ptr_;
@@ -23,6 +23,8 @@ namespace ReverseMIPS {
         std::unique_ptr<int[]> query_int_ptr_;
         double user_convert_coe_, convert_coe_;
     public:
+        int check_dim_, remain_dim_;
+
         PartDimPartIntPrune() = default;
 
         //make bound from offset_dim to vec_dim
@@ -64,7 +66,7 @@ namespace ReverseMIPS {
 
         void
         IPBound(const double *query_vecs, const VectorMatrix &user, const std::vector<bool> &prune_l,
-                std::vector<std::pair<double, double>> &ip_bound_l) {
+                std::vector<std::pair<double, double>> &ip_bound_l, double* queryIP_l) {
             assert(ip_bound_l.size() == n_user_);
             assert(prune_l.size() == n_user_);
 
@@ -87,9 +89,11 @@ namespace ReverseMIPS {
 
             for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID]) {
+                    assert(false);
                     continue;
                 }
                 double leftIP = InnerProduct(query_vecs, user.getVector(userID), check_dim_);
+                queryIP_l[userID] = leftIP;
 
                 int *user_int_vecs = user_int_ptr_.get() + userID * remain_dim_;
                 int rightIP = InnerProduct(user_int_vecs, query_int_vecs, remain_dim_);

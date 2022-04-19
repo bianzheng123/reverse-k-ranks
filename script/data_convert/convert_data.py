@@ -14,8 +14,8 @@ def delete_file_if_exist(dire):
 
 if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
-    dimension = 150
-    n_query_item = 1000
+    dimension = 30
+    n_query_item = 200
 
     # ds_l = ['movielens-small', 'movielens-27m', 'netflix', 'yelp']
     ds_l = ['movielens-small', 'movielens-1m', 'movielens-10m', 'movielens-27m']

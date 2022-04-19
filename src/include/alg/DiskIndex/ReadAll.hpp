@@ -93,7 +93,7 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
-                     std::vector<bool> &prune_l) {
+                     std::vector<bool> &prune_l, int queryID) {
 
             //read disk and fine binary search
             n_candidate_ = 0;
@@ -112,7 +112,6 @@ namespace ReverseMIPS {
 
                 assert(0 <= read_count && read_count <= n_max_disk_read_);
 
-                assert(start_idx <= end_idx);
                 read_disk_record_.reset();
                 ReadDisk(userID, start_idx, read_count);
                 read_disk_time_ += read_disk_record_.get_elapsed_time_second();
@@ -128,7 +127,7 @@ namespace ReverseMIPS {
                       std::less());
         }
 
-        void FinishRetrieval(){
+        void FinishRetrieval() {
             index_stream_.close();
         }
 

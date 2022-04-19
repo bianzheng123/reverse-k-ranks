@@ -175,7 +175,7 @@ namespace ReverseMIPS::IntervalRankBound {
 
                 interval_search_record_.reset();
                 //get the ip bound
-                interval_prune_.IPBound(query_vecs, user_, prune_l_, ip_bound_l_);
+                interval_prune_.IPBound(query_vecs, user_, prune_l_, ip_bound_l_, queryIP_l_.data());
                 //count rank bound
                 interval_ins_.RankBound(ip_bound_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
                 //prune the bound

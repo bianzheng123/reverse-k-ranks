@@ -83,8 +83,8 @@ namespace ReverseMIPS {
 
                 double itv_dist = interval_dist_l_[userID];
                 //for interval id, the higher rank value means the lower queryiP
-                long long l_lb = std::ceil((user_ip_bound.second - ip_bound.first) / itv_dist);
-                long long l_ub = (long long) std::floor((user_ip_bound.second - ip_bound.second) / itv_dist) - 1;
+                int64_t l_lb = std::ceil((user_ip_bound.second - ip_bound.first) / itv_dist);
+                int64_t l_ub = (int64_t) std::floor((user_ip_bound.second - ip_bound.second) / itv_dist) - 1;
 
                 int itv_lb_idx = (int) (l_lb % 1000000000);
                 int itv_ub_idx = (int) (l_ub % 1000000000);

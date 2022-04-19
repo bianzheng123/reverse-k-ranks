@@ -92,6 +92,10 @@ namespace ReverseMIPS {
             int tmp_rank_lb = known_rank_idx_l_[bucket_idx];
             int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
 
+            if(tmp_rank_ub <= rank_ub && rank_lb <= tmp_rank_lb){
+                return false;
+            }
+
             if (lb_ptr == iter_end) {
                 rank_ub = tmp_rank_ub;
             } else if (lb_ptr == iter_begin) {

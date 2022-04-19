@@ -27,7 +27,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
     opts.add_options()
             ("help,h", "help info")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake"), "dataset_name")
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(1000),
+            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
