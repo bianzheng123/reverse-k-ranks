@@ -80,11 +80,11 @@ namespace ReverseMIPS::DiskBruteForce {
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
-                std::printf("error in writing index\n");
+                spdlog::error("error in writing index");
             }
 
             if (topk > user_.n_vector_) {
-                printf("top-k is too large, program exit\n");
+                spdlog::error("top-k is too large, program exit");
                 exit(-1);
             }
 
@@ -267,7 +267,7 @@ namespace ReverseMIPS::DiskBruteForce {
     Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path) {
         std::ofstream out(index_path, std::ios::binary | std::ios::out);
         if (!out) {
-            std::printf("error in write result\n");
+            spdlog::error("error in write result\n");
         }
         const int n_data_item = data_item.n_vector_;
         std::vector<double> distance_cache(write_every_ * n_data_item);

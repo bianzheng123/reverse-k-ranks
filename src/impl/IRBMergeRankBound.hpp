@@ -1,11 +1,11 @@
 //
-// Created by BianZheng on 2022/4/13.
+// Created by BianZheng on 2022/4/19.
 //
 
-#ifndef REVERSE_KRANKS_INTERVALRANKBOUNDCOMPRESS_HPP
-#define REVERSE_KRANKS_INTERVALRANKBOUNDCOMPRESS_HPP
+#ifndef REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
+#define REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
 
-#include "alg/DiskIndex/RankBucket.hpp"
+#include "alg/DiskIndex/MergeRankBound.hpp"
 #include "alg/Prune/IPbound/FullIntPrune.hpp"
 #include "alg/Prune/IntervalSearch.hpp"
 #include "alg/Prune/RankSearch.hpp"
@@ -29,7 +29,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::IntervalRankBoundCompress {
+namespace ReverseMIPS::IRBMergeRankBound {
 
     class RetrievalResult : public RetrievalResultBase {
     public:
@@ -93,7 +93,7 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
         //for rank search, store in memory
         RankSearch rank_ins_;
         //read all instance
-        RankBucket disk_ins_;
+        MergeRankBound disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -104,7 +104,7 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
         //temporary retrieval variable
         std::unique_ptr<double[]> query_ptr_;
         std::vector<bool> prune_l_;
-        std::vector<std::pair<double, double>> ip_bound_l_;
+        std::vector<std::pair<double, double>> IPbound_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
@@ -117,7 +117,7 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
                 // rank search
                 RankSearch &rank_ins,
                 //disk index
-                RankBucket &disk_ins,
+                MergeRankBound &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
             //interval search
@@ -140,7 +140,7 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
             //retrieval variable
             this->query_ptr_ = std::make_unique<double[]>(vec_dim_);
             this->prune_l_.resize(n_user_);
-            this->ip_bound_l_.resize(n_user_);
+            this->IPbound_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
@@ -175,9 +175,9 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
 
                 interval_search_record_.reset();
                 //get the ip bound
-                interval_prune_.IPBound(query_vecs, user_, prune_l_, ip_bound_l_);
+                interval_prune_.IPBound(query_vecs, user_, prune_l_, IPbound_l_);
                 //count rank bound
-                interval_ins_.RankBound(ip_bound_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
+                interval_ins_.RankBound(IPbound_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
                 //prune the bound
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
@@ -205,7 +205,7 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
 
                 //coarse binary search
                 coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, prune_l_, rank_topk_max_heap);
+                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_, rank_topk_max_heap);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
@@ -220,7 +220,7 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_, queryID);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_, user_, data_item_);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
@@ -247,8 +247,7 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
      */
 
     Index &BuildIndex(VectorMatrix &user, VectorMatrix &data_item, const char *index_path,
-                      const int &n_merge_user, const int &compress_rank_every,
-                      const int &cache_bound_every, const int &n_interval) {
+                      const int &n_interval, const int &cache_bound_every, const int &n_merge_user) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -270,11 +269,11 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
         //disk index
-        RankBucket disk_ins(user, n_data_item, index_path, n_merge_user, compress_rank_every);
+        MergeRankBound disk_ins(user, n_data_item, index_path, n_merge_user);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
 
-        std::vector<std::set<int>> cache_bucket_vector(disk_ins.n_cache_rank_);
+        std::vector<UserRankBound> merge_user_list(n_data_item);
 
         std::vector<DistancePair> distance_pair_l(n_data_item);
         std::vector<double> IP_l(n_data_item);
@@ -307,9 +306,9 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
                 //rank search
                 rank_ins.LoopPreprocess(distance_ptr, userID);
 
-                disk_ins.BuildIndexLoop(distance_pair_l, userID, cache_bucket_vector);
+                disk_ins.BuildIndexLoop(distance_pair_l, userID);
             }
-            disk_ins.WriteIndex(labelID, cache_bucket_vector);
+            disk_ins.WriteIndex();
 
             if (labelID % report_batch_every == 0) {
                 std::cout << "preprocessed " << labelID / (0.01 * n_merge_user) << " %, "
@@ -335,4 +334,4 @@ namespace ReverseMIPS::IntervalRankBoundCompress {
     }
 
 }
-#endif //REVERSE_KRANKS_INTERVALRANKBOUNDCOMPRESS_HPP
+#endif //REVERSE_KRANKS_IRBMERGERANKBOUND_HPP

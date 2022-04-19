@@ -4,23 +4,47 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "OnlineBruteForce.hpp"
+#include <boost/program_options.hpp>
 #include <iostream>
 #include <vector>
 #include <spdlog/spdlog.h>
+
+class Parameter {
+public:
+    std::string dataset_name, basic_dir;
+};
+
+void LoadOptions(int argc, char **argv, Parameter &para) {
+    namespace po = boost::program_options;
+
+    po::options_description opts("Allowed options");
+    opts.add_options()
+            ("help,h", "help info")
+            ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake"), "dataset_name")
+            ("basic_dir,bd",
+             po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
+             "basic directory");
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, opts), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        std::cout << opts << std::endl;
+        exit(0);
+    }
+}
+
 
 using namespace std;
 using namespace ReverseMIPS;
 
 int main(int argc, char **argv) {
-    if (!(argc == 2 or argc == 3)) {
-        cout << argv[0] << " dataset_name [basic_dir]" << endl;
-        return 0;
-    }
-    const char *dataset_name = argv[1];
-    const char *basic_dir = "/home/bianzheng/Dataset/ReverseMIPS";
-    if (argc == 3) {
-        basic_dir = argv[2];
-    }
+    Parameter para;
+    LoadOptions(argc, argv, para);
+    const char *dataset_name = para.dataset_name.c_str();
+    const char *basic_dir = para.basic_dir.c_str();
+
     const char *method_name = "OnlineBruteForce";
     spdlog::info("{} dataset_name {}, basic_dir {}", method_name, dataset_name, basic_dir);
 

@@ -27,7 +27,7 @@ namespace ReverseMIPS {
             }
             std::ofstream file(resPath);
             if (!file) {
-                std::printf("error in write result\n");
+                spdlog::error("error in write result");
             }
             int config_size = (int) config_l.size();
             for (int i = config_size - 1; i >= 0; i--) {
@@ -54,7 +54,7 @@ namespace ReverseMIPS {
         }
         std::ofstream file(resPath);
         if (!file) {
-            std::printf("error in write result\n");
+            spdlog::error("error in write result");
         }
 
         for (int i = 0; i < n_query_item; i++) {
@@ -73,7 +73,7 @@ namespace ReverseMIPS {
         }
         file.open(resPath);
         if (!file) {
-            std::printf("error in write result\n");
+            spdlog::error("error in write result");
         }
 
         for (int i = 0; i < n_query_item; i++) {
@@ -92,7 +92,7 @@ namespace ReverseMIPS {
         }
         file.open(resPath);
         if (!file) {
-            std::printf("error in write result\n");
+            spdlog::error("error in write result");
         }
 
         for (int i = 0; i < n_query_item; i++) {

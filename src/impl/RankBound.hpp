@@ -88,6 +88,7 @@ namespace ReverseMIPS::RankBound {
 
         //temporary retrieval variable
         // store queryIP
+        std::vector<std::pair<double, double>> IPbound_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
@@ -111,6 +112,7 @@ namespace ReverseMIPS::RankBound {
             this->n_data_item_ = n_data_item;
 
             //retrieval variable
+            IPbound_l_.resize(n_user_);
             queryIP_l_.resize(n_user_);
             rank_lb_l_.resize(n_user_);
             rank_ub_l_.resize(n_user_);
@@ -153,7 +155,7 @@ namespace ReverseMIPS::RankBound {
 
                 //rank search
                 coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, prune_l_, rank_topk_max_heap);
+                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_, rank_topk_max_heap);
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
 
                 rank_prune_record_.reset();

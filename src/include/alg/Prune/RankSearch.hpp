@@ -49,7 +49,7 @@ namespace ReverseMIPS {
                 known_rank_idx_l_[idx] = known_rank_idx;
             }
 
-            if(n_cache_rank_ >= 2){
+            if (n_cache_rank_ >= 2) {
                 assert(known_rank_idx_l_[0] == known_rank_idx_l_[1] - (known_rank_idx_l_[0] + 1));
             }
             n_max_disk_read_ = std::max(known_rank_idx_l_[0] + 1,
@@ -67,7 +67,7 @@ namespace ReverseMIPS {
 
         inline bool
         CoarseBinarySearch(const double &queryIP, const int &userID, const int &global_lower_bucket,
-                           int &rank_lb, int &rank_ub) const {
+                           int &rank_lb, int &rank_ub, double &IP_lb, double &IP_ub) const {
             double *search_iter = bound_distance_table_.get() + userID * n_cache_rank_;
 
             assert(0 <= global_lower_bucket && global_lower_bucket <= n_cache_rank_);
@@ -92,17 +92,21 @@ namespace ReverseMIPS {
             int tmp_rank_lb = known_rank_idx_l_[bucket_idx];
             int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
 
-            if(tmp_rank_ub <= rank_ub && rank_lb <= tmp_rank_lb){
+            if (tmp_rank_ub <= rank_ub && rank_lb <= tmp_rank_lb) {
                 return false;
             }
 
             if (lb_ptr == iter_end) {
                 rank_ub = tmp_rank_ub;
+                IP_ub = bound_distance_table_[userID * n_cache_rank_ + bucket_idx - 1];
             } else if (lb_ptr == iter_begin) {
                 rank_lb = tmp_rank_lb;
+                IP_lb = bound_distance_table_[userID * n_cache_rank_ + bucket_idx];
             } else {
                 rank_lb = tmp_rank_lb;
                 rank_ub = tmp_rank_ub;
+                IP_lb = bound_distance_table_[userID * n_cache_rank_ + bucket_idx];
+                IP_ub = bound_distance_table_[userID * n_cache_rank_ + bucket_idx - 1];
             }
 
             return false;
@@ -110,6 +114,7 @@ namespace ReverseMIPS {
 
         void RankBound(const std::vector<double> &queryIP_l, const int &topk,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
+                       std::vector<std::pair<double, double>> &IPbound_l,
                        std::vector<bool> &prune_l,
                        std::vector<int> &rank_topk_max_heap) const {
             assert(rank_topk_max_heap.size() == topk);
@@ -125,7 +130,13 @@ namespace ReverseMIPS {
                 assert(upper_rank <= lower_rank);
                 double queryIP = queryIP_l[userID];
 
-                CoarseBinarySearch(queryIP, userID, n_cache_rank_, lower_rank, upper_rank);
+                double IP_lb = IPbound_l[userID].first;
+                double IP_ub = IPbound_l[userID].second;
+
+                CoarseBinarySearch(queryIP, userID, n_cache_rank_,
+                                   lower_rank, upper_rank, IP_lb, IP_ub);
+                IPbound_l[userID] = std::make_pair(IP_lb, IP_ub);
+
                 rank_topk_max_heap[count] = lower_rank;
                 rank_lb_l[userID] = lower_rank;
                 rank_ub_l[userID] = upper_rank;
@@ -159,7 +170,12 @@ namespace ReverseMIPS {
                     userID++;
                     continue;
                 }
-                bool prune = CoarseBinarySearch(queryIP, userID, global_lower_bucket, lower_rank, upper_rank);
+
+                double IP_lb = IPbound_l[userID].first;
+                double IP_ub = IPbound_l[userID].second;
+                bool prune = CoarseBinarySearch(queryIP, userID, global_lower_bucket,
+                                                lower_rank, upper_rank, IP_lb, IP_ub);
+                IPbound_l[userID] = std::make_pair(IP_lb, IP_ub);
 
                 if (prune) {
                     prune_l[userID] = true;

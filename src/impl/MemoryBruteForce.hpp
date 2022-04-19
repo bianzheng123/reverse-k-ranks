@@ -107,7 +107,7 @@ namespace ReverseMIPS::MemoryBruteForce {
 
         std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
             if (topk > user_.n_vector_) {
-                printf("top-k is larger than user, system exit\n");
+                spdlog::error("top-k is larger than user, system exit");
                 exit(-1);
             }
             ResetTime();

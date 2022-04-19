@@ -93,7 +93,7 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
-                     std::vector<bool> &prune_l, int queryID) {
+                     std::vector<bool> &prune_l) {
 
             //read disk and fine binary search
             n_candidate_ = 0;

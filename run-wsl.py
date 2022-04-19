@@ -87,16 +87,16 @@ def run():
 
     dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     for ds in dataset_l:
-        # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
+        os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
         # os.system('cd build && ./{} --dataset_name {}'.format('irbc', ds))
-        # os.system('cd build && ./{} {}'.format('bdbf', ds))
-        # os.system('cd build && ./{} {}'.format('bpt', ds))
+        # os.system('cd build && ./{} --dataset_name {}'.format('bdbf', ds))
+        # os.system('cd build && ./{} --dataset_name {}'.format('bpt', ds))
         os.system('cd build && ./{} --dataset_name {}'.format('irb', ds))
-        # os.system('cd build && ./{} {}'.format('birb', ds))
+        # os.system('cd build && ./{} --dataset_name {}'.format('birb', ds))
 
-        # os.system('cd build && ./{} {}'.format('obf', ds))
-        os.system('cd build && ./{} {}'.format('mbf', ds))
-        # os.system('cd build && ./{} {}'.format('dbf', ds))
+        # os.system('cd build && ./{} --dataset_name {}'.format('obf', ds))
+        os.system('cd build && ./{} --dataset_name {}'.format('mbf', ds))
+        # os.system('cd build && ./{} --dataset_name {}'.format('dbf', ds))
 
         # os.system('cd build && ./{} {}'.format('irbfdp', ds))
         # os.system('cd build && ./{} {}'.format('irbfip', ds))
