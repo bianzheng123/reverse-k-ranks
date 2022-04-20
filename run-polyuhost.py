@@ -94,12 +94,24 @@ def run_intervalrankbound_sample_rate():
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    dataset_l = ['movielens-27m', 'netflix']
+    dataset_l = ['yahoomusic-small', 'yelp-small']
 
-    run_rankbound_sample_rate()
-    run_intervalrankbound_sample_rate()
+    # run_rankbound_sample_rate()
+    # run_intervalrankbound_sample_rate()
 
-    # for ds in dataset_l:
+    for ds in dataset_l:
+        os.system(
+            'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
+                ds, basic_dir, 512, 512))
+        os.system(
+            'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
+                ds, basic_dir, 512, 1024))
+        os.system(
+            'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, 512,
+                                                                                              basic_dir))
+        os.system(
+            'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, 1024,
+                                                                                              basic_dir))
     #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
     #     os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
     #     os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
