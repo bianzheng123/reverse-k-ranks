@@ -22,7 +22,7 @@ if __name__ == "__main__":
     plt.plot(after_user_l[:, 0], after_user_l[:, 1], marker=marker_l[1], linestyle='dotted',
              color=color_l[1],
              label="after user")
-    plt.savefig('./curve/%s_user.png' % ds)
+    plt.savefig('./%s_user.png' % ds)
     plt.close()
 
     plt.plot(before_item_l[:, 0], before_item_l[:, 1], marker=marker_l[0], linestyle='solid',
@@ -31,4 +31,4 @@ if __name__ == "__main__":
     plt.plot(after_item_l[:, 0], after_item_l[:, 1], marker=marker_l[1], linestyle='dotted',
              color=color_l[1],
              label="after user")
-    plt.savefig('./curve/%s_user.png' % ds)
+    plt.savefig('./%s_user.png' % ds)
