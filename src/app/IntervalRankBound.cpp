@@ -113,12 +113,12 @@ int main(int argc, char **argv) {
     sprintf(other_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRankResult(result_rank_l[i], dataset_name, method_name, other_name);
-//        writeRankResult(result_rank_l[i], dataset_name, method_name);
+        WriteRankResult(result_rank_l[i], dataset_name, method_name, other_name);
+//        WriteRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, method_name, other_name);
-//    config.writePerformance(dataset_name, method_name);
+    config.WritePerformance(dataset_name, method_name, other_name);
+//    config.WritePerformance(dataset_name, method_name);
     return 0;
 }

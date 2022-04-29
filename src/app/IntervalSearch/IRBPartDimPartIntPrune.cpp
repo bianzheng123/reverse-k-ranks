@@ -77,10 +77,10 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRankResult(result_rank_l[i], dataset_name, method_name);
+        WriteRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, method_name);
+    config.WritePerformance(dataset_name, method_name);
     return 0;
 }

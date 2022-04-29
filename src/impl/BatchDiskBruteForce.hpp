@@ -18,7 +18,7 @@
 #include <map>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::DiskBruteForce {
+namespace ReverseMIPS::BatchDiskBruteForce {
     class RetrievalResult : public RetrievalResultBase {
     public:
         //unit: second

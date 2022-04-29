@@ -15,7 +15,14 @@ namespace ReverseMIPS {
     public:
         std::vector<std::string> config_l;
 
-        void writePerformance(const char *dataset_name, const char *method_name,
+        void AddPreprocessInfo(double build_index_time) {
+            char buff[1024];
+            sprintf(buff, "build index time %.3f", build_index_time);
+            std::string str(buff);
+            this->config_l.emplace_back(str);
+        }
+
+        void WritePerformance(const char *dataset_name, const char *method_name,
                               const char *other_name = nullptr) {
             char resPath[256];
             if (other_name == nullptr) {
@@ -39,7 +46,7 @@ namespace ReverseMIPS {
     };
 
     void
-    writeRankResult(const std::vector<std::vector<UserRankElement>> &result, const char *dataset_name,
+    WriteRankResult(const std::vector<std::vector<UserRankElement>> &result, const char *dataset_name,
                     const char *method_name,
                     const char *other_name = nullptr) {
         int n_query_item = (int) result.size();

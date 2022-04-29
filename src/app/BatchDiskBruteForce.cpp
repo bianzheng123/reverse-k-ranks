@@ -64,13 +64,13 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    DiskBruteForce::Index &index = DiskBruteForce::BuildIndex(data_item, user, index_path);
+    BatchDiskBruteForce::Index &index = BatchDiskBruteForce::BuildIndex(data_item, user, index_path);
     total_build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{10};
-    DiskBruteForce::RetrievalResult config;
+    BatchDiskBruteForce::RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (const int &topk: topk_l) {
         record.reset();
@@ -93,11 +93,11 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRankResult(result_rank_l[i], dataset_name, method_name);
+        WriteRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
     config.AddPreprocess(total_build_index_time);
-    config.writePerformance(dataset_name, method_name);
+    config.WritePerformance(dataset_name, method_name);
 
     return 0;
 }

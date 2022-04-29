@@ -1,2 +1,1 @@
-binary search cache bound有bug
-IntervalVector也有bug
+every method rewrite PerformanceStatistics

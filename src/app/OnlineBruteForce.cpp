@@ -58,8 +58,7 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    OnlineBruteForce::Index obf(data_item, user);
-    obf.Preprocess();
+    OnlineBruteForce::Index &obf = OnlineBruteForce::BuildIndex(data_item, user);
     double preprocessed_time = record.get_elapsed_time_second();
     record.reset();
     spdlog::info("finish preprocess");
@@ -84,9 +83,9 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRankResult(result_rank_l[i], dataset_name, method_name);
+        WriteRankResult(result_rank_l[i], dataset_name, method_name);
     }
     config.AddPreprocess(preprocessed_time);
-    config.writePerformance(dataset_name, method_name);
+    config.WritePerformance(dataset_name, method_name);
     return 0;
 }

@@ -76,8 +76,8 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    IRBMergeRankBound::Index &irb = IRBMergeRankBound::BuildIndex(user, data_item, index_path,
-                                                                  n_interval, cache_bound_every, n_merge_user);
+    IRBMergeRankBound::Index &irb = IRBMergeRankBound::BuildIndex(data_item, user, index_path,
+                                                                  cache_bound_every, n_interval, n_merge_user);
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
@@ -116,12 +116,12 @@ int main(int argc, char **argv) {
     sprintf(other_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRankResult(result_rank_l[i], dataset_name, method_name, other_name);
-//        writeRankResult(result_rank_l[i], dataset_name, method_name);
+        WriteRankResult(result_rank_l[i], dataset_name, method_name, other_name);
+//        WriteRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
     config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, method_name, other_name);
-//    config.writePerformance(dataset_name, method_name);
+    config.WritePerformance(dataset_name, method_name, other_name);
+//    config.WritePerformance(dataset_name, method_name);
     return 0;
 }

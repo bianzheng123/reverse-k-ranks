@@ -77,7 +77,7 @@ namespace ReverseMIPS::MemoryBruteForce {
             user_.vectorNormalize();
 
             preprocess_record_.reset();
-#pragma omp parallel for default(none) shared(n_user, preprocess_matrix, std::cout, n_data_item)
+//#pragma omp parallel for default(none) shared(n_user, preprocess_matrix, std::cout, n_data_item)
             for (int userID = 0; userID < n_user; userID++) {
 
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -181,6 +181,12 @@ namespace ReverseMIPS::MemoryBruteForce {
         }
 
     };
+
+    Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {
+        static Index mbf(data_item, user);
+        mbf.Preprocess();
+        return mbf;
+    }
 
 }
 

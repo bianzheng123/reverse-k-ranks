@@ -27,7 +27,7 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST_MODULE OFF)
-set(BUILD_ATTRIBUTION ON)
+set(BUILD_ATTRIBUTION OFF)
 
 set(BUILD_RKRANK ON)
 set(BUILD_RKRANK_FINISH ON)
@@ -51,6 +51,10 @@ if (BUILD_RKRANK)
     add_executable(bdbf src/app/BatchDiskBruteForce.cpp)
     target_include_directories(bdbf PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(bdbf PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(rri src/app/ReverseRankIndex.cpp)
+    target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(bpt src/app/BPlusTree.cpp)
     target_include_directories(bpt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})

@@ -76,26 +76,19 @@ int main(int argc, char **argv) {
 
     vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{20};
-    RankBound::RetrievalResult config;
+    RetrievalResultBase config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
         record.reset();
         vector<vector<UserRankElement>> result_rk = bscb.Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double read_disk_time = bscb.read_disk_time_;
-        double inner_product_time = bscb.inner_product_time_;
-        double coarse_binary_search_time = bscb.coarse_binary_search_time_;
-        double rank_prune_time = bscb.rank_prune_time_;
-        double fine_binary_search_time = bscb.fine_binary_search_time_;
-        double prune_ratio = bscb.rank_prune_ratio_;
         double second_per_query = retrieval_time / n_query_item;
 
+        string performance_str = bscb.PerformanceStatistics(topk, retrieval_time, second_per_query);
+        config.config_l.push_back(performance_str);
+
         result_rank_l.emplace_back(result_rk);
-        string str = config.AddResultConfig(topk, retrieval_time, inner_product_time,
-                                            coarse_binary_search_time, rank_prune_time, read_disk_time,
-                                            fine_binary_search_time, prune_ratio,
-                                            second_per_query);
         spdlog::info("finish top-{}", topk);
     }
 
@@ -106,11 +99,11 @@ int main(int argc, char **argv) {
     sprintf(other_name, "cache_bound_every_%d", cache_bound_every);
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRankResult(result_rank_l[i], dataset_name, method_name, other_name);
-//        writeRankResult(result_rank_l[i], dataset_name, method_name);
+        WriteRankResult(result_rank_l[i], dataset_name, method_name, other_name);
+//        WriteRankResult(result_rank_l[i], dataset_name, method_name);
     }
-    config.AddPreprocess(build_index_time);
-    config.writePerformance(dataset_name, method_name, other_name);
-//    config.writePerformance(dataset_name, method_name);
+    config.AddPreprocessInfo(build_index_time);
+    config.WritePerformance(dataset_name, method_name, other_name);
+//    config.WritePerformance(dataset_name, method_name);
     return 0;
 }

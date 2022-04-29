@@ -57,8 +57,7 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    MemoryBruteForce::Index mibf(data_item, user);
-    mibf.Preprocess();
+    MemoryBruteForce::Index &mibf = MemoryBruteForce::BuildIndex(data_item, user);
     double preprocessed_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocessing");
 
@@ -85,11 +84,11 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < n_topk; i++) {
         cout << config.config_l[i] << endl;
-        writeRankResult(result_rank_l[i], dataset_name, method_name);
+        WriteRankResult(result_rank_l[i], dataset_name, method_name);
     }
 
     config.AddPreprocess(preprocessed_time);
 
-    config.writePerformance(dataset_name, method_name);
+    config.WritePerformance(dataset_name, method_name);
     return 0;
 }

@@ -54,9 +54,9 @@ namespace ReverseMIPS::OnlineBruteForce {
             this->user_.vectorNormalize();
         }
 
-        inline ~Index() {}
-
         void Preprocess() {}
+
+        inline ~Index() {}
 
         std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
             if (topk > user_.n_vector_) {
@@ -124,6 +124,12 @@ namespace ReverseMIPS::OnlineBruteForce {
         }
 
     };
+
+    Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {
+        static Index obf(data_item, user);
+        obf.Preprocess();
+        return obf;
+    }
 
 }
 
