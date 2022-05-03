@@ -1,5 +1,5 @@
 //
-// Created by bianzheng on 2022/4/29.
+// Created by bianzheng on 2022/5/3.
 //
 
 #include "util/VectorIO.hpp"
@@ -8,13 +8,9 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "BruteForce/BatchDiskBruteForce.hpp"
-#include "BruteForce/BPlusTree.hpp"
-#include "BruteForce/DiskBruteForce.hpp"
-#include "IntervalRankBound.hpp"
-#include "BruteForce/MemoryBruteForce.hpp"
-#include "BruteForce/OnlineBruteForce.hpp"
-#include "RankBound.hpp"
+#include "IRBMergeRankBound.hpp"
+#include "BruteForce/CompressTopTIDIPBruteForce.hpp"
+#include "BruteForce/CompressTopTIPBruteForce.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -25,7 +21,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, n_merge_user;
+    int cache_bound_every, n_interval, n_merge_user, topt;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -47,7 +43,9 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
             ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
-             "the numer of merged user");
+             "the numer of merged user")
+            ("topt, tt", po::value<int>(&para.topt)->default_value(200),
+             "store top-t inner product as index");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -86,34 +84,35 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
-    if (method_name == "BatchDiskBruteForce") {
-        spdlog::info("input parameter: none");
-        index = BatchDiskBruteForce::BuildIndex(data_item, user, index_path);
-    } else if (method_name == "BPlusTree") {
-        spdlog::info("input parameter: none");
-        index = BPlusTree::BuildIndex(data_item, user, index_path);
-    } else if (method_name == "DiskBruteForce") {
-        spdlog::info("input parameter: none");
-        index = DiskBruteForce::BuildIndex(data_item, user, index_path);
-    } else if (method_name == "IntervalRankBound") {
+    if (method_name == "IRBMergeRankBound") {
+        //TODO still have bug
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
-                     cache_bound_every, n_interval);
-        index = IntervalRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
-
-    } else if (method_name == "MemoryBruteForce") {
-        spdlog::info("input parameter: none");
-        index = MemoryBruteForce::BuildIndex(data_item, user);
-    } else if (method_name == "OnlineBruteForce") {
-        spdlog::info("input parameter: none");
-        index = OnlineBruteForce::BuildIndex(data_item, user);
-    } else if (method_name == "RankBound") {
+        const int n_merge_user = para.n_merge_user;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, n_merge_user {}",
+                     cache_bound_every, n_interval, n_merge_user);
+        index = IRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
+                n_merge_user);
+    } else if (method_name == "CompressTopTIDIPBruteForce") {
         const int cache_bound_every = para.cache_bound_every;
-        spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
-        index = RankBound::BuildIndex(data_item, user, index_path, cache_bound_every);
-        sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
+        const int n_interval = para.n_interval;
+        const int topt = para.topt;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, top_t {}",
+                     cache_bound_every, n_interval, topt);
+        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval,
+                                                       topt);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_%d", cache_bound_every, n_interval, topt);
+    } else if (method_name == "CompressTopTIPBruteForce") {
+        //TODO implement
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        const int topt = para.topt;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, top_t {}",
+                     cache_bound_every, n_interval, topt);
+        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval,
+                                                       topt);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_%d", cache_bound_every, n_interval, topt);
     } else {
         spdlog::error("not such method");
     }

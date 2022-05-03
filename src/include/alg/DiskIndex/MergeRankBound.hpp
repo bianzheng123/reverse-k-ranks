@@ -20,7 +20,7 @@
 
 namespace ReverseMIPS {
 
-    class MergeRankBound {
+    class MergeRankBound{
     public:
         //index variable
         int n_user_, n_data_item_, vec_dim_, n_merge_user_;
@@ -153,9 +153,9 @@ namespace ReverseMIPS {
         }
 
         void GetRank(const std::vector<double> &queryIP_l,
-                     std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
-                     std::vector<std::pair<double, double>> &IPbound_l,
-                     std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
+                     const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
+                     const std::vector<std::pair<double, double>> &IPbound_l,
+                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
             //read disk and fine binary search
             n_candidate_ = 0;
             for (int iter_userID = 0; iter_userID < n_user_; iter_userID++) {

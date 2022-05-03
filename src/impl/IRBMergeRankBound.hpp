@@ -257,7 +257,6 @@ namespace ReverseMIPS::IRBMergeRankBound {
         std::vector<UserRankBound> merge_user_list(n_data_item);
 
         std::vector<DistancePair> distance_pair_l(n_data_item);
-        std::vector<double> IP_l(n_data_item);
         TimeRecord batch_report_record;
         batch_report_record.reset();
         for (int labelID = 0; labelID < n_merge_user; labelID++) {
@@ -273,19 +272,11 @@ namespace ReverseMIPS::IRBMergeRankBound {
                 }
                 std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
 
-                for (int itemID = 0; itemID < n_data_item; itemID++) {
-                    IP_l[itemID] = distance_pair_l[itemID].dist_;
-                }
-
                 //interval search
-                double upper_bound = IP_l[0] + 0.01;
-                double lower_bound = IP_l[n_data_item - 1] - 0.01;
-                std::pair<double, double> bound_pair = std::make_pair(lower_bound, upper_bound);
-                const double *distance_ptr = IP_l.data();
-                interval_ins.LoopPreprocess(bound_pair, distance_ptr, userID);
+                interval_ins.LoopPreprocess(distance_pair_l.data(), userID);
 
                 //rank search
-                rank_ins.LoopPreprocess(distance_ptr, userID);
+                rank_ins.LoopPreprocess(distance_pair_l.data(), userID);
 
                 disk_ins.BuildIndexLoop(distance_pair_l, userID);
             }

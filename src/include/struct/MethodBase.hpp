@@ -20,6 +20,7 @@ namespace ReverseMIPS {
         virtual ~BaseIndex() = default;
 
     };
+
 }
 
 

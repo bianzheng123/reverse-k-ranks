@@ -269,11 +269,8 @@ namespace ReverseMIPS::IRBPartDimPartNormPrune {
                           write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
 
                 //interval search
-                double upper_bound = write_distance_cache[cacheID * n_data_item] + 0.01;
-                double lower_bound = write_distance_cache[(cacheID + 1) * n_data_item - 1] - 0.01;
-                std::pair<double, double> bound_pair = std::make_pair(lower_bound, upper_bound);
                 const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-                interval_ins.LoopPreprocess(bound_pair, distance_ptr, userID);
+                interval_ins.LoopPreprocess(distance_ptr, userID);
 
                 //rank search
                 rank_ins.LoopPreprocess(distance_ptr, userID);
@@ -300,11 +297,8 @@ namespace ReverseMIPS::IRBPartDimPartNormPrune {
                           write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater<double>());
 
                 //interval search
-                double upper_bound = write_distance_cache[cacheID * n_data_item] + 0.01;
-                double lower_bound = write_distance_cache[(cacheID + 1) * n_data_item - 1] - 0.01;
-                std::pair<double, double> bound_pair = std::make_pair(lower_bound, upper_bound);
                 const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-                interval_ins.LoopPreprocess(bound_pair, distance_ptr, userID);
+                interval_ins.LoopPreprocess(distance_ptr, userID);
 
                 //rank search
                 rank_ins.LoopPreprocess(distance_ptr, userID);

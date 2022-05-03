@@ -5,10 +5,11 @@
 #ifndef REVERSE_KRANKS_INTERVALSEARCH_HPP
 #define REVERSE_KRANKS_INTERVALSEARCH_HPP
 
+#include "struct/DistancePair.hpp"
+
 #include <cassert>
 #include <vector>
 #include <algorithm>
-#include "struct/RankBoundElement.hpp"
 #include "spdlog/spdlog.h"
 
 namespace ReverseMIPS {
@@ -40,8 +41,20 @@ namespace ReverseMIPS {
             spdlog::info("interval bound: n_interval {}", n_interval);
         }
 
+        void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
+            std::vector<double> IP_l(n_data_item_);
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                IP_l[itemID] = distance_ptr[itemID].dist_;
+            }
+            LoopPreprocess(IP_l.data(), userID);
+        }
+
         void
-        LoopPreprocess(const std::pair<double, double> &bound_pair, const double *distance_ptr, const int &userID) {
+        LoopPreprocess(const double *distance_ptr, const int &userID) {
+
+            double upper_bound = distance_ptr[0] + 0.01;
+            double lower_bound = distance_ptr[n_data_item_ - 1] - 0.01;
+            const std::pair<double, double> &bound_pair = std::make_pair(lower_bound, upper_bound);
 
             double lb = bound_pair.first;
             double ub = bound_pair.second;

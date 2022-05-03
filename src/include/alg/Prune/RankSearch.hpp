@@ -5,6 +5,7 @@
 #ifndef REVERSE_KRANKS_RANKSEARCH_HPP
 #define REVERSE_KRANKS_RANKSEARCH_HPP
 
+#include "struct/DistancePair.hpp"
 #include <memory>
 #include <spdlog/spdlog.h>
 
@@ -56,6 +57,14 @@ namespace ReverseMIPS {
                                         n_data_item_ - known_rank_idx_l_[n_cache_rank_ - 1]);
 
             spdlog::info("rank bound: cache_bound_every {}, n_cache_rank {}", cache_bound_every_, n_cache_rank_);
+        }
+
+        void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
+            std::vector<double> IP_l(n_data_item_);
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                IP_l[itemID] = distance_ptr[itemID].dist_;
+            }
+            LoopPreprocess(IP_l.data(), userID);
         }
 
         void LoopPreprocess(const double *distance_ptr, const int &userID) {
