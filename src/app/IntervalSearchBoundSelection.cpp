@@ -1,5 +1,5 @@
 //
-// Created by bianzheng on 2022/4/29.
+// Created by bianzheng on 2022/5/3.
 //
 
 #include "util/VectorIO.hpp"
@@ -8,14 +8,13 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "BatchDiskBruteForce.hpp"
-#include "BPlusTree.hpp"
-#include "DiskBruteForce.hpp"
-#include "IntervalRankBound.hpp"
-#include "IRBMergeRankBound.hpp"
-#include "MemoryBruteForce.hpp"
-#include "OnlineBruteForce.hpp"
-#include "RankBound.hpp"
+#include "IntervalSearch/IRBBallPrune.hpp"
+#include "IntervalSearch/IRBFullDimPrune.hpp"
+#include "IntervalSearch/IRBFullIntPrune.hpp"
+#include "IntervalSearch/IRBFullNormPrune.hpp"
+#include "IntervalSearch/IRBPartDimPartIntPrune.hpp"
+#include "IntervalSearch/IRBPartDimPartNormPrune.hpp"
+#include "IntervalSearch/IRBPartIntPartNormPrune.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -26,7 +25,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, n_merge_user;
+    int cache_bound_every, n_interval;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -40,15 +39,13 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "basic directory")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
              "dataset_name")
-            ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("BatchDiskBruteForce"),
+            ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("IRBBallPrune"),
              "method_name")
 
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
-             "the numer of interval")
-            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
-             "the numer of merged user");
+             "the numer of interval");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -87,44 +84,62 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
-    if (method_name == "BatchDiskBruteForce") {
-        spdlog::info("input parameter: none");
-        index = BatchDiskBruteForce::BuildIndex(data_item, user, index_path);
-    }else if (method_name == "BPlusTree") {
-        spdlog::info("input parameter: none");
-        index = BPlusTree::BuildIndex(data_item, user, index_path);
-    }else if (method_name == "DiskBruteForce") {
-        spdlog::info("input parameter: none");
-        index = DiskBruteForce::BuildIndex(data_item, user, index_path);
-    }else if (method_name == "IntervalRankBound") {
+    if (method_name == "IRBBallPrune") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
         spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
                      cache_bound_every, n_interval);
-        index = IntervalRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        index = IRBBallPrune::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
 
-    }else if (method_name == "IRBMergeRankBound") {
-        //TODO still have bug
+    } else if (method_name == "IRBFullDimPrune") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
-        const int n_merge_user = para.n_merge_user;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, n_merge_user {}",
-                     cache_bound_every, n_interval, n_merge_user);
-        index = IRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
-                n_merge_user);
-    }else if (method_name == "MemoryBruteForce") {
-        spdlog::info("input parameter: none");
-        index = MemoryBruteForce::BuildIndex(data_item, user);
-    }else if (method_name == "OnlineBruteForce") {
-        spdlog::info("input parameter: none");
-        index = OnlineBruteForce::BuildIndex(data_item, user);
-    }else if (method_name == "RankBound") {
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = IRBFullDimPrune::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
+    } else if (method_name == "IRBFullIntPrune") {
         const int cache_bound_every = para.cache_bound_every;
-        spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
-        index = RankBound::BuildIndex(data_item, user, index_path, cache_bound_every);
-        sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = IRBFullIntPrune::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
+    } else if (method_name == "IRBFullNormPrune") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = IRBFullNormPrune::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
+    } else if (method_name == "IRBPartDimPartIntPrune") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = IRBPartDimPartIntPrune::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
+    } else if (method_name == "IRBPartDimPartNormPrune") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = IRBPartDimPartNormPrune::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
+    } else if (method_name == "IRBPartIntPartNormPrune") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = IRBPartIntPartNormPrune::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
     }else{
         spdlog::error("not such method");
     }

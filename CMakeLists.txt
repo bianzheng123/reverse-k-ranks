@@ -29,11 +29,8 @@ find_package(OpenMP)
 set(BUILD_TEST_MODULE OFF)
 set(BUILD_ATTRIBUTION OFF)
 
-set(BUILD_RKRANK ON)
-set(BUILD_RKRANK_FINISH ON)
+set(BUILD_BOUND_SELECTION ON)
 set(BUILD_INTERVAL_SEARCH OFF)
-set(BUILD_RANK_SAMPLE OFF)
-set(BUILD_DEV ON)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
@@ -41,47 +38,14 @@ set(BUILD_DEV ON)
 #target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
 #target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
 
-if (BUILD_DEV)
-    add_executable(irbmrb src/app/IRBMergeRankBound.cpp)
-    target_include_directories(irbmrb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irbmrb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-endif ()
+add_executable(rri src/app/ReverseRankIndex.cpp)
+target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-if (BUILD_RKRANK)
-    add_executable(bdbf src/app/BatchDiskBruteForce.cpp)
-    target_include_directories(bdbf PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bdbf PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(rri src/app/ReverseRankIndex.cpp)
-    target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(bpt src/app/BPlusTree.cpp)
-    target_include_directories(bpt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bpt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(rb src/app/RankBound.cpp)
-    target_include_directories(rb PRIVATE src/include src/impl ${Boost_INCLUDE_DIRS})
-    target_link_libraries(rb PRIVATE OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(irb src/app/IntervalRankBound.cpp)
-    target_include_directories(irb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(irb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(mbf src/app/MemoryBruteForce.cpp)
-    target_include_directories(mbf PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(mbf PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-endif ()
-
-if (BUILD_RKRANK_FINISH)
-    add_executable(obf src/app/OnlineBruteForce.cpp)
-    target_include_directories(obf PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(obf PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(dbf src/app/DiskBruteForce.cpp)
-    target_include_directories(dbf PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(dbf PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+if (BUILD_BOUND_SELECTION)
+    add_executable(isbs src/app/IntervalSearchBoundSelection.cpp)
+    target_include_directories(isbs PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(isbs PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 if (BUILD_INTERVAL_SEARCH)

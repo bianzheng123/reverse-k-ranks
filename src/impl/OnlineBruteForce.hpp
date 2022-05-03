@@ -10,35 +10,6 @@
 
 namespace ReverseMIPS::OnlineBruteForce {
 
-    class RetrievalResult : public RetrievalResultBase {
-    public:
-        //unit: second
-        //double total_time, second_per_query;
-        //int topk;
-
-        inline RetrievalResult() = default;
-
-        void AddPreprocess(double build_index_time) {
-            char buff[1024];
-            sprintf(buff, "build index time %.3f", build_index_time);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-        }
-
-        std::string AddResultConfig(const int &topk,
-                                    const double &total_time, const double &second_per_query) {
-            char buff[1024];
-
-            sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, million second per query %.3fms",
-                    topk, total_time, second_per_query);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-            return str;
-        }
-
-    };
-
     class Index : public BaseIndex {
     public:
         VectorMatrix data_item_, user_;
@@ -123,12 +94,28 @@ namespace ReverseMIPS::OnlineBruteForce {
             return rank;
         }
 
+        std::string
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
+            // int topk;
+            //double total_time,
+            //double second_per_query;
+            //unit: second
+
+            char buff[1024];
+
+            sprintf(buff,
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tmillion second per query %.3fms",
+                    topk, retrieval_time, second_per_query);
+            std::string str(buff);
+            return str;
+        }
+
     };
 
-    Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {
-        static Index obf(data_item, user);
-        obf.Preprocess();
-        return obf;
+    std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {
+        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(data_item, user);
+        index_ptr->Preprocess();
+        return index_ptr;
     }
 
 }

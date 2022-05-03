@@ -12,37 +12,6 @@
 
 namespace ReverseMIPS::MemoryBruteForce {
 
-    class RetrievalResult : public RetrievalResultBase {
-    public:
-        //unit: second
-        //double total_time, inner_product_time, binary_search_time
-        //double second_per_query;
-        //int topk;
-
-        inline RetrievalResult() = default;
-
-        void AddPreprocess(double build_index_time) {
-            char buff[1024];
-            sprintf(buff, "build index time %.3f", build_index_time);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-        }
-
-        std::string AddResultConfig(const int &topk,
-                                    const double &total_time, const double &inner_product_time,
-                                    const double &binary_search_time, const double &second_per_query) {
-            char buff[1024];
-
-            sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, inner product %.3fs\n\tbinary search %.3fs, million second per query %.3fms",
-                    topk, total_time, inner_product_time, binary_search_time, second_per_query);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-            return str;
-        }
-
-    };
-
     class Index : public BaseIndex {
     private:
         void ResetTime() {
@@ -180,12 +149,31 @@ namespace ReverseMIPS::MemoryBruteForce {
             return (int) (lb_ptr - iter_begin) + 1;
         }
 
+        std::string
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
+            // int topk;
+            //double total_time,
+            //          inner_product_time, binary_search_time;
+            //double second_per_query;
+            //unit: second
+
+            char buff[1024];
+
+            sprintf(buff,
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, binary search %.3fs\n\tmillion second per query %.3fms",
+                    topk, retrieval_time,
+                    inner_product_time_, binary_search_time_,
+                    second_per_query);
+            std::string str(buff);
+            return str;
+        }
+
     };
 
-    Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {
-        static Index mbf(data_item, user);
-        mbf.Preprocess();
-        return mbf;
+    std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {
+        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(data_item, user);
+        index_ptr->Preprocess();
+        return index_ptr;
     }
 
 }

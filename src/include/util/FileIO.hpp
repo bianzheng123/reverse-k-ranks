@@ -11,13 +11,13 @@
 #include <iomanip>
 
 namespace ReverseMIPS {
-    class RetrievalResultBase {
+    class RetrievalResult {
     public:
         std::vector<std::string> config_l;
 
         void AddPreprocessInfo(double build_index_time) {
             char buff[1024];
-            sprintf(buff, "build index time %.3f", build_index_time);
+            sprintf(buff, "build index time %.3fs", build_index_time);
             std::string str(buff);
             this->config_l.emplace_back(str);
         }
@@ -48,12 +48,12 @@ namespace ReverseMIPS {
     void
     WriteRankResult(const std::vector<std::vector<UserRankElement>> &result, const char *dataset_name,
                     const char *method_name,
-                    const char *other_name = nullptr) {
+                    const char *other_name) {
         int n_query_item = (int) result.size();
         int topk = (int) result[0].size();
 
         char resPath[256];
-        if (other_name == nullptr) {
+        if (strcmp(other_name, "") == 0) {
             std::sprintf(resPath, "../result/rank/%s-%s-top%d-userID.csv", dataset_name, method_name, topk);
         } else {
             std::sprintf(resPath, "../result/rank/%s-%s-top%d-%s-userID.csv", dataset_name, method_name, topk,
@@ -72,7 +72,7 @@ namespace ReverseMIPS {
         }
         file.close();
 
-        if (other_name == nullptr) {
+        if (strcmp(other_name, "") == 0) {
             std::sprintf(resPath, "../result/rank/%s-%s-top%d-rank.csv", dataset_name, method_name, topk);
         } else {
             std::sprintf(resPath, "../result/rank/%s-%s-top%d-%s-rank.csv", dataset_name, method_name, topk,
@@ -91,7 +91,7 @@ namespace ReverseMIPS {
         }
         file.close();
 
-        if (other_name == nullptr) {
+        if (strcmp(other_name, "") == 0) {
             std::sprintf(resPath, "../result/rank/%s-%s-top%d-IP.csv", dataset_name, method_name, topk);
         } else {
             std::sprintf(resPath, "../result/rank/%s-%s-top%d-%s-IP.csv", dataset_name, method_name, topk,

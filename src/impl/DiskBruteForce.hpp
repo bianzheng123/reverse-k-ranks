@@ -19,36 +19,6 @@
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS::DiskBruteForce {
-    class RetrievalResult : public RetrievalResultBase {
-    public:
-        //unit: second
-        //double total_time, read_disk_time, inner_product_time, binary_search_time, second_per_query;
-        //int topk;
-
-        inline RetrievalResult() {
-        }
-
-        void AddPreprocess(double build_index_time) {
-            char buff[1024];
-            sprintf(buff, "build index time %.3f", build_index_time);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-        }
-
-        std::string AddResultConfig(int topk, double total_time, double read_disk_time, double inner_product_time,
-                                    double binary_search_time, double second_per_query) {
-            char buff[1024];
-
-            sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, read disk %.3fs\n\tinner product %.3fs, binary search %.3fs, million second per query %.3fms",
-                    topk, total_time, read_disk_time, inner_product_time,
-                    binary_search_time, second_per_query);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-            return str;
-        }
-
-    };
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -218,6 +188,25 @@ namespace ReverseMIPS::DiskBruteForce {
             return (int) (lb_ptr - iter_begin) + 1;
         }
 
+        std::string
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
+            // int topk;
+            //double total_time,
+            //          inner_product_time, read_disk_time, binary_search_time;
+            //double second_per_query;
+            //unit: second
+
+            char buff[1024];
+
+            sprintf(buff,
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, read disk %.3fs, binary search %.3fs\n\tmillion second per query %.3fms",
+                    topk, retrieval_time,
+                    inner_product_time_, read_disk_time_, binary_search_time_,
+                    second_per_query);
+            std::string str(buff);
+            return str;
+        }
+
     };
 
     const int write_every_ = 30000;
@@ -229,7 +218,7 @@ namespace ReverseMIPS::DiskBruteForce {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path) {
+    std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path) {
         std::ofstream out(index_path, std::ios::binary | std::ios::out);
         if (!out) {
             spdlog::error("error in write result");
@@ -279,8 +268,8 @@ namespace ReverseMIPS::DiskBruteForce {
         out.write((char *) distance_cache.data(),
                   n_remain * data_item.n_vector_ * sizeof(double));
 
-        static Index index(index_path, n_data_item, user);
-        return index;
+        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(index_path, n_data_item, user);
+        return index_ptr;
     }
 
 }

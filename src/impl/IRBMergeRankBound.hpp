@@ -31,47 +31,6 @@
 
 namespace ReverseMIPS::IRBMergeRankBound {
 
-    class RetrievalResult : public RetrievalResultBase {
-    public:
-        //unit: second
-        //double total_time, read_disk_time, inner_product_time,
-        //          coarse_binary_search_time, fine_binary_search_time, interval_search_time;
-        //double interval_prune_ratio, binary_search_prune_ratio;
-        //double second_per_query;
-        //int topk;
-
-        inline RetrievalResult() = default;
-
-        void AddPreprocess(double build_index_time) {
-            char buff[1024];
-            sprintf(buff, "build index time %.3f", build_index_time);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-        }
-
-        std::string AddResultConfig(const int &topk,
-                                    const double &total_time, const double &interval_search_time,
-                                    const double &inner_product_time,
-                                    const double &coarse_binary_search_time, const double &read_disk_time,
-                                    const double &fine_binary_search_time,
-                                    const double &interval_prune_ratio,
-                                    const double &rank_search_prune_ratio,
-                                    const double &second_per_query) {
-            char buff[1024];
-            sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs, interval search %.3fs, inner product %.3fs\n\tcoarse binary search %.3fs, read disk time %.3f, fine binary search %.3fs\n\tinterval prune ratio %.4f, rank search prune ratio %.4f\n\tmillion second per query %.3fms",
-                    topk,
-                    total_time, interval_search_time, inner_product_time,
-                    coarse_binary_search_time, read_disk_time, fine_binary_search_time,
-                    interval_prune_ratio, rank_search_prune_ratio,
-                    second_per_query);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-            return str;
-        }
-
-    };
-
     class Index : public BaseIndex {
         void ResetTimer() {
             read_disk_time_ = 0;
@@ -237,6 +196,28 @@ namespace ReverseMIPS::IRBMergeRankBound {
             return query_heap_l;
         }
 
+        std::string
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
+            // int topk;
+            //double total_time,
+            //          interval_search_time_, inner_product_time, coarse_binary_search_time
+            //          read_disk_time_, fine_binary_search_time_,
+            //          interval_prune_ratio_, rank_search_prune_ratio_
+            //double second_per_query;
+            //unit: second
+
+            char buff[1024];
+            sprintf(buff,
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinterval search %.3fs, inner product %.3fs, coarse binary search %.3fs\n\tread disk time %.3f, fine binary search %.3fs\n\tinterval prune ratio %.4f, rank search prune ratio %.4f\n\tmillion second per query %.3fms",
+                    topk, retrieval_time,
+                    interval_search_time_, inner_product_time_, coarse_binary_search_time_,
+                    read_disk_time_, fine_binary_search_time_,
+                    interval_prune_ratio_, rank_search_prune_ratio_,
+                    second_per_query);
+            std::string str(buff);
+            return str;
+        }
+
     };
 
     const int report_batch_every = 100;
@@ -246,8 +227,8 @@ namespace ReverseMIPS::IRBMergeRankBound {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    Index &BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                      const int &cache_bound_every, const int &n_interval, const int &n_merge_user) {
+    std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
+                                      const int &cache_bound_every, const int &n_interval, const int &n_merge_user) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -319,7 +300,7 @@ namespace ReverseMIPS::IRBMergeRankBound {
         }
         disk_ins.FinishWrite();
 
-        static Index index(
+        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 //interval search
                 interval_ins,
                 //interval search bound
@@ -330,7 +311,7 @@ namespace ReverseMIPS::IRBMergeRankBound {
                 disk_ins,
                 //general retrieval
                 user, data_item);
-        return index;
+        return index_ptr;
     }
 
 }
