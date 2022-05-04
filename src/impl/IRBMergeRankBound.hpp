@@ -249,8 +249,11 @@ namespace ReverseMIPS::IRBMergeRankBound {
         //rank search
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
+        //exact rank refinement
+        CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
+
         //disk index
-        MergeRankBound disk_ins(user, n_data_item, index_path, n_merge_user);
+        MergeRankBound disk_ins(exact_rank_ins, user, n_data_item, index_path, n_merge_user);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
 

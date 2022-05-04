@@ -82,7 +82,7 @@ def run_rankbound_sample_rate():
 
 
 def run_intervalrankbound_sample_rate():
-    # dataset_name_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     n_interval_l = [16, 32, 64, 128, 256, 512, 1024, 2048]
     for ds in dataset_l:
         for n_interval in n_interval_l:
@@ -91,27 +91,41 @@ def run_intervalrankbound_sample_rate():
                     ds, basic_dir, 512, n_interval))
 
 
+def run_compress_topt():
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig']
+    topt_perc_l = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    for ds in dataset_l:
+        for topt_perc in topt_perc_l:
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --topt_perc {}'.format(
+                    ds, basic_dir, "CompressTopTIDIPBruteForce", topt_perc))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --topt_perc {}'.format(
+                    ds, basic_dir, "CompressTopTIPBruteForce", topt_perc))
+
+
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    dataset_l = ['yahoomusic-small', 'yelp-small']
+    # dataset_l = ['yahoomusic-small', 'yelp-small']
+    run_compress_topt()
 
     # run_rankbound_sample_rate()
     # run_intervalrankbound_sample_rate()
 
-    for ds in dataset_l:
-        os.system(
-            'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
-                ds, basic_dir, 512, 512))
-        os.system(
-            'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
-                ds, basic_dir, 512, 1024))
-        os.system(
-            'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, 512,
-                                                                                              basic_dir))
-        os.system(
-            'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, 1024,
-                                                                                              basic_dir))
+    # for ds in dataset_l:
+    #     os.system(
+    #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
+    #             ds, basic_dir, 512, 512))
+    #     os.system(
+    #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
+    #             ds, basic_dir, 512, 1024))
+    #     os.system(
+    #         'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, 512,
+    #                                                                                           basic_dir))
+    #     os.system(
+    #         'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, 1024,
+    #                                                                                           basic_dir))
     #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
     #     os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
     #     os.system('cd build && ./birb {} {}'.format(ds, basic_dir))

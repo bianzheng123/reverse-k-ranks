@@ -7,8 +7,6 @@
 
 namespace ReverseMIPS {
     class TopTIP {
-        int n_data_item_, n_user_, vec_dim_, topt_;
-        const char *index_path_;
 
         void
         BuildIndexPreprocess() {
@@ -125,6 +123,8 @@ namespace ReverseMIPS {
         }
 
     public:
+        int n_data_item_, n_user_, vec_dim_, topt_;
+        const char *index_path_;
 
         TimeRecord read_disk_record_, exact_rank_record_;
         double read_disk_time_, exact_rank_time_;
@@ -141,11 +141,18 @@ namespace ReverseMIPS {
         inline TopTIP() = default;
 
         inline TopTIP(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
-                      const int topt) {
+                      const int topt_perc) {
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
             this->index_path_ = index_path;
+
+            const int topt = int(1.0 * n_data_item / 100 * topt_perc);
+            if (topt <= 0 || topt > n_data_item) {
+                spdlog::error("topt is invalid, consider change topt_perc");
+                exit(-1);
+            }
+
             this->topt_ = topt;
             if (topt_ > n_data_item_) {
                 spdlog::error("top-t larger than n_data_item, program exit");

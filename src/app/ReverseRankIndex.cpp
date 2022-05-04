@@ -10,10 +10,12 @@
 
 #include "BruteForce/BatchDiskBruteForce.hpp"
 #include "BruteForce/BPlusTree.hpp"
+#include "BruteForce/CompressTopTIDIPBruteForce.hpp"
+#include "BruteForce/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/DiskBruteForce.hpp"
-#include "IntervalRankBound.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "BruteForce/OnlineBruteForce.hpp"
+#include "IntervalRankBound.hpp"
 #include "RankBound.hpp"
 
 #include <spdlog/spdlog.h>
@@ -25,7 +27,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, n_merge_user;
+    int cache_bound_every, n_interval, n_merge_user, topt_perc;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -47,7 +49,9 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
             ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
-             "the numer of merged user");
+             "the numer of merged user")
+            ("topt_perc, ttp", po::value<int>(&para.topt_perc)->default_value(50),
+             "store percent of top-t inner product as index");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -114,6 +118,27 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
         index = RankBound::BuildIndex(data_item, user, index_path, cache_bound_every);
         sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
+
+    } else if (method_name == "CompressTopTIDIPBruteForce") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        const int topt_perc = para.topt_perc;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, topt_perc {}",
+                     cache_bound_every, n_interval, topt_perc);
+        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval,
+                                                       topt_perc);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
+                topt_perc);
+    } else if (method_name == "CompressTopTIPBruteForce") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        const int topt_perc = para.topt_perc;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, topt_perc {}",
+                     cache_bound_every, n_interval, topt_perc);
+        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval,
+                                                     topt_perc);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
+                topt_perc);
     } else {
         spdlog::error("not such method");
     }
@@ -146,7 +171,9 @@ int main(int argc, char **argv) {
         cout << config.config_l[i] << endl;
         WriteRankResult(result_rank_l[i], dataset_name, method_name.c_str(), parameter_name);
     }
-    config.AddPreprocessInfo(build_index_time);
+
+    config.AddBuildIndexInfo(index->BuildIndexStatistics());
+    config.AddBuildIndexTime(build_index_time);
     config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     return 0;
 }

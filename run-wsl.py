@@ -99,16 +99,16 @@ def run():
     dataset_l = ['fake-normal', 'fake-uniform', 'fakebig']
     # dataset_l = ['fake-normal', 'fake-uniform']
     for ds in dataset_l:
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBound'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
 
         # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullDimPrune'))
         # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullIntPrune'))

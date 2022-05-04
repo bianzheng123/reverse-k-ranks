@@ -77,7 +77,7 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
                 //disk index
                 TopTIDIP &disk_ins,
                 //general retrieval
-                VectorMatrix &user, VectorMatrix& data_item) {
+                VectorMatrix &user, VectorMatrix &data_item) {
             //interval search
             this->interval_ins_ = std::move(interval_ins);
             //interval search bound
@@ -223,6 +223,15 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
             return str;
         }
 
+        std::string BuildIndexStatistics() override{
+            char buffer[512];
+            double index_size = 1.0 * n_user_ * disk_ins_.topt_ * sizeof(DistancePair) / (1024 * 1024 * 1024);
+            sprintf(buffer, "Build Index Info: index size %.3f GB", index_size);
+            spdlog::info(buffer);
+            spdlog::info("n_user {}, topt {}", n_user_, disk_ins_.topt_);
+            return buffer;
+        };
+
     };
 
     const int write_every_ = 1000;
@@ -234,7 +243,7 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &cache_bound_every, const int &n_interval, const int& topt) {
+                                      const int &cache_bound_every, const int &n_interval, const int &topt_perc) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -256,7 +265,7 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
 
         //disk index
-        TopTIDIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
+        TopTIDIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt_perc);
 
         std::vector<DistancePair> write_distance_cache(write_every_ * n_data_item);
         const int n_batch = n_user / write_every_;

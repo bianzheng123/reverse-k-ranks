@@ -20,13 +20,13 @@
 
 namespace ReverseMIPS {
 
-    class MergeRankBound{
+    class MergeRankBound {
     public:
         //index variable
         int n_user_, n_data_item_, vec_dim_, n_merge_user_;
         //n_cache_rank_: stores how many intervals for each merged user
         std::vector<uint32_t> merge_label_l_; // n_user, stores which cluster the user belons to
-        CandidateBruteForce cand_bf_ins_;
+        CandidateBruteForce exact_rank_ins_;
         const char *index_path_;
 
         //record time memory
@@ -46,14 +46,15 @@ namespace ReverseMIPS {
 
         inline MergeRankBound() {}
 
-        inline MergeRankBound(const VectorMatrix &user, const int &n_data_item, const char *index_path,
+        inline MergeRankBound(const CandidateBruteForce &exact_rank_ins, const VectorMatrix &user,
+                              const int &n_data_item, const char *index_path,
                               const int &n_merge_user) {
             this->n_user_ = user.n_vector_;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = user.vec_dim_;
             this->index_path_ = index_path;
             this->n_merge_user_ = n_merge_user;
-            cand_bf_ins_.Preprocess(n_data_item, vec_dim_);
+            exact_rank_ins_ = exact_rank_ins;
 
             spdlog::info("n_merge_user {}", n_merge_user_);
 
@@ -179,9 +180,10 @@ namespace ReverseMIPS {
                     fine_binary_search_record_.reset();
                     double queryIP = queryIP_l[userID];
                     int base_rank = rank_ub_l[userID];
-                    int loc_rk = cand_bf_ins_.RankByCandidate(user, item, queryIP, disk_cache_l_, userID,
-                                                              IPbound_l[userID],
-                                                              std::make_pair(rank_lb_l[userID], rank_ub_l[userID]));
+                    int loc_rk = exact_rank_ins_.QueryRankByCandidate(user, item, queryIP, disk_cache_l_,
+                                                                      userID, IPbound_l[userID],
+                                                                      std::make_pair(rank_lb_l[userID],
+                                                                                     rank_ub_l[userID]));
                     int rank = base_rank + loc_rk + 1;
                     fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
 

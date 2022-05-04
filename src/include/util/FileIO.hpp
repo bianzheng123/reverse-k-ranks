@@ -15,7 +15,11 @@ namespace ReverseMIPS {
     public:
         std::vector<std::string> config_l;
 
-        void AddPreprocessInfo(double build_index_time) {
+        void AddBuildIndexInfo(const std::string &str) {
+            this->config_l.emplace_back(str);
+        }
+
+        void AddBuildIndexTime(const double &build_index_time) {
             char buff[1024];
             sprintf(buff, "build index time %.3fs", build_index_time);
             std::string str(buff);

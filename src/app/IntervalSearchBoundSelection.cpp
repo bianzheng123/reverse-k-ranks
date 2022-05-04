@@ -172,7 +172,9 @@ int main(int argc, char **argv) {
         cout << config.config_l[i] << endl;
         WriteRankResult(result_rank_l[i], dataset_name, method_name.c_str(), parameter_name);
     }
-    config.AddPreprocessInfo(build_index_time);
+
+    config.AddBuildIndexInfo(index->BuildIndexStatistics());
+    config.AddBuildIndexTime(build_index_time);
     config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     return 0;
 }

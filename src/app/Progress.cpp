@@ -9,8 +9,6 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "IRBMergeRankBound.hpp"
-#include "BruteForce/CompressTopTIDIPBruteForce.hpp"
-#include "BruteForce/CompressTopTIPBruteForce.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -21,7 +19,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, n_merge_user, topt;
+    int cache_bound_every, n_interval, n_merge_user, topt_perc;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -44,7 +42,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "the numer of interval")
             ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
              "the numer of merged user")
-            ("topt, tt", po::value<int>(&para.topt)->default_value(200),
+            ("topt_perc, tt", po::value<int>(&para.topt_perc)->default_value(50),
              "store top-t inner product as index");
 
     po::variables_map vm;
@@ -94,25 +92,6 @@ int main(int argc, char **argv) {
         index = IRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
                 n_merge_user);
-    } else if (method_name == "CompressTopTIDIPBruteForce") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
-        const int topt = para.topt;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, top_t {}",
-                     cache_bound_every, n_interval, topt);
-        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval,
-                                                       topt);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_%d", cache_bound_every, n_interval, topt);
-    } else if (method_name == "CompressTopTIPBruteForce") {
-        //TODO implement
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
-        const int topt = para.topt;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, top_t {}",
-                     cache_bound_every, n_interval, topt);
-        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval,
-                                                       topt);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_%d", cache_bound_every, n_interval, topt);
     } else {
         spdlog::error("not such method");
     }
@@ -145,7 +124,9 @@ int main(int argc, char **argv) {
         cout << config.config_l[i] << endl;
         WriteRankResult(result_rank_l[i], dataset_name, method_name.c_str(), parameter_name);
     }
-    config.AddPreprocessInfo(build_index_time);
+
+    config.AddBuildIndexInfo(index->BuildIndexStatistics());
+    config.AddBuildIndexTime(build_index_time);
     config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     return 0;
 }

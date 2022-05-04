@@ -17,6 +17,10 @@ namespace ReverseMIPS {
         virtual std::string
         PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) = 0;
 
+        virtual std::string BuildIndexStatistics(){
+            return "Build Index Info:";
+        };
+
         virtual ~BaseIndex() = default;
 
     };

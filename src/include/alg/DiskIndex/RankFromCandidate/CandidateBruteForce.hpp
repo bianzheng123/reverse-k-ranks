@@ -14,22 +14,21 @@
 namespace ReverseMIPS {
 
     class CandidateBruteForce {
-    public:
         int n_data_item_, vec_dim_;
-
+    public:
         //in retrieval
         std::vector<double> IPcandidate_l_;
 
         inline CandidateBruteForce() = default;
 
-        inline void Preprocess(const int &n_data_item, const int &vec_dim) {
+        inline CandidateBruteForce(const int &n_data_item, const int &vec_dim) {
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
 
             IPcandidate_l_.resize(n_data_item);
         }
 
-        int RankByCandidate
+        int QueryRankByCandidate
                 (const VectorMatrix &user, const VectorMatrix &item, const double &queryIP,
                  const std::vector<UserRankBound> &item_rank_bound_l, const int &userID,
                  const std::pair<double, double> &IPbound_pair, const std::pair<int, int> &rank_bound_pair) {
