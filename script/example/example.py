@@ -1,4 +1,5 @@
 import numpy as np
+import gen_example
 
 
 def normalization(user_l):
@@ -10,22 +11,20 @@ def normalization(user_l):
 
 
 def user_item_norm():
-    user_l = np.array([
-        [2.7, 2.1, 8.6],
-        [7.5, 5.0, 3.4],
-        [8.2, 2.5, 3.1],
-        [4.4, 3.9, 4.6],
-        [4.0, 0.6, 2.8],
-        [8.3, 9.4, 8.2],
-    ], dtype=np.float64)
-    item_l = np.array([
-        [3.6, 3.5, 3.9],
-        [5.0, 2.8, 4.2],
-        [9.1, 7.4, 1.8],
-        [9.0, 5.9, 1.3],
-        [9.2, 4.3, 3.5],
-        [3.0, 9.8, 5.7],
-    ], dtype=np.float64)
+    item_l = np.array(
+        [[0.7585935, 1.6275389],
+         [1.7348094, 2.3759346],
+         [3.1377952, 0.08928549],
+         [1.8950846, 3.26434],
+         [3.1293406, 1.0796206]], dtype=np.float64
+    )
+
+    user_l = np.array(
+        [[0.13834432, 2.2017198],
+         [2.9890387, 2.9058983],
+         [0.6941855, 0.22097017],
+         [1.6679517, 1.9731998]],
+        dtype=np.float64)
 
     IP_l = np.dot(user_l, item_l.T)
     before_ip_l = np.array([np.sort(-_) for _ in IP_l])
@@ -47,14 +46,21 @@ def q_norm():
 
 
 if __name__ == '__main__':
-    bound_l = np.array([
-        [8.39, 5.17],
-        [11.56, 5.99],
-        [10.82, 5.52],
-        [10.40, 6.35],
-        [9.99, 5.57],
-        [10.92, 6.32]
-    ], dtype=np.float64)
-    norm = 12.02
-    percent_l = np.array([(norm - _[1]) / (_[0] - _[1]) for _ in bound_l])
-    print(percent_l)
+    item_l = np.array(
+        [[0.8, 1.6],
+         [1.7, 2.4],
+         [3.1, 0.1],
+         [1.9, 3.3],
+         [3.1, 1.1]], dtype=np.float32
+    )
+
+    user_l = np.array(
+        [[0.1, 2.2],
+         [3.0, 2.9],
+         [0.7, 0.2],
+         [1.7, 2.0]],
+        dtype=np.float32)
+    gnd_id, gnd_dist = gen_example.ip_gnd(item_l, user_l, len(item_l))
+    gnd_id = gnd_id + 1
+    print(gnd_id)
+    print(gnd_dist)

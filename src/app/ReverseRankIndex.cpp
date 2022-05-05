@@ -96,29 +96,6 @@ int main(int argc, char **argv) {
     } else if (method_name == "BPlusTree") {
         spdlog::info("input parameter: none");
         index = BPlusTree::BuildIndex(data_item, user, index_path);
-    } else if (method_name == "DiskBruteForce") {
-        spdlog::info("input parameter: none");
-        index = DiskBruteForce::BuildIndex(data_item, user, index_path);
-    } else if (method_name == "IntervalRankBound") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
-                     cache_bound_every, n_interval);
-        index = IntervalRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
-
-    } else if (method_name == "MemoryBruteForce") {
-        spdlog::info("input parameter: none");
-        index = MemoryBruteForce::BuildIndex(data_item, user);
-    } else if (method_name == "OnlineBruteForce") {
-        spdlog::info("input parameter: none");
-        index = OnlineBruteForce::BuildIndex(data_item, user);
-    } else if (method_name == "RankBound") {
-        const int cache_bound_every = para.cache_bound_every;
-        spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
-        index = RankBound::BuildIndex(data_item, user, index_path, cache_bound_every);
-        sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
-
     } else if (method_name == "CompressTopTIDIPBruteForce") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
@@ -139,6 +116,29 @@ int main(int argc, char **argv) {
                                                      topt_perc);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
                 topt_perc);
+    } else if (method_name == "DiskBruteForce") {
+        spdlog::info("input parameter: none");
+        index = DiskBruteForce::BuildIndex(data_item, user, index_path);
+    } else if (method_name == "MemoryBruteForce") {
+        spdlog::info("input parameter: none");
+        index = MemoryBruteForce::BuildIndex(data_item, user);
+    } else if (method_name == "OnlineBruteForce") {
+        spdlog::info("input parameter: none");
+        index = OnlineBruteForce::BuildIndex(data_item, user);
+    } else if (method_name == "IntervalRankBound") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = IntervalRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
+    } else if (method_name == "RankBound") {
+        const int cache_bound_every = para.cache_bound_every;
+        spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
+        index = RankBound::BuildIndex(data_item, user, index_path, cache_bound_every);
+        sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
+
     } else {
         spdlog::error("not such method");
     }

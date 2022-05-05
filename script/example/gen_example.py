@@ -15,8 +15,8 @@ if __name__ == '__main__':
         d = 2
         n_item = 5
         n_user = 4
-        item_l = np.random.rand(n_item * d).reshape(-1, d).astype(np.float32)
-        user_l = np.random.rand(n_user * d).reshape(-1, d).astype(np.float32)
+        item_l = np.random.rand(n_item * d).reshape(-1, d).astype(np.float32) * 4
+        user_l = np.random.rand(n_user * d).reshape(-1, d).astype(np.float32) * 4
         gnd_idx_l, gnd_dist_l = ip_gnd(item_l, user_l, len(item_l))
         gnd_idx_l = gnd_idx_l + 1
         arr_end_idx = []

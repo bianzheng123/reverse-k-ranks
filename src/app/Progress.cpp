@@ -9,6 +9,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "IRBMergeRankBound.hpp"
+#include "BruteForce/BPlusTree.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -92,7 +93,7 @@ int main(int argc, char **argv) {
         index = IRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
                 n_merge_user);
-    } else {
+    }  else {
         spdlog::error("not such method");
     }
 
@@ -100,7 +101,7 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-//    vector<int> topk_l{20};
+//    vector<int> topk_l{10};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
