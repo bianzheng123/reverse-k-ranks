@@ -143,7 +143,7 @@ namespace ReverseMIPS::RankBound {
             disk_ins_.FinishRetrieval();
 
             read_disk_time_ = disk_ins_.read_disk_time_;
-            fine_binary_search_time_ = disk_ins_.fine_binary_search_time_;
+            fine_binary_search_time_ = disk_ins_.exact_rank_refinement_time_;
 
             rank_prune_ratio_ /= n_query_item;
 

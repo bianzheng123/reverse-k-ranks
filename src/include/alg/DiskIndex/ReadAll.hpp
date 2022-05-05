@@ -50,8 +50,8 @@ namespace ReverseMIPS {
 
     public:
 
-        TimeRecord read_disk_record_, fine_binary_search_record_;
-        double read_disk_time_, fine_binary_search_time_;
+        TimeRecord read_disk_record_, exact_rank_refinement_record_;
+        double read_disk_time_, exact_rank_refinement_time_;
 
         //variable in build index
         std::ofstream out_stream_;
@@ -84,7 +84,7 @@ namespace ReverseMIPS {
 
         void RetrievalPreprocess() {
             read_disk_time_ = 0;
-            fine_binary_search_time_ = 0;
+            exact_rank_refinement_time_ = 0;
             index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
                 spdlog::error("error in writing index");
@@ -115,9 +115,9 @@ namespace ReverseMIPS {
                 read_disk_record_.reset();
                 ReadDisk(userID, start_idx, read_count);
                 read_disk_time_ += read_disk_record_.get_elapsed_time_second();
-                fine_binary_search_record_.reset();
+                exact_rank_refinement_record_.reset();
                 int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
-                fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
+                exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
 
                 user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
                 n_candidate_++;

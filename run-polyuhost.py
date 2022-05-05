@@ -92,7 +92,7 @@ def run_intervalrankbound_sample_rate():
 
 
 def run_compress_topt():
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig']
+    dataset_l = ['movielens-27m']
     topt_perc_l = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     for ds in dataset_l:
         for topt_perc in topt_perc_l:

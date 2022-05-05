@@ -3,6 +3,7 @@
 //
 
 #include "alg/SpaceInnerProduct.hpp"
+#include "alg/DiskIndex/RankFromCandidate/GridIndex.hpp"
 #include "util/TimeMemory.hpp"
 #include <iostream>
 #include <vector>
@@ -90,6 +91,7 @@ int main(int argc, char **argv) {
         std::unique_ptr<double[]> vecs2 = GenRandom(n_eval, dimension);
         size_t length = (size_t) n_eval * n_eval;
 
+        //compute the inner product
         TimeRecord record;
         record.reset();
         double comp_res = 0;
@@ -103,11 +105,12 @@ int main(int argc, char **argv) {
         }
         double comp_time = record.get_elapsed_time_second();
 
+        // write the index into the disk
         BuildWriteIndex(index_path, vecs1.get(), vecs2.get(), n_eval, dimension);
-
         std::vector<double> read_array(length);
         std::ifstream in(index_path, std::ios::binary | std::ios::in);
         size_t read_size = (size_t) n_eval * n_eval * sizeof(double);
+
         record.reset();
         in.read((char *) read_array.data(), read_size);
         double read_disk_time = record.get_elapsed_time_second();
@@ -118,8 +121,41 @@ int main(int argc, char **argv) {
                 disk_res += read_array[xID * n_eval + yID];
             }
         }
-        spdlog::info("dimension {}, computation time {}s, read disk time {}s, compute res {}, disk read res {}",
-                     dimension, comp_time, read_disk_time, comp_res, disk_res);
+
+        //use grid index
+        VectorMatrix user, data_item;
+        user.init(vecs1, n_eval, dimension);
+        data_item.init(vecs2, n_eval, dimension);
+
+        GridIndex gridIndex;
+        gridIndex.Preprocess(user, data_item, 2);
+        std::vector<int> item_cand_l(n_eval);
+        for (int itemID = 0; itemID < n_eval; itemID++) {
+            item_cand_l[itemID] = itemID;
+        }
+        std::vector<std::pair<double, double>> IPbound_l(n_eval);
+
+        double grid_lb = 0;
+        double grid_ub = 0;
+        record.reset();
+        for (int userID = 0; userID < n_eval; userID++) {
+            gridIndex.CalcIPBound(item_cand_l, userID, IPbound_l);
+//            for (int itemID = 0; itemID < n_eval; itemID++) {
+//                grid_lb += IPbound_l[itemID].first;
+//                grid_ub += IPbound_l[itemID].second;
+//            }
+        }
+        double grid_time = record.get_elapsed_time_second();
+        grid_lb /= (n_eval * n_eval);
+        grid_ub /= (n_eval * n_eval);
+
+
+        spdlog::info(
+                "dimension {}, computation time {}s, read disk time {}s, grid time {}s",
+                dimension, comp_time, read_disk_time, grid_time);
+        spdlog::info("compute res {}, disk read res {}, grid lb res {}, grid ub res {}",
+                     comp_res, disk_res, grid_lb, grid_ub);
+//        assert(grid_lb <= comp_res && comp_res <= grid_ub);
         result_l.emplace_back(comp_time, read_disk_time);
     }
     AttributionWrite(result_l, dim_l);

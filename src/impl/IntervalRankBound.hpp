@@ -77,7 +77,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 //disk index
                 ReadAll &disk_ins,
                 //general retrieval
-                VectorMatrix &user, const int &n_data_item, const char *index_path) {
+                VectorMatrix &user, const int &n_data_item) {
             //interval search
             this->interval_ins_ = std::move(interval_ins);
             //interval search bound
@@ -192,7 +192,7 @@ namespace ReverseMIPS::IntervalRankBound {
             }
             disk_ins_.FinishRetrieval();
 
-            fine_binary_search_time_ = disk_ins_.fine_binary_search_time_;
+            fine_binary_search_time_ = disk_ins_.exact_rank_refinement_time_;
             read_disk_time_ = disk_ins_.read_disk_time_;
 
             interval_prune_ratio_ /= n_query_item;
@@ -205,7 +205,7 @@ namespace ReverseMIPS::IntervalRankBound {
             // int topk;
             //double total_time,
             //          interval_search_time_, inner_product_time, read_disk_time
-            //          coarse_binary_search_time_, read_disk_time_, fine_binary_search_time_,
+            //          coarse_binary_search_time_, read_disk_time_, exact_rank_refinement_time_,
             //          interval_prune_ratio_, rank_search_prune_ratio_
             //double second_per_query;
             //unit: second
@@ -323,7 +323,7 @@ namespace ReverseMIPS::IntervalRankBound {
                 //disk index
                 disk_ins,
                 //general retrieval
-                user, n_data_item, index_path);
+                user, n_data_item);
         return index_ptr;
     }
 

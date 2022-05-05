@@ -201,7 +201,7 @@ namespace ReverseMIPS::IRBMergeRankBound {
             // int topk;
             //double total_time,
             //          interval_search_time_, inner_product_time, coarse_binary_search_time
-            //          read_disk_time_, fine_binary_search_time_,
+            //          read_disk_time_, exact_rank_refinement_time_,
             //          interval_prune_ratio_, rank_search_prune_ratio_
             //double second_per_query;
             //unit: second
