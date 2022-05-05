@@ -472,8 +472,8 @@ namespace ReverseMIPS::BPlusTree {
         const int n_remain = user.n_vector_ % write_every_;
         user.vectorNormalize();
 
-        const int node_size = 2;
-        const int n_disk_layer = 5;
+        const int node_size = 512;
+        const int n_disk_layer = 1;
         TreeIndex tree_ins(n_data_item, n_user, node_size, n_disk_layer, index_path);
 
         TimeRecord batch_report_record;
