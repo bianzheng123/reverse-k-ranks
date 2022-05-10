@@ -9,7 +9,6 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "IRBMergeRankBound.hpp"
-#include "HashRankBound.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -93,15 +92,7 @@ int main(int argc, char **argv) {
         index = IRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
                 n_merge_user);
-    } else if (method_name == "HashRankBound") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
-                     cache_bound_every, n_interval);
-        index = HashRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
-
-    } else {
+    }  else {
         spdlog::error("not such method");
     }
 

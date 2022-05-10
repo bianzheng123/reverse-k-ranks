@@ -116,7 +116,7 @@ namespace ReverseMIPS::HashRankBound {
 
                 //rank search
                 rank_bound_prune_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_, queryID);
+                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_);
 
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,

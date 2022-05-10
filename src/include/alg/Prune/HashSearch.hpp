@@ -39,9 +39,6 @@ namespace ReverseMIPS {
             n_sample_ = size;
             for (int candID = 0; candID < size; candID++) {
                 sample_IP_l_[candID] = IP_vecs[end_sample_rank - candID * sample_every];
-                if (end_sample_rank - candID * sample_every < 0) {
-                    printf("size %d, end_sample_rank %d, rankID %d\n", size, end_sample_rank, end_sample_rank - candID * sample_every);
-                }
 
                 assert(0 <= end_sample_rank - candID * sample_every && end_sample_rank - candID * sample_every <= n_data_item);
             }
@@ -49,12 +46,8 @@ namespace ReverseMIPS {
         }
 
         std::pair<int, int>
-        BinarySearch(const double &queryIP, const int &sample_every, const std::pair<int, int> &bkt_rank_pair,
-                     int queryID, int userID) {
+        BinarySearch(const double &queryIP, const int &sample_every, const std::pair<int, int> &bkt_rank_pair) {
             if (n_sample_ == 0) {
-                if (queryID == 0 && userID == 1) {
-                    printf("queryID %d, userID %d, skip binary search\n", queryID, userID);
-                }
                 return bkt_rank_pair;
             }
 
@@ -68,11 +61,6 @@ namespace ReverseMIPS {
                                                     return arr_val > queryIP;
                                                 });
             const int sample_loc_rk = rank_lb_ptr - sample_IP_l_.get();
-
-            if (queryID == 0 && userID == 0) {
-                printf("sample rank ub %d\n", sample_rank_ub);
-                printf("sample loc rk %d, n_sample %d\n", sample_loc_rk, n_sample_);
-            }
 
             if (sample_loc_rk == 0) {
                 return std::make_pair(sample_rank_ub, bkt_rank_pair.second);
@@ -196,7 +184,7 @@ namespace ReverseMIPS {
 
 
         void RankBound(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
-                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l, const int queryID) const {
+                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) const {
             for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID]) {
                     continue;
@@ -225,28 +213,7 @@ namespace ReverseMIPS {
                 const std::pair<int, int> &sample_rank_pair = bucket_l_[userID * n_interval_ + bucketID].BinarySearch(
                         queryIP,
                         cache_bound_every_,
-                        bkt_rank_pair, queryID, userID);
-
-                if (!(sample_rank_pair.second <= sample_rank_pair.first)) {
-
-                    printf("userID %d, interval_table \n", userID);
-                    for (int itvID = 0; itvID < n_interval_; itvID++) {
-                        printf("%d ", interval_table_[userID * n_interval_ + itvID]);
-                    }
-                    printf("\n");
-
-                    printf("known rank:\n");
-                    for (int rankID = 0; rankID < n_cache_rank_; rankID++) {
-                        printf("%d ", known_rank_idx_l_[rankID]);
-                    }
-                    printf("\n");
-
-                    printf("queryID %d, userID %d\n", queryID, userID);
-                    printf("origin rank lb %d, origin rank ub %d\n", rank_lb_l[userID], rank_ub_l[userID]);
-                    printf("bkt rank lb %d, bkt rank ub %d\n", bkt_rank_pair.first, bkt_rank_pair.second);
-                    printf("sample rank lb %d, sample rank ub %d\n", sample_rank_pair.first, sample_rank_pair.second);
-                    printf("bucketID %d\n", bucketID);
-                }
+                        bkt_rank_pair);
 
                 assert(rank_ub_l[userID] <= bkt_rank_pair.second && bkt_rank_pair.second <= sample_rank_pair.second);
                 assert(sample_rank_pair.second <= sample_rank_pair.first);
@@ -254,29 +221,6 @@ namespace ReverseMIPS {
 
                 rank_lb_l[userID] = sample_rank_pair.first;
                 rank_ub_l[userID] = sample_rank_pair.second;
-
-                if (not(0 <= rank_lb_l[userID] - rank_ub_l[userID] &&
-                        rank_lb_l[userID] - rank_ub_l[userID] <= n_max_disk_read_)) {
-
-                    printf("userID %d, interval_table \n", userID);
-                    for (int itvID = 0; itvID < n_interval_; itvID++) {
-                        printf("%d ", interval_table_[userID * n_interval_ + itvID]);
-                    }
-                    printf("\n");
-
-                    printf("known rank:\n");
-                    for (int rankID = 0; rankID < n_cache_rank_; rankID++) {
-                        printf("%d ", known_rank_idx_l_[rankID]);
-                    }
-                    printf("\n");
-
-                    printf("queryID %d, userID %d, rank_lb %d, rank_ub %d, read_count %d, n_max_disk_read %d\n",
-                           queryID, userID, rank_lb_l[userID], rank_ub_l[userID], rank_lb_l[userID] - rank_ub_l[userID],
-                           n_max_disk_read_);
-                    printf("bkt_rank_pair_lb %d, bkt_rank_pair_ub %d\n", bkt_rank_pair.first, bkt_rank_pair.second);
-                    printf("sample_rank_pair_lb %d, sample_rank_pair_ub %d\n", sample_rank_pair.first,
-                           sample_rank_pair.second);
-                }
 
                 const int &this_read_count = rank_lb_l[userID] - rank_ub_l[userID];
                 assert(0 <= this_read_count && this_read_count <= n_max_disk_read_);
