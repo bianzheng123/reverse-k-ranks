@@ -1,42 +1,34 @@
-//
-// Created by BianZheng on 2022/2/25.
-//
-
-#include <vector>
+#include <algorithm>
 #include <iostream>
-#include <memory>
+#include <vector>
 
-using namespace std;
-
-struct Base {
-    virtual void doWork() {
-        // blah blah blah
-        cout << "base" << std::endl;
-    }
-
-    virtual ~Base() {}
+struct PriceInfo {
+    double price;
 };
 
-struct Derived : public Base {
-    virtual void doWork() {
-        // blah blah blah 2
-        cout << "derived" << std::endl;
-    }
-};
+int main() {
 
-struct Derived2 : public Base {
-    virtual void doWork() {
-        // blah blah blah 2
-        cout << "derived2" << std::endl;
-    }
-};
+    std::vector<PriceInfo> prices = {{107.3},
+                                     {102.5},
+                                     {102.5},
+                                     {101.5},
+                                     {100.0}};
 
-int main(int argc, char **argv) {
-    unique_ptr<Base> ptr = make_unique<Base>();
-    ptr->doWork();
-    ptr = make_unique<Derived>();
-    ptr->doWork();
-    ptr = make_unique<Derived2>();
-    ptr->doWork();
-    return 0;
+    for (double to_find: {102.5, 110.2, 101.0}) {
+        auto prc_info = std::lower_bound(prices.begin(), prices.end(), to_find,
+                                         [](const PriceInfo &info, double value) {
+                                             return info.price > value;
+                                         });
+
+        printf("lower bound price %.3f at index %d\n", to_find, prc_info - prices.begin());
+
+        prc_info = std::upper_bound(prices.begin(), prices.end(), to_find,
+                                         [](double value, const PriceInfo &info) {
+                                             return value > info.price;
+                                         });
+
+        printf("upper bound price %.3f at index %d\n", to_find, prc_info - prices.begin());
+
+    }
+
 }

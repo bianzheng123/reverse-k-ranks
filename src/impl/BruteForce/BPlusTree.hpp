@@ -6,6 +6,7 @@
 #define REVERSE_KRANKS_BPLUSTREE_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
+#include "alg/Prune/PruneCandidateByBound.hpp"
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
