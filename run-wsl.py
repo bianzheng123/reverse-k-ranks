@@ -23,6 +23,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
     suffix_m = {
         'RankBound': 'cache_bound_every_512',
         'IntervalRankBound': 'cache_bound_every_512-n_interval_1024',
+        'HashRankBound': 'cache_bound_every_512-n_interval_512',
 
         'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_200',
         'CompressTopTIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_200',
@@ -72,16 +73,17 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
 def run():
     method_name_l = [
         'BatchDiskBruteForce',
-        'BPlusTree',
-        # 'DiskBruteForce',
-        # 'IntervalRankBound',
-        'MemoryBruteForce',
-        # 'OnlineBruteForce',
-        # 'RankBound',
-
-        # 'IRBMergeRankBound',
+        # 'BPlusTree',
         # 'CompressTopTIDIPBruteForce',
         # 'CompressTopTIPBruteForce',
+        # 'DiskBruteForce',
+        'MemoryBruteForce',
+        # 'OnlineBruteForce',
+
+        'HashRankBound',
+        # 'IntervalRankBound',
+        # 'IRBMergeRankBound',
+        # 'RankBound',
 
         # 'IRBFullDimPrune',
         # 'IRBFullIntPrune',
@@ -100,15 +102,17 @@ def run():
     # dataset_l = ['fake-normal', 'fake-uniform']
     for ds in dataset_l:
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBound'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
-
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
+
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'HashRankBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IRBMergeRankBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
         # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullDimPrune'))
         # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullIntPrune'))

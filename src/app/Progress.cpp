@@ -39,7 +39,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
-            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
+            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(512),
              "the numer of interval")
             ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
              "the numer of merged user")
