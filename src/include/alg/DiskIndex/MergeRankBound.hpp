@@ -30,8 +30,8 @@ namespace ReverseMIPS {
         const char *index_path_;
 
         //record time memory
-        TimeRecord read_disk_record_, fine_binary_search_record_;
-        double read_disk_time_, fine_binary_search_time_;
+        TimeRecord read_disk_record_, exact_rank_refinement_record_;
+        double read_disk_time_, exact_rank_refinement_time_;
 
         //variable in build index
         std::ofstream out_stream_;
@@ -146,7 +146,7 @@ namespace ReverseMIPS {
 
         inline void RetrievalPreprocess() {
             read_disk_time_ = 0;
-            fine_binary_search_time_ = 0;
+            exact_rank_refinement_time_ = 0;
             index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
                 spdlog::error("error in writing index");
@@ -177,7 +177,7 @@ namespace ReverseMIPS {
                     }
                     assert(0 <= rank_ub_l[userID] && rank_ub_l[userID] <= rank_lb_l[userID] &&
                            rank_lb_l[userID] <= n_data_item_);
-                    fine_binary_search_record_.reset();
+                    exact_rank_refinement_record_.reset();
                     double queryIP = queryIP_l[userID];
                     int base_rank = rank_ub_l[userID];
                     int loc_rk = exact_rank_ins_.QueryRankByCandidate(user, item, queryIP, disk_cache_l_,
@@ -185,7 +185,7 @@ namespace ReverseMIPS {
                                                                       std::make_pair(rank_lb_l[userID],
                                                                                      rank_ub_l[userID]));
                     int rank = base_rank + loc_rk + 1;
-                    fine_binary_search_time_ += fine_binary_search_record_.get_elapsed_time_second();
+                    exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
 
                     user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
                     n_candidate_++;

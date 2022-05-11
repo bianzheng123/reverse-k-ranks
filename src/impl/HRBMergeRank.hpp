@@ -6,9 +6,7 @@
 #define REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
 
 #include "alg/DiskIndex/MergeRankBound.hpp"
-#include "alg/Prune/IPbound/FullIntPrune.hpp"
-#include "alg/Prune/IntervalSearch.hpp"
-#include "alg/Prune/RankSearch.hpp"
+#include "alg/Prune/HashSearch.hpp"
 #include "alg/Prune/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
@@ -29,39 +27,30 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::IRBMergeRankBound {
+namespace ReverseMIPS::HRBMergeRank {
 
     class Index : public BaseIndex {
         void ResetTimer() {
             read_disk_time_ = 0;
             inner_product_time_ = 0;
-            coarse_binary_search_time_ = 0;
-            fine_binary_search_time_ = 0;
-            interval_search_time_ = 0;
-            interval_prune_ratio_ = 0;
+            rank_bound_refinement_time_ = 0;
+            exact_rank_refinement_time_ = 0;
             rank_search_prune_ratio_ = 0;
         }
 
     public:
-        //for interval search, store in memory
-        IntervalSearch interval_ins_;
-        //interval search bound
-        SVD svd_ins_;
-        FullIntPrune interval_prune_;
-
         //for rank search, store in memory
-        RankSearch rank_ins_;
+        HashSearch rank_ins_;
         //read all instance
         MergeRankBound disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
-        double interval_search_time_, inner_product_time_, coarse_binary_search_time_, read_disk_time_, fine_binary_search_time_;
-        TimeRecord interval_search_record_, inner_product_record_, coarse_binary_search_record_;
-        double interval_prune_ratio_, rank_search_prune_ratio_;
+        double inner_product_time_, rank_bound_refinement_time_, read_disk_time_, exact_rank_refinement_time_;
+        TimeRecord inner_product_record_, rank_bound_refinement_record_;
+        double rank_search_prune_ratio_;
 
         //temporary retrieval variable
-        std::unique_ptr<double[]> query_ptr_;
         std::vector<bool> prune_l_;
         std::vector<std::pair<double, double>> IPbound_l_;
         std::vector<double> queryIP_l_;
@@ -69,22 +58,13 @@ namespace ReverseMIPS::IRBMergeRankBound {
         std::vector<int> rank_ub_l_;
 
         Index(
-                //interval search
-                IntervalSearch &interval_ins,
-                //interval search bound
-                SVD &svd_ins, FullIntPrune &interval_prune,
-                // rank search
-                RankSearch &rank_ins,
+                // hash search
+                HashSearch &rank_ins,
                 //disk index
                 MergeRankBound &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
-            //interval search
-            this->interval_ins_ = std::move(interval_ins);
-            //interval search bound
-            this->svd_ins_ = std::move(svd_ins);
-            this->interval_prune_ = std::move(interval_prune);
-            //rank search
+            //hash search
             this->rank_ins_ = std::move(rank_ins);
             //read disk
             this->disk_ins_ = std::move(disk_ins);
@@ -97,7 +77,6 @@ namespace ReverseMIPS::IRBMergeRankBound {
             assert(0 < this->user_.vec_dim_);
 
             //retrieval variable
-            this->query_ptr_ = std::make_unique<double[]>(vec_dim_);
             this->prune_l_.resize(n_user_);
             this->IPbound_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
@@ -128,29 +107,7 @@ namespace ReverseMIPS::IRBMergeRankBound {
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
 
-
-                double *query_vecs = query_ptr_.get();
-                svd_ins_.TransferQuery(query_item.getVector(queryID), vec_dim_, query_vecs);
-
-                interval_search_record_.reset();
-                //get the ip bound
-                interval_prune_.IPBound(query_vecs, user_, prune_l_, IPbound_l_);
-                //count rank bound
-                interval_ins_.RankBound(IPbound_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
-                //prune the bound
-                PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_, topk,
-                                      prune_l_, rank_topk_max_heap);
-
-                this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
-                int n_candidate = 0;
-                for (int userID = 0; userID < n_user_; userID++) {
-                    if (!prune_l_[userID]) {
-                        n_candidate++;
-                    }
-                }
-                assert(n_candidate >= topk);
-                interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                double *query_vecs = query_item.getVector(queryID);
 
                 //calculate the exact IP
                 inner_product_record_.reset();
@@ -162,14 +119,14 @@ namespace ReverseMIPS::IRBMergeRankBound {
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
-                //coarse binary search
-                coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_, rank_topk_max_heap);
+                //rank bound refinement
+                rank_bound_refinement_record_.reset();
+                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
-                coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
-                n_candidate = 0;
+                rank_bound_refinement_time_ += rank_bound_refinement_record_.get_elapsed_time_second();
+                int n_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
                     if (!prune_l_[userID]) {
                         n_candidate++;
@@ -188,10 +145,9 @@ namespace ReverseMIPS::IRBMergeRankBound {
             }
             disk_ins_.FinishRetrieval();
 
-            fine_binary_search_time_ = disk_ins_.fine_binary_search_time_;
+            exact_rank_refinement_time_ = disk_ins_.exact_rank_refinement_time_;
             read_disk_time_ = disk_ins_.read_disk_time_;
 
-            interval_prune_ratio_ /= n_query_item;
             rank_search_prune_ratio_ /= n_query_item;
             return query_heap_l;
         }
@@ -200,19 +156,19 @@ namespace ReverseMIPS::IRBMergeRankBound {
         PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
             // int topk;
             //double total_time,
-            //          interval_search_time_, inner_product_time, coarse_binary_search_time
+            //          inner_product_time, rank_bound_refinement_time_
             //          read_disk_time_, exact_rank_refinement_time_,
-            //          interval_prune_ratio_, rank_search_prune_ratio_
+            //          rank_search_prune_ratio_
             //double second_per_query;
             //unit: second
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinterval search %.3fs, inner product %.3fs, coarse binary search %.3fs\n\tread disk time %.3f, fine binary search %.3fs\n\tinterval prune ratio %.4f, rank search prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, coarse binary search %.3fs\n\tread disk time %.3f, exact rank refinement %.3fs\n\trank search prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
-                    interval_search_time_, inner_product_time_, coarse_binary_search_time_,
-                    read_disk_time_, fine_binary_search_time_,
-                    interval_prune_ratio_, rank_search_prune_ratio_,
+                    inner_product_time_, rank_bound_refinement_time_,
+                    read_disk_time_, exact_rank_refinement_time_,
+                    rank_search_prune_ratio_,
                     second_per_query);
             std::string str(buff);
             return str;
@@ -235,19 +191,8 @@ namespace ReverseMIPS::IRBMergeRankBound {
 
         user.vectorNormalize();
 
-        const double SIGMA = 0.7;
-        const double scale = 100;
-        SVD svd_ins;
-        int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
-
-        FullIntPrune interval_prune;
-        interval_prune.Preprocess(user, check_dim, scale);
-
-        //interval search
-        IntervalSearch interval_ins(n_interval, n_user, n_data_item);
-
         //rank search
-        RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
+        HashSearch rank_ins(n_data_item, n_user, cache_bound_every, n_interval);
 
         //exact rank refinement
         CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
@@ -275,9 +220,6 @@ namespace ReverseMIPS::IRBMergeRankBound {
                 }
                 std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
 
-                //interval search
-                interval_ins.LoopPreprocess(distance_pair_l.data(), userID);
-
                 //rank search
                 rank_ins.LoopPreprocess(distance_pair_l.data(), userID);
 
@@ -295,11 +237,7 @@ namespace ReverseMIPS::IRBMergeRankBound {
         disk_ins.FinishWrite();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
-                //interval search
-                interval_ins,
-                //interval search bound
-                svd_ins, interval_prune,
-                //rank search
+                //hash search
                 rank_ins,
                 //disk index
                 disk_ins,

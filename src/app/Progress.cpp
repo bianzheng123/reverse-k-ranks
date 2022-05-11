@@ -8,7 +8,7 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "IRBMergeRankBound.hpp"
+#include "HRBMergeRank.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -82,14 +82,14 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
-    if (method_name == "IRBMergeRankBound") {
+    if (method_name == "HRBMergeRank") {
         //TODO still have bug
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
         const int n_merge_user = para.n_merge_user;
         spdlog::info("input parameter: cache_bound_every {}, n_interval {}, n_merge_user {}",
                      cache_bound_every, n_interval, n_merge_user);
-        index = IRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
+        index = HRBMergeRank::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
                 n_merge_user);
     }  else {

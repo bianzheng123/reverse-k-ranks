@@ -48,8 +48,6 @@ namespace ReverseMIPS::HashRankBound {
     public:
 
         //temporary retrieval variable
-        // store queryIP
-        std::vector<std::pair<double, double>> IPbound_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
@@ -73,7 +71,6 @@ namespace ReverseMIPS::HashRankBound {
             this->n_data_item_ = n_data_item;
 
             //retrieval variable
-            IPbound_l_.resize(n_user_);
             queryIP_l_.resize(n_user_);
             rank_lb_l_.resize(n_user_);
             rank_ub_l_.resize(n_user_);

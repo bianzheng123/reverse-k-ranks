@@ -111,7 +111,7 @@ def run():
 
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBound'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IRBMergeRankBound'))
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRank'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
         # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullDimPrune'))
