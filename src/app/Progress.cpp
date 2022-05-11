@@ -9,6 +9,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "HRBMergeRank.hpp"
+#include "HashRankBound.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -38,7 +39,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
-            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(512),
+            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
             ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
              "the numer of merged user")
@@ -92,7 +93,15 @@ int main(int argc, char **argv) {
         index = HRBMergeRank::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
                 n_merge_user);
-    }  else {
+    } else if (method_name == "HashRankBound") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = HashRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
+    } else {
         spdlog::error("not such method");
     }
 

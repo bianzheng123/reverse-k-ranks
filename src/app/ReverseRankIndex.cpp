@@ -15,7 +15,6 @@
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "BruteForce/OnlineBruteForce.hpp"
-#include "HashRankBound.hpp"
 #include "IntervalRankBound.hpp"
 #include "RankBound.hpp"
 
@@ -126,15 +125,7 @@ int main(int argc, char **argv) {
     } else if (method_name == "OnlineBruteForce") {
         spdlog::info("input parameter: none");
         index = OnlineBruteForce::BuildIndex(data_item, user);
-    } else if (method_name == "HashRankBound") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
-                     cache_bound_every, n_interval);
-        index = HashRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
-
-    } else if (method_name == "IntervalRankBound") {
+    }  else if (method_name == "IntervalRankBound") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
         spdlog::info("input parameter: cache_bound_every {}, n_interval {}",

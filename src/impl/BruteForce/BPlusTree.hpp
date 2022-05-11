@@ -172,7 +172,7 @@ namespace ReverseMIPS::BPlusTree {
             std::cout << std::endl;
 
             std::cout << "disk_cum_layer_size_l_" << std::endl;
-            for(int layer = 0;layer < n_disk_layer_;layer++){
+            for (int layer = 0; layer < n_disk_layer_; layer++) {
                 std::cout << disk_cum_layer_size_l_[layer] << " ";
             }
             std::cout << std::endl;
@@ -249,7 +249,7 @@ namespace ReverseMIPS::BPlusTree {
 //            spdlog::info("index size %ld byte\n", fsize);
         }
 
-        void RetrievalMemory(const std::vector<double> &queryIP_l, std::vector<int> &rank_l, int queryID) {
+        void RetrievalMemory(const std::vector<double> &queryIP_l, std::vector<int> &rank_l) {
             assert(queryIP_l.size() == n_user_ && rank_l.size() == n_user_);
             for (int userID = 0; userID < n_user_; userID++) {
                 const double &queryIP = queryIP_l[userID];
@@ -405,7 +405,7 @@ namespace ReverseMIPS::BPlusTree {
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
                 rank_bound_prune_record_.reset();
-                tree_ins_.RetrievalMemory(queryIP_l, rank_l, qID);
+                tree_ins_.RetrievalMemory(queryIP_l, rank_l);
                 PruneCandidateByBound(rank_l,
                                       n_user_, topk,
                                       prune_l);
@@ -428,6 +428,9 @@ namespace ReverseMIPS::BPlusTree {
                 assert(query_heap_l[qID].size() == topk);
             }
 
+            read_disk_time_ = tree_ins_.read_disk_time_;
+            exact_rank_refinement_time_ = tree_ins_.exact_rank_refinement_time_;
+
             tree_ins_.FinishRetrieval();
             rank_prune_ratio_ /= n_query_item;
             return query_heap_l;
@@ -444,9 +447,10 @@ namespace ReverseMIPS::BPlusTree {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, read disk %.3fs, exact rank refinement %.3fs\n\trank prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, rank bound pruning %.3fs\n\tread disk %.3fs, exact rank refinement %.3fs\n\trank prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
-                    inner_product_time_, read_disk_time_, exact_rank_refinement_time_,
+                    inner_product_time_, rank_bound_prune_time_,
+                    read_disk_time_, exact_rank_refinement_time_,
                     rank_prune_ratio_,
                     second_per_query);
             std::string str(buff);

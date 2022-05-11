@@ -92,7 +92,7 @@ def run_intervalrankbound_sample_rate():
 
 
 def run_compress_topt():
-    dataset_l = ['movielens-27m']
+    dataset_l = ['netflix', 'yahoomusic-small', 'yelp-small']
     topt_perc_l = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     for ds in dataset_l:
         for topt_perc in topt_perc_l:
@@ -107,16 +107,16 @@ def run_compress_topt():
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    # dataset_l = ['yahoomusic-small', 'yelp-small']
-    run_compress_topt()
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
+    # run_compress_topt()
 
     # run_rankbound_sample_rate()
     # run_intervalrankbound_sample_rate()
 
-    # for ds in dataset_l:
-    #     os.system(
-    #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
-    #             ds, basic_dir, 512, 512))
+    for ds in dataset_l:
+        os.system(
+            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {}'.format(
+                ds, basic_dir, "HashRankBound"))
     #     os.system(
     #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
     #             ds, basic_dir, 512, 1024))

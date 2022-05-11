@@ -23,7 +23,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
     suffix_m = {
         'RankBound': 'cache_bound_every_512',
         'IntervalRankBound': 'cache_bound_every_512-n_interval_1024',
-        'HashRankBound': 'cache_bound_every_512-n_interval_512',
+        'HashRankBound': 'cache_bound_every_512-n_interval_1024',
 
         'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_200',
         'CompressTopTIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_200',
@@ -109,9 +109,9 @@ def run():
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
 
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashRankBound'))
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'HashRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBound'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRank'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRank'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
         # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullDimPrune'))

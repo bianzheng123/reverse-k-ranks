@@ -52,7 +52,7 @@ namespace ReverseMIPS::HRBMergeRank {
 
         //temporary retrieval variable
         std::vector<bool> prune_l_;
-        std::vector<std::pair<double, double>> IPbound_l_;
+        std::vector<std::pair<double, double>> queryIPbound_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
@@ -78,7 +78,7 @@ namespace ReverseMIPS::HRBMergeRank {
 
             //retrieval variable
             this->prune_l_.resize(n_user_);
-            this->IPbound_l_.resize(n_user_);
+            this->queryIPbound_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
@@ -121,7 +121,7 @@ namespace ReverseMIPS::HRBMergeRank {
 
                 //rank bound refinement
                 rank_bound_refinement_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_);
+                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, queryID);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
@@ -136,7 +136,7 @@ namespace ReverseMIPS::HRBMergeRank {
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_, user_, data_item_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];

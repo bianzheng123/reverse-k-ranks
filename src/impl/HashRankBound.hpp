@@ -49,6 +49,7 @@ namespace ReverseMIPS::HashRankBound {
 
         //temporary retrieval variable
         std::vector<double> queryIP_l_;
+        std::vector<std::pair<double, double>> queryIPbound_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
         std::vector<bool> prune_l_;
@@ -72,6 +73,7 @@ namespace ReverseMIPS::HashRankBound {
 
             //retrieval variable
             queryIP_l_.resize(n_user_);
+            queryIPbound_l_.resize(n_user_);
             rank_lb_l_.resize(n_user_);
             rank_ub_l_.resize(n_user_);
             prune_l_.resize(n_user_);
@@ -113,7 +115,7 @@ namespace ReverseMIPS::HashRankBound {
 
                 //rank search
                 rank_bound_prune_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_);
+                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, queryID);
 
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
