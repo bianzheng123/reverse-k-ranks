@@ -27,9 +27,9 @@ namespace ReverseMIPS {
         }
 
         void WritePerformance(const char *dataset_name, const char *method_name,
-                              const char *other_name = nullptr) {
+                              const char *other_name) {
             char resPath[256];
-            if (other_name == nullptr) {
+            if (strcmp(other_name, "") == 0) {
                 std::sprintf(resPath, "../result/performance/%s-%s-config.txt",
                              dataset_name, method_name);
             } else {
