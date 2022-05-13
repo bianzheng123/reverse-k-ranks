@@ -64,7 +64,6 @@ namespace ReverseMIPS {
                 this->disk_cache_l_[itemID].Reset();
             }
             this->is_compute_l_.resize(n_merge_user_);
-            this->is_compute_l_.assign(n_merge_user_, false);
             this->user_topk_cache_l_.resize(n_user_);
 
             BuildIndexPreprocess(user);
@@ -157,6 +156,8 @@ namespace ReverseMIPS {
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<std::pair<double, double>> &IPbound_l,
                      const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
+            is_compute_l_.assign(n_merge_user_, false);
+
             //read disk and fine binary search
             n_candidate_ = 0;
             for (int iter_userID = 0; iter_userID < n_user_; iter_userID++) {
@@ -178,8 +179,8 @@ namespace ReverseMIPS {
                     assert(0 <= rank_ub_l[userID] && rank_ub_l[userID] <= rank_lb_l[userID] &&
                            rank_lb_l[userID] <= n_data_item_);
                     exact_rank_refinement_record_.reset();
-                    double queryIP = queryIP_l[userID];
-                    int base_rank = rank_ub_l[userID];
+                    const double queryIP = queryIP_l[userID];
+                    const int base_rank = rank_ub_l[userID];
                     int loc_rk = exact_rank_ins_.QueryRankByCandidate(user, item, queryIP, disk_cache_l_,
                                                                       userID, IPbound_l[userID],
                                                                       std::make_pair(rank_lb_l[userID],
@@ -193,8 +194,6 @@ namespace ReverseMIPS {
                 }
                 is_compute_l_[iter_labelID] = true;
             }
-
-            is_compute_l_.assign(n_merge_user_, false);
 
             std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_candidate_,
                       std::less());

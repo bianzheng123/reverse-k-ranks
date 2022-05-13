@@ -46,14 +46,6 @@ namespace ReverseMIPS {
 
                 assert(0 <= end_sample_rank - candID * sample_every &&
                        end_sample_rank - candID * sample_every <= n_data_item);
-                if (not(bkt_rank_pair.first >= end_sample_rank - candID * sample_every &&
-                        end_sample_rank - candID * sample_every >= bkt_rank_pair.second)) {
-                    printf("bkt_rank_pair_lb %d, bkt_rank_pair_ub %d\n", bkt_rank_pair.first, bkt_rank_pair.second);
-                    const int this_rank = end_sample_rank - candID * sample_every;
-                    printf("this_rank %d\n", this_rank);
-                    printf("sample_ID_end %d\n", sampleID_end);
-                    printf("end_sample_rank %d\n", end_sample_rank);
-                }
 
                 assert(bkt_rank_pair.first >= end_sample_rank - candID * sample_every &&
                        end_sample_rank - candID * sample_every >= bkt_rank_pair.second);
@@ -81,10 +73,6 @@ namespace ReverseMIPS {
                                                       return arr_val > queryIP;
                                                   });
             const int sample_loc_rk = sample_IP_ptr - sample_IP_l_.get();
-            if (queryID == 0 && userID == 198) {
-                printf("queryID %d, userID %d\n", queryID, userID);
-                printf("sample_loc_rk %d\n", sample_loc_rk);
-            }
 
             if (sample_loc_rk == 0) {
                 const int res_rank_lb = sample_rank_ub;
@@ -215,9 +203,6 @@ namespace ReverseMIPS {
                                                         return arr_val > query_val;
                                                     });
                 int size = rank_lb_ptr - distance_ptr;
-                if(userID == 1 && itvID== 315){
-                    printf("tmp_IP_lb %.3f, size %d, item_IP[510] %.3f, item_IP[511] %.3f\n", tmp_IP_lb, size, distance_ptr[510], distance_ptr[511]);
-                }
                 interval_table_[userID * n_interval_ + itvID] = size;
             }
 
@@ -246,17 +231,6 @@ namespace ReverseMIPS {
                 int n_sample = bucket_l_[userID * n_interval_ + itvID].n_sample_;
                 const double *sample_l = bucket_l_[userID * n_interval_ + itvID].sample_IP_l_.get();
                 for (int sampleID = 0; sampleID < n_sample; sampleID++) {
-                    if(not(bkt_IP_lb <= sample_l[sampleID] && sample_l[sampleID] <= bkt_IP_ub)){
-                        printf("userID %d, itvID %d\n", userID, itvID);
-                        printf("bkt_IP_lb %.3f, bkt_IP_ub %.3f\n", bkt_IP_lb, bkt_IP_ub);
-                        printf("bkt_rank_lb %d, bkt_rank_ub %d\n", bkt_rank_lb, bkt_rank_ub);
-                        printf("sample_l\n");
-                        for (int sampleID1 = 0; sampleID1 < n_sample; sampleID1++) {
-                            printf("%.3f ", sample_l[sampleID1]);
-                        }
-                        printf("\n");
-                    }
-
                     assert(bkt_IP_lb <= sample_l[sampleID] && sample_l[sampleID] <= bkt_IP_ub);
                 }
             }
@@ -306,25 +280,6 @@ namespace ReverseMIPS {
                                                                         bkt_rank_pair, bkt_IPbound_pair,
                                                                         sample_rank_pair, queryIPbound_pair, queryID,
                                                                         userID);
-
-                if (not(bkt_IPbound_pair.first <= queryIPbound_pair.first && queryIPbound_pair.first <= queryIP)) {
-                    printf("known_rank_idx_l:\n");
-                    for (int sampleID = 0; sampleID < n_cache_rank_; sampleID++) {
-                        printf("%d ", known_rank_idx_l_[sampleID]);
-                    }
-                    printf("\n");
-
-                    printf("queryID %d, userID %d, queryIP %.3f\n", queryID, userID, queryIP);
-                    printf("bkt_rank_pair_lb %d, bkt_rank_pair_ub %d\n",
-                           bkt_rank_pair.first, bkt_rank_pair.second);
-                    printf("sample_rank_pair_lb %d, sample_rank_pair_ub %d\n",
-                           sample_rank_pair.first, sample_rank_pair.second);
-                    printf("bkt_IPbound_pair_lb %.3f, bkt_IPbound_pair_ub %.3f\n",
-                           bkt_IPbound_pair.first, bkt_IPbound_pair.second);
-                    printf("queryIPbound_pair_lb %.3f, queryIPbound_pair_ub %.3f\n",
-                           queryIPbound_pair.first, queryIPbound_pair.second);
-                    printf("bucket n_sample %d\n", bucket_l_[userID * n_interval_ + bucketID].n_sample_);
-                }
 
                 assert(rank_ub_l[userID] <= bkt_rank_pair.second && bkt_rank_pair.second <= sample_rank_pair.second);
                 assert(sample_rank_pair.second <= sample_rank_pair.first);

@@ -21,8 +21,7 @@ public:
     }
 
     void Merge(int rank) {
-        assert(rank_lb_ != -1 && rank_ub_ == -1);
-        assert(rank_lb_ == -1 && rank_ub_ != -1);
+        assert((rank_lb_ == -1 && rank_ub_ == -1) || (rank_lb_ != -1 && rank_ub_ != -1));
         assert(rank_ub_ <= rank_lb_);
         if (rank_lb_ == -1 && rank_ub_ == -1) {
             rank_lb_ = rank;

@@ -8,7 +8,7 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "HRBMergeRank.hpp"
+#include "HRBMergeRankBound.hpp"
 #include "HashRankBound.hpp"
 
 #include <spdlog/spdlog.h>
@@ -41,7 +41,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
-            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
+            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(512),
              "the numer of merged user")
             ("topt_perc, tt", po::value<int>(&para.topt_perc)->default_value(50),
              "store top-t inner product as index");
@@ -83,14 +83,14 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
-    if (method_name == "HRBMergeRank") {
+    if (method_name == "HRBMergeRankBound") {
         //TODO still have bug
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
         const int n_merge_user = para.n_merge_user;
         spdlog::info("input parameter: cache_bound_every {}, n_interval {}, n_merge_user {}",
                      cache_bound_every, n_interval, n_merge_user);
-        index = HRBMergeRank::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
+        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
                 n_merge_user);
     } else if (method_name == "HashRankBound") {

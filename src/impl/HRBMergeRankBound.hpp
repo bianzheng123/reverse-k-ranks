@@ -27,7 +27,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::HRBMergeRank {
+namespace ReverseMIPS::HRBMergeRankBound {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -164,7 +164,7 @@ namespace ReverseMIPS::HRBMergeRank {
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, coarse binary search %.3fs\n\tread disk time %.3f, exact rank refinement %.3fs\n\trank search prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, coarse binary search %.3fs\n\tread disk time %.3fs, exact rank refinement %.3fs\n\trank search prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, rank_bound_refinement_time_,
                     read_disk_time_, exact_rank_refinement_time_,

@@ -46,10 +46,9 @@ namespace ReverseMIPS {
                 UserRankBound element = item_rank_bound_l[itemID];
                 assert(0 <= element.rank_ub_ && element.rank_ub_ <= element.rank_lb_ &&
                        element.rank_lb_ <= n_data_item_);
-                bool ub_intersect = element.rank_ub_ <= query_rank_ub && query_rank_ub <= element.rank_lb_;
-                bool overlap = query_rank_ub <= element.rank_ub_ && element.rank_lb_ <= query_rank_lb;
-                bool lb_intersect = element.rank_ub_ <= query_rank_lb && query_rank_lb <= element.rank_lb_;
-                if (ub_intersect || overlap || lb_intersect) {
+                bool top_element = element.rank_lb_ < query_rank_ub;
+                bool bottom_element = query_rank_lb < element.rank_ub_;
+                if (top_element || bottom_element) {
                     continue;
                 }
                 double ip = InnerProduct(item.getVector(itemID), user.getVector(userID), vec_dim_);

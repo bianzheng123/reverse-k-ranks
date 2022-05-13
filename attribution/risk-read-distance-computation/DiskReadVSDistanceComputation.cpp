@@ -19,9 +19,8 @@ std::unique_ptr<double[]> GenRandom(const int &n_eval, const int &n_dim) {
     std::random_device rd;  // Will be used to obtain a seed for the random number engine
     std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
     std::uniform_real_distribution<> dis(1.0, 1000.0);
-    size_t length = n_eval * n_eval;
 
-    std::unique_ptr<double[]> random_l = make_unique<double[]>(length);
+    std::unique_ptr<double[]> random_l = make_unique<double[]>(n_eval * n_dim);
 
     for (int itemID = 0; itemID < n_eval; itemID++) {
         for (int dim = 0; dim < n_dim; dim++) {
