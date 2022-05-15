@@ -110,13 +110,13 @@ if __name__ == '__main__':
     dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
     # run_compress_topt()
 
-    # run_rankbound_sample_rate()
-    # run_intervalrankbound_sample_rate()
+    run_rankbound_sample_rate()
+    run_intervalrankbound_sample_rate()
 
-    for ds in dataset_l:
-        os.system(
-            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {}'.format(
-                ds, basic_dir, "HashRankBound"))
+    # for ds in dataset_l:
+    #     os.system(
+    #         'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {}'.format(
+    #             ds, basic_dir, "HashRankBound"))
     #     os.system(
     #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
     #             ds, basic_dir, 512, 1024))

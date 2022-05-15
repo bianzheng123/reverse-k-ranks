@@ -121,7 +121,7 @@ namespace ReverseMIPS::HRBMergeRankBound {
 
                 //rank bound refinement
                 rank_bound_refinement_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, queryID);
+                rank_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);

@@ -8,8 +8,8 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
+#include "GridIndex.hpp"
 #include "HRBMergeRankBound.hpp"
-#include "HashRankBound.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -93,7 +93,11 @@ int main(int argc, char **argv) {
         index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, n_merge_user);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-n_merge_user_%d", cache_bound_every, n_interval,
                 n_merge_user);
-    }  else {
+    } else if(method_name == "GridIndex"){
+        //TODO not test, still have bug
+        spdlog::info("input parameter: none");
+        index = GridIndex::BuildIndex(data_item, user);
+    } else {
         spdlog::error("not such method");
     }
 

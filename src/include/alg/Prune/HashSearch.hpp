@@ -32,7 +32,7 @@ namespace ReverseMIPS {
             const int &end_sample_rank = sample_every - 1 + sampleID_end * sample_every;
 
             int size = 0;
-            if(end_sample_rank == bkt_rank_pair.first){
+            if (end_sample_rank == bkt_rank_pair.first) {
                 size--;
             }
             for (int rankID = end_sample_rank; rankID >= bkt_rank_ub; rankID -= sample_every) {
@@ -53,10 +53,10 @@ namespace ReverseMIPS {
 
         }
 
-        void BinarySearch(const double &queryIP, const int &sample_every,
-                          const std::pair<int, int> &bkt_rank_pair, const std::pair<double, double> &bkt_IPbound_pair,
-                          std::pair<int, int> &sample_rank_pair, std::pair<double, double> &queryIPbound_pair,
-                          int queryID, int userID) {
+        void BinarySearchByRankIP(const double &queryIP, const int &sample_every,
+                                  const std::pair<int, int> &bkt_rank_pair,
+                                  const std::pair<double, double> &bkt_IPbound_pair,
+                                  std::pair<int, int> &sample_rank_pair, std::pair<double, double> &queryIPbound_pair) {
             if (n_sample_ == 0) {
                 sample_rank_pair = bkt_rank_pair;
                 queryIPbound_pair = bkt_IPbound_pair;
@@ -75,37 +75,77 @@ namespace ReverseMIPS {
             const int sample_loc_rk = sample_IP_ptr - sample_IP_l_.get();
 
             if (sample_loc_rk == 0) {
-                const int res_rank_lb = sample_rank_ub;
-                const int res_rank_ub = bkt_rank_pair.second;
+                const int &res_rank_lb = sample_rank_ub;
+                const int &res_rank_ub = bkt_rank_pair.second;
                 assert(res_rank_lb >= res_rank_ub);
                 sample_rank_pair = std::make_pair(res_rank_lb, res_rank_ub);
 
-                const double bkt_IP_lb = sample_IP_l_[0];
-                const double bkt_IP_ub = bkt_IPbound_pair.second;
+                const double &bkt_IP_lb = sample_IP_l_[0];
+                const double &bkt_IP_ub = bkt_IPbound_pair.second;
                 assert(bkt_IP_lb <= bkt_IP_ub);
                 queryIPbound_pair = std::make_pair(bkt_IP_lb, bkt_IP_ub);
 
             } else if (sample_loc_rk == n_sample_) {
-                const int res_rank_lb = bkt_rank_pair.first;
-                const int res_rank_ub = sample_rank_ub + (n_sample_ - 1) * sample_every;
+                const int &res_rank_lb = bkt_rank_pair.first;
+                const int &res_rank_ub = sample_rank_ub + (n_sample_ - 1) * sample_every;
                 assert(res_rank_lb >= res_rank_ub);
                 sample_rank_pair = std::make_pair(res_rank_lb, res_rank_ub);
 
-                const double bkt_IP_lb = bkt_IPbound_pair.first;
-                const double bkt_IP_ub = sample_IP_l_[n_sample_ - 1];
+                const double &bkt_IP_lb = bkt_IPbound_pair.first;
+                const double &bkt_IP_ub = sample_IP_l_[n_sample_ - 1];
                 assert(bkt_IP_lb <= bkt_IP_ub);
                 queryIPbound_pair = std::make_pair(bkt_IP_lb, bkt_IP_ub);
 
             } else {
-                const int res_rank_lb = sample_rank_ub + sample_loc_rk * sample_every;
-                const int res_rank_ub = sample_rank_ub + (sample_loc_rk - 1) * sample_every;
+                const int &res_rank_lb = sample_rank_ub + sample_loc_rk * sample_every;
+                const int &res_rank_ub = sample_rank_ub + (sample_loc_rk - 1) * sample_every;
                 assert(res_rank_lb >= res_rank_ub);
                 sample_rank_pair = std::make_pair(res_rank_lb, res_rank_ub);
 
-                const double bkt_IP_lb = *sample_IP_ptr;
-                const double bkt_IP_ub = *(sample_IP_ptr - 1);
+                const double &bkt_IP_lb = *sample_IP_ptr;
+                const double &bkt_IP_ub = *(sample_IP_ptr - 1);
                 assert(bkt_IP_lb <= bkt_IP_ub);
                 queryIPbound_pair = std::make_pair(bkt_IP_lb, bkt_IP_ub);
+            }
+
+        }
+
+        void
+        BinarySearchByRank(const double &queryIP, const int &sample_every, const std::pair<int, int> &bkt_rank_pair,
+                           std::pair<int, int> &sample_rank_pair) {
+            if (n_sample_ == 0) {
+                sample_rank_pair = bkt_rank_pair;
+                return;
+            }
+
+            //get the rank of the first sample arr
+            const int rank_ub = bkt_rank_pair.second;
+            int sampleID_lb = std::ceil(1.0 * (rank_ub - sample_every + 1) / sample_every);
+            const int sample_rank_ub = sample_every - 1 + sampleID_lb * sample_every;
+
+            auto sample_IP_ptr = std::lower_bound(sample_IP_l_.get(), sample_IP_l_.get() + n_sample_, queryIP,
+                                                [](const double &arr_val, double queryIP) {
+                                                    return arr_val > queryIP;
+                                                });
+            const int sample_loc_rk = sample_IP_ptr - sample_IP_l_.get();
+
+            if (sample_loc_rk == 0) {
+                const int &res_rank_lb = sample_rank_ub;
+                const int &res_rank_ub = bkt_rank_pair.second;
+                assert(res_rank_lb >= res_rank_ub);
+                sample_rank_pair = std::make_pair(res_rank_lb, res_rank_ub);
+
+            } else if (sample_loc_rk == n_sample_) {
+                const int &res_rank_lb = bkt_rank_pair.first;
+                const int &res_rank_ub = sample_rank_ub + (n_sample_ - 1) * sample_every;
+                assert(res_rank_lb >= res_rank_ub);
+                sample_rank_pair = std::make_pair(res_rank_lb, res_rank_ub);
+
+            } else {
+                const int &res_rank_lb = sample_rank_ub + sample_loc_rk * sample_every;
+                const int &res_rank_ub = sample_rank_ub + (sample_loc_rk - 1) * sample_every;
+                assert(res_rank_lb >= res_rank_ub);
+                sample_rank_pair = std::make_pair(res_rank_lb, res_rank_ub);
             }
 
         }
@@ -239,8 +279,9 @@ namespace ReverseMIPS {
 
         void RankBound(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
-                       std::vector<std::pair<double, double>> &queryIPbound_l, int queryID) const {
+                       std::vector<std::pair<double, double>> &queryIPbound_l) const {
 
+            //TODO, tested in hash search before, not have bug. But transfer in HRBMergeRankBound, may have bug
             assert(queryIP_l.size() == prune_l.size() && prune_l.size() == rank_lb_l.size() &&
                    rank_lb_l.size() == rank_ub_l.size() && rank_ub_l.size() == queryIPbound_l.size());
             for (int userID = 0; userID < n_user_; userID++) {
@@ -276,10 +317,9 @@ namespace ReverseMIPS {
                 const double bkt_IP_ub = user_IP_ub - bkt_dist * bucketID;
                 std::pair<double, double> bkt_IPbound_pair = std::make_pair(bkt_IP_lb, bkt_IP_ub);
                 std::pair<double, double> queryIPbound_pair;
-                bucket_l_[userID * n_interval_ + bucketID].BinarySearch(queryIP, cache_bound_every_,
-                                                                        bkt_rank_pair, bkt_IPbound_pair,
-                                                                        sample_rank_pair, queryIPbound_pair, queryID,
-                                                                        userID);
+                bucket_l_[userID * n_interval_ + bucketID].BinarySearchByRankIP(queryIP, cache_bound_every_,
+                                                                                bkt_rank_pair, bkt_IPbound_pair,
+                                                                                sample_rank_pair, queryIPbound_pair);
 
                 assert(rank_ub_l[userID] <= bkt_rank_pair.second && bkt_rank_pair.second <= sample_rank_pair.second);
                 assert(sample_rank_pair.second <= sample_rank_pair.first);
@@ -292,6 +332,50 @@ namespace ReverseMIPS {
                 rank_ub_l[userID] = sample_rank_pair.second;
 
                 queryIPbound_l[userID] = queryIPbound_pair;
+
+                const int &this_read_count = rank_lb_l[userID] - rank_ub_l[userID];
+                assert(0 <= this_read_count && this_read_count <= n_max_disk_read_);
+
+            }
+        }
+
+        void RankBound(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
+                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) const {
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID]) {
+                    continue;
+                }
+                const double queryIP = queryIP_l[userID];
+                std::pair<double, double> IPbound = glb_IPbound_l_[userID];
+                const double user_IP_ub = IPbound.second;
+                const double bkt_dist = bkt_dist_l_[userID];
+                const int bucketID = std::floor((user_IP_ub - queryIP_l[userID]) / bkt_dist);
+                if (bucketID < 0) {
+                    assert(rank_ub_l[userID] <= 0 && 0 <= rank_lb_l[userID]);
+                    rank_ub_l[userID] = 0;
+                    rank_lb_l[userID] = 0;
+                    continue;
+                } else if (bucketID >= n_interval_) {
+                    assert(rank_ub_l[userID] <= n_data_item_ && n_data_item_ <= rank_lb_l[userID]);
+                    rank_ub_l[userID] = n_data_item_;
+                    rank_lb_l[userID] = n_data_item_;
+                    continue;
+                }
+
+                int bkt_rank_ub = bucketID == 0 ? 0 : interval_table_[userID * n_interval_ + bucketID - 1];
+                int bkt_rank_lb = interval_table_[userID * n_interval_ + bucketID];
+
+                const std::pair<int, int> &bkt_rank_pair = std::make_pair(bkt_rank_lb, bkt_rank_ub);
+                std::pair<int, int> sample_rank_pair;
+                bucket_l_[userID * n_interval_ + bucketID].BinarySearchByRank(
+                        queryIP, cache_bound_every_, bkt_rank_pair, sample_rank_pair);
+
+                assert(rank_ub_l[userID] <= bkt_rank_pair.second && bkt_rank_pair.second <= sample_rank_pair.second);
+                assert(sample_rank_pair.second <= sample_rank_pair.first);
+                assert(sample_rank_pair.first <= bkt_rank_pair.first && bkt_rank_pair.first <= rank_lb_l[userID]);
+
+                rank_lb_l[userID] = sample_rank_pair.first;
+                rank_ub_l[userID] = sample_rank_pair.second;
 
                 const int &this_read_count = rank_lb_l[userID] - rank_ub_l[userID];
                 assert(0 <= this_read_count && this_read_count <= n_max_disk_read_);
