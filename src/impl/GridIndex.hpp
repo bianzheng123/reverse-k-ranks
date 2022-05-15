@@ -44,6 +44,10 @@ namespace ReverseMIPS::GridIndex {
             }
         }
         assert(min_val <= max_val);
+        if (min_val - 0.01 >= 0) {
+            min_val -= 0.01;
+        }
+        max_val += 0.01;
         return std::make_pair(min_val, max_val);
     }
 
@@ -58,6 +62,7 @@ namespace ReverseMIPS::GridIndex {
         //retrieval
         std::vector<int> cand_l_;
         int n_cand_;
+        unsigned char NEGATIVE_ = 255;
 
     public:
 
@@ -68,7 +73,8 @@ namespace ReverseMIPS::GridIndex {
             this->vec_dim_ = user.vec_dim_;
             this->n_data_item_ = data_item.n_vector_;
             this->n_partition_ = n_partition;
-            if (n_partition >= (2 << 8)) {
+            const int lshift = sizeof(unsigned char) * 8;
+            if (n_partition >= (1 << lshift)) {
                 spdlog::error("n_partition too large, program exit");
                 exit(-1);
             }
@@ -104,7 +110,7 @@ namespace ReverseMIPS::GridIndex {
                 const double *user_vecs = user.getVector(userID);
                 for (int dim = 0; dim < vec_dim_; dim++) {
                     if (user_vecs[dim] <= 0) {
-                        user_codeword_[userID * vec_dim_ + dim] = 127;
+                        user_codeword_[userID * vec_dim_ + dim] = NEGATIVE_;
                     } else { // user_vecs[dim] > 0
                         unsigned char bktID = std::floor((user_vecs[dim] - user_minmax_pair.first) / user_dist);
                         assert(0 <= bktID && bktID < n_partition_);
@@ -117,7 +123,7 @@ namespace ReverseMIPS::GridIndex {
                 const double *item_vecs = data_item.getVector(itemID);
                 for (int dim = 0; dim < vec_dim_; dim++) {
                     if (item_vecs[dim] <= 0) {
-                        item_codeword_[itemID * vec_dim_ + dim] = 127;
+                        item_codeword_[itemID * vec_dim_ + dim] = NEGATIVE_;
                     } else { // item_vecs[dim] > 0
                         unsigned char bktID = std::floor((item_vecs[dim] - item_minmax_pair.first) / item_dist);
                         assert(0 <= bktID && bktID < n_partition_);
@@ -134,14 +140,16 @@ namespace ReverseMIPS::GridIndex {
             n_cand_ = 0;
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 const double *item_vecs = item.getVector(itemID);
-                const double IP_ub = IPUpperBound(user_vecs, userID, item_vecs, itemID);
-                if (IP_ub < queryIP) {
+                const double IP_lb = IPLowerBound(user_vecs, userID, item_vecs, itemID);
+                assert(IP_lb <= InnerProduct(user_vecs, item_vecs, vec_dim_));
+                if (queryIP < IP_lb) {
                     rank++;
                     if (rank > min_rank) {
                         return -1;
                     }
                 } else {
-                    const double IP_lb = IPLowerBound(user_vecs, userID, item_vecs, itemID);
+                    const double IP_ub = IPUpperBound(user_vecs, userID, item_vecs, itemID);
+                    assert(InnerProduct(user_vecs, item_vecs, vec_dim_) <= IP_ub);
                     if (IP_lb <= queryIP && queryIP <= IP_ub) {
                         cand_l_[n_cand_] = itemID;
                         n_cand_++;
@@ -171,7 +179,7 @@ namespace ReverseMIPS::GridIndex {
             const unsigned char *item_code_ptr = item_codeword_.get() + itemID * vec_dim_;
             double IP_ub = 0;
             for (int dim = 0; dim < vec_dim_; dim++) {
-                if (user_code_ptr[dim] == 127 || item_code_ptr[dim] == 127) {
+                if (user_code_ptr[dim] == NEGATIVE_ || item_code_ptr[dim] == NEGATIVE_) {
                     double IP = user_vecs[dim] * item_vecs[dim];
                     IP_ub += IP;
                 } else {
@@ -189,7 +197,7 @@ namespace ReverseMIPS::GridIndex {
             const unsigned char *item_code_ptr = item_codeword_.get() + itemID * vec_dim_;
             double IP_lb = 0;
             for (int dim = 0; dim < vec_dim_; dim++) {
-                if (user_code_ptr[dim] == 127 || item_code_ptr[dim] == 127) {
+                if (user_code_ptr[dim] == NEGATIVE_ || item_code_ptr[dim] == NEGATIVE_) {
                     double IP = user_vecs[dim] * item_vecs[dim];
                     IP_lb += IP;
                 } else {
@@ -253,10 +261,9 @@ namespace ReverseMIPS::GridIndex {
             //coarse binary search
             const int n_query_item = query_item.n_vector_;
 
-            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>());
+            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-
                 //calculate IP
                 double *query_item_vec = query_item.getVector(queryID);
                 inner_product_record_.reset();
@@ -272,7 +279,7 @@ namespace ReverseMIPS::GridIndex {
                 std::vector<UserRankElement> &rank_max_heap = query_heap_l[queryID];
                 for (int userID = 0; userID < topk; userID++) {
                     const double *user_vecs = user_.getVector(userID);
-                    int rank = grid_.GetRank(queryIP_l_[userID], n_data_item_, userID, user_vecs, data_item_);
+                    int rank = grid_.GetRank(queryIP_l_[userID], n_data_item_ + 1, userID, user_vecs, data_item_);
                     assert(rank != -1);
                     rank_max_heap[userID] = UserRankElement(userID, rank, queryIP_l_[userID]);
                 }

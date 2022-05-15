@@ -81,7 +81,8 @@ def run():
         'MemoryBruteForce',
         # 'OnlineBruteForce',
 
-        'HashRankBound',
+        'GridIndex',
+        # 'HashRankBound',
         # 'IntervalRankBound',
         # 'HRBMergeRankBound',
         # 'RankBound',
@@ -98,8 +99,9 @@ def run():
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     # os.system('cd build && ./{} {}'.format('bbfdi', ds))
 
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    # dataset_l = ['fake-normal']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal']
+    # dataset_l = ['fake-small']
     for ds in dataset_l:
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
@@ -109,7 +111,8 @@ def run():
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
 
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashRankBound'))
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBound'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
