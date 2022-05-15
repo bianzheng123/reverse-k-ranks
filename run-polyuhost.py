@@ -77,8 +77,8 @@ def run_rankbound_sample_rate():
     for ds in dataset_l:
         for para in cache_bound_every_l:
             os.system(
-                'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, para,
-                                                                                                  basic_dir))
+                'cd build && ./rri --method_name {} --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(
+                    'HashRankBound', ds, para, basic_dir))
 
 
 def run_intervalrankbound_sample_rate():
@@ -87,8 +87,8 @@ def run_intervalrankbound_sample_rate():
     for ds in dataset_l:
         for n_interval in n_interval_l:
             os.system(
-                'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
-                    ds, basic_dir, 512, n_interval))
+                'cd build && ./rri --method_name {} --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
+                    'HashRankBound', ds, basic_dir, 512, n_interval))
 
 
 def run_compress_topt():
