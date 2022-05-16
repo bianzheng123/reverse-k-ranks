@@ -107,7 +107,8 @@ def run_compress_topt():
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
+    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
+    dataset_l = ['movielens-27m']
     # run_compress_topt()
 
     run_rankbound_sample_rate()

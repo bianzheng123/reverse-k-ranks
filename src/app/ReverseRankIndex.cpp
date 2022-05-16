@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
     } else if (method_name == "OnlineBruteForce") {
         spdlog::info("input parameter: none");
         index = OnlineBruteForce::BuildIndex(data_item, user);
-    }  else if (method_name == "HashRankBound") {
+    } else if (method_name == "HashRankBound") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
         spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
         index = HashRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
 
-    }else if (method_name == "IntervalRankBound") {
+    } else if (method_name == "IntervalRankBound") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
         spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
@@ -155,8 +155,8 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-//    vector<int> topk_l{2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2};
+//    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
+    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
 //    vector<int> topk_l{20};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
