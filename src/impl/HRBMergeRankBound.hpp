@@ -184,10 +184,16 @@ namespace ReverseMIPS::HRBMergeRankBound {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &cache_bound_every, const int &n_interval, const int &n_merge_user) {
+                                      const int &cache_bound_every, const int &n_interval, const int &topt_perc) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
+
+        if (not(0 < topt_perc && topt_perc <= 100)) {
+            spdlog::error("topt_perc too small, program exit");
+            exit(-1);
+        }
+        const int n_merge_user = int(n_user * 1.0 / 100 * topt_perc);
 
         user.vectorNormalize();
 
@@ -226,7 +232,6 @@ namespace ReverseMIPS::HRBMergeRankBound {
                 disk_ins.BuildIndexLoop(distance_pair_l, userID);
             }
             disk_ins.WriteIndex();
-
             if (labelID % report_batch_every == 0) {
                 std::cout << "preprocessed " << labelID / (0.01 * n_merge_user) << " %, "
                           << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "

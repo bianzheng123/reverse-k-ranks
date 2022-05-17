@@ -6,7 +6,8 @@
 #define REVERSE_KRANKS_MERGEVECTOR_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/KMeans/KMeansParallel.hpp"
+//#include "alg/Cluster/KMeansParallel.hpp"
+#include "alg/Cluster/GreedyMerge.hpp"
 #include "alg/DiskIndex/RankFromCandidate/CandidateBruteForce.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
@@ -25,7 +26,7 @@ namespace ReverseMIPS {
         //index variable
         int n_user_, n_data_item_, vec_dim_, n_merge_user_;
         //n_cache_rank_: stores how many intervals for each merged user
-        std::vector<uint32_t> merge_label_l_; // n_user, stores which cluster the user belons to
+        std::vector <uint32_t> merge_label_l_; // n_user, stores which cluster the user belons to
         CandidateBruteForce exact_rank_ins_;
         const char *index_path_;
 
@@ -36,13 +37,13 @@ namespace ReverseMIPS {
         //variable in build index
         std::ofstream out_stream_;
         //n_data_item, stores the UserRankBound in the disk, used for build index and retrieval
-        std::vector<UserRankBound> disk_cache_l_;
+        std::vector <UserRankBound> disk_cache_l_;
 
         //variable in retrieval
         std::ifstream index_stream_;
         int n_candidate_;
         std::vector<bool> is_compute_l_;
-        std::vector<UserRankElement> user_topk_cache_l_; //n_user, used for sort the element to return the top-k
+        std::vector <UserRankElement> user_topk_cache_l_; //n_user, used for sort the element to return the top-k
 
         inline MergeRankBound() {}
 
@@ -71,30 +72,19 @@ namespace ReverseMIPS {
 
         void
         BuildIndexPreprocess(const VectorMatrix &user) {
-            //build kmeans on user
-            std::vector<std::vector<double>> user_vecs_l(n_user_, std::vector<double>(user.vec_dim_));
-            for (int userID = 0; userID < n_user_; userID++) {
-                memcpy(user_vecs_l[userID].data(), user.getVector(userID), user.vec_dim_);
-            }
-            ReverseMIPS::clustering_parameters<double> para(n_merge_user_);
-            para.set_random_seed(0);
-            para.set_max_iteration(200);
-            std::tuple<std::vector<std::vector<double>>, std::vector<uint32_t>> cluster_data =
-                    kmeans_lloyd_parallel(user_vecs_l, para);
-            merge_label_l_ = std::get<1>(cluster_data);
-            spdlog::info("Finish KMeans clustering");
+            merge_label_l_ = GreedyMerge::ClusterLabel(user, n_merge_user_);
 
-            printf("cluster size\n");
-            for (int mergeID = 0; mergeID < n_merge_user_; mergeID++) {
-                int count = 0;
-                for (int userID = 0; userID < n_user_; userID++) {
-                    if (merge_label_l_[userID] == mergeID) {
-                        count++;
-                    }
-                }
-                printf("%d ", count);
-            }
-            printf("\n");
+//            printf("cluster size\n");
+//            for (int mergeID = 0; mergeID < n_merge_user_; mergeID++) {
+//                int count = 0;
+//                for (int userID = 0; userID < n_user_; userID++) {
+//                    if (merge_label_l_[userID] == mergeID) {
+//                        count++;
+//                    }
+//                }
+//                printf("%d ", count);
+//            }
+//            printf("\n");
 
             out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
             if (!out_stream_) {
@@ -103,8 +93,8 @@ namespace ReverseMIPS {
             }
         }
 
-        std::vector<std::vector<int>> &BuildIndexMergeUser() {
-            static std::vector<std::vector<int>> eval_seq_l(n_merge_user_);
+        std::vector <std::vector<int>> &BuildIndexMergeUser() {
+            static std::vector <std::vector<int>> eval_seq_l(n_merge_user_);
             for (int labelID = 0; labelID < n_merge_user_; labelID++) {
                 std::vector<int> &eval_l = eval_seq_l[labelID];
                 for (int userID = 0; userID < n_user_; userID++) {
@@ -116,7 +106,7 @@ namespace ReverseMIPS {
             return eval_seq_l;
         }
 
-        void BuildIndexLoop(const std::vector<DistancePair> &distance_pair_l, const int &userID) {
+        void BuildIndexLoop(const std::vector <DistancePair> &distance_pair_l, const int &userID) {
             for (int rank = 0; rank < n_data_item_; rank++) {
                 int itemID = distance_pair_l[rank].ID_;
                 disk_cache_l_[itemID].Merge(rank);
@@ -129,9 +119,9 @@ namespace ReverseMIPS {
 
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 assert(disk_cache_l_[itemID].rank_lb_ != -1 && disk_cache_l_[itemID].rank_ub_ != -1);
-                out_stream_.write((char *) disk_cache_l_.data(),
-                                  (std::streamsize) (n_data_item_ * sizeof(UserRankBound)));
             }
+            out_stream_.write((char *) disk_cache_l_.data(),
+                              (std::streamsize)(n_data_item_ * sizeof(UserRankBound)));
 
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 disk_cache_l_[itemID].Reset();
@@ -154,7 +144,7 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                     const std::vector<std::pair<double, double>> &IPbound_l,
+                     const std::vector <std::pair<double, double>> &IPbound_l,
                      const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
             is_compute_l_.assign(n_merge_user_, false);
 

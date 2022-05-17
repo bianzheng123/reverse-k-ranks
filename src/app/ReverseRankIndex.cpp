@@ -15,7 +15,9 @@
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "BruteForce/OnlineBruteForce.hpp"
+#include "GridIndex.hpp"
 #include "HashRankBound.hpp"
+#include "HRBMergeRankBound.hpp"
 #include "IntervalRankBound.hpp"
 #include "RankBound.hpp"
 
@@ -49,7 +51,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
-            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(2),
+            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(512),
              "the numer of merged user")
             ("topt_perc, ttp", po::value<int>(&para.topt_perc)->default_value(50),
              "store percent of top-t inner product as index");
@@ -128,6 +130,18 @@ int main(int argc, char **argv) {
     } else if (method_name == "OnlineBruteForce") {
         spdlog::info("input parameter: none");
         index = OnlineBruteForce::BuildIndex(data_item, user);
+    } else if (method_name == "HRBMergeRankBound") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        const int topt_perc = para.topt_perc;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, topt_perc {}",
+                     cache_bound_every, n_interval, topt_perc);
+        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, topt_perc);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
+                topt_perc);
+    } else if (method_name == "GridIndex") {
+        spdlog::info("input parameter: none");
+        index = GridIndex::BuildIndex(data_item, user);
     } else if (method_name == "HashRankBound") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
