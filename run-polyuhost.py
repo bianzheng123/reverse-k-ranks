@@ -77,8 +77,11 @@ def run_rankbound_sample_rate():
     for ds in dataset_l:
         for para in cache_bound_every_l:
             os.system(
-                'cd build && ./rri --method_name {} --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(
-                    'HashRankBound', ds, para, basic_dir))
+                'cd build && ./rri --method_name {} --dataset_name {} --basic_dir {} --cache_bound_every {}'.format(
+                    'BPlusTree', ds, basic_dir, para))
+            # os.system(
+            #     'cd build && ./rri --method_name {} --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(
+            #         'HashRankBound', ds, para, basic_dir))
 
 
 def run_intervalrankbound_sample_rate():
@@ -107,12 +110,15 @@ def run_compress_topt():
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
-    dataset_l = ['movielens-27m']
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
+    # dataset_l = ['movielens-27m']
     # run_compress_topt()
 
     run_rankbound_sample_rate()
-    run_intervalrankbound_sample_rate()
+    # run_intervalrankbound_sample_rate()
+    for ds in dataset_l:
+        cmd = 'cd build/attribution && ./pur {} {}'.format(ds, basic_dir)
+        os.system(cmd)
 
     # for ds in dataset_l:
     #     os.system(

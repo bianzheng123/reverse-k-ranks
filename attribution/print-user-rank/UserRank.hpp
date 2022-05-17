@@ -1,9 +1,9 @@
 //
-// Created by BianZheng on 2022/3/28.
+// Created by BianZheng on 2022/5/17.
 //
 
-#ifndef REVERSE_KRANKS_BPLUSTREE_HPP
-#define REVERSE_KRANKS_BPLUSTREE_HPP
+#ifndef REVERSE_KRANKS_ATTRIBUTION_BPLUSTREE_HPP
+#define REVERSE_KRANKS_ATTRIBUTION_BPLUSTREE_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/Prune/PruneCandidateByBound.hpp"
@@ -19,7 +19,7 @@
 #include <map>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::BPlusTree {
+namespace ReverseMIPS::UserRank {
 
     class TreeIndex {
         int BinarySearch(const double &queryIP, const int &base_rank, const int &arr_size) const {
@@ -56,7 +56,7 @@ namespace ReverseMIPS::BPlusTree {
         std::vector<double> item_cache_;// node_size_, cache for reading a node on the disk
         double read_disk_time_, exact_rank_refinement_time_;
         TimeRecord read_disk_record_, exact_rank_refinement_record_;
-        std::vector<UserRankElement> user_topk_cache_l_;
+        std::vector<int> user_rank_cache_l_;
 
         inline TreeIndex() = default;
 
@@ -83,7 +83,7 @@ namespace ReverseMIPS::BPlusTree {
                 exit(-1);
             }
             this->item_cache_.resize(node_size_);
-            this->user_topk_cache_l_.resize(n_user);
+            this->user_rank_cache_l_.resize(n_user);
 
             GetMetaInfo();
         }
@@ -283,15 +283,11 @@ namespace ReverseMIPS::BPlusTree {
 
         }
 
-        void
-        RetrievalDisk(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
-                      const std::vector<int> &rank_l) {
+        std::vector<int>
+        RetrievalDisk(const std::vector<double> &queryIP_l, const std::vector<int> &rank_l) {
             assert(queryIP_l.size() == n_user_);
             int n_candidate = 0;
             for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID]) {
-                    continue;
-                }
                 const double &queryIP = queryIP_l[userID];
                 size_t base_offset = userID * disk_tree_size_byte_;
                 assert(in_stream_);
@@ -327,13 +323,10 @@ namespace ReverseMIPS::BPlusTree {
                 assert(rank >= 0);
                 rank += 1;
 
-                user_topk_cache_l_[n_candidate] = UserRankElement(userID, rank, queryIP);
-                n_candidate++;
+                user_rank_cache_l_[userID] = rank;
             }
 
-            std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_candidate,
-                      std::less());
-
+            return user_rank_cache_l_;
         }
 
         void FinishRetrieval() {
@@ -342,7 +335,7 @@ namespace ReverseMIPS::BPlusTree {
 
     };
 
-    class Index : public BaseIndex {
+    class Index {
         void ResetTimer() {
             inner_product_time_ = 0;
             rank_bound_prune_time_ = 0;
@@ -370,22 +363,14 @@ namespace ReverseMIPS::BPlusTree {
             this->n_data_item_ = n_data_item;
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<int>> GetAllRank(VectorMatrix &query_item) {
             ResetTimer();
-
-            if (topk > user_.n_vector_) {
-                spdlog::error("top-k is too large, program exit");
-                exit(-1);
-            }
 
             tree_ins_.RetrievalPreprocess();
 
             int n_query_item = query_item.n_vector_;
 
-            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
-            for (int qID = 0; qID < n_query_item; qID++) {
-                query_heap_l[qID].reserve(topk);
-            }
+            std::vector<std::vector<int>> query_rank_l(n_query_item, std::vector<int>(n_user_));
 
             std::vector<double> queryIP_l(n_user_);
             std::vector<int> rank_l(n_user_);
@@ -396,48 +381,29 @@ namespace ReverseMIPS::BPlusTree {
 
                 //calculate distance
                 double *query_item_vec = query_item.getVector(qID);
-                inner_product_record_.reset();
                 for (int userID = 0; userID < n_user_; userID++) {
                     double *user_vec = user_.getVector(userID);
                     double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
                     queryIP_l[userID] = queryIP;
                 }
-                this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
-                rank_bound_prune_record_.reset();
                 tree_ins_.RetrievalMemory(queryIP_l, rank_l);
-                PruneCandidateByBound(rank_l,
-                                      n_user_, topk,
-                                      prune_l);
-                rank_bound_prune_time_ += rank_bound_prune_record_.get_elapsed_time_second();
-                int n_candidate = 0;
-                for (int userID = 0; userID < n_user_; userID++) {
-                    if (!prune_l[userID]) {
-                        n_candidate++;
-                    }
-                }
-                assert(n_candidate >= topk);
-                rank_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                tree_ins_.RetrievalDisk(queryIP_l, prune_l, rank_l);
+                std::vector<int> user_rank_l = tree_ins_.RetrievalDisk(queryIP_l, rank_l);
 
-                for (int candID = 0; candID < topk; candID++) {
-                    query_heap_l[qID].emplace_back(tree_ins_.user_topk_cache_l_[candID]);
+                for (int quserID = 0; quserID < n_user_; quserID++) {
+                    query_rank_l[qID][quserID] = user_rank_l[quserID];
                 }
-                assert(query_heap_l[qID].size() == topk);
+
             }
 
-            read_disk_time_ = tree_ins_.read_disk_time_;
-            exact_rank_refinement_time_ = tree_ins_.exact_rank_refinement_time_;
-
             tree_ins_.FinishRetrieval();
-            rank_prune_ratio_ /= n_query_item;
-            return query_heap_l;
+            return query_rank_l;
         }
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) {
             // int topk;
             //double total_time,
             //          inner_product_time, read_disk_time, binary_search_time;
@@ -534,5 +500,4 @@ namespace ReverseMIPS::BPlusTree {
     }
 
 }
-
-#endif //REVERSE_KRANKS_BPLUSTREE_HPP
+#endif //REVERSE_KRANKS_ATTRIBUTION_BPLUSTREE_HPP
