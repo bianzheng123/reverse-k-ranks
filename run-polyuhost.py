@@ -107,6 +107,16 @@ def run_compress_topt():
                     ds, basic_dir, "CompressTopTIPBruteForce", topt_perc))
 
 
+def run_sample_rank_bound():
+    # dataset_l = ['netflix', 'yahoomusic-small', 'yelp-small']
+    n_sample_l = [1, 2, 4, 8, 16, 32]
+    for ds in dataset_l:
+        for n_sample in n_sample_l:
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --cache_bound_every {}'.format(
+                    ds, basic_dir, "PartRankBound", n_sample, 512))
+
+
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
@@ -114,11 +124,9 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m']
     # run_compress_topt()
 
-    run_rankbound_sample_rate()
+    # run_rankbound_sample_rate()
     # run_intervalrankbound_sample_rate()
-    for ds in dataset_l:
-        cmd = 'cd build/attribution && ./pur {} {}'.format(ds, basic_dir)
-        os.system(cmd)
+    run_sample_rank_bound()
 
     # for ds in dataset_l:
     #     os.system(

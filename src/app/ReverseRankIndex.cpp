@@ -19,6 +19,7 @@
 #include "HashRankBound.hpp"
 #include "HRBMergeRankBound.hpp"
 #include "IntervalRankBound.hpp"
+#include "PartRankBound.hpp"
 #include "RankBound.hpp"
 
 #include <spdlog/spdlog.h>
@@ -30,7 +31,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, n_merge_user, topt_perc;
+    int cache_bound_every, n_interval, n_merge_user, topt_perc, n_sample;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -54,7 +55,9 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(512),
              "the numer of merged user")
             ("topt_perc, ttp", po::value<int>(&para.topt_perc)->default_value(50),
-             "store percent of top-t inner product as index");
+             "store percent of top-t inner product as index")
+            ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(3),
+             "number of sample of a rank bound");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -158,6 +161,12 @@ int main(int argc, char **argv) {
         index = IntervalRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
 
+    } else if (method_name == "PartRankBound") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: cache_bound_every {}, n_sample {}", cache_bound_every, n_sample);
+        index = PartRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample);
+        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d", cache_bound_every, n_sample);
     } else if (method_name == "RankBound") {
         const int cache_bound_every = para.cache_bound_every;
         spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);

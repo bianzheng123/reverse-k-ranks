@@ -8,7 +8,6 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "GridIndex.hpp"
 #include "HRBMergeRankBound.hpp"
 
 #include <spdlog/spdlog.h>
@@ -20,7 +19,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, topt_perc;
+    int cache_bound_every, n_interval, topt_perc, n_sample;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -37,12 +36,15 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("BatchDiskBruteForce"),
              "method_name")
 
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
+            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(10),
+//            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
             ("topt_perc, tt", po::value<int>(&para.topt_perc)->default_value(50),
-             "store top-t inner product as index");
+             "store top-t inner product as index")
+            ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
+             "number of sample of a rank bound");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
