@@ -24,7 +24,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::HashRankBound {
+namespace ReverseMIPS::HashBound {
 
     class Index : public BaseIndex {
         void ResetTimer() {

@@ -84,27 +84,24 @@ def run_rankbound_sample_rate():
             #         'HashRankBound', ds, para, basic_dir))
 
 
-def run_intervalrankbound_sample_rate():
+def run_interval_sample_rate():
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     n_interval_l = [16, 32, 64, 128, 256, 512, 1024, 2048]
     for ds in dataset_l:
         for n_interval in n_interval_l:
             os.system(
-                'cd build && ./rri --method_name {} --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
-                    'HashRankBound', ds, basic_dir, 512, n_interval))
+                'cd build && ./rri --method_name {} --dataset_name {} --basic_dir {} --n_interval {}'.format(
+                    'IntervalBound', ds, basic_dir, n_interval))
 
 
 def run_compress_topt():
-    dataset_l = ['netflix', 'yahoomusic-small', 'yelp-small']
+    # dataset_l = ['netflix', 'yahoomusic-small', 'yelp-small']
     topt_perc_l = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     for ds in dataset_l:
         for topt_perc in topt_perc_l:
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --topt_perc {}'.format(
-                    ds, basic_dir, "CompressTopTIDIPBruteForce", topt_perc))
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --topt_perc {}'.format(
-                    ds, basic_dir, "CompressTopTIPBruteForce", topt_perc))
+                    ds, basic_dir, "HRBMergeRankBound", topt_perc))
 
 
 def run_sample_rank_bound():
@@ -122,11 +119,11 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
     dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
     # dataset_l = ['movielens-27m']
-    # run_compress_topt()
 
     # run_rankbound_sample_rate()
-    # run_intervalrankbound_sample_rate()
-    run_sample_rank_bound()
+    run_interval_sample_rate()
+    # run_sample_rank_bound()
+    run_compress_topt()
 
     # for ds in dataset_l:
     #     os.system(

@@ -9,6 +9,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "HRBMergeRankBound.hpp"
+#include "IntervalBound.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -36,8 +37,8 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("BatchDiskBruteForce"),
              "method_name")
 
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(10),
-//            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
+//            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(10),
+            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")

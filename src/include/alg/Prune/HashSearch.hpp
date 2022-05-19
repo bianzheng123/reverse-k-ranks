@@ -281,7 +281,6 @@ namespace ReverseMIPS {
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
                        std::vector<std::pair<double, double>> &queryIPbound_l) const {
 
-            //TODO, tested in hash search before, not have bug. But transfer in HRBMergeRankBound, may have bug
             assert(queryIP_l.size() == prune_l.size() && prune_l.size() == rank_lb_l.size() &&
                    rank_lb_l.size() == rank_ub_l.size() && rank_ub_l.size() == queryIPbound_l.size());
             for (int userID = 0; userID < n_user_; userID++) {

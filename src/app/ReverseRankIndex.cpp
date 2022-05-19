@@ -16,8 +16,9 @@
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "BruteForce/OnlineBruteForce.hpp"
 #include "GridIndex.hpp"
-#include "HashRankBound.hpp"
+#include "HashBound.hpp"
 #include "HRBMergeRankBound.hpp"
+#include "IntervalBound.hpp"
 #include "IntervalRankBound.hpp"
 #include "PartRankBound.hpp"
 #include "RankBound.hpp"
@@ -31,7 +32,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, n_merge_user, topt_perc, n_sample;
+    int cache_bound_every, n_interval, topt_perc, n_sample;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -52,8 +53,6 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "how many numbers would cache a value")
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
-            ("n_merge_user, nmu", po::value<int>(&para.n_merge_user)->default_value(512),
-             "the numer of merged user")
             ("topt_perc, ttp", po::value<int>(&para.topt_perc)->default_value(50),
              "store percent of top-t inner product as index")
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(3),
@@ -133,6 +132,17 @@ int main(int argc, char **argv) {
     } else if (method_name == "OnlineBruteForce") {
         spdlog::info("input parameter: none");
         index = OnlineBruteForce::BuildIndex(data_item, user);
+    } else if (method_name == "GridIndex") {
+        spdlog::info("input parameter: none");
+        index = GridIndex::BuildIndex(data_item, user);
+    } else if (method_name == "HashBound") {
+        const int cache_bound_every = para.cache_bound_every;
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
+                     cache_bound_every, n_interval);
+        index = HashBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
+        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+
     } else if (method_name == "HRBMergeRankBound") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
@@ -142,17 +152,11 @@ int main(int argc, char **argv) {
         index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, topt_perc);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
                 topt_perc);
-    } else if (method_name == "GridIndex") {
-        spdlog::info("input parameter: none");
-        index = GridIndex::BuildIndex(data_item, user);
-    } else if (method_name == "HashRankBound") {
-        const int cache_bound_every = para.cache_bound_every;
+    } else if (method_name == "IntervalBound") {
         const int n_interval = para.n_interval;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
-                     cache_bound_every, n_interval);
-        index = HashRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
-
+        spdlog::info("input parameter: n_interval {}", n_interval);
+        index = IntervalBound::BuildIndex(data_item, user, index_path, n_interval);
+        sprintf(parameter_name, "n_interval_%d", n_interval);
     } else if (method_name == "IntervalRankBound") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;

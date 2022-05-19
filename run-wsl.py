@@ -23,8 +23,9 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
     suffix_m = {
         'BPlusTree': 'node_size_512',
 
-        'HashRankBound': 'cache_bound_every_512-n_interval_1024',
+        'HashBound': 'cache_bound_every_512-n_interval_1024',
         'HRBMergeRankBound': 'cache_bound_every_512-n_interval_1024-topt_perc_50',
+        'IntervalBound': 'n_interval_1024',
         'IntervalRankBound': 'cache_bound_every_512-n_interval_1024',
         'PartRankBound': 'cache_bound_every_512-n_sample_3',
         'RankBound': 'cache_bound_every_512',
@@ -85,10 +86,11 @@ def run():
         # 'OnlineBruteForce',
 
         # 'GridIndex',
-        # 'HashRankBound',
+        # 'HashBound',
         # 'HRBMergeRankBound',
+        'IntervalBound',
         # 'IntervalRankBound',
-        'PartRankBound',
+        # 'PartRankBound',
         # 'RankBound',
 
         # 'IRBFullDimPrune',
@@ -116,10 +118,11 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
 
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashRankBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBound'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'PartRankBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'PartRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
         # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullDimPrune'))
