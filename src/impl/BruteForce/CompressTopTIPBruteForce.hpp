@@ -6,12 +6,9 @@
 #define REVERSE_KRANKS_COMPRESSTOPTIPBRUTEFROCE_HPP
 
 #include "alg/DiskIndex/TopTIP.hpp"
-#include "alg/Prune/IPbound/PartDimPartIntPrune.hpp"
-#include "alg/Prune/IntervalSearch.hpp"
-#include "alg/Prune/RankSearch.hpp"
+#include "alg/Prune/HashSearch.hpp"
 #include "alg/Prune/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
@@ -32,59 +29,40 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
 
     class Index : public BaseIndex {
         void ResetTimer() {
-            read_disk_time_ = 0;
             inner_product_time_ = 0;
-            coarse_binary_search_time_ = 0;
+            hash_search_time_ = 0;
+            read_disk_time_ = 0;
             exact_rank_time_ = 0;
-            interval_search_time_ = 0;
-            interval_prune_ratio_ = 0;
-            rank_search_prune_ratio_ = 0;
+            hash_prune_ratio_ = 0;
         }
 
     public:
-        //for interval search, store in memory
-        IntervalSearch interval_ins_;
-        //interval search bound
-        SVD svd_ins_;
-        PartDimPartIntPrune interval_prune_;
-
-        //for rank search, store in memory
-        RankSearch rank_ins_;
+        //for hash search, store in memory
+        HashSearch hash_ins_;
         //read all instance
         TopTIP disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
-        double interval_search_time_, inner_product_time_, coarse_binary_search_time_, read_disk_time_, exact_rank_time_;
-        TimeRecord interval_search_record_, inner_product_record_, coarse_binary_search_record_;
-        double interval_prune_ratio_, rank_search_prune_ratio_;
+        double inner_product_time_, hash_search_time_, read_disk_time_, exact_rank_time_;
+        TimeRecord inner_product_record_, hash_search_record_;
+        double hash_prune_ratio_;
 
         //temporary retrieval variable
-        std::unique_ptr<double[]> query_ptr_;
         std::vector<bool> prune_l_;
-        std::vector<std::pair<double, double>> IPbound_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
 
         Index(
-                //interval search
-                IntervalSearch &interval_ins,
-                //interval search bound
-                SVD &svd_ins, PartDimPartIntPrune &interval_prune,
-                // rank search
-                RankSearch &rank_ins,
+                // hash search
+                HashSearch &hash_ins,
                 //disk index
                 TopTIP &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
-            //interval search
-            this->interval_ins_ = std::move(interval_ins);
-            //interval search bound
-            this->svd_ins_ = std::move(svd_ins);
-            this->interval_prune_ = std::move(interval_prune);
-            //rank search
-            this->rank_ins_ = std::move(rank_ins);
+            //hash search
+            this->hash_ins_ = std::move(hash_ins);
             //read disk
             this->disk_ins_ = std::move(disk_ins);
             //general retrieval
@@ -96,9 +74,7 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
             assert(0 < this->user_.vec_dim_);
 
             //retrieval variable
-            this->query_ptr_ = std::make_unique<double[]>(vec_dim_);
             this->prune_l_.resize(n_user_);
-            this->IPbound_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
@@ -127,20 +103,25 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
 
-                double *query_vecs = query_ptr_.get();
-                svd_ins_.TransferQuery(query_item.getVector(queryID), vec_dim_, query_vecs);
+                const double *query_vecs = query_item.getVector(queryID);
 
-                interval_search_record_.reset();
-                //get the ip bound
-                interval_prune_.IPBound(query_vecs, user_, prune_l_, IPbound_l_, queryIP_l_.data());
-                //count rank bound
-                interval_ins_.RankBound(IPbound_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
-                //prune the bound
+                //calculate the exact IP
+                inner_product_record_.reset();
+                for (int userID = 0; userID < n_user_; userID++) {
+                    if (prune_l_[userID]) {
+                        continue;
+                    }
+                    queryIP_l_[userID] = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
+                }
+                this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+
+                //coarse binary search
+                hash_search_record_.reset();
+                hash_ins_.RankBound(queryIP_l_, prune_l_, rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
-
-                this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
+                hash_search_time_ += hash_search_record_.get_elapsed_time_second();
                 int n_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
                     if (!prune_l_[userID]) {
@@ -148,40 +129,7 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
                     }
                 }
                 assert(n_candidate >= topk);
-                interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
-
-                //calculate the exact IP
-                inner_product_record_.reset();
-                const int check_dim = interval_prune_.check_dim_;
-                const int remain_dim = interval_prune_.remain_dim_;
-                const double *query_remain_vecs = query_vecs + check_dim;
-                for (int userID = 0; userID < n_user_; userID++) {
-                    if (prune_l_[userID]) {
-                        continue;
-                    }
-                    const double *user_vecs = user_.getVector(userID) + check_dim;
-                    double prev_left = queryIP_l_[userID];
-                    double prev_right = InnerProduct(user_vecs, query_remain_vecs, remain_dim);
-                    queryIP_l_[userID] = prev_left + prev_right;
-//                    queryIP_l_[userID] = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
-                }
-                this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
-
-                //coarse binary search
-                coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_, rank_topk_max_heap);
-                PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_, topk,
-                                      prune_l_, rank_topk_max_heap);
-                coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
-                n_candidate = 0;
-                for (int userID = 0; userID < n_user_; userID++) {
-                    if (!prune_l_[userID]) {
-                        n_candidate++;
-                    }
-                }
-                assert(n_candidate >= topk);
-                rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                hash_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_);
@@ -196,8 +144,7 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
             exact_rank_time_ = disk_ins_.exact_rank_time_;
             read_disk_time_ = disk_ins_.read_disk_time_;
 
-            interval_prune_ratio_ /= n_query_item;
-            rank_search_prune_ratio_ /= n_query_item;
+            hash_prune_ratio_ /= n_query_item;
             return query_heap_l;
         }
 
@@ -205,19 +152,19 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
         PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
             // int topk;
             //double total_time,
-            //          interval_search_time_, inner_product_time, read_disk_time
-            //          coarse_binary_search_time_, read_disk_time_, exact_rank_time_,
-            //          interval_prune_ratio_, rank_search_prune_ratio_
+            //          inner_product_time, hash_search_time_
+            //          read_disk_time_, exact_rank_time_,
+            //          hash_prune_ratio_
             //double second_per_query;
             //unit: second
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinterval search %.3fs, inner product %.3fs, coarse binary search %.3fs\n\tread disk time %.3f, exact rank time %.3fs\n\tinterval prune ratio %.4f, rank search prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, hash search %.3fs\n\tread disk time %.3f, exact rank time %.3fs\n\thash prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
-                    interval_search_time_, inner_product_time_, coarse_binary_search_time_,
+                    inner_product_time_, hash_search_time_,
                     read_disk_time_, exact_rank_time_,
-                    interval_prune_ratio_, rank_search_prune_ratio_,
+                    hash_prune_ratio_,
                     second_per_query);
             std::string str(buff);
             return str;
@@ -250,19 +197,8 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
 
         user.vectorNormalize();
 
-        const double SIGMA = 0.7;
-        const double scale = 100;
-        SVD svd_ins;
-        int check_dim = svd_ins.Preprocess(user, data_item, SIGMA);
-
-        PartDimPartIntPrune interval_prune;
-        interval_prune.Preprocess(user, check_dim, scale);
-
-        //interval search
-        IntervalSearch interval_ins(n_interval, n_user, n_data_item);
-
-        //rank search
-        RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
+        //hash search
+        HashSearch hash_ins(n_data_item, n_user, cache_bound_every, n_interval);
 
         //disk index
         TopTIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt_perc);
@@ -275,7 +211,7 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
         TimeRecord batch_report_record;
         batch_report_record.reset();
         for (int i = 0; i < n_batch; i++) {
-#pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, rank_ins, check_dim, interval_ins) shared(write_every_, n_data_item, vec_dim, n_interval)
+#pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, hash_ins) shared(write_every_, n_data_item, vec_dim, n_interval)
             for (int cacheID = 0; cacheID < write_every_; cacheID++) {
                 int userID = write_every_ * i + cacheID;
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -285,12 +221,9 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
                 std::sort(write_distance_cache.begin() + cacheID * n_data_item,
                           write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
 
-                //interval search
+                //hash search
                 const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-                interval_ins.LoopPreprocess(distance_ptr, userID);
-
-                //rank search
-                rank_ins.LoopPreprocess(distance_ptr, userID);
+                hash_ins.LoopPreprocess(distance_ptr, userID);
             }
             disk_ins.BuildIndexLoop(write_distance_cache.data(), write_every_);
 
@@ -313,23 +246,16 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
                 std::sort(write_distance_cache.begin() + cacheID * n_data_item,
                           write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
 
-                //interval search
+                //hash search
                 const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-                interval_ins.LoopPreprocess(distance_ptr, userID);
-
-                //rank search
-                rank_ins.LoopPreprocess(distance_ptr, userID);
+                hash_ins.LoopPreprocess(distance_ptr, userID);
             }
             disk_ins.BuildIndexLoop(write_distance_cache.data(), n_remain);
         }
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
-                //interval search
-                interval_ins,
-                //interval search bound
-                svd_ins, interval_prune,
                 //rank search
-                rank_ins,
+                hash_ins,
                 //disk index
                 disk_ins,
                 //general retrieval

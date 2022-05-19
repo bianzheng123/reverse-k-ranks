@@ -77,6 +77,52 @@ namespace ReverseMIPS {
         }
 
         //convert ip_bound to rank_bound
+        void RankBound(const std::vector<std::pair<double, double>> &ip_bound_l, const std::vector<bool> &prune_l,
+                       const int &topk,
+                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) {
+
+            assert(prune_l.size() == n_user_);
+            assert(rank_lb_l.size() == n_user_ && rank_ub_l.size() == n_user_);
+            assert(ip_bound_l.size() == n_user_);
+
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID]) {
+                    continue;
+                }
+
+                std::pair<double, double> user_ip_bound = user_ip_bound_l_[userID];
+                std::pair<double, double> ip_bound = ip_bound_l[userID];
+                assert(ip_bound.first <= ip_bound.second);
+
+                double itv_dist = interval_dist_l_[userID];
+                //for interval id, the higher rank value means the lower queryiP
+                int64_t l_lb = std::ceil((user_ip_bound.second - ip_bound.first) / itv_dist);
+                int64_t l_ub = (int64_t) std::floor((user_ip_bound.second - ip_bound.second) / itv_dist) - 1;
+
+                int itv_lb_idx = (int) (l_lb % 1000000000);
+                int itv_ub_idx = (int) (l_ub % 1000000000);
+
+                if (itv_ub_idx <= -1) {
+                    itv_ub_idx = -1;
+                } else if (itv_ub_idx >= n_interval_ - 1) {
+                    itv_ub_idx = n_interval_ - 1;
+                }
+                if (itv_lb_idx <= -1) {
+                    itv_lb_idx = -1;
+                } else if (itv_lb_idx >= n_interval_ - 1) {
+                    itv_lb_idx = n_interval_ - 1;
+                }
+                assert(itv_ub_idx <= itv_lb_idx);
+                int *rank_ptr = interval_table_.get() + userID * n_interval_;
+                int rank_lb = itv_lb_idx == -1 ? 0 : rank_ptr[itv_lb_idx];
+                int rank_ub = itv_ub_idx == -1 ? 0 : rank_ptr[itv_ub_idx];
+
+                rank_lb_l[userID] = std::min(rank_lb, rank_lb_l[userID]);
+                rank_ub_l[userID] = std::max(rank_ub, rank_ub_l[userID]);
+            }
+        }
+
+        //convert ip_bound to rank_bound
         void RankBound(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
                        const int &topk,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) {

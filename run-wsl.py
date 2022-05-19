@@ -30,8 +30,8 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'PartRankBound': 'cache_bound_every_512-n_sample_3',
         'RankBound': 'cache_bound_every_512',
 
-        'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_200',
-        'CompressTopTIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_200',
+        'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_perc_50',
+        'CompressTopTIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_perc_50',
 
         'IRBFullDimPrune': 'cache_bound_every_512-n_interval_1024',
         'IRBFullIntPrune': 'cache_bound_every_512-n_interval_1024',
@@ -79,8 +79,8 @@ def run():
     method_name_l = [
         'BatchDiskBruteForce',
         # 'BPlusTree',
-        # 'CompressTopTIDIPBruteForce',
-        # 'CompressTopTIPBruteForce',
+        'CompressTopTIDIPBruteForce',
+        'CompressTopTIPBruteForce',
         # 'DiskBruteForce',
         'MemoryBruteForce',
         # 'OnlineBruteForce',
@@ -89,17 +89,8 @@ def run():
         # 'HashBound',
         # 'HRBMergeRankBound',
         'IntervalBound',
-        # 'IntervalRankBound',
         # 'PartRankBound',
         # 'RankBound',
-
-        # 'IRBFullDimPrune',
-        # 'IRBFullIntPrune',
-        # 'IRBFullNormPrune',
-        # 'IRBPartDimPartIntPrune',
-        # 'IRBPartDimPartNormPrune',
-        # 'IRBPartIntPartNormPrune',
-        # 'IRBBallPrune',
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
@@ -111,8 +102,8 @@ def run():
     for ds in dataset_l:
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
@@ -121,29 +112,11 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'PartRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
-        # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullDimPrune'))
-        # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullIntPrune'))
-        # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBFullNormPrune'))
-        # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBPartDimPartIntPrune'))
-        # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBPartDimPartNormPrune'))
-        # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBPartIntPartNormPrune'))
-        # os.system('cd build && ./isbs --dataset_name {} --method_name {}'.format(ds, 'IRBBallPrune'))
-
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBoundCompress'))
 
-        # os.system('cd build && ./{} {}'.format('irbfdp', ds))
-        # os.system('cd build && ./{} {}'.format('irbfip', ds))
-        # os.system('cd build && ./{} {}'.format('irbfnp', ds))
-        # os.system('cd build && ./{} {}'.format('irbpdpip', ds))
-        # os.system('cd build && ./{} {}'.format('irbpdpnp', ds))
-        # os.system('cd build && ./{} {}'.format('irbpipnp', ds))
-        # os.system('cd build && ./{} {}'.format('irbbp', ds))
-
-        # os.system('cd build && ./{} --dataset_name {}'.format('rbnet', ds))
 
     type_arr = ['userID', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50, 60, 70]
