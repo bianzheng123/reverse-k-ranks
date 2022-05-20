@@ -17,6 +17,9 @@ namespace ReverseMIPS {
         virtual double
         IPLowerBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) = 0;
 
+        virtual std::pair<double,double>
+        IPBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) = 0;
+
         virtual ~BaseIPBound() = default;
 
     };

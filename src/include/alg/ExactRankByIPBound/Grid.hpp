@@ -164,6 +164,28 @@ namespace ReverseMIPS {
             return IP_lb;
         }
 
+        std::pair<double, double>
+        IPBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) override {
+            const unsigned char *user_code_ptr = user_codeword_.get() + userID * vec_dim_;
+            const unsigned char *item_code_ptr = item_codeword_.get() + itemID * vec_dim_;
+            double IP_ub = 0;
+            double IP_lb = 0;
+            for (int dim = 0; dim < vec_dim_; dim++) {
+                if (user_code_ptr[dim] == NEGATIVE_ || item_code_ptr[dim] == NEGATIVE_) {
+                    double IP = user_vecs[dim] * item_vecs[dim];
+                    IP_lb += IP;
+                    IP_ub += IP;
+                } else {
+                    const unsigned char user_code = user_code_ptr[dim];
+                    const unsigned char item_code = item_code_ptr[dim];
+                    const std::pair<double, double> bound_pair = grid_[user_code * n_partition_ + item_code];
+                    IP_lb += bound_pair.first;
+                    IP_ub += bound_pair.second;
+                }
+            }
+            return std::make_pair(IP_lb, IP_ub);
+        }
+
     };
 }
 

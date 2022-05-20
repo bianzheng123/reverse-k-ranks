@@ -363,8 +363,9 @@ namespace ReverseMIPS::UserRank {
             this->n_data_item_ = n_data_item;
         }
 
-        std::vector<std::vector<int>> GetAllRank(VectorMatrix &query_item) {
+        std::vector<std::vector<int>> GetAllRank(const VectorMatrix &query_item, std::vector<double> &prune_ratio_l) {
             ResetTimer();
+            assert(prune_ratio_l.size() == query_item.n_vector_);
 
             tree_ins_.RetrievalPreprocess();
 
@@ -434,7 +435,8 @@ namespace ReverseMIPS::UserRank {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int& node_size) {
+    std::unique_ptr<Index>
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &node_size) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
         std::vector<double> distance_cache(write_every_ * n_data_item);

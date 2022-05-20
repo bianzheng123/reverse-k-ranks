@@ -139,6 +139,22 @@ namespace ReverseMIPS {
             return lower_bound;
         }
 
+        std::pair<double, double>
+        IPBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) override {
+            double leftIP = InnerProduct(user_vecs, item_vecs, check_dim_);
+
+            const int *user_remain_int_vecs = user_int_ptr_.get() + userID * remain_dim_;
+            const int *item_remain_int_vecs = item_int_ptr_.get() + itemID * remain_dim_;
+
+            int rightIP = InnerProduct(user_remain_int_vecs, item_remain_int_vecs, remain_dim_);
+            int right_otherIP = user_int_sum_ptr_[userID] + item_int_sum_ptr_[itemID];
+            int lb_right_part = rightIP - right_otherIP;
+            int ub_right_part = rightIP + right_otherIP;
+            double lower_bound = leftIP + convert_coe_ * lb_right_part;
+            double upper_bound = leftIP + convert_coe_ * ub_right_part;
+            return std::make_pair(lower_bound, upper_bound);
+        }
+
     };
 }
 #endif //REVERSE_KRANKS_PARTDIMPARTINT_HPP

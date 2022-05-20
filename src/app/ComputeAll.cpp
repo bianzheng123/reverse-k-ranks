@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/5/19.
+// Created by BianZheng on 2022/5/20.
 //
 
 #include "util/VectorIO.hpp"
@@ -8,7 +8,7 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "GridIndex/GridIndex.hpp"
+#include "Online/ComputeAll.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     char parameter_name[256] = "";
 
     spdlog::info("input parameter: none");
-    index = GridIndex::BuildIndex(data_item, user, bound_name);
+    index = ComputeAll::BuildIndex(data_item, user, bound_name);
 
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");

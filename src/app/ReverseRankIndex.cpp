@@ -14,6 +14,9 @@
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "BruteForce/OnlineBruteForce.hpp"
+
+#include "Online/GridIndex.hpp"
+
 #include "BPlusTree.hpp"
 #include "HashBound.hpp"
 #include "HRBMergeRankBound.hpp"
@@ -94,6 +97,7 @@ int main(int argc, char **argv) {
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
     if (method_name == "BatchDiskBruteForce") {
+        ///BruteForce
         spdlog::info("input parameter: none");
         index = BatchDiskBruteForce::BuildIndex(data_item, user, index_path);
 
@@ -131,7 +135,13 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: none");
         index = OnlineBruteForce::BuildIndex(data_item, user);
 
+    } else if (method_name == "GridIndex") {
+        ///Online
+        spdlog::info("input parameter: none");
+        index = GridIndex::BuildIndex(data_item, user);
+
     } else if (method_name == "BPlusTree") {
+        ///Proposed method
         const int cache_bound_every = para.cache_bound_every;
         spdlog::info("input parameter: node_size {}", cache_bound_every);
         index = BPlusTree::BuildIndex(data_item, user, index_path, cache_bound_every);
@@ -181,8 +191,8 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-//    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
+    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
+//    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
 //    vector<int> topk_l{20};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;

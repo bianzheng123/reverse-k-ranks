@@ -123,9 +123,12 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m']
 
     # run_rankbound_sample_rate()
-    run_interval_sample_rate()
+    # run_interval_sample_rate()
     # run_sample_rank_bound()
-    run_compress_topt()
+    # run_compress_topt()
+
+    for ds in ['movielens-27m', 'netflix', 'yelp-small']:
+        os.system('cd build/attribution && ./pur {} {}'.format(ds, basic_dir))
 
     # for ds in dataset_l:
     #     os.system(

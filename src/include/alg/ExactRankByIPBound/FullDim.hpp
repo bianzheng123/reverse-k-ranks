@@ -49,6 +49,12 @@ namespace ReverseMIPS {
             return itemIP;
         }
 
+        std::pair<double, double>
+        IPBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) override {
+            const double itemIP = InnerProduct(user_vecs, item_vecs, vec_dim_);
+            return std::make_pair(itemIP, itemIP);
+        }
+
     };
 }
 #endif //REVERSE_K_RANKS_FULLDIM_HPP

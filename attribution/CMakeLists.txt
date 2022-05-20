@@ -44,7 +44,6 @@ if (FINISH)
     target_link_libraries(svdcmp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 endif ()
 
-
 add_executable(pur print-user-rank/PrintUserRank.cpp)
 target_include_directories(pur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(pur PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)

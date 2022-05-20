@@ -28,7 +28,6 @@ void WriteRank(const std::vector<std::vector<int>> &all_rank_l, const char *data
     const int n_user = all_rank_l[0].size();
 
     const int n_bin = std::ceil(1.0 * n_data_item / node_size);
-    std::vector<double> avg_bin_l(n_bin, 0);
 
     for (int qID = 0; qID < n_query_item; qID++) {
         std::vector<int> bin_l(n_bin, 0);
@@ -42,16 +41,12 @@ void WriteRank(const std::vector<std::vector<int>> &all_rank_l, const char *data
             bin_l[binID]++;
         }
 
-        for (int binID = 0; binID < n_bin; binID++) {
-            avg_bin_l[binID] += 1.0 * bin_l[binID] / n_query_item;
+        for (int binID = 0; binID < n_bin - 1; binID++) {
+            file << bin_l[binID] << ",";
         }
-
+        file << bin_l[n_bin - 1] << std::endl;
     }
 
-    for (int binID = 0; binID < n_bin - 1; binID++) {
-        file << avg_bin_l[binID] << ",";
-    }
-    file << avg_bin_l[n_bin - 1] << std::endl;
     file.close();
 
 }
@@ -92,7 +87,8 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     record.reset();
-    vector<vector<int>> result_rk = index->GetAllRank(query_item);
+    std::vector<double> prune_ratio_l(n_query_item);
+    vector<vector<int>> result_rk = index->GetAllRank(query_item, prune_ratio_l);
 
     double retrieval_time = record.get_elapsed_time_second();
     spdlog::info("build index time: total {}s, retrieval time: total {}s", build_index_time, retrieval_time);

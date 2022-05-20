@@ -38,6 +38,20 @@ def gen_data_uniform(n_user, n_data_item, n_query_item, vec_dim, dataset):
     vecs_io.dvecs_write("%s/%s_user.dvecs" % (output_dir, dataset), user_l)
 
 
+def gen_data_independent(n_user, n_data_item, n_query_item, vec_dim, dataset):
+    query_item_l = np.random.uniform(-100, 100, size=(n_query_item, vec_dim))
+    data_item_l = np.random.uniform(-100, 100, size=(n_data_item, vec_dim))
+    user_l = np.random.uniform(-100, 100, size=(n_user, vec_dim))
+
+    output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
+    delete_file_if_exist(output_dir)
+    os.mkdir(output_dir)
+
+    vecs_io.dvecs_write("%s/%s_query_item.dvecs" % (output_dir, dataset), query_item_l)
+    vecs_io.dvecs_write("%s/%s_data_item.dvecs" % (output_dir, dataset), data_item_l)
+    vecs_io.dvecs_write("%s/%s_user.dvecs" % (output_dir, dataset), user_l)
+
+
 if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
     n_query_item = 100

@@ -164,6 +164,25 @@ namespace ReverseMIPS {
             return lower_bound;
         }
 
+        std::pair<double, double>
+        IPBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) override {
+            const int *user_int_vecs = user_int_ptr_.get() + userID * check_dim_;
+            const int *item_int_vecs = item_int_ptr_.get() + itemID * check_dim_;
+
+            int leftIP = InnerProduct(user_int_vecs, item_int_vecs, check_dim_);
+            int left_otherIP = user_int_sum_ptr_[userID] + item_int_sum_ptr_[itemID];
+            int lb_left_part = leftIP - left_otherIP;
+            int ub_left_part = leftIP + left_otherIP;
+
+            double rightIP_lb = -user_norm_l_[userID] * item_norm_l_[userID];
+            double rightIP_ub = user_norm_l_[userID] * item_norm_l_[itemID];
+
+            double lower_bound = convert_coe_ * lb_left_part + rightIP_lb;
+            double upper_bound = convert_coe_ * ub_left_part + rightIP_ub;
+
+            return std::make_pair(lower_bound, upper_bound);
+        }
+
     };
 }
 

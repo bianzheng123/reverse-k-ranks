@@ -162,6 +162,29 @@ namespace ReverseMIPS {
             return lower_bound;
         }
 
+        std::pair<double, double>
+        IPBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) override {
+            const int *user_int_vecs = user_int_ptr_.get() + userID * vec_dim_;
+            const int *item_int_vecs = item_int_ptr_.get() + itemID * vec_dim_;
+
+            int leftIP = InnerProduct(user_int_vecs, item_int_vecs, check_dim_);
+            int left_otherIP = user_int_sum_ptr_[userID].first + item_int_sum_ptr_[itemID].first;
+            int ub_left_part = leftIP + left_otherIP;
+            int lb_left_part = leftIP - left_otherIP;
+
+            const int *user_remain_int_vecs = user_int_vecs + check_dim_;
+            const int *item_remain_int_vecs = item_int_vecs + check_dim_;
+
+            int rightIP = InnerProduct(user_remain_int_vecs, item_remain_int_vecs, remain_dim_);
+            int right_otherIP = user_int_sum_ptr_[userID].second + item_int_sum_ptr_[itemID].second;
+            int ub_right_part = rightIP + right_otherIP;
+            int lb_right_part = rightIP - right_otherIP;
+
+            double upper_bound = convert_coe_.first * ub_left_part + convert_coe_.second * ub_right_part;
+            double lower_bound = convert_coe_.first * lb_left_part + convert_coe_.second * lb_right_part;
+            return std::make_pair(lower_bound, upper_bound);
+        }
+
     };
 }
 #endif //REVERSE_KRANKS_FULLINT_HPP

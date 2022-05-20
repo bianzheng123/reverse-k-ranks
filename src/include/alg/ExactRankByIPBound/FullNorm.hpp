@@ -93,6 +93,17 @@ namespace ReverseMIPS {
             return IP_lb;
         }
 
+        std::pair<double, double>
+        IPBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) override {
+            const std::pair<double, double> user_norm_pair = user_norm_l_[userID];
+            const std::pair<double, double> item_norm_pair = item_norm_l_[itemID];
+            const double IP_lb =
+                    -user_norm_pair.first * item_norm_pair.first - user_norm_pair.second * item_norm_pair.second;
+            const double IP_ub =
+                    user_norm_pair.first * item_norm_pair.first + user_norm_pair.second * item_norm_pair.second;
+            return std::make_pair(IP_lb, IP_ub);
+        }
+
     };
 }
 #endif //REVERSE_KRANKS_FULLNORM_HPP

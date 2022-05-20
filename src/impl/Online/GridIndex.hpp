@@ -5,15 +5,7 @@
 #ifndef REVERSE_K_RANKS_GRIDINDEX_HPP
 #define REVERSE_K_RANKS_GRIDINDEX_HPP
 
-#include "alg/ExactRankByIPBound/BaseIPBound.hpp"
-#include "alg/ExactRankByIPBound/FullDim.hpp"
-#include "alg/ExactRankByIPBound/FullInt.hpp"
-#include "alg/ExactRankByIPBound/FullNorm.hpp"
 #include "alg/ExactRankByIPBound/Grid.hpp"
-#include "alg/ExactRankByIPBound/PartDimPartInt.hpp"
-#include "alg/ExactRankByIPBound/PartDimPartNorm.hpp"
-#include "alg/ExactRankByIPBound/PartIntPartNorm.hpp"
-
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -38,17 +30,16 @@ namespace ReverseMIPS::GridIndex {
         void ResetTimer() {
             inner_product_time_ = 0;
             inner_product_bound_time_ = 0;
-            bound_prune_ratio_ = 0;
+            early_prune_ratio_ = 0;
         }
 
-        SVD svd_ins_;
         std::unique_ptr<BaseIPBound> ip_bound_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
         double inner_product_time_, inner_product_bound_time_;
         TimeRecord inner_product_record_, inner_product_bound_record_;
-        double bound_prune_ratio_;
+        double early_prune_ratio_;
     public:
 
         //temporary retrieval variable
@@ -91,7 +82,6 @@ namespace ReverseMIPS::GridIndex {
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-
                 double *query_vecs = query_ptr_.get();
                 ip_bound_ins_->PreprocessQuery(query_item.getVector(queryID), vec_dim_, query_vecs);
 
@@ -106,7 +96,7 @@ namespace ReverseMIPS::GridIndex {
 
                 //rank search
                 inner_product_bound_record_.reset();
-                int prune_candidate = 0;
+                int early_prune_candidate = 0;
                 std::vector<UserRankElement> &rank_max_heap = query_heap_l[queryID];
                 for (int userID = 0; userID < topk; userID++) {
                     const double *user_vecs = user_.getVector(userID);
@@ -124,7 +114,7 @@ namespace ReverseMIPS::GridIndex {
                     int rank = GetRank(queryIP_l_[userID], heap_ele.rank_, userID, user_vecs, data_item_);
 
                     if (rank == -1) {
-                        prune_candidate++;
+                        early_prune_candidate++;
                         continue;
                     }
 
@@ -141,10 +131,10 @@ namespace ReverseMIPS::GridIndex {
                 std::make_heap(rank_max_heap.begin(), rank_max_heap.end(), std::less());
                 std::sort_heap(rank_max_heap.begin(), rank_max_heap.end(), std::less());
                 inner_product_bound_time_ += inner_product_bound_record_.get_elapsed_time_second();
-                bound_prune_ratio_ += prune_candidate * 1.0 / n_user_;
+                early_prune_ratio_ += early_prune_candidate * 1.0 / n_user_;
             }
 
-            bound_prune_ratio_ /= n_query_item;
+            early_prune_ratio_ /= n_query_item;
 
             return query_heap_l;
         }
@@ -194,17 +184,17 @@ namespace ReverseMIPS::GridIndex {
             // int topk;
             //double total_time,
             //          inner_product_time, inner_product_bound_time
-            //double bound_prune_ratio
+            //double early_prune_ratio_
             //double second_per_query;
             //unit: second
 
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tbound prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tearly prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, inner_product_bound_time_,
-                    bound_prune_ratio_,
+                    early_prune_ratio_,
                     second_per_query);
             std::string str(buff);
             return str;
@@ -218,7 +208,7 @@ namespace ReverseMIPS::GridIndex {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const std::string &bound_name) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {
         user.vectorNormalize();
         assert(user.vec_dim_ == data_item.vec_dim_);
 
@@ -228,47 +218,15 @@ namespace ReverseMIPS::GridIndex {
         int n_data_item = data_item.n_vector_;
         int vec_dim = user.vec_dim_;
 
-        if (bound_name == "OnlineGrid") {
-            const int min_codeword = std::floor(std::sqrt(1.0 * 80 * std::sqrt(3 * user.vec_dim_)));
-            int n_codeword = 1;
-            while (n_codeword < min_codeword) {
-                n_codeword = n_codeword << 1;
-            }
-            spdlog::info("OnlineGrid min_codeword {}, codeword {}", min_codeword, n_codeword);
-
-            IPbound_ptr = std::make_unique<Grid>(n_user, n_data_item, vec_dim, n_codeword);
-        } else if (bound_name == "OnlineFullDim") {
-            IPbound_ptr = std::make_unique<FullDim>(n_user, n_data_item, vec_dim);
-
-        } else if (bound_name == "OnlineFullNorm") {
-            IPbound_ptr = std::make_unique<FullNorm>(n_user, n_data_item, vec_dim);
-
-        } else if (bound_name == "OnlineFullInt") {
-            //TODO test
-            const int scale = 100;
-            IPbound_ptr = std::make_unique<FullInt>(n_user, n_data_item, vec_dim, scale);
-
-        } else if (bound_name == "PartDimPartInt") {
-            //TODO test
-            const int scale = 100;
-            IPbound_ptr = std::make_unique<PartDimPartInt>(n_user, n_data_item, vec_dim, scale);
-
-        } else if (bound_name == "PartDimPartNorm") {
-            //TODO test
-            IPbound_ptr = std::make_unique<PartDimPartNorm>(n_user, n_data_item, vec_dim);
-
-        } else if (bound_name == "PartIntPartNorm") {
-            //TODO test
-            const int scale = 100;
-            IPbound_ptr = std::make_unique<PartIntPartNorm>(n_user, n_data_item, vec_dim, scale);
-
-        } else {
-            spdlog::error("not found IPBound name, program exit");
-            exit(-1);
+        const int min_codeword = std::floor(std::sqrt(1.0 * 80 * std::sqrt(3 * user.vec_dim_)));
+        int n_codeword = 1;
+        while (n_codeword < min_codeword) {
+            n_codeword = n_codeword << 1;
         }
+        spdlog::info("GridIndex min_codeword {}, codeword {}", min_codeword, n_codeword);
 
+        IPbound_ptr = std::make_unique<Grid>(n_user, n_data_item, vec_dim, n_codeword);
         IPbound_ptr->Preprocess(user, data_item);
-
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(IPbound_ptr, data_item, user);
         return index_ptr;

@@ -84,6 +84,8 @@ def run():
         'MemoryBruteForce',
         # 'OnlineBruteForce',
 
+        # 'GridIndex',
+
         # 'BPlusTree',
         # 'HashBound',
         # 'HRBMergeRankBound',
@@ -91,13 +93,13 @@ def run():
         # 'PartRankBound',
         # 'RankBound',
 
-        # 'OnlineGrid',
-        # 'OnlineFullDim',
-        # 'OnlineFullNorm',
-        'OnlineFullInt',
-        'PartDimPartInt',
-        'PartDimPartNorm',
-        'PartIntPartNorm'
+        'GIMGrid',
+        'GIMFullDim',
+        'GIMFullNorm',
+        'GIMFullInt',
+        'GIMPartDimPartInt',
+        'GIMPartDimPartNorm',
+        'GIMPartIntPartNorm'
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
@@ -113,23 +115,22 @@ def run():
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
 
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'GridIndexFullDim'))
 
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'PartRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
-        # os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'OnlineGrid'))
-        # os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'OnlineFullDim'))
-        # os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'OnlineFullNorm'))
-        os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'OnlineFullInt'))
-        os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'PartDimPartInt'))
-        os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'PartDimPartNorm'))
-        os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'PartIntPartNorm'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullNorm'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullInt'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartDimPartInt'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartDimPartNorm'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartIntPartNorm'))
 
     type_arr = ['userID', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50, 60, 70]
