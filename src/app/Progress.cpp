@@ -9,7 +9,6 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "HRBMergeRankBound.hpp"
-#include "IntervalBound.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -93,7 +92,8 @@ int main(int argc, char **argv) {
         index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, topt_perc);
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
                 topt_perc);
-    }  else {
+
+    } else {
         spdlog::error("not such method");
     }
 

@@ -38,10 +38,11 @@ namespace ReverseMIPS {
 
             user_int_ptr_ = std::make_unique<int[]>(n_user_ * vec_dim_);
             user_int_sum_ptr_ = std::make_unique<std::pair<int, int>[]>(n_user_);
+            query_int_ptr_ = std::make_unique<int[]>(vec_dim_);
+
             std::pair<double, double> user_max_dim_;
             user_max_dim_.first = user.getVector(0)[0];
             user_max_dim_.second = user.getVector(0)[check_dim];
-            query_int_ptr_ = std::make_unique<int[]>(vec_dim_);
 
             //compute the integer bound for the first part
             for (int userID = 0; userID < n_user_; userID++) {

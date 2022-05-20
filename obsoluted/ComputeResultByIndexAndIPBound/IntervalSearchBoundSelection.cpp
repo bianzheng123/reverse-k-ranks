@@ -8,13 +8,13 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "IntervalSearch/IRBBallPrune.hpp"
-#include "IntervalSearch/IRBFullDimPrune.hpp"
-#include "IntervalSearch/IRBFullIntPrune.hpp"
-#include "IntervalSearch/IRBFullNormPrune.hpp"
-#include "IntervalSearch/IRBPartDimPartIntPrune.hpp"
-#include "IntervalSearch/IRBPartDimPartNormPrune.hpp"
-#include "IntervalSearch/IRBPartIntPartNormPrune.hpp"
+#include "impl/IntervalSearch/IRBBallPrune.hpp"
+#include "impl/IntervalSearch/IRBFullDimPrune.hpp"
+#include "impl/IntervalSearch/IRBFullIntPrune.hpp"
+#include "impl/IntervalSearch/IRBFullNormPrune.hpp"
+#include "impl/IntervalSearch/IRBPartDimPartIntPrune.hpp"
+#include "impl/IntervalSearch/IRBPartDimPartNormPrune.hpp"
+#include "impl/IntervalSearch/IRBPartIntPartNormPrune.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>

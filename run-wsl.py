@@ -78,45 +78,58 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
 def run():
     method_name_l = [
         'BatchDiskBruteForce',
-        # 'BPlusTree',
-        'CompressTopTIDIPBruteForce',
-        'CompressTopTIPBruteForce',
+        # 'CompressTopTIDIPBruteForce',
+        # 'CompressTopTIPBruteForce',
         # 'DiskBruteForce',
         'MemoryBruteForce',
         # 'OnlineBruteForce',
 
-        # 'GridIndex',
+        # 'BPlusTree',
         # 'HashBound',
         # 'HRBMergeRankBound',
-        'IntervalBound',
+        # 'IntervalBound',
         # 'PartRankBound',
         # 'RankBound',
+
+        # 'OnlineGrid',
+        # 'OnlineFullDim',
+        # 'OnlineFullNorm',
+        'OnlineFullInt',
+        'PartDimPartInt',
+        'PartDimPartNorm',
+        'PartIntPartNorm'
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     # os.system('cd build && ./{} {}'.format('bbfdi', ds))
 
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    # dataset_l = ['fake-normal']
-    # dataset_l = ['fake-small']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-small', 'fake']
     for ds in dataset_l:
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
 
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'GridIndexFullDim'))
+
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'PartRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalRankBoundCompress'))
-
+        # os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'OnlineGrid'))
+        # os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'OnlineFullDim'))
+        # os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'OnlineFullNorm'))
+        os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'OnlineFullInt'))
+        os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'PartDimPartInt'))
+        os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'PartDimPartNorm'))
+        os.system('cd build && ./gim --dataset_name {} --bound_name {}'.format(ds, 'PartIntPartNorm'))
 
     type_arr = ['userID', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50, 60, 70]
@@ -124,9 +137,6 @@ def run():
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    # run(method_name='BPlusTree', program_name='bpt')
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-small', 'fake']
     run()
-    # run(method_name='BallIntervalRankBound', program_name='birb')
-    # run(method_name='IntervalRankBound', program_name='irb')
-    # run(method_name='RankBound', program_name='rb')

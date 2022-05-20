@@ -86,7 +86,8 @@ def run_rankbound_sample_rate():
 
 def run_interval_sample_rate():
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    n_interval_l = [16, 32, 64, 128, 256, 512, 1024, 2048]
+    # n_interval_l = [16, 32, 64, 128, 256, 512, 1024, 2048]
+    n_interval_l = [32, 64, 128, 256, 512]
     for ds in dataset_l:
         for n_interval in n_interval_l:
             os.system(
@@ -117,7 +118,8 @@ def run_sample_rank_bound():
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
+    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
+    dataset_l = ['movielens-27m', 'netflix']
     # dataset_l = ['movielens-27m']
 
     # run_rankbound_sample_rate()
