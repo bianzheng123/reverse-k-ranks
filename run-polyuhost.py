@@ -127,16 +127,16 @@ if __name__ == '__main__':
     # run_sample_rank_bound()
     # run_compress_topt()
 
-    # for ds in ['movielens-27m', 'netflix', 'yelp-small']:
-    #     os.system('cd build/attribution && ./pur {} {}'.format(ds, basic_dir))
+    for ds in ['movielens-27m', 'netflix', 'yelp-small']:
+        os.system('cd build/attribution && ./usd {} {}'.format(ds, basic_dir))
 
-    for ds in dataset_l:
-        os.system(
-            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --cache_bound_every {}'.format(
-                ds, basic_dir, "BPlusTree", 512))
-        os.system(
-            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_interval {}'.format(
-                ds, basic_dir, "IntervalBound", 512))
+    # for ds in dataset_l:
+    #     os.system(
+    #         'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --cache_bound_every {}'.format(
+    #             ds, basic_dir, "BPlusTree", 512))
+    #     os.system(
+    #         'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_interval {}'.format(
+    #             ds, basic_dir, "IntervalBound", 512))
     #     os.system(
     #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
     #             ds, basic_dir, 512, 1024))
