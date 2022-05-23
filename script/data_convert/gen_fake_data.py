@@ -39,9 +39,9 @@ def gen_data_uniform(n_user, n_data_item, n_query_item, vec_dim, dataset):
 
 
 def gen_data_independent(n_user, n_data_item, n_query_item, vec_dim, dataset):
-    query_item_l = np.random.uniform(-100, 100, size=(n_query_item, vec_dim))
-    data_item_l = np.random.uniform(-100, 100, size=(n_data_item, vec_dim))
-    user_l = np.random.uniform(-100, 100, size=(n_user, vec_dim))
+    query_item_l = np.random.uniform(0, 100, size=(n_query_item, vec_dim))
+    data_item_l = np.random.uniform(0, 100, size=(n_data_item, vec_dim))
+    user_l = np.random.uniform(0, 100, size=(n_user, vec_dim))
 
     output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
     delete_file_if_exist(output_dir)
@@ -55,10 +55,11 @@ def gen_data_independent(n_user, n_data_item, n_query_item, vec_dim, dataset):
 if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
     n_query_item = 100
-    n_dim = 30
-    n_data_item = 5000
-    n_user = 1000
+    n_dim = 50
+    n_data_item = 3000
+    n_user = 6000
 
-    gen_data_normal(n_user, n_data_item, n_query_item, n_dim, "fake-normal")
-    gen_data_uniform(n_user, n_data_item, n_query_item, n_dim, "fake-uniform")
-    gen_data_uniform(100, 500, 10, 10, "fake-small")
+    # gen_data_normal(n_user, n_data_item, n_query_item, n_dim, "fake-normal")
+    # gen_data_uniform(n_user, n_data_item, n_query_item, n_dim, "fake-uniform")
+    # gen_data_uniform(100, 500, 10, 10, "fake-small")
+    gen_data_independent(n_user, n_data_item, n_query_item, n_dim, "fake-independent")

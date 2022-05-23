@@ -119,8 +119,8 @@ if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
-    dataset_l = ['movielens-27m', 'netflix']
-    # dataset_l = ['movielens-27m']
+    # dataset_l = ['movielens-27m', 'netflix']
+    dataset_l = ['movielens-27m-extreme']
 
     # run_rankbound_sample_rate()
     # run_interval_sample_rate()
@@ -130,10 +130,13 @@ if __name__ == '__main__':
     for ds in ['movielens-27m', 'netflix', 'yelp-small']:
         os.system('cd build/attribution && ./pur {} {}'.format(ds, basic_dir))
 
-    # for ds in dataset_l:
-    #     os.system(
-    #         'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {}'.format(
-    #             ds, basic_dir, "HashRankBound"))
+    for ds in dataset_l:
+        os.system(
+            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --cache_bound_every {}'.format(
+                ds, basic_dir, "BPlusTree", 512))
+        os.system(
+            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_interval {}'.format(
+                ds, basic_dir, "IntervalBound", 512))
     #     os.system(
     #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
     #             ds, basic_dir, 512, 1024))
