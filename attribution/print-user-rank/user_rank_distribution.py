@@ -7,8 +7,11 @@ def show_bin_hist(hist, name):
     # 直方图会进行统计各个区间的数值
     plt.bar(bins, hist, color='fuchsia')  # alpha设置透明度，0为完全透明
 
-    plt.title('fake-extreme, user: 6000, item: 3000')
-    plt.xlabel('interval number, from top to bottom')
+    dataset_name = 'movielens-27m'
+    n_user = 283228
+    n_data_item = 53889
+    plt.title(r'rank distribution of a single query, $\tau=512$' + '\n{}, user: {}, item: {}'.format(dataset_name, n_user, n_data_item))
+    plt.xlabel('column means # user within the rank interval')
     plt.ylabel('number of user')
     # plt.xlim(0, 100)  # 设置x轴分布范围
     plt.savefig('{}.jpg'.format(name))
@@ -16,8 +19,8 @@ def show_bin_hist(hist, name):
 
 
 if __name__ == '__main__':
-    arr = np.loadtxt('../../result/attribution/print-user-rank-fake-extreme.csv', delimiter=',')
+    arr = np.loadtxt('../../result/attribution/print-user-rank-movielens-27m.csv', delimiter=',')
     print(len(arr))
     print(np.sum(arr))
     # for i in range(100):
-    show_bin_hist(arr[0], 'fig-{}'.format(1))
+    show_bin_hist(arr[793], 'fig-{}'.format(1))

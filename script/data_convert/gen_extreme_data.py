@@ -13,8 +13,8 @@ def delete_file_if_exist(dire):
 if __name__ == '__main__':
     dataset_name = 'movielens-27m'
     new_dataset_name = 'movielens-27m-extreme'
-    extrace_query_ID = [793]
-    repeat_time = 100
+    extrace_query_ID = [821]
+    repeat_time = 1000
 
     basic_dir = os.path.join('/home', 'bianzheng', 'Dataset', 'ReverseMIPS')
 

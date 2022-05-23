@@ -127,8 +127,8 @@ if __name__ == '__main__':
     # run_sample_rank_bound()
     # run_compress_topt()
 
-    for ds in ['movielens-27m', 'netflix', 'yelp-small']:
-        os.system('cd build/attribution && ./pur {} {}'.format(ds, basic_dir))
+    # for ds in ['movielens-27m', 'netflix', 'yelp-small']:
+    #     os.system('cd build/attribution && ./pur {} {}'.format(ds, basic_dir))
 
     for ds in dataset_l:
         os.system(
