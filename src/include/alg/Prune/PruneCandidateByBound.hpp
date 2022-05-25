@@ -12,11 +12,11 @@
 
 namespace ReverseMIPS {
     void
-    PruneCandidateByBound(const std::vector<int> &lb_l, const std::vector<int> &ub_l,
+    PruneCandidateByBound(const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                           const int &n_user, const int &topk,
                           std::vector<bool> &prune_l, std::vector<int> &topk_lb_heap) {
-        assert(lb_l.size() == n_user);
-        assert(ub_l.size() == n_user);
+        assert(rank_lb_l.size() == n_user);
+        assert(rank_ub_l.size() == n_user);
         assert(prune_l.size() == n_user);
 
         int n_cand = 0;
@@ -26,7 +26,7 @@ namespace ReverseMIPS {
                 userID++;
                 continue;
             }
-            topk_lb_heap[n_cand] = lb_l[userID];
+            topk_lb_heap[n_cand] = rank_lb_l[userID];
             n_cand++;
             userID++;
         }
@@ -38,7 +38,7 @@ namespace ReverseMIPS {
             if (prune_l[userID]) {
                 continue;
             }
-            int tmp_lb = lb_l[userID];
+            int tmp_lb = rank_lb_l[userID];
             if (global_lb > tmp_lb) {
                 std::pop_heap(topk_lb_heap.begin(), topk_lb_heap.end(), std::less());
                 topk_lb_heap[topk_1] = tmp_lb;
@@ -51,7 +51,7 @@ namespace ReverseMIPS {
             if (prune_l[userID]) {
                 continue;
             }
-            int tmp_ub = ub_l[userID];
+            int tmp_ub = rank_ub_l[userID];
             if (global_lb < tmp_ub) {
                 prune_l[userID] = true;
             }

@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_rank_pdf(score_distri, idx):
+def plot_rank_pdf(score_distri, idx, n_sample):
     # plot
     fig, ax = plt.subplots()
 
@@ -14,8 +14,37 @@ def plot_rank_pdf(score_distri, idx):
     # ax.scatter(x, y, vmin=0, vmax=n_data_item)
     ax.plot(rank_pdf_x, rank_pdf_y)
 
-    ax.set(xlim=(1, n_data_item),
-           ylim=(score_distri[n_data_item - 1], score_distri[0]))
+    # get the highest score and lowest score
+    high_score = score_distri[0]
+    low_score = score_distri[n_data_item - 1]
+    score_dist = (high_score - low_score) / (n_sample - 1)
+    for itvID in range(n_sample):
+        y_score = high_score - score_dist * itvID
+        line_x = np.arange(-2000, n_data_item + 2000, 1)
+        line_y = np.ones(n_data_item + 4000) * y_score
+        if itvID == 0:
+            ax.plot(line_x, line_y, linestyle='dotted', color='#b9529f', label="sample by score")
+        else:
+            ax.plot(line_x, line_y, linestyle='dotted', color='#b9529f')
+
+    high_rank = n_data_item
+    low_rank = 1
+    # rank_dist = int((high_rank - low_rank) // n_sample)
+    rank_dist = 10000
+    print("rank_dist", rank_dist)
+    for sampleID in range(n_sample):
+        x_rank = (sampleID + 1) * rank_dist
+        line_x = np.ones(n_data_item + 4000) * x_rank
+        line_y = np.arange(-2000, n_data_item + 2000, 1)
+        if sampleID == 0:
+            ax.plot(line_x, line_y, linestyle='dotted', color='#0084ff', label='sample by rank')
+        else:
+            ax.plot(line_x, line_y, linestyle='dotted', color='#0084ff')
+
+    ax.legend(loc='upper left')
+
+    ax.set(xlim=(-2000, n_data_item + 2000),
+           ylim=(score_distri[n_data_item - 1] - 2, score_distri[0] + 2))
     # ax.set(xlim=(0, 5000),
     #        ylim=(0, 5000))
 
@@ -64,11 +93,10 @@ def plot_all_score_distribution(score_distribution_l):
 
 if __name__ == '__main__':
     score_distribution_l = np.loadtxt(
-        '/home/bianzheng/reverse-k-ranks/result/attribution/user-score-distribution-fake-normal.csv',
+        '/home/bianzheng/reverse-k-ranks/result/attribution/user-score-distribution-movielens-27m.csv',
         delimiter=',')
-    # sample_len = len(score_distribution_l)
-    sample_len = 1
     plot_all_score_distribution(score_distribution_l)
-    for i in range(sample_len):
-        plot_rank_pdf(score_distribution_l[i], i)
-        plot_score_distribution(score_distribution_l[i], i)
+
+    i = 9
+    plot_rank_pdf(score_distribution_l[i], i, 5)
+    plot_score_distribution(score_distribution_l[i], i)

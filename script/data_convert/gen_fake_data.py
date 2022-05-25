@@ -62,4 +62,5 @@ if __name__ == '__main__':
     # gen_data_normal(n_user, n_data_item, n_query_item, n_dim, "fake-normal")
     # gen_data_uniform(n_user, n_data_item, n_query_item, n_dim, "fake-uniform")
     # gen_data_uniform(100, 500, 10, 10, "fake-small")
-    gen_data_independent(n_user, n_data_item, n_query_item, n_dim, "fake-independent")
+    # gen_data_independent(n_user, n_data_item, n_query_item, n_dim, "fake-independent")
+    gen_data_independent(100, 50, 10, n_dim, "fake-tiny")

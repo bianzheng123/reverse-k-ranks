@@ -35,8 +35,9 @@ namespace ReverseMIPS {
         inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
             int64_t offset = (int64_t) userID * n_data_item_ + start_idx;
             offset *= sizeof(double);
+            int64_t read_count_offset = read_count * sizeof(double);
             index_stream_.seekg(offset, std::ios::beg);
-            index_stream_.read((char *) disk_cache_.get(), read_count * sizeof(double));
+            index_stream_.read((char *) disk_cache_.get(), read_count_offset);
         }
 
         void
@@ -78,8 +79,10 @@ namespace ReverseMIPS {
 
         void BuildIndexLoop(const std::vector<double> &distance_cache, const int &n_write) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
+            int64_t offset = (int64_t) n_write * n_data_item_;
             assert(distance_cache.size() >= n_write * n_data_item_);
-            out_stream_.write((char *) distance_cache.data(), n_write * n_data_item_ * sizeof(double));
+            offset *= sizeof(double);
+            out_stream_.write((char *) distance_cache.data(), offset);
         }
 
         void RetrievalPreprocess() {
