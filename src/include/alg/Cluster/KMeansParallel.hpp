@@ -167,26 +167,40 @@ Any code still using this signature should move to the version of this function 
         return kmeans_lloyd_parallel(data, parameters);
     }
 
-
+    //self-implement kmeans interface
     namespace KMeans {
-        /*
-         * self-implement kmeans interface
-         */
-        std::vector<uint32_t> ClusterLabel(const VectorMatrix &user, const int &n_merge_user) {
-            const int n_user = user.n_vector_;
-            //build kmeans on user
-            std::vector<std::vector<double>> user_vecs_l(n_user, std::vector<double>(user.vec_dim_));
-            for (int userID = 0; userID < n_user; userID++) {
-                memcpy(user_vecs_l[userID].data(), user.getVector(userID), user.vec_dim_);
+        std::vector<uint32_t>& ClusterLabel(const VectorMatrix &vm, const int &n_cluster) {
+            const int n_vector = vm.n_vector_;
+            //build kmeans on vm
+            std::vector<std::vector<double>> vecs_l(n_vector, std::vector<double>(vm.vec_dim_));
+            for (int vecsID = 0; vecsID < n_vector; vecsID++) {
+                memcpy(vecs_l[vecsID].data(), vm.getVector(vecsID), vm.vec_dim_ * sizeof(double));
             }
-            ReverseMIPS::clustering_parameters<double> para(n_merge_user);
+            ReverseMIPS::clustering_parameters<double> para(n_cluster);
             para.set_random_seed(0);
             para.set_max_iteration(200);
             std::tuple<std::vector<std::vector<double>>, std::vector<uint32_t>> cluster_data =
-                    kmeans_lloyd_parallel(user_vecs_l, para);
+                    kmeans_lloyd_parallel(vecs_l, para);
             spdlog::info("Finish KMeans clustering");
             return std::get<1>(cluster_data);
         }
+
+        auto ClusterData(const VectorMatrix &vm, const int &n_cluster) {
+            const int n_vector = vm.n_vector_;
+            //build kmeans on vm
+            std::vector<std::vector<double>> vecs_l(n_vector, std::vector<double>(vm.vec_dim_));
+            for (int vecsID = 0; vecsID < n_vector; vecsID++) {
+                memcpy(vecs_l[vecsID].data(), vm.getVector(vecsID), vm.vec_dim_ * sizeof(double));
+            }
+            ReverseMIPS::clustering_parameters<double> para(n_cluster);
+            para.set_random_seed(0);
+            para.set_max_iteration(200);
+            std::tuple<std::vector<std::vector<double>>, std::vector<uint32_t>> cluster_data =
+                    kmeans_lloyd_parallel(vecs_l, para);
+            spdlog::info("Finish KMeans clustering");
+            return cluster_data;
+        }
+
     }
 
 } // namespace dkm

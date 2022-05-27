@@ -120,23 +120,23 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
     # dataset_l = ['movielens-27m', 'netflix']
-    dataset_l = ['movielens-27m-extreme']
+    dataset_l = ['movielens-27m-extreme', 'movielens-27m', 'netflix', 'yelp-small']
 
     # run_rankbound_sample_rate()
     # run_interval_sample_rate()
     # run_sample_rank_bound()
     # run_compress_topt()
 
-    for ds in ['movielens-27m', 'netflix', 'yelp-small']:
-        os.system('cd build/attribution && ./usd {} {}'.format(ds, basic_dir))
+    # for ds in ['movielens-27m', 'netflix', 'yelp-small']:
+    #     os.system('cd build/attribution && ./usd {} {}'.format(ds, basic_dir))
 
-    # for ds in dataset_l:
-    #     os.system(
-    #         'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --cache_bound_every {}'.format(
-    #             ds, basic_dir, "BPlusTree", 512))
-    #     os.system(
-    #         'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_interval {}'.format(
-    #             ds, basic_dir, "IntervalBound", 512))
+    for ds in dataset_l:
+        os.system(
+            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --cache_bound_every {}'.format(
+                ds, basic_dir, "BPlusTree", 512))
+        os.system(
+            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_interval {}'.format(
+                ds, basic_dir, "IntervalBound", 512))
     #     os.system(
     #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
     #             ds, basic_dir, 512, 1024))
@@ -150,10 +150,3 @@ if __name__ == '__main__':
     #     os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
     #     os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
     #     os.system('cd build && ./bpt {} {}'.format(ds, basic_dir))
-    #
-    #     os.system('cd build && ./irbfdp {} {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./irbfip {} {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./irbfnp {} {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./irbpdpip {} {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./irbpdpnp {} {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./irbpipnp {} {}'.format(ds, basic_dir))

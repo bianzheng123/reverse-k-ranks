@@ -13,6 +13,7 @@
 #include "alg/ExactRankByIPBound/PartDimPartInt.hpp"
 #include "alg/ExactRankByIPBound/PartDimPartNorm.hpp"
 #include "alg/ExactRankByIPBound/PartIntPartNorm.hpp"
+#include "alg/ExactRankByIPBound/UserItemPQ.hpp"
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
@@ -38,7 +39,7 @@ namespace ReverseMIPS::ComputeAll {
         void ResetTimer() {
             inner_product_time_ = 0;
             inner_product_bound_time_ = 0;
-            early_prune_ratio_ = 0;
+            prune_ratio_ = 0;
         }
 
         std::unique_ptr<BaseIPBound> ip_bound_ins_;
@@ -47,7 +48,7 @@ namespace ReverseMIPS::ComputeAll {
         int vec_dim_, n_data_item_, n_user_;
         double inner_product_time_, inner_product_bound_time_;
         TimeRecord inner_product_record_, inner_product_bound_record_;
-        double early_prune_ratio_;
+        double prune_ratio_;
     public:
 
         //temporary retrieval variable
@@ -77,7 +78,6 @@ namespace ReverseMIPS::ComputeAll {
         }
 
         std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
-            //TODO, finish the compute all, get the IP bound pair and prune
             ResetTimer();
 
             if (topk > user_.n_vector_) {
@@ -105,13 +105,13 @@ namespace ReverseMIPS::ComputeAll {
 
                 //rank search
                 inner_product_bound_record_.reset();
-                int early_prune_candidate = 0;
                 std::vector<UserRankElement> &rank_max_heap = query_heap_l[queryID];
                 for (int userID = 0; userID < topk; userID++) {
                     const double *user_vecs = user_.getVector(userID);
-                    int rank = GetRank(queryIP_l_[userID], n_data_item_ + 1, userID, user_vecs, data_item_);
+                    int total_n_prune = 0;
+                    int rank = GetRank(queryIP_l_[userID], userID, user_vecs, data_item_, total_n_prune);
+                    prune_ratio_ += total_n_prune * 1.0 / n_data_item_;
 
-                    assert(rank != -1);
                     rank_max_heap[userID] = UserRankElement(userID, rank, queryIP_l_[userID]);
                 }
 
@@ -120,12 +120,9 @@ namespace ReverseMIPS::ComputeAll {
                 UserRankElement heap_ele = rank_max_heap.front();
                 for (int userID = topk; userID < n_user_; userID++) {
                     const double *user_vecs = user_.getVector(userID);
-                    int rank = GetRank(queryIP_l_[userID], heap_ele.rank_, userID, user_vecs, data_item_);
-
-                    if (rank == -1) {
-                        early_prune_candidate++;
-                        continue;
-                    }
+                    int total_n_prune = 0;
+                    int rank = GetRank(queryIP_l_[userID], userID, user_vecs, data_item_, total_n_prune);
+                    prune_ratio_ += total_n_prune * 1.0 / n_data_item_;
 
                     UserRankElement element(userID, rank, queryIP_l_[userID]);
                     if (heap_ele > element) {
@@ -137,53 +134,44 @@ namespace ReverseMIPS::ComputeAll {
                     }
 
                 }
+
                 std::make_heap(rank_max_heap.begin(), rank_max_heap.end(), std::less());
                 std::sort_heap(rank_max_heap.begin(), rank_max_heap.end(), std::less());
                 inner_product_bound_time_ += inner_product_bound_record_.get_elapsed_time_second();
-                early_prune_ratio_ += early_prune_candidate * 1.0 / n_user_;
             }
-
-            early_prune_ratio_ /= n_query_item;
+            prune_ratio_ = prune_ratio_ / (n_user_ * n_query_item);
 
             return query_heap_l;
         }
 
-        int GetRank(const double &queryIP, const int &min_rank, const int &userID, const double *user_vecs,
-                    const VectorMatrix &item) {
+        int GetRank(const double &queryIP, const int &userID, const double *user_vecs,
+                    const VectorMatrix &item, int &n_prune) {
             int rank = 1;
-            int n_cand_ = 0;
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 const double *item_vecs = item.getVector(itemID);
-                const double IP_lb = ip_bound_ins_->IPLowerBound(user_vecs, userID, item_vecs, itemID);
-                assert(IP_lb <= InnerProduct(user_vecs, item_vecs, vec_dim_));
-                if (queryIP < IP_lb) {
-                    rank++;
-                    if (rank > min_rank) {
-                        return -1;
-                    }
-                } else {
-                    const double IP_ub = ip_bound_ins_->IPUpperBound(user_vecs, userID, item_vecs, itemID);
-                    assert(InnerProduct(user_vecs, item_vecs, vec_dim_) <= IP_ub);
-                    if (IP_lb <= queryIP && queryIP <= IP_ub) {
-                        item_cand_l_[n_cand_] = itemID;
-                        n_cand_++;
-                    }
-                }
-            }
+                const std::pair<double, double> IP_pair = ip_bound_ins_->IPBound(user_vecs, userID, item_vecs, itemID);
 
-            for (int candID = 0; candID < n_cand_; candID++) {
-                const int itemID = item_cand_l_[candID];
-                const double *item_vecs = item.getVector(itemID);
-                const double IP = InnerProduct(user_vecs, item_vecs, vec_dim_);
-                if (IP > queryIP) {
-                    rank++;
-                    if (rank > min_rank) {
-                        return -1;
-                    }
+                if (not(IP_pair.first <= InnerProduct(user_vecs, item_vecs, vec_dim_) &&
+                        InnerProduct(user_vecs, item_vecs, vec_dim_) <= IP_pair.second)) {
+                    printf("userID %d, itemID %d, IP_lb %.3f, IP %.3f, IP_ub %.3f\n",
+                           userID, itemID,
+                           IP_pair.first, InnerProduct(user_vecs, item_vecs, vec_dim_), IP_pair.second);
                 }
-            }
-            if (rank > min_rank) {
-                return -1;
+                assert(IP_pair.first <= InnerProduct(user_vecs, item_vecs, vec_dim_) &&
+                       InnerProduct(user_vecs, item_vecs, vec_dim_) <= IP_pair.second);
+                const double IP_lb = IP_pair.first;
+                const double IP_ub = IP_pair.second;
+                if (queryIP <= IP_lb) {
+                    rank++;
+                    n_prune++;
+                } else if (IP_lb <= queryIP && queryIP <= IP_ub) {
+                    double IP = InnerProduct(user_vecs, item_vecs, vec_dim_);
+                    if (queryIP <= IP) {
+                        rank++;
+                    }
+                } else { // IP_ub <= queryIP
+                    n_prune++;
+                }
             }
             return rank;
         }
@@ -200,10 +188,10 @@ namespace ReverseMIPS::ComputeAll {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tearly prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tprune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, inner_product_bound_time_,
-                    early_prune_ratio_,
+                    prune_ratio_,
                     second_per_query);
             std::string str(buff);
             return str;
@@ -257,6 +245,10 @@ namespace ReverseMIPS::ComputeAll {
             const int scale = 100;
             IPbound_ptr = std::make_unique<PartIntPartNorm>(n_user, n_data_item, vec_dim, scale);
 
+        } else if (bound_name == "CAUserItemPQ") {
+            const int n_codebook = 8;
+            const int n_codeword = 32;
+            IPbound_ptr = std::make_unique<CAUserItemPQ>(n_user, n_data_item, vec_dim, n_codebook, n_codeword);
         } else {
             spdlog::error("not found IPBound name, program exit");
             exit(-1);

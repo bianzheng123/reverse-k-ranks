@@ -20,5 +20,15 @@ namespace ReverseMIPS {
         return res;
     }
 
+    double EuclideanDistanceSquare(const double *pVect1, const double *pVect2, const int dim) {
+        double res = 0;
+        for (unsigned i = 0; i < dim; i++) {
+            double tmp_euc = pVect1[i] - pVect2[i];
+            res += tmp_euc * tmp_euc;
+        }
+        assert(res >= 0);
+        return res;
+    }
+
 }
 #endif //REVERSE_KRANKS_SPACEEUCLIDEAN_HPP

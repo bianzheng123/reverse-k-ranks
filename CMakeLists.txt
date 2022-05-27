@@ -27,7 +27,7 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST_MODULE OFF)
-set(BUILD_ATTRIBUTION ON)
+set(BUILD_ATTRIBUTION OFF)
 
 set(BUILD_PROGRESS ON)
 

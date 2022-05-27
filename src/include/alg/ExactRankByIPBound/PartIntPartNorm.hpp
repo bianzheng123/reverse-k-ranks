@@ -34,6 +34,7 @@ namespace ReverseMIPS {
     public:
 
         inline PartIntPartNorm() {
+            //TODO have bug
             n_user_ = -1;
             n_data_item_ = -1;
             vec_dim_ = -1;
