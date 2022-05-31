@@ -11,11 +11,11 @@ def delete_file_if_exist(dire):
 
 
 if __name__ == '__main__':
-    ds_m = {'netflix': 'netflix-small'}
+    ds_m = {'netflix': 'netflix-small', 'movielens-27m': 'movielens-27m-small'}
     # basic_dir = '/home/bianzheng/Dataset/ReverseMIPS'
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
-    n_user = 10000
-    n_item = 5000
+    n_user = 5000
+    n_item = 2000
     for from_ds in ds_m.keys():
         to_ds = ds_m[from_ds]
         data_item, d = vecs_io.dvecs_read(os.path.join(basic_dir, from_ds, '%s_data_item.dvecs' % from_ds))

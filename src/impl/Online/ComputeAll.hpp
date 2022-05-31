@@ -5,11 +5,11 @@
 #ifndef REVERSE_KRANKS_COMPUTEALL_HPP
 #define REVERSE_KRANKS_COMPUTEALL_HPP
 
-#include "alg/ExactRankByIPBound/BaseIPBound.hpp"
 #include "alg/ExactRankByIPBound/FullDim.hpp"
 #include "alg/ExactRankByIPBound/FullInt.hpp"
 #include "alg/ExactRankByIPBound/FullNorm.hpp"
 #include "alg/ExactRankByIPBound/Grid.hpp"
+#include "alg/ExactRankByIPBound/ItemPQ.hpp"
 #include "alg/ExactRankByIPBound/PartDimPartInt.hpp"
 #include "alg/ExactRankByIPBound/PartDimPartNorm.hpp"
 #include "alg/ExactRankByIPBound/PartIntPartNorm.hpp"
@@ -55,6 +55,7 @@ namespace ReverseMIPS::ComputeAll {
         std::vector<double> queryIP_l_;
         std::vector<int> item_cand_l_;
         std::unique_ptr<double[]> query_ptr_;
+        std::unique_ptr<std::pair<double, double>[]> IPbound_l_; //n_data_item, store the IP bound of all item
 
         Index(
                 //ip_bound_ins
@@ -75,6 +76,7 @@ namespace ReverseMIPS::ComputeAll {
             queryIP_l_.resize(n_user_);
             item_cand_l_.resize(n_data_item_);
             query_ptr_ = std::make_unique<double[]>(vec_dim_);
+            IPbound_l_ = std::make_unique<std::pair<double, double>[]>(n_data_item_);
         }
 
         std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
@@ -147,16 +149,16 @@ namespace ReverseMIPS::ComputeAll {
         int GetRank(const double &queryIP, const int &userID, const double *user_vecs,
                     const VectorMatrix &item, int &n_prune) {
             int rank = 1;
-            for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                const double *item_vecs = item.getVector(itemID);
-                const std::pair<double, double> IP_pair = ip_bound_ins_->IPBound(user_vecs, userID, item_vecs, itemID);
 
-                if (not(IP_pair.first <= InnerProduct(user_vecs, item_vecs, vec_dim_) &&
-                        InnerProduct(user_vecs, item_vecs, vec_dim_) <= IP_pair.second)) {
-                    printf("userID %d, itemID %d, IP_lb %.3f, IP %.3f, IP_ub %.3f\n",
-                           userID, itemID,
-                           IP_pair.first, InnerProduct(user_vecs, item_vecs, vec_dim_), IP_pair.second);
-                }
+            std::iota(item_cand_l_.begin(), item_cand_l_.end(), 0);
+
+            ip_bound_ins_->IPBound(user_vecs, userID, item_cand_l_, item, IPbound_l_.get());
+
+            for (const int &itemID: item_cand_l_) {
+                assert(0 <= itemID && itemID < n_data_item_);
+                const double *item_vecs = item.getVector(itemID);
+                const std::pair<double, double> IP_pair = IPbound_l_[itemID];
+
                 assert(IP_pair.first <= InnerProduct(user_vecs, item_vecs, vec_dim_) &&
                        InnerProduct(user_vecs, item_vecs, vec_dim_) <= IP_pair.second);
                 const double IP_lb = IP_pair.first;
@@ -249,6 +251,10 @@ namespace ReverseMIPS::ComputeAll {
             const int n_codebook = 8;
             const int n_codeword = 32;
             IPbound_ptr = std::make_unique<CAUserItemPQ>(n_user, n_data_item, vec_dim, n_codebook, n_codeword);
+        } else if (bound_name == "CAItemPQ") {
+            const int n_codebook = 8;
+            const int n_codeword = 32;
+            IPbound_ptr = std::make_unique<CAItemPQ>(n_user, n_data_item, vec_dim, n_codebook, n_codeword);
         } else {
             spdlog::error("not found IPBound name, program exit");
             exit(-1);

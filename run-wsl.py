@@ -93,14 +93,15 @@ def run():
         # 'PartRankBound',
         # 'RankBound',
 
-        # 'CAGrid',
+        'CAGrid',
         'CAFullDim',
-        # 'CAFullNorm',
-        # 'CAFullInt',
-        # 'CAPartDimPartInt',
-        # 'CAPartDimPartNorm',
-        # 'CAPartIntPartNorm'
-        'CAUserItemPQ'
+        'CAFullNorm',
+        'CAFullInt',
+        'CAPartDimPartInt',
+        'CAPartDimPartNorm',
+        'CAPartIntPartNorm',
+        'CAUserItemPQ',
+        'CAItemPQ',
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
@@ -133,6 +134,7 @@ def run():
         os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartDimPartNorm'))
         os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartIntPartNorm'))
         os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAUserItemPQ'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAItemPQ'))
 
     type_arr = ['userID', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50, 60, 70]
@@ -140,7 +142,6 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-small', 'fake']
-    dataset_l = ['fake-small']
     run()

@@ -19,7 +19,7 @@ def show_bin_hist(hist, name):
 
 
 if __name__ == '__main__':
-    arr = np.loadtxt('../../result/attribution/print-user-rank-movielens-27m.csv', delimiter=',')
+    arr = np.loadtxt('../../result/attribution/PrintUserRank/rank-hist-movielens-27m.csv', delimiter=',')
     print(len(arr))
     print(np.sum(arr))
     # for i in range(100):

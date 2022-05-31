@@ -12,7 +12,7 @@ def plot_rank_pdf(score_distri, idx, n_sample):
 
     # ax.scatter(x, y, s=sizes, c=colors, vmin=0, vmax=100)
     # ax.scatter(x, y, vmin=0, vmax=n_data_item)
-    ax.plot(rank_pdf_x, rank_pdf_y)
+    ax.plot(rank_pdf_x, rank_pdf_y, linestyle='solid', color='#000000', label="distribution")
 
     # get the highest score and lowest score
     high_score = score_distri[0]
@@ -23,9 +23,9 @@ def plot_rank_pdf(score_distri, idx, n_sample):
         line_x = np.arange(-2000, n_data_item + 2000, 1)
         line_y = np.ones(n_data_item + 4000) * y_score
         if itvID == 0:
-            ax.plot(line_x, line_y, linestyle='dotted', color='#b9529f', label="sample by score")
+            ax.plot(line_x, line_y, linestyle='dashed', color='#b9529f', label="sampled by score")
         else:
-            ax.plot(line_x, line_y, linestyle='dotted', color='#b9529f')
+            ax.plot(line_x, line_y, linestyle='dashed', color='#b9529f')
 
     high_rank = n_data_item
     low_rank = 1
@@ -37,7 +37,7 @@ def plot_rank_pdf(score_distri, idx, n_sample):
         line_x = np.ones(n_data_item + 4000) * x_rank
         line_y = np.arange(-2000, n_data_item + 2000, 1)
         if sampleID == 0:
-            ax.plot(line_x, line_y, linestyle='dotted', color='#0084ff', label='sample by rank')
+            ax.plot(line_x, line_y, linestyle='dotted', color='#0084ff', label='sampled by rank')
         else:
             ax.plot(line_x, line_y, linestyle='dotted', color='#0084ff')
 
@@ -50,10 +50,10 @@ def plot_rank_pdf(score_distri, idx, n_sample):
 
     ax.set_xlabel('rank')
     ax.set_ylabel('score')
-    ax.set_title('movielens-27m, n_data_item={}'.format(n_data_item))
+    # ax.set_title('movielens-27m, n_data_item={}'.format(n_data_item))
 
     # plt.show()
-    plt.savefig('rank_pdf_{}.jpg'.format(idx))
+    plt.savefig('rank_pdf_{}.jpg'.format(idx), dpi=600, bbox_inches = 'tight')
     plt.close()
 
 
@@ -93,7 +93,7 @@ def plot_all_score_distribution(score_distribution_l):
 
 if __name__ == '__main__':
     score_distribution_l = np.loadtxt(
-        '/home/bianzheng/reverse-k-ranks/result/attribution/user-score-distribution-movielens-27m.csv',
+        '/home/bianzheng/reverse-k-ranks/result/attribution/PrintUserRank/score-distribution-movielens-27m.csv',
         delimiter=',')
     plot_all_score_distribution(score_distribution_l)
 
