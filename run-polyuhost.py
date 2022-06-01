@@ -115,16 +115,54 @@ def run_sample_rank_bound():
                     ds, basic_dir, "PartRankBound", n_sample, 512))
 
 
+def run_compute_all_scale():
+    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    scale_l = [25, 50, 100, 200, 400, 800, 1000]
+    for ds in dataset_l:
+        for scale in scale_l:
+            os.system(
+                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --scale {}'.format(
+                    'CAPartIntPartNorm', ds, basic_dir, scale))
+
+
+def run_compute_all_n_codebook():
+    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    n_codebook_l = [2, 4, 8, 16]
+    n_codeword = 128
+    for ds in dataset_l:
+        for n_codebook in n_codebook_l:
+            os.system(
+                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --n_codebook {} --n_codeword {}'.format(
+                    'CAUserItemPQ', ds, basic_dir, n_codebook, n_codeword))
+            os.system(
+                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --n_codebook {} --n_codeword {}'.format(
+                    'CAItemPQ', ds, basic_dir, n_codebook, n_codeword))
+
+
+def run_compute_all_n_codeword():
+    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
+    n_codebook = 4
+    n_codeword_l = [16, 32, 64, 128, 256, 512, 1024]
+    for ds in dataset_l:
+        for n_codeword in n_codeword_l:
+            os.system(
+                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --n_codebook {} --n_codeword {}'.format(
+                    'CAUserItemPQ', ds, basic_dir, n_codebook, n_codeword))
+            os.system(
+                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --n_codebook {} --n_codeword {}'.format(
+                    'CAItemPQ', ds, basic_dir, n_codebook, n_codeword))
+
+
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
+    # basic_dir = os.path.join('/home', 'bianzheng', 'Dataset', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yelp']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
     dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    # run_rankbound_sample_rate()
-    # run_interval_sample_rate()
-    # run_sample_rank_bound()
-    # run_compress_topt()
+    run_compute_all_scale()
+    run_compute_all_n_codebook()
+    run_compute_all_n_codeword()
 
     # for ds in ['movielens-27m', 'netflix', 'yelp-small']:
     #     os.system('cd build/attribution && ./usd {} {}'.format(ds, basic_dir))
@@ -151,23 +189,3 @@ if __name__ == '__main__':
             'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds, 'CAUserItemPQ'))
         os.system(
             'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds, 'CAItemPQ'))
-
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --cache_bound_every {}'.format(
-        #         ds, basic_dir, "BPlusTree", 512))
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_interval {}'.format(
-        #         ds, basic_dir, "IntervalBound", 512))
-    #     os.system(
-    #         'cd build && ./irb --dataset_name {} --basic_dir {} --cache_bound_every {} --n_interval {}'.format(
-    #             ds, basic_dir, 512, 1024))
-    #     os.system(
-    #         'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, 512,
-    #                                                                                           basic_dir))
-    #     os.system(
-    #         'cd build && ./rb --dataset_name {} --cache_bound_every {} --basic_dir {}'.format(ds, 1024,
-    #                                                                                           basic_dir))
-    #     os.system('cd build && ./rb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./irb --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./birb {} {}'.format(ds, basic_dir))
-    #     os.system('cd build && ./bpt {} {}'.format(ds, basic_dir))

@@ -7,31 +7,19 @@
 set(FINISH OFF)
 
 if (FINISH)
-    add_executable(bd bound-distribution/BoundDistribution.cpp)
-    target_include_directories(bd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
-    add_executable(bs bound-selection/BoundSelection.cpp)
-    target_include_directories(bs PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bs PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
-    add_executable(escp evaluation-sequence/CauchyPercentile.cpp)
-    target_include_directories(escp PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(escp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
     add_executable(kmrt kmeans/KMeansRunTime.cpp)
     target_include_directories(kmrt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(kmrt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    add_executable(ipc prune/IPCompare.cpp)
+    add_executable(ipc prune-implementation/IPCompare.cpp)
     target_include_directories(ipc PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(ipc PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    add_executable(pi prune/PruneImplementation.cpp)
+    add_executable(pi prune-implementation/PruneImplementation.cpp)
     target_include_directories(pi PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(pi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    add_executable(pp prune/PruneParameterClass.cpp)
+    add_executable(pp prune-implementation/PruneParameterClass.cpp)
     target_include_directories(pp PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(pp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
@@ -39,15 +27,15 @@ if (FINISH)
     target_include_directories(dvd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(dvd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    add_executable(svdcmp svd-compare/SVDCompare.cpp)
-    target_include_directories(svdcmp PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(svdcmp PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+    add_executable(pur print-user-rank/PrintUserRank.cpp)
+    target_include_directories(pur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(pur PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+
+    add_executable(usd score-rank-distribution/UserScoreDistribution.cpp)
+    target_include_directories(usd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(usd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 endif ()
 
-add_executable(pur print-user-rank/PrintUserRank.cpp)
-target_include_directories(pur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(pur PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
-add_executable(usd score-distribution/UserScoreDistribution.cpp)
-target_include_directories(usd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(usd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
+add_executable(npd norm-popularity-distribution/NormPopularityDistribution.cpp)
+target_include_directories(npd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(npd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)

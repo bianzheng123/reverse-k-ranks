@@ -207,7 +207,8 @@ namespace ReverseMIPS::ComputeAll {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const std::string &bound_name) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const std::string &bound_name,
+               const int &scale, const int &n_codebook, const int &n_codeword, char *parameter_name) {
         user.vectorNormalize();
         assert(user.vec_dim_ == data_item.vec_dim_);
 
@@ -219,13 +220,14 @@ namespace ReverseMIPS::ComputeAll {
 
         if (bound_name == "CAGrid") {
             const int min_codeword = std::floor(std::sqrt(1.0 * 80 * std::sqrt(3 * user.vec_dim_)));
-            int n_codeword = 1;
-            while (n_codeword < min_codeword) {
-                n_codeword = n_codeword << 1;
+            int n_cur_codeword = 1;
+            while (n_cur_codeword < min_codeword) {
+                n_cur_codeword = n_cur_codeword << 1;
             }
-            spdlog::info("CAGrid min_codeword {}, codeword {}", min_codeword, n_codeword);
+            spdlog::info("CAGrid min_codeword {}, codeword {}", min_codeword, n_cur_codeword);
+            IPbound_ptr = std::make_unique<Grid>(n_user, n_data_item, vec_dim, n_cur_codeword);
+            sprintf(parameter_name, "codeword_%d", n_cur_codeword);
 
-            IPbound_ptr = std::make_unique<Grid>(n_user, n_data_item, vec_dim, n_codeword);
         } else if (bound_name == "CAFullDim") {
             IPbound_ptr = std::make_unique<FullDim>(n_user, n_data_item, vec_dim);
 
@@ -233,28 +235,33 @@ namespace ReverseMIPS::ComputeAll {
             IPbound_ptr = std::make_unique<FullNorm>(n_user, n_data_item, vec_dim);
 
         } else if (bound_name == "CAFullInt") {
-            const int scale = 100;
+            spdlog::info("CAFullInt scale {}", scale);
             IPbound_ptr = std::make_unique<FullInt>(n_user, n_data_item, vec_dim, scale);
+            sprintf(parameter_name, "scale_%d", scale);
 
         } else if (bound_name == "CAPartDimPartInt") {
-            const int scale = 100;
+            spdlog::info("CAPartDimPartInt scale {}", scale);
             IPbound_ptr = std::make_unique<PartDimPartInt>(n_user, n_data_item, vec_dim, scale);
+            sprintf(parameter_name, "scale_%d", scale);
 
         } else if (bound_name == "CAPartDimPartNorm") {
             IPbound_ptr = std::make_unique<PartDimPartNorm>(n_user, n_data_item, vec_dim);
 
         } else if (bound_name == "CAPartIntPartNorm") {
-            const int scale = 100;
+            spdlog::info("CAPartIntPartNorm scale {}", scale);
             IPbound_ptr = std::make_unique<PartIntPartNorm>(n_user, n_data_item, vec_dim, scale);
+            sprintf(parameter_name, "scale_%d", scale);
 
         } else if (bound_name == "CAUserItemPQ") {
-            const int n_codebook = 8;
-            const int n_codeword = 32;
+            spdlog::info("CAUserItemPQ n_codebook {}, n_codeword {}", n_codebook, n_codeword);
             IPbound_ptr = std::make_unique<CAUserItemPQ>(n_user, n_data_item, vec_dim, n_codebook, n_codeword);
+            sprintf(parameter_name, "n_codebook_%d-n_codeword_%d", n_codebook, n_codeword);
+
         } else if (bound_name == "CAItemPQ") {
-            const int n_codebook = 8;
-            const int n_codeword = 32;
+            spdlog::info("CAItemPQ n_codebook {}, n_codeword {}", n_codebook, n_codeword);
             IPbound_ptr = std::make_unique<CAItemPQ>(n_user, n_data_item, vec_dim, n_codebook, n_codeword);
+            sprintf(parameter_name, "n_codebook_%d-n_codeword_%d", n_codebook, n_codeword);
+
         } else {
             spdlog::error("not found IPBound name, program exit");
             exit(-1);

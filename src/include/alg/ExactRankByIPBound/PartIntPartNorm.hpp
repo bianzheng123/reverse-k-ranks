@@ -175,7 +175,7 @@ namespace ReverseMIPS {
             int lb_left_part = leftIP - left_otherIP;
             int ub_left_part = leftIP + left_otherIP;
 
-            double rightIP_lb = -user_norm_l_[userID] * item_norm_l_[userID];
+            double rightIP_lb = -user_norm_l_[userID] * item_norm_l_[itemID];
             double rightIP_ub = user_norm_l_[userID] * item_norm_l_[itemID];
 
             double lower_bound = convert_coe_ * lb_left_part + rightIP_lb;

@@ -33,13 +33,12 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_perc_50',
         'CompressTopTIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_perc_50',
 
-        'IRBFullDimPrune': 'cache_bound_every_512-n_interval_1024',
-        'IRBFullIntPrune': 'cache_bound_every_512-n_interval_1024',
-        'IRBFullNormPrune': 'cache_bound_every_512-n_interval_1024',
-        'IRBPartDimPartIntPrune': 'cache_bound_every_512-n_interval_1024',
-        'IRBPartDimPartNormPrune': 'cache_bound_every_512-n_interval_1024',
-        'IRBPartIntPartNormPrune': 'cache_bound_every_512-n_interval_1024',
-        'IRBBallPrune': 'cache_bound_every_512-n_interval_1024',
+        'CAGrid': 'codeword_32',
+        'CAFullInt': 'scale_100',
+        'CAPartDimPartInt': 'scale_100',
+        'CAPartIntPartNorm': 'scale_100',
+        'CAUserItemPQ': 'n_codebook_8-n_codeword_32',
+        'CAItemPQ': 'n_codebook_8-n_codeword_32'
     }
     flag = True
     for ds in dataset_l:
@@ -138,10 +137,12 @@ def run():
 
     type_arr = ['userID', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50, 60, 70]
+    # topk_l = [10, 20]
     cmp_file_all(method_name_l, type_arr, dataset_l, topk_l)
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-small', 'fake']
+    dataset_l = ['fake-small']
     run()

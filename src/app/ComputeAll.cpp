@@ -19,6 +19,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, bound_name;
+    int scale, n_codebook, n_codeword;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -33,7 +34,13 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake-small"),
              "dataset_name")
             ("bound_name, bn", po::value<std::string>(&para.bound_name)->default_value("OnlineGrid"),
-             "bound_name");
+             "bound_name")
+            ("scale, s", po::value<int>(&para.scale)->default_value(100),
+             "scale for integer bound")
+            ("n_codebook, ncb", po::value<int>(&para.n_codebook)->default_value(8),
+             "number of codebook")
+            ("n_codeword, ncw", po::value<int>(&para.n_codeword)->default_value(32),
+             "number of codeword");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -74,13 +81,12 @@ int main(int argc, char **argv) {
     char parameter_name[256] = "";
 
     spdlog::info("input parameter: none");
-    index = ComputeAll::BuildIndex(data_item, user, bound_name);
+    index = ComputeAll::BuildIndex(data_item, user, bound_name, para.scale, para.n_codebook, para.n_codeword, parameter_name);
 
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-//    vector<int> topk_l{10};
+    vector<int> topk_l{20, 10};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     for (int topk: topk_l) {
