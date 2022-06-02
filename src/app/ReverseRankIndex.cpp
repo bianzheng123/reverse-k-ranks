@@ -21,7 +21,6 @@
 #include "HashBound.hpp"
 #include "HRBMergeRankBound.hpp"
 #include "IntervalBound.hpp"
-#include "PartRankBound.hpp"
 #include "RankBound.hpp"
 
 #include <spdlog/spdlog.h>
@@ -33,7 +32,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, topt_perc, n_sample;
+    int cache_bound_every, n_interval, topt_perc;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -55,9 +54,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
              "the numer of interval")
             ("topt_perc, ttp", po::value<int>(&para.topt_perc)->default_value(50),
-             "store percent of top-t inner product as index")
-            ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(3),
-             "number of sample of a rank bound");
+             "store percent of top-t inner product as index");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -170,13 +167,6 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: n_interval {}", n_interval);
         index = IntervalBound::BuildIndex(data_item, user, index_path, n_interval);
         sprintf(parameter_name, "n_interval_%d", n_interval);
-
-    } else if (method_name == "PartRankBound") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: cache_bound_every {}, n_sample {}", cache_bound_every, n_sample);
-        index = PartRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample);
-        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d", cache_bound_every, n_sample);
 
     } else if (method_name == "RankBound") {
         const int cache_bound_every = para.cache_bound_every;

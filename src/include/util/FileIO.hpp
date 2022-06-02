@@ -11,6 +11,41 @@
 #include <iomanip>
 
 namespace ReverseMIPS {
+    class RedundantRetrievalResult {
+    public:
+        std::string performance_metric_name;
+        std::vector<std::vector<std::string>> config_l_l;
+
+        void WritePerformance(const char *dataset_name, const char *method_name,
+                              const char *other_name, const std::vector<int> &topk_l) {
+            //TODO output the result
+            char resPath[256];
+            const int n_topk = (int) topk_l.size();
+            for (int topkID = 0; topkID < n_topk; topkID++) {
+                const int topk = topk_l[topkID];
+                if (strcmp(other_name, "") == 0) {
+                    std::sprintf(resPath, "../result/performance/%s-%s-top%d-variance-config.csv",
+                                 dataset_name, method_name, topk);
+                } else {
+                    std::sprintf(resPath, "../result/performance/%s-%s-%s-top%d-variance-config.csv",
+                                 dataset_name, method_name, other_name, topk);
+                }
+                std::ofstream file(resPath);
+                if (!file) {
+                    spdlog::error("error in write result");
+                }
+                file << performance_metric_name << std::endl;
+                const std::vector<std::string> &config_l = config_l_l[topkID];
+                const int &n_query = (int) config_l_l[topkID].size();
+                for (int queryID = 0; queryID < n_query; queryID++) {
+                    file << config_l[queryID] << std::endl;
+                }
+
+                file.close();
+            }
+        }
+    };
+
     class RetrievalResult {
     public:
         std::vector<std::string> config_l;

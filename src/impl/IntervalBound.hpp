@@ -35,7 +35,6 @@ namespace ReverseMIPS::IntervalBound {
             read_disk_time_ = 0;
             exact_rank_refinement_time_ = 0;
             interval_prune_ratio_ = 0;
-            rank_search_prune_ratio_ = 0;
         }
 
     public:
@@ -49,7 +48,7 @@ namespace ReverseMIPS::IntervalBound {
         int vec_dim_, n_data_item_, n_user_;
         double inner_product_time_, interval_search_time_, read_disk_time_, exact_rank_refinement_time_;
         TimeRecord inner_product_record_, interval_search_record_;
-        double interval_prune_ratio_, rank_search_prune_ratio_;
+        double interval_prune_ratio_;
 
         //temporary retrieval variable
         std::vector<bool> prune_l_;
@@ -83,7 +82,7 @@ namespace ReverseMIPS::IntervalBound {
 
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -149,9 +148,19 @@ namespace ReverseMIPS::IntervalBound {
             read_disk_time_ = disk_ins_.read_disk_time_;
 
             interval_prune_ratio_ /= n_query_item;
-            rank_search_prune_ratio_ /= n_query_item;
             return query_heap_l;
         }
+
+        std::string VariancePerformanceMetricName() override {
+            return "queryID, retrieval time, second per query, interval prune ratio";
+        }
+
+        std::string VariancePerformanceStatistics(
+                const double &retrieval_time, const double &second_per_query, const int &queryID) override {
+            char str[256];
+            sprintf(str, "%d,%.3f,%.3f,%.3f", queryID, retrieval_time, second_per_query, interval_prune_ratio_);
+            return str;
+        };
 
         std::string
         PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {

@@ -29,7 +29,7 @@ namespace ReverseMIPS::OnlineBruteForce {
 
         inline ~Index() {}
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
             if (topk > user_.n_vector_) {
                 spdlog::error("top-k is larger than user, system exit");
                 exit(-1);

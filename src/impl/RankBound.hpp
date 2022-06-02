@@ -80,7 +80,7 @@ namespace ReverseMIPS::RankBound {
             prune_l_.resize(n_user_);
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -149,6 +149,17 @@ namespace ReverseMIPS::RankBound {
 
             return query_heap_l;
         }
+
+        std::string VariancePerformanceMetricName() override {
+            return "queryID, retrieval time, second per query, rank prune ratio";
+        }
+
+        std::string VariancePerformanceStatistics(
+                const double &retrieval_time, const double &second_per_query, const int &queryID) override {
+            char str[256];
+            sprintf(str, "%d,%.3f,%.3f,%.3f", queryID, retrieval_time, second_per_query, rank_prune_ratio_);
+            return str;
+        };
 
         std::string
         PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {

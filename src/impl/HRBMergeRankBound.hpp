@@ -85,7 +85,7 @@ namespace ReverseMIPS::HRBMergeRankBound {
 
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 

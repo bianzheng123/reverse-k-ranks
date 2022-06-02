@@ -68,7 +68,7 @@ namespace ReverseMIPS::GridIndex {
             query_ptr_ = std::make_unique<double[]>(vec_dim_);
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
             ResetTimer();
 
             if (topk > user_.n_vector_) {
