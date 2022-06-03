@@ -22,6 +22,7 @@
 #include "HRBMergeRankBound.hpp"
 #include "IntervalBound.hpp"
 #include "QuadraticRankBound.hpp"
+#include "QuadraticScoreBound.hpp"
 #include "RankBound.hpp"
 
 #include <spdlog/spdlog.h>
@@ -173,6 +174,12 @@ int main(int argc, char **argv) {
         const int n_sample = para.n_sample;
         spdlog::info("input parameter: n_sample {}", n_sample);
         index = QuadraticRankBound::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
+    } else if (method_name == "QuadraticScoreBound") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = QuadraticScoreBound::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else if (method_name == "RankBound") {

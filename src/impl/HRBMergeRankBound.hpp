@@ -184,7 +184,7 @@ namespace ReverseMIPS::HRBMergeRankBound {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &cache_bound_every, const int &n_interval, const int &topt_perc) {
+                                      const int &cache_bound_every, const int &n_sample, const int &topt_perc) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -198,7 +198,7 @@ namespace ReverseMIPS::HRBMergeRankBound {
         user.vectorNormalize();
 
         //rank search
-        HashSearch rank_ins(n_data_item, n_user, cache_bound_every, n_interval);
+        HashSearch rank_ins(n_data_item, n_user, cache_bound_every, n_sample);
 
         //exact rank refinement
         CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);

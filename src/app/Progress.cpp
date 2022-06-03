@@ -19,7 +19,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, topt_perc, n_sample;
+    int cache_bound_every, n_sample, topt_perc;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -39,12 +39,10 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 //            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(2),
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
-            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
-             "the numer of interval")
-            ("topt_perc, tt", po::value<int>(&para.topt_perc)->default_value(50),
-             "store top-t inner product as index")
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
-             "number of sample of a rank bound");
+             "number of sample of a rank bound")
+            ("topt_perc, tt", po::value<int>(&para.topt_perc)->default_value(50),
+             "store top-t inner product as index");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -85,12 +83,12 @@ int main(int argc, char **argv) {
     char parameter_name[256] = "";
     if (method_name == "HRBMergeRankBound") {
         const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
+        const int n_sample = para.n_sample;
         const int topt_perc = para.topt_perc;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, topt_perc {}",
-                     cache_bound_every, n_interval, topt_perc);
-        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, topt_perc);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
+        spdlog::info("input parameter: cache_bound_every {}, n_sample {}, topt_perc {}",
+                     cache_bound_every, n_sample, topt_perc);
+        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample, topt_perc);
+        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d-topt_perc_%d", cache_bound_every, n_sample,
                 topt_perc);
 
     } else {

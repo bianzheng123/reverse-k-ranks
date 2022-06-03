@@ -27,6 +27,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'HRBMergeRankBound': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
         'IntervalBound': 'n_sample_1024',
         'QuadraticRankBound': 'n_sample_16',
+        'QuadraticScoreBound': 'n_sample_16',
         'RankBound': 'cache_bound_every_512',
 
         'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
@@ -88,8 +89,9 @@ def run():
         # 'HashBound',
         # 'HRBMergeRankBound',
         # 'IntervalBound',
-        'QuadraticRankBound',
-        'RankBound',
+        # 'QuadraticRankBound',
+        'QuadraticScoreBound',
+        # 'RankBound',
 
         # 'CAGrid',
         # 'CAFullDim',
@@ -121,9 +123,11 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
         os.system(
-            'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
+            'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticScoreBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))
