@@ -23,15 +23,14 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
     suffix_m = {
         'BPlusTree': 'node_size_512',
 
-        'HashBound': 'cache_bound_every_512-n_interval_1024',
-        'HRBMergeRankBound': 'cache_bound_every_512-n_interval_1024-topt_perc_50',
-        'IntervalBound': 'n_interval_1024',
-        'IntervalRankBound': 'cache_bound_every_512-n_interval_1024',
-        'PartRankBound': 'cache_bound_every_512-n_sample_3',
+        'HashBound': 'cache_bound_every_512-n_sample_1024',
+        'HRBMergeRankBound': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
+        'IntervalBound': 'n_sample_1024',
+        'QuadraticRankBound': 'n_sample_16',
         'RankBound': 'cache_bound_every_512',
 
-        'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_perc_50',
-        'CompressTopTIPBruteForce': 'cache_bound_every_512-n_interval_1024-topt_perc_50',
+        'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
+        'CompressTopTIPBruteForce': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
 
         'CAGrid': 'codeword_32',
         'CAFullInt': 'scale_100',
@@ -85,10 +84,11 @@ def run():
 
         # 'GridIndex',
 
-        'BPlusTree',
+        # 'BPlusTree',
         # 'HashBound',
         # 'HRBMergeRankBound',
-        'IntervalBound',
+        # 'IntervalBound',
+        'QuadraticRankBound',
         'RankBound',
 
         # 'CAGrid',
@@ -117,10 +117,12 @@ def run():
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
+        os.system(
+            'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))

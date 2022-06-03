@@ -15,7 +15,6 @@
 #include <spdlog/spdlog.h>
 #include <fstream>
 #include "util/TimeMemory.hpp"
-#include "util/FileIO.hpp"
 
 using namespace ReverseMIPS;
 

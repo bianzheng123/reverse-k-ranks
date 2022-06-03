@@ -2,8 +2,7 @@
 // Created by bianzheng on 2022/5/11.
 //
 
-#include "alg/KMeans/KMeansParallel.hpp"
-#include "alg/SpaceInnerProduct.hpp"
+#include "alg/Cluster/KMeansParallel.hpp"
 #include "util/TimeMemory.hpp"
 #include <iostream>
 #include <vector>

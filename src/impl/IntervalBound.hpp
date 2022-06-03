@@ -6,9 +6,9 @@
 #define REVERSE_K_RANKS_INTERVALBOUND_HPP
 
 #include "alg/DiskIndex/ReadAll.hpp"
-#include "alg/Prune/IntervalSearch.hpp"
-#include "alg/Prune/RankSearch.hpp"
-#include "alg/Prune/PruneCandidateByBound.hpp"
+#include "alg/PruneUser/IntervalSearch.hpp"
+#include "alg/PruneUser/RankSearch.hpp"
+#include "alg/PruneUser/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"

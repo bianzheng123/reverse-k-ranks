@@ -6,8 +6,8 @@
 #define REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
 
 #include "alg/DiskIndex/MergeRankBound.hpp"
-#include "alg/Prune/HashSearch.hpp"
-#include "alg/Prune/PruneCandidateByBound.hpp"
+#include "alg/PruneUser/HashSearch.hpp"
+#include "alg/PruneUser/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"

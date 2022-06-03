@@ -118,12 +118,22 @@ namespace ReverseMIPS {
                 IP_ub = bound_distance_table_[userID * n_cache_rank_ + bucket_idx - 1];
             }
 
+            if (not(IP_lb <= queryIP && queryIP <= IP_ub)) {
+                printf("userID %d, queryIP %.3f, rank_lb %d, rank_ub %d, IP_lb %.3f, IP_ub %.3f\n", userID, queryIP,
+                       rank_lb, rank_ub, IP_lb, IP_ub);
+                printf("bucket_lb %d, bucket_ub %d\n", bucket_lb, bucket_ub);
+                std::cout << std::boolalpha << (lb_ptr == iter_end) << std::endl;
+            }
+
+            assert(IP_lb <= queryIP && queryIP <= IP_ub);
+            assert(rank_lb - rank_ub <= n_max_disk_read_);
+
             return false;
         }
 
         void RankBound(const std::vector<double> &queryIP_l, const int &topk,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
-                       std::vector<std::pair<double, double>> &IPbound_l,
+                       std::vector<std::pair<double, double>> &queryIPbound_l,
                        std::vector<bool> &prune_l,
                        std::vector<int> &rank_topk_max_heap) const {
             assert(rank_topk_max_heap.size() == topk);
@@ -139,12 +149,12 @@ namespace ReverseMIPS {
                 assert(upper_rank <= lower_rank);
                 double queryIP = queryIP_l[userID];
 
-                double IP_lb = IPbound_l[userID].first;
-                double IP_ub = IPbound_l[userID].second;
+                double IP_lb = queryIPbound_l[userID].first;
+                double IP_ub = queryIPbound_l[userID].second;
 
                 CoarseBinarySearch(queryIP, userID, n_cache_rank_,
                                    lower_rank, upper_rank, IP_lb, IP_ub);
-                IPbound_l[userID] = std::make_pair(IP_lb, IP_ub);
+                queryIPbound_l[userID] = std::make_pair(IP_lb, IP_ub);
 
                 rank_topk_max_heap[count] = lower_rank;
                 rank_lb_l[userID] = lower_rank;
@@ -180,11 +190,11 @@ namespace ReverseMIPS {
                     continue;
                 }
 
-                double IP_lb = IPbound_l[userID].first;
-                double IP_ub = IPbound_l[userID].second;
+                double IP_lb = queryIPbound_l[userID].first;
+                double IP_ub = queryIPbound_l[userID].second;
                 bool prune = CoarseBinarySearch(queryIP, userID, global_lower_bucket,
                                                 lower_rank, upper_rank, IP_lb, IP_ub);
-                IPbound_l[userID] = std::make_pair(IP_lb, IP_ub);
+                queryIPbound_l[userID] = std::make_pair(IP_lb, IP_ub);
 
                 if (prune) {
                     prune_l[userID] = true;

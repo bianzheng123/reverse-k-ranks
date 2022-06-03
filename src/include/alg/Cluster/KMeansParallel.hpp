@@ -12,8 +12,11 @@
 #include <tuple>
 #include <type_traits>
 #include <vector>
+#include <spdlog/spdlog.h>
+#include <cstring>
 
 #include "KMeans.hpp"
+#include "struct/VectorMatrix.hpp"
 
 /*
 DKM - A k-means implementation that is generic across variable data dimensions.

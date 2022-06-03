@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_EXACTUSERRANK_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/Prune/PruneCandidateByBound.hpp"
+#include "alg/PruneUser/PruneCandidateByBound.hpp"
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"

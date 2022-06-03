@@ -25,7 +25,7 @@
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/Prune/PruneCandidateByBound.hpp"
+#include "alg/PruneUser/PruneCandidateByBound.hpp"
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"

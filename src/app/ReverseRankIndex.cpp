@@ -21,6 +21,7 @@
 #include "HashBound.hpp"
 #include "HRBMergeRankBound.hpp"
 #include "IntervalBound.hpp"
+#include "QuadraticRankBound.hpp"
 #include "RankBound.hpp"
 
 #include <spdlog/spdlog.h>
@@ -32,7 +33,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_interval, topt_perc;
+    int cache_bound_every, n_sample, topt_perc;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -51,8 +52,8 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
-            ("n_interval, nitv", po::value<int>(&para.n_interval)->default_value(1024),
-             "the numer of interval")
+            ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(1024),
+             "the numer of sample")
             ("topt_perc, ttp", po::value<int>(&para.topt_perc)->default_value(50),
              "store percent of top-t inner product as index");
 
@@ -100,24 +101,24 @@ int main(int argc, char **argv) {
 
     } else if (method_name == "CompressTopTIDIPBruteForce") {
         const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
+        const int n_sample = para.n_sample;
         const int topt_perc = para.topt_perc;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, topt_perc {}",
-                     cache_bound_every, n_interval, topt_perc);
-        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval,
+        spdlog::info("input parameter: cache_bound_every {}, n_sample {}, topt_perc {}",
+                     cache_bound_every, n_sample, topt_perc);
+        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample,
                                                        topt_perc);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
+        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d-topt_perc_%d", cache_bound_every, n_sample,
                 topt_perc);
 
     } else if (method_name == "CompressTopTIPBruteForce") {
         const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
+        const int n_sample = para.n_sample;
         const int topt_perc = para.topt_perc;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, topt_perc {}",
-                     cache_bound_every, n_interval, topt_perc);
-        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval,
+        spdlog::info("input parameter: cache_bound_every {}, n_sample {}, topt_perc {}",
+                     cache_bound_every, n_sample, topt_perc);
+        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample,
                                                      topt_perc);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
+        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d-topt_perc_%d", cache_bound_every, n_sample,
                 topt_perc);
 
     } else if (method_name == "DiskBruteForce") {
@@ -146,27 +147,33 @@ int main(int argc, char **argv) {
 
     } else if (method_name == "HashBound") {
         const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
-                     cache_bound_every, n_interval);
-        index = HashBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: cache_bound_every {}, n_sample {}",
+                     cache_bound_every, n_sample);
+        index = HashBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample);
+        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d", cache_bound_every, n_sample);
 
     } else if (method_name == "HRBMergeRankBound") {
         const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
+        const int n_sample = para.n_sample;
         const int topt_perc = para.topt_perc;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}, topt_perc {}",
-                     cache_bound_every, n_interval, topt_perc);
-        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval, topt_perc);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
+        spdlog::info("input parameter: cache_bound_every {}, n_sample {}, topt_perc {}",
+                     cache_bound_every, n_sample, topt_perc);
+        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample, topt_perc);
+        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d-topt_perc_%d", cache_bound_every, n_sample,
                 topt_perc);
 
     } else if (method_name == "IntervalBound") {
-        const int n_interval = para.n_interval;
-        spdlog::info("input parameter: n_interval {}", n_interval);
-        index = IntervalBound::BuildIndex(data_item, user, index_path, n_interval);
-        sprintf(parameter_name, "n_interval_%d", n_interval);
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = IntervalBound::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
+    } else if (method_name == "QuadraticRankBound") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = QuadraticRankBound::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else if (method_name == "RankBound") {
         const int cache_bound_every = para.cache_bound_every;

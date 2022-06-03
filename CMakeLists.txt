@@ -30,6 +30,7 @@ set(BUILD_TEST_MODULE OFF)
 set(BUILD_ATTRIBUTION OFF)
 
 set(BUILD_PROGRESS ON)
+set(BUILD_VAR OFF)
 
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
@@ -41,9 +42,11 @@ add_executable(rri src/app/ReverseRankIndex.cpp)
 target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-add_executable(rrivar src/app/ReverseRankIndexVariance.cpp)
-target_include_directories(rrivar PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(rrivar PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+if (BUILD_VAR)
+    add_executable(rrivar src/app/ReverseRankIndexVariance.cpp)
+    target_include_directories(rrivar PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(rrivar PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+endif ()
 
 add_executable(ca src/app/ComputeAll.cpp)
 target_include_directories(ca PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})

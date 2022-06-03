@@ -17,6 +17,7 @@
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
+
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"

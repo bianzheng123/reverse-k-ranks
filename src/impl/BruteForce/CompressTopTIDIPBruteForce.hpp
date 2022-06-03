@@ -6,8 +6,8 @@
 #define REVERSE_KRANKS_COMPRESSTOPTIDIPBRUTEFORCE_HPP
 
 #include "alg/DiskIndex/TopTIDIP.hpp"
-#include "alg/Prune/HashSearch.hpp"
-#include "alg/Prune/PruneCandidateByBound.hpp"
+#include "alg/PruneUser/HashSearch.hpp"
+#include "alg/PruneUser/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"

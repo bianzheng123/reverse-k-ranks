@@ -18,7 +18,6 @@ namespace ReverseMIPS {
 
         void WritePerformance(const char *dataset_name, const char *method_name,
                               const char *other_name, const std::vector<int> &topk_l) {
-            //TODO output the result
             char resPath[256];
             const int n_topk = (int) topk_l.size();
             for (int topkID = 0; topkID < n_topk; topkID++) {
@@ -55,7 +54,10 @@ namespace ReverseMIPS {
         }
 
         void AddBuildIndexTime(const double &build_index_time) {
-            char buff[1024];
+//            std::string time_s = std::to_string(build_index_time);
+//            std::string str = "build index time " + time_s + "s";
+
+            char buff[128];
             sprintf(buff, "build index time %.3fs", build_index_time);
             std::string str(buff);
             this->config_l.emplace_back(str);

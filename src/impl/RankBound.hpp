@@ -6,14 +6,14 @@
 #define REVERSE_KRANKS_RANKBOUND_HPP
 
 #include "alg/DiskIndex/ReadAll.hpp"
-#include "alg/Prune/PruneCandidateByBound.hpp"
+#include "alg/PruneUser/PruneCandidateByBound.hpp"
+#include "alg/PruneUser/RankSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
-#include "alg/Prune/RankSearch.hpp"
 #include <string>
 #include <fstream>
 #include <vector>
@@ -103,6 +103,7 @@ namespace ReverseMIPS::RankBound {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
+                IPbound_l_.assign(n_user_, std::pair<double, double>(-std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
 
                 //calculate IP
                 double *query_item_vec = query_item.getVector(queryID);
