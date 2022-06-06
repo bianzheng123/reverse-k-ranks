@@ -89,7 +89,7 @@ def run():
         # 'HashBound',
         # 'HRBMergeRankBound',
         # 'IntervalBound',
-        # 'QuadraticRankBound',
+        'QuadraticRankBound',
         'QuadraticScoreBound',
         # 'RankBound',
 
@@ -123,8 +123,8 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
+        os.system(
+            'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
         os.system(
             'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticScoreBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))

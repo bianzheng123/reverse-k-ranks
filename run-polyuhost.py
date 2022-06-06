@@ -105,16 +105,6 @@ def run_compress_topt():
                     ds, basic_dir, "HRBMergeRankBound", topt_perc))
 
 
-def run_sample_rank_bound():
-    # dataset_l = ['netflix', 'yahoomusic-small', 'yelp-small']
-    n_sample_l = [1, 2, 4, 8, 16, 32]
-    for ds in dataset_l:
-        for n_sample in n_sample_l:
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --cache_bound_every {}'.format(
-                    ds, basic_dir, "PartRankBound", n_sample, 512))
-
-
 def run_compute_all_scale():
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     scale_l = [25, 50, 100, 200, 400, 800, 1000]
@@ -156,36 +146,46 @@ def run_compute_all_n_codeword():
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # basic_dir = os.path.join('/home', 'bianzheng', 'Dataset', 'ReverseMIPS')
-    # dataset_l = ['movielens-27m', 'netflix', 'yelp']
+    dataset_l = ['movielens-27m-extreme', 'movielens-27m', 'netflix', 'yelp-small', 'yahoomusic-small']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
-    dataset_l = ['netflix-small', 'movielens-27m-small']
+    # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    run_compute_all_scale()
-    run_compute_all_n_codebook()
-    run_compute_all_n_codeword()
+    # run_compute_all_scale()
+    # run_compute_all_n_codebook()
+    # run_compute_all_n_codeword()
 
-    # for ds in ['movielens-27m', 'netflix', 'yelp-small']:
-    #     os.system('cd build/attribution && ./usd {} {}'.format(ds, basic_dir))
+    n_data_item_m = {
+        'movielens-27m-extreme': 53889,
+        'movielens-27m': 53889,
+        'netflix': 17770,
+        'yelp-small': 50000,
+        'yahoomusic-small': 50000
+    }
 
     for ds in dataset_l:
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds, 'CAGrid'))
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds, 'CAFullDim'))
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds, 'CAFullNorm'))
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds, 'CAFullInt'))
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds,
-                                                                                       'CAPartDimPartInt'))
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds,
-                                                                                       'CAPartDimPartNorm'))
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds,
-                                                                                       'CAPartIntPartNorm'))
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds, 'CAUserItemPQ'))
-        os.system(
-            'cd build && ./ca --basic_dir {} --dataset_name {} --bound_name {}'.format(basic_dir, ds, 'CAItemPQ'))
+        n_rankbound = 512
+        rankbound_cmd = 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --cache_bound_every {}'.format(
+            ds, basic_dir, 'RankBound', n_rankbound
+        )
+        print(rankbound_cmd)
+        os.system(rankbound_cmd)
+
+        n_sample = int(n_data_item_m[ds] / n_rankbound)
+
+        intervalbound_cmd = 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+            ds, basic_dir, 'IntervalBound', n_sample
+        )
+        print(intervalbound_cmd)
+        os.system(intervalbound_cmd)
+
+        quadraticrankbound_cmd = 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+            ds, basic_dir, 'QuadraticRankBound', n_sample
+        )
+        print(quadraticrankbound_cmd)
+        os.system(quadraticrankbound_cmd)
+
+        quadraticscorebound_cmd = 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+            ds, basic_dir, 'QuadraticScoreBound', n_sample
+        )
+        print(quadraticscorebound_cmd)
+        os.system(quadraticscorebound_cmd)
