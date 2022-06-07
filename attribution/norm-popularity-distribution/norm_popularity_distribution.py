@@ -2,8 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # movielens
-n_user = 283228
-n_data_item = 53889
+# n_user = 283228
+# n_data_item = 53889
+# fake-normal
+n_user = 1000
+n_data_item = 5000
 # netflix
 # n_user = 480189
 # n_data_item = 17770
@@ -14,7 +17,7 @@ n_data_item = 53889
 if __name__ == '__main__':
     for top_perc in [1, 2, 5, 8, 10]:
         distribution_l = np.loadtxt(
-            '../../result/attribution/norm-popularity-distribution-netflix-small-perc-{}.csv'.format(top_perc),
+            '../../result/attribution/norm-popularity-distribution-fake-normal-perc-{}.csv'.format(top_perc),
             delimiter=',')
         scatter_x = distribution_l[:, 0]
         scatter_y = distribution_l[:, 1]

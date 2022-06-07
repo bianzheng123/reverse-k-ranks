@@ -146,7 +146,8 @@ def run_compute_all_n_codeword():
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # basic_dir = os.path.join('/home', 'bianzheng', 'Dataset', 'ReverseMIPS')
-    dataset_l = ['movielens-27m-extreme', 'movielens-27m', 'netflix', 'yelp-small', 'yahoomusic-small']
+    dataset_l = ['movielens-27m', 'netflix']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
@@ -154,38 +155,5 @@ if __name__ == '__main__':
     # run_compute_all_n_codebook()
     # run_compute_all_n_codeword()
 
-    n_data_item_m = {
-        'movielens-27m-extreme': 53889,
-        'movielens-27m': 53889,
-        'netflix': 17770,
-        'yelp-small': 50000,
-        'yahoomusic-small': 50000
-    }
-
     for ds in dataset_l:
-        n_rankbound = 512
-        rankbound_cmd = 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --cache_bound_every {}'.format(
-            ds, basic_dir, 'RankBound', n_rankbound
-        )
-        print(rankbound_cmd)
-        os.system(rankbound_cmd)
-
-        n_sample = int(n_data_item_m[ds] / n_rankbound)
-
-        intervalbound_cmd = 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-            ds, basic_dir, 'IntervalBound', n_sample
-        )
-        print(intervalbound_cmd)
-        os.system(intervalbound_cmd)
-
-        quadraticrankbound_cmd = 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-            ds, basic_dir, 'QuadraticRankBound', n_sample
-        )
-        print(quadraticrankbound_cmd)
-        os.system(quadraticrankbound_cmd)
-
-        quadraticscorebound_cmd = 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-            ds, basic_dir, 'QuadraticScoreBound', n_sample
-        )
-        print(quadraticscorebound_cmd)
-        os.system(quadraticscorebound_cmd)
+        os.system("cd build/attribution && ./npd {} {}".format(ds, basic_dir))
