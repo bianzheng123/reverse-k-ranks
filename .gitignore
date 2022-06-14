@@ -15,3 +15,4 @@ index
 cmake-build-debug/
 cmake-build-release/
 /attribution/*.jpg
+*.eps

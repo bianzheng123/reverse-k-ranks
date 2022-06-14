@@ -1,0 +1,6 @@
+#range query (query region ratio=0.16%) - query send throughput - average query latency		
+#	FlinkGIS_baseline	Query_Replica_Baseline	Thor
+8	387	412	349
+16	650	702	581
+24	2579	23780	833
+32	56407	91865	29494

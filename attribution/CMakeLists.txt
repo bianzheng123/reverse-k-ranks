@@ -43,3 +43,7 @@ target_link_libraries(npd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::
 add_executable(srt run-time/ScoreRunTime.cpp)
 target_include_directories(srt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(srt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+add_executable(sd score-distribution/ScoreDistribution.cpp)
+target_include_directories(sd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(sd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})

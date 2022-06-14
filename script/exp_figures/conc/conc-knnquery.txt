@@ -1,0 +1,7 @@
+# knn query (k=8) - query send throughput - average query latency			
+#	nometa	qbcast	thor
+1	273.5	208	156.5
+4	2294	214.5	160.5
+16	254977	267	165.5
+64	1616828	566.5	191.5
+256	1284254	193586.5	292

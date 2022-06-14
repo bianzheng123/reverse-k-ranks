@@ -1,0 +1,6 @@
+# object query - query send throughput - average query latency			
+#	FlinkGIS_baseline	Query_Replica_Baseline	Thor
+5	52	234	52
+10	51	340	51
+20	49	580	49
+40	49	32708	49
