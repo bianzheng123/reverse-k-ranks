@@ -150,11 +150,11 @@ namespace ReverseMIPS::MemoryBruteForce {
         }
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
             // int topk;
             //double total_time,
             //          inner_product_time, binary_search_time;
-            //double second_per_query;
+            //double ms_per_query;
             //unit: second
 
             char buff[1024];
@@ -163,7 +163,7 @@ namespace ReverseMIPS::MemoryBruteForce {
                     "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, binary search %.3fs\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, binary_search_time_,
-                    second_per_query);
+                    ms_per_query);
             std::string str(buff);
             return str;
         }

@@ -103,7 +103,8 @@ namespace ReverseMIPS::RankBound {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
-                IPbound_l_.assign(n_user_, std::pair<double, double>(-std::numeric_limits<double>::max(), std::numeric_limits<double>::max()));
+                IPbound_l_.assign(n_user_, std::pair<double, double>(-std::numeric_limits<double>::max(),
+                                                                     std::numeric_limits<double>::max()));
 
                 //calculate IP
                 double *query_item_vec = query_item.getVector(queryID);
@@ -163,13 +164,13 @@ namespace ReverseMIPS::RankBound {
         };
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
             // int topk;
             //double total_time,
             //          inner_product_time, coarse_binary_search_time, read_disk_time
             //          fine_binary_search_time;
             //double rank_prune_ratio;
-            //double second_per_query;
+            //double ms_per_query;
             //unit: second
 
             char buff[1024];
@@ -180,7 +181,7 @@ namespace ReverseMIPS::RankBound {
                     inner_product_time_, coarse_binary_search_time_, read_disk_time_,
                     fine_binary_search_time_,
                     rank_prune_ratio_,
-                    second_per_query);
+                    ms_per_query);
             std::string str(buff);
             return str;
         }

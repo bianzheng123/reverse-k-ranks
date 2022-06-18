@@ -16,10 +16,10 @@ namespace ReverseMIPS {
         Retrieval(const VectorMatrix &query_item, const int &topk) = 0;
 
         virtual std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) = 0;
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) = 0;
 
         virtual std::string BuildIndexStatistics() {
-            return "Build Index Info:";
+            return "Build Index Info: none";
         };
 
         virtual std::string VariancePerformanceMetricName() {

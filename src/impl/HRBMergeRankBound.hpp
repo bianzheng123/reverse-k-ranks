@@ -153,13 +153,13 @@ namespace ReverseMIPS::HRBMergeRankBound {
         }
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &second_per_query) override {
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
             // int topk;
             //double total_time,
             //          inner_product_time, rank_bound_refinement_time_
             //          read_disk_time_, exact_rank_refinement_time_,
             //          rank_search_prune_ratio_
-            //double second_per_query;
+            //double ms_per_query;
             //unit: second
 
             char buff[1024];
@@ -169,7 +169,7 @@ namespace ReverseMIPS::HRBMergeRankBound {
                     inner_product_time_, rank_bound_refinement_time_,
                     read_disk_time_, exact_rank_refinement_time_,
                     rank_search_prune_ratio_,
-                    second_per_query);
+                    ms_per_query);
             std::string str(buff);
             return str;
         }

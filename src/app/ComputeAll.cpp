@@ -81,7 +81,8 @@ int main(int argc, char **argv) {
     char parameter_name[256] = "";
 
     spdlog::info("input parameter: none");
-    index = ComputeAll::BuildIndex(data_item, user, bound_name, para.scale, para.n_codebook, para.n_codeword, parameter_name);
+    index = ComputeAll::BuildIndex(data_item, user, bound_name, para.scale, para.n_codebook, para.n_codeword,
+                                   parameter_name);
 
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
@@ -94,10 +95,10 @@ int main(int argc, char **argv) {
         vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk);
 
         double retrieval_time = record.get_elapsed_time_second();
-        double second_per_query = retrieval_time / n_query_item;
+        double ms_per_query = retrieval_time / n_query_item * 1000;
 
-        string performance_str = index->PerformanceStatistics(topk, retrieval_time, second_per_query);
-        config.config_l.push_back(performance_str);
+        string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
+        config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
 
         result_rank_l.emplace_back(result_rk);
         spdlog::info("finish top-{}", topk);
@@ -107,7 +108,7 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
 
     for (int i = 0; i < n_topk; i++) {
-        cout << config.config_l[i] << endl;
+        cout << config.GetConfig(i) << endl;
         WriteRankResult(result_rank_l[i], dataset_name, bound_name.c_str(), parameter_name);
     }
 
