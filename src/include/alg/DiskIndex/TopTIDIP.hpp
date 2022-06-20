@@ -171,13 +171,12 @@ namespace ReverseMIPS {
         inline TopTIDIP() = default;
 
         inline TopTIDIP(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
-                        const int topt_perc) {
+                        const int topt) {
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
             this->index_path_ = index_path;
 
-            const int topt = int(1.0 * n_data_item / 100 * topt_perc);
             if (topt <= 0 || topt > n_data_item) {
                 spdlog::error("topt is invalid, consider change topt_perc");
                 exit(-1);

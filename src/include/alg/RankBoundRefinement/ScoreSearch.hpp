@@ -14,7 +14,7 @@
 
 namespace ReverseMIPS {
 
-    class IntervalSearch {
+    class ScoreSearch {
     public:
 
         int n_interval_, n_user_, n_data_item_;
@@ -26,9 +26,9 @@ namespace ReverseMIPS {
         std::unique_ptr<std::pair<double, double>[]> user_ip_bound_l_;
 
 
-        inline IntervalSearch() = default;
+        inline ScoreSearch() = default;
 
-        inline IntervalSearch(const int &n_interval, const int &n_user, const int n_data_item) {
+        inline ScoreSearch(const int &n_interval, const int &n_user, const int n_data_item) {
             this->n_interval_ = n_interval;
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
@@ -111,6 +111,50 @@ namespace ReverseMIPS {
                 int bkt_rank_lb = interval_table_[userID * n_interval_ + itvID];
                 rank_lb_l[userID] = bkt_rank_lb;
                 rank_ub_l[userID] = bkt_rank_ub;
+            }
+        }
+
+        //convert ip_bound to rank_bound
+        void RankBound(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
+                       const int &topk,
+                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
+                       std::vector<std::pair<double, double>>& queryIPBound_l) {
+
+            assert(prune_l.size() == n_user_);
+            assert(rank_lb_l.size() == n_user_ && rank_ub_l.size() == n_user_);
+            assert(queryIP_l.size() == n_user_);
+            assert(queryIPBound_l.size() == n_user_);
+
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID]) {
+                    continue;
+                }
+
+                const double queryIP = queryIP_l[userID];
+                std::pair<double, double> user_IPbound = user_ip_bound_l_[userID];
+                const double user_IP_ub = user_IPbound.second;
+                const double itv_dist = interval_dist_l_[userID];
+                const int itvID = std::floor((user_IP_ub - queryIP) / itv_dist);
+                if (itvID < 0) {
+                    assert(rank_ub_l[userID] <= 0 && 0 <= rank_lb_l[userID]);
+                    rank_ub_l[userID] = 0;
+                    rank_lb_l[userID] = 0;
+                    continue;
+                } else if (itvID >= n_interval_) {
+                    assert(rank_ub_l[userID] <= n_data_item_ && n_data_item_ <= rank_lb_l[userID]);
+                    rank_ub_l[userID] = n_data_item_;
+                    rank_lb_l[userID] = n_data_item_;
+                    continue;
+                }
+
+                int bkt_rank_ub = itvID == 0 ? 0 : interval_table_[userID * n_interval_ + itvID - 1];
+                int bkt_rank_lb = interval_table_[userID * n_interval_ + itvID];
+                rank_lb_l[userID] = bkt_rank_lb;
+                rank_ub_l[userID] = bkt_rank_ub;
+
+                const double itv_IP_lb = user_IP_ub - (itvID + 1) * itv_dist;
+                const double itv_IP_ub = user_IP_ub - itvID * itv_dist;
+                queryIPBound_l[userID] = std::make_pair(itv_IP_lb, itv_IP_ub);
             }
         }
 

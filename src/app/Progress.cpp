@@ -9,6 +9,9 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "HRBMergeRankBound.hpp"
+#include "BruteForce/CompressTopTIDIPBruteForce.hpp"
+#include "BruteForce/CompressTopTIDBruteForce.hpp"
+#include "BruteForce/CompressTopTIPBruteForce.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -19,7 +22,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_sample, topt_perc;
+    int cache_bound_every, n_sample, index_size_gb;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -36,13 +39,12 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("BatchDiskBruteForce"),
              "method_name")
 
-//            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(2),
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "number of sample of a rank bound")
-            ("topt_perc, tt", po::value<int>(&para.topt_perc)->default_value(50),
-             "store top-t inner product as index");
+            ("index_size_gb, tt", po::value<int>(&para.index_size_gb)->default_value(50),
+             "index size, in unit of GB");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -82,14 +84,44 @@ int main(int argc, char **argv) {
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
     if (method_name == "HRBMergeRankBound") {
-        const int cache_bound_every = para.cache_bound_every;
         const int n_sample = para.n_sample;
-        const int topt_perc = para.topt_perc;
-        spdlog::info("input parameter: cache_bound_every {}, n_sample {}, topt_perc {}",
-                     cache_bound_every, n_sample, topt_perc);
-        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample, topt_perc);
-        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d-topt_perc_%d", cache_bound_every, n_sample,
-                topt_perc);
+        const int index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path,
+                                              n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+                n_sample, index_size_gb);
+
+    } else if (method_name == "CompressTopTIDBruteForce") {
+        const int n_sample = para.n_sample;
+        const int index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = CompressTopTIDBruteForce::BuildIndex(data_item, user, index_path,
+                                                     n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+                n_sample, index_size_gb);
+
+    } else if (method_name == "CompressTopTIDIPBruteForce") {
+        const int n_sample = para.n_sample;
+        const int index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path,
+                                                       n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+                n_sample, index_size_gb);
+
+    } else if (method_name == "CompressTopTIPBruteForce") {
+        const int n_sample = para.n_sample;
+        const int index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path,
+                                                     n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+                n_sample, index_size_gb);
 
     } else {
         spdlog::error("not such method");

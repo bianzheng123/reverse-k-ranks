@@ -18,10 +18,9 @@
 #include "Online/GridIndex.hpp"
 
 #include "BPlusTree.hpp"
-#include "HashBound.hpp"
 #include "HRBMergeRankBound.hpp"
-#include "IntervalBound.hpp"
-#include "RankBound.hpp"
+#include "ScoreSample.hpp"
+#include "RankSample.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -166,14 +165,6 @@ int main(int argc, char **argv) {
         index = BPlusTree::BuildIndex(data_item, user, index_path, cache_bound_every);
         sprintf(parameter_name, "node_size_%d", cache_bound_every);
 
-    } else if (method_name == "HashBound") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_interval = para.n_interval;
-        spdlog::info("input parameter: cache_bound_every {}, n_interval {}",
-                     cache_bound_every, n_interval);
-        index = HashBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_interval);
-        sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d", cache_bound_every, n_interval);
-
     } else if (method_name == "HRBMergeRankBound") {
         const int cache_bound_every = para.cache_bound_every;
         const int n_interval = para.n_interval;
@@ -184,17 +175,17 @@ int main(int argc, char **argv) {
         sprintf(parameter_name, "cache_bound_every_%d-n_interval_%d-topt_perc_%d", cache_bound_every, n_interval,
                 topt_perc);
 
-    } else if (method_name == "IntervalBound") {
-        const int n_interval = para.n_interval;
-        spdlog::info("input parameter: n_interval {}", n_interval);
-        index = IntervalBound::BuildIndex(data_item, user, index_path, n_interval);
-        sprintf(parameter_name, "n_interval_%d", n_interval);
-
-    } else if (method_name == "RankBound") {
+    } else if (method_name == "RankSample") {
         const int cache_bound_every = para.cache_bound_every;
         spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
-        index = RankBound::BuildIndex(data_item, user, index_path, cache_bound_every);
+        index = RankSample::BuildIndex(data_item, user, index_path, cache_bound_every);
         sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
+
+    } else if (method_name == "ScoreSample") {
+        const int n_interval = para.n_interval;
+        spdlog::info("input parameter: n_interval {}", n_interval);
+        index = ScoreSample::BuildIndex(data_item, user, index_path, n_interval);
+        sprintf(parameter_name, "n_interval_%d", n_interval);
 
     } else {
         spdlog::error("not such method");

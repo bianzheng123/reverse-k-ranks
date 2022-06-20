@@ -24,14 +24,15 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'BPlusTree': 'node_size_512',
 
         'HashBound': 'cache_bound_every_512-n_sample_1024',
-        'HRBMergeRankBound': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
-        'IntervalBound': 'n_sample_1024',
+        'HRBMergeRankBound': 'n_sample_20-index_size_gb_50',
         'QuadraticRankBound': 'n_sample_16',
         'QuadraticScoreBound': 'n_sample_16',
-        'RankBound': 'cache_bound_every_512',
+        'RankSample': 'cache_bound_every_512',
+        'ScoreSample': 'n_sample_50',
 
-        'CompressTopTIDIPBruteForce': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
-        'CompressTopTIPBruteForce': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
+        # 'CompressTopTIDBruteForce': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
+        'CompressTopTIDIPBruteForce': 'n_sample_20-index_size_gb_50',
+        'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
 
         'CAGrid': 'codeword_32',
         'CAFullInt': 'scale_100',
@@ -77,6 +78,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
 def run():
     method_name_l = [
         'BatchDiskBruteForce',
+        # 'CompressTopTIDBruteForce',
         # 'CompressTopTIDIPBruteForce',
         # 'CompressTopTIPBruteForce',
         # 'DiskBruteForce',
@@ -87,11 +89,11 @@ def run():
 
         # 'BPlusTree',
         # 'HashBound',
-        # 'HRBMergeRankBound',
-        # 'IntervalBound',
-        'QuadraticRankBound',
-        'QuadraticScoreBound',
-        # 'RankBound',
+        'HRBMergeRankBound',
+        # 'QuadraticRankBound',
+        # 'QuadraticScoreBound',
+        # 'RankSample',
+        # 'ScoreSample',
 
         # 'CAGrid',
         # 'CAFullDim',
@@ -111,8 +113,9 @@ def run():
     # dataset_l = ['fake-small', 'fake']
     for ds in dataset_l:
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
@@ -121,13 +124,13 @@ def run():
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'IntervalBound'))
-        os.system(
-            'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
-        os.system(
-            'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticScoreBound'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankBound'))
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticScoreBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))
@@ -146,6 +149,6 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-small', 'fake']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-small', 'fake']
     run()

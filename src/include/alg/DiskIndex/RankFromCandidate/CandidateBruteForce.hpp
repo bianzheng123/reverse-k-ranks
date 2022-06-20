@@ -40,6 +40,9 @@ namespace ReverseMIPS {
             const double &IP_ub = IPbound_pair.second;
             const int query_rank_lb = rank_bound_pair.first;
             const int query_rank_ub = rank_bound_pair.second;
+            if(query_rank_lb == query_rank_ub){
+                return 0;
+            }
             assert(0 <= query_rank_ub && query_rank_ub <= query_rank_lb && query_rank_lb <= n_data_item_);
             assert(IP_lb <= queryIP && queryIP <= IP_ub);
             for (int itemID = 0; itemID < n_data_item_; itemID++) {

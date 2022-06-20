@@ -6,8 +6,8 @@
 #define REVERSE_KRANKS_QUADRATICSCOREBOUND_HPP
 
 #include "alg/DiskIndex/ReadAll.hpp"
-#include "alg/PruneUser/PruneCandidateByBound.hpp"
-#include "alg/PruneUser/QuadraticScoreSearch.hpp"
+#include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
+#include "alg/RankBoundRefinement/QuadraticScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"

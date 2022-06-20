@@ -9,8 +9,6 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "BruteForce/BatchDiskBruteForce.hpp"
-#include "BruteForce/CompressTopTIDIPBruteForce.hpp"
-#include "BruteForce/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "BruteForce/OnlineBruteForce.hpp"
@@ -18,12 +16,10 @@
 #include "Online/GridIndex.hpp"
 
 #include "BPlusTree.hpp"
-#include "HashBound.hpp"
-#include "HRBMergeRankBound.hpp"
-#include "IntervalBound.hpp"
 #include "QuadraticRankBound.hpp"
 #include "QuadraticScoreBound.hpp"
-#include "RankBound.hpp"
+#include "RankSample.hpp"
+#include "ScoreSample.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -34,7 +30,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_sample, topt_perc;
+    int cache_bound_every, n_sample, index_size_gb;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -53,10 +49,10 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
-            ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(1024),
+            ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(50),
              "the numer of sample")
-            ("topt_perc, ttp", po::value<int>(&para.topt_perc)->default_value(50),
-             "store percent of top-t inner product as index");
+            ("index_size_gb, tt", po::value<int>(&para.index_size_gb)->default_value(50),
+             "index size, in unit of GB");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -100,28 +96,6 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: none");
         index = BatchDiskBruteForce::BuildIndex(data_item, user, index_path);
 
-    } else if (method_name == "CompressTopTIDIPBruteForce") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_sample = para.n_sample;
-        const int topt_perc = para.topt_perc;
-        spdlog::info("input parameter: cache_bound_every {}, n_sample {}, topt_perc {}",
-                     cache_bound_every, n_sample, topt_perc);
-        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample,
-                                                       topt_perc);
-        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d-topt_perc_%d", cache_bound_every, n_sample,
-                topt_perc);
-
-    } else if (method_name == "CompressTopTIPBruteForce") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_sample = para.n_sample;
-        const int topt_perc = para.topt_perc;
-        spdlog::info("input parameter: cache_bound_every {}, n_sample {}, topt_perc {}",
-                     cache_bound_every, n_sample, topt_perc);
-        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample,
-                                                     topt_perc);
-        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d-topt_perc_%d", cache_bound_every, n_sample,
-                topt_perc);
-
     } else if (method_name == "DiskBruteForce") {
         spdlog::info("input parameter: none");
         index = DiskBruteForce::BuildIndex(data_item, user, index_path);
@@ -146,30 +120,6 @@ int main(int argc, char **argv) {
         index = BPlusTree::BuildIndex(data_item, user, index_path, cache_bound_every);
         sprintf(parameter_name, "node_size_%d", cache_bound_every);
 
-    } else if (method_name == "HashBound") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: cache_bound_every {}, n_sample {}",
-                     cache_bound_every, n_sample);
-        index = HashBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample);
-        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d", cache_bound_every, n_sample);
-
-    } else if (method_name == "HRBMergeRankBound") {
-        const int cache_bound_every = para.cache_bound_every;
-        const int n_sample = para.n_sample;
-        const int topt_perc = para.topt_perc;
-        spdlog::info("input parameter: cache_bound_every {}, n_sample {}, topt_perc {}",
-                     cache_bound_every, n_sample, topt_perc);
-        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path, cache_bound_every, n_sample, topt_perc);
-        sprintf(parameter_name, "cache_bound_every_%d-n_sample_%d-topt_perc_%d", cache_bound_every, n_sample,
-                topt_perc);
-
-    } else if (method_name == "IntervalBound") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = IntervalBound::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
     } else if (method_name == "QuadraticRankBound") {
         const int n_sample = para.n_sample;
         spdlog::info("input parameter: n_sample {}", n_sample);
@@ -182,11 +132,17 @@ int main(int argc, char **argv) {
         index = QuadraticScoreBound::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    } else if (method_name == "RankBound") {
+    } else if (method_name == "RankSample") {
         const int cache_bound_every = para.cache_bound_every;
         spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
-        index = RankBound::BuildIndex(data_item, user, index_path, cache_bound_every);
+        index = RankSample::BuildIndex(data_item, user, index_path, cache_bound_every);
         sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
+
+    } else if (method_name == "ScoreSample") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = ScoreSample::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else {
         spdlog::error("not such method");
