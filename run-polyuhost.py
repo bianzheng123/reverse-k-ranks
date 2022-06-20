@@ -95,16 +95,6 @@ def run_interval_sample_rate():
                     'IntervalBound', ds, basic_dir, n_interval))
 
 
-def run_compress_topt():
-    # dataset_l = ['netflix', 'yahoomusic-small', 'yelp-small']
-    topt_perc_l = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-    for ds in dataset_l:
-        for topt_perc in topt_perc_l:
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --topt_perc {}'.format(
-                    ds, basic_dir, "HRBMergeRankBound", topt_perc))
-
-
 def run_compute_all_scale():
     # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
     scale_l = [25, 50, 100, 200, 400, 800, 1000]
@@ -143,17 +133,37 @@ def run_compute_all_n_codeword():
                     'CAItemPQ', ds, basic_dir, n_codebook, n_codeword))
 
 
+def run_compress_topt():
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
+    index_size_l = [100, 150, 200, 250, 300]
+    for ds in dataset_l:
+        for index_size in index_size_l:
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "HRBMergeRankBound", 128, index_size))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "CompressTopTIDBruteForce", 128, index_size))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "CompressTopTIDIPBruteForce", 128, index_size))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "CompressTopTIPBruteForce", 128, index_size))
+
+
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # basic_dir = os.path.join('/home', 'bianzheng', 'Dataset', 'ReverseMIPS')
-    dataset_l = ['movielens-27m', 'netflix']
+    # dataset_l = ['movielens-27m', 'netflix']
     # dataset_l = ['fake-normal']
-    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic-small', 'yelp-small']
+    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
     # run_compute_all_scale()
     # run_compute_all_n_codebook()
     # run_compute_all_n_codeword()
 
-    for ds in dataset_l:
-        os.system("cd build/attribution && ./npd {} {}".format(ds, basic_dir))
+    for ds in ['movielens-27m', 'netflix']:
+        os.system('cd build/attribution && ./pc --dataset_name {} --basic_dir {}'.format(ds, basic_dir))
+    run_compress_topt()

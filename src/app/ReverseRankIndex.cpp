@@ -9,6 +9,9 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "BruteForce/BatchDiskBruteForce.hpp"
+#include "BruteForce/CompressTopTIDBruteForce.hpp"
+#include "BruteForce/CompressTopTIDIPBruteForce.hpp"
+#include "BruteForce/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "BruteForce/OnlineBruteForce.hpp"
@@ -16,6 +19,7 @@
 #include "Online/GridIndex.hpp"
 
 #include "BPlusTree.hpp"
+#include "HRBMergeRankBound.hpp"
 #include "QuadraticRankBound.hpp"
 #include "QuadraticScoreBound.hpp"
 #include "RankSample.hpp"
@@ -49,7 +53,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 
             ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
              "how many numbers would cache a value")
-            ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(50),
+            ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "the numer of sample")
             ("index_size_gb, tt", po::value<int>(&para.index_size_gb)->default_value(50),
              "index size, in unit of GB");
@@ -96,6 +100,36 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: none");
         index = BatchDiskBruteForce::BuildIndex(data_item, user, index_path);
 
+    } else if (method_name == "CompressTopTIDBruteForce") {
+        const int n_sample = para.n_sample;
+        const int index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = CompressTopTIDBruteForce::BuildIndex(data_item, user, index_path,
+                                                     n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+                n_sample, index_size_gb);
+
+    } else if (method_name == "CompressTopTIDIPBruteForce") {
+        const int n_sample = para.n_sample;
+        const int index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path,
+                                                       n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+                n_sample, index_size_gb);
+
+    } else if (method_name == "CompressTopTIPBruteForce") {
+        const int n_sample = para.n_sample;
+        const int index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path,
+                                                     n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+                n_sample, index_size_gb);
+
     } else if (method_name == "DiskBruteForce") {
         spdlog::info("input parameter: none");
         index = DiskBruteForce::BuildIndex(data_item, user, index_path);
@@ -119,6 +153,16 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: node_size {}", cache_bound_every);
         index = BPlusTree::BuildIndex(data_item, user, index_path, cache_bound_every);
         sprintf(parameter_name, "node_size_%d", cache_bound_every);
+
+    } else if (method_name == "HRBMergeRankBound") {
+        const int n_sample = para.n_sample;
+        const int index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path,
+                                              n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+                n_sample, index_size_gb);
 
     } else if (method_name == "QuadraticRankBound") {
         const int n_sample = para.n_sample;

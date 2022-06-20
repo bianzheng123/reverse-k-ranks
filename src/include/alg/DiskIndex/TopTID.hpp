@@ -5,11 +5,12 @@
 #ifndef REVERSE_K_RANKS_TOPTID_HPP
 #define REVERSE_K_RANKS_TOPTID_HPP
 
-namespace ReverseMIPS {
-    class TopTID {
+#include "struct/DistancePair.hpp"
 
-        void
-        BuildIndexPreprocess() {
+namespace ReverseMIPS {
+    class IDIndex {
+
+        void BuildIndexPreprocess() {
             out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
             if (!out_stream_) {
                 spdlog::error("error in write result");
@@ -20,13 +21,21 @@ namespace ReverseMIPS {
         inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
             assert(0 <= start_idx + read_count && start_idx + read_count <= topt_);
             int64_t offset = (int64_t) userID * topt_ + start_idx;
-            offset *= sizeof(double);
+            offset *= sizeof(int);
             index_stream_.seekg(offset, std::ios::beg);
-            int64_t read_count_byte = read_count * sizeof(double);
+            int64_t read_count_byte = read_count * sizeof(int);
 
-            assert(0 <= offset + read_count_byte && offset + read_count_byte <= n_user_ * topt_ * sizeof(double));
+            assert(0 <= offset + read_count_byte && offset + read_count_byte <= n_user_ * topt_ * sizeof(int));
 
             index_stream_.read((char *) disk_cache_.get(), read_count_byte);
+        }
+
+        inline void ComputeCandIP(const VectorMatrix &item, const double *user_vecs, const int &read_count) {
+            for (int candID = 0; candID < read_count; candID++) {
+                const double *item_vecs = item.getVector(disk_cache_[candID]);
+                const double IP = InnerProduct(item_vecs, user_vecs, vec_dim_);
+                candIP_cache_[candID] = IP;
+            }
         }
 
         inline int FineBinarySearch(const double &queryIP, const int &userID,
@@ -35,7 +44,7 @@ namespace ReverseMIPS {
             if (read_count == 0) {
                 return base_rank + 1;
             }
-            const double *cache_ptr = disk_cache_.get();
+            const double *cache_ptr = candIP_cache_.get();
             auto iter_begin = cache_ptr;
             auto iter_end = cache_ptr + read_count;
 
@@ -46,8 +55,8 @@ namespace ReverseMIPS {
             return (int) (lb_ptr - iter_begin) + base_rank + 1;
         }
 
-        void BelowTopt(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID) {
-
+        void BelowTopt(const VectorMatrix &item, const double *user_vecs, const double &queryIP,
+                       const int &rank_lb, const int &rank_ub, const int &userID) {
             int end_idx = rank_lb;
             int start_idx = rank_ub;
             assert(0 <= start_idx && start_idx <= end_idx && end_idx <= topt_);
@@ -61,6 +70,7 @@ namespace ReverseMIPS {
             ReadDisk(userID, start_idx, read_count);
             read_disk_time_ += read_disk_record_.get_elapsed_time_second();
             exact_rank_record_.reset();
+            ComputeCandIP(item, user_vecs, read_count);
             int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
             exact_rank_time_ += exact_rank_record_.get_elapsed_time_second();
 
@@ -85,6 +95,7 @@ namespace ReverseMIPS {
             ReadDisk(userID, start_idx, read_count);
             read_disk_time_ += read_disk_record_.get_elapsed_time_second();
             exact_rank_record_.reset();
+            ComputeCandIP(item, user_vecs, read_count);
             int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
             exact_rank_time_ += exact_rank_record_.get_elapsed_time_second();
 
@@ -134,14 +145,15 @@ namespace ReverseMIPS {
 
         //variable in retrieval
         std::ifstream index_stream_;
-        std::unique_ptr<double[]> disk_cache_;
+        std::unique_ptr<int[]> disk_cache_;
+        std::unique_ptr<double[]> candIP_cache_;
         int n_candidate_;
-        std::vector <UserRankElement> user_topk_cache_l_;
+        std::vector<UserRankElement> user_topk_cache_l_;
 
-        inline TopTID() = default;
+        inline IDIndex() = default;
 
-        inline TopTID(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
-                      const int &topt) {
+        inline IDIndex(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
+                       const int &topt) {
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
@@ -158,7 +170,8 @@ namespace ReverseMIPS {
                 exit(-1);
             }
 
-            this->disk_cache_ = std::make_unique<double[]>(topt);
+            this->disk_cache_ = std::make_unique<int[]>(topt);
+            this->candIP_cache_ = std::make_unique<double[]>(topt);
             this->user_topk_cache_l_.resize(n_user);
 
             BuildIndexPreprocess();
@@ -166,17 +179,12 @@ namespace ReverseMIPS {
 
         void BuildIndexLoop(const DistancePair *distance_cache, const int &n_write) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
+            std::vector<int> distID_l(n_data_item_);
             for (int writeID = 0; writeID < n_write; writeID++) {
-                const DistancePair *tmp_distance_cache = distance_cache + writeID * n_data_item_;
-                out_stream_.write((char *) tmp_distance_cache, topt_ * sizeof(double));
-            }
-        }
-
-        void BuildIndexLoop(const double *distance_cache, const int &n_write) {
-            // distance_cache: write_every * n_data_item_, n_write <= write_every
-            for (int writeID = 0; writeID < n_write; writeID++) {
-                const double *tmp_distance_cache = distance_cache + writeID * n_data_item_;
-                out_stream_.write((char *) tmp_distance_cache, topt_ * sizeof(double));
+                for (int candID = 0; candID < n_data_item_; candID++) {
+                    distID_l[candID] = distance_cache[writeID * n_data_item_ + candID].ID_;
+                }
+                out_stream_.write((char *) distID_l.data(), sizeof(int) * topt_);
             }
         }
 
@@ -209,7 +217,7 @@ namespace ReverseMIPS {
                 assert(rank_ub <= rank_lb);
                 if (rank_lb <= topt_) {
                     //retrieval the top-t like before
-                    BelowTopt(queryIP, rank_lb, rank_ub, userID);
+                    BelowTopt(item, user_vecs, queryIP, rank_lb, rank_ub, userID);
                 } else if (rank_ub <= topt_ && topt_ <= rank_lb) {
                     BetweenTopt(queryIP, rank_lb, rank_ub, userID, user_vecs, item);
                 } else if (topt_ < rank_ub) {

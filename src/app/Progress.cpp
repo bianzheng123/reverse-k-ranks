@@ -93,37 +93,7 @@ int main(int argc, char **argv) {
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
                 n_sample, index_size_gb);
 
-    } else if (method_name == "CompressTopTIDBruteForce") {
-        const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = CompressTopTIDBruteForce::BuildIndex(data_item, user, index_path,
-                                                     n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
-                n_sample, index_size_gb);
-
-    } else if (method_name == "CompressTopTIDIPBruteForce") {
-        const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path,
-                                                       n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
-                n_sample, index_size_gb);
-
-    } else if (method_name == "CompressTopTIPBruteForce") {
-        const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path,
-                                                     n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
-                n_sample, index_size_gb);
-
-    } else {
+    }  else {
         spdlog::error("not such method");
     }
 

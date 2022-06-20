@@ -5,16 +5,15 @@
 #ifndef REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
 #define REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
 
-#include "alg/DiskIndex/TopTID.hpp"
+#include "IDIndex.hpp"
+#include "OtherUsefulFunc.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
-#include "struct/MethodBase.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
-#include "util/FileIO.hpp"
 #include <string>
 #include <fstream>
 #include <vector>
@@ -27,7 +26,7 @@
 
 namespace ReverseMIPS::CompressTopTIDBruteForce {
 
-    class Index : public BaseIndex {
+    class Index {
         void ResetTimer() {
             inner_product_time_ = 0;
             hash_search_time_ = 0;
@@ -82,7 +81,8 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
 
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk,
+                                                            std::vector<std::vector<ItemCandidates>> &result_cand) {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -92,6 +92,8 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
             }
 
             const int n_query_item = query_item.n_vector_;
+            result_cand.clear();
+            result_cand = std::vector<std::vector<ItemCandidates>>(n_query_item);
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
             for (int qID = 0; qID < n_query_item; qID++) {
                 query_heap_l[qID].resize(topk);
@@ -133,7 +135,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
                 hash_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_, result_cand[queryID]);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
@@ -150,7 +152,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         }
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
+        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) {
             // int topk;
             //double total_time,
             //          inner_product_time, hash_search_time_,
@@ -171,15 +173,6 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
             return str;
         }
 
-        std::string BuildIndexStatistics() override {
-            char buffer[512];
-            double index_size = 1.0 * n_user_ * disk_ins_.topt_ * sizeof(DistancePair) / (1024 * 1024 * 1024);
-            sprintf(buffer, "Build Index Info: index size %.3f GB", index_size);
-            spdlog::info(buffer);
-            spdlog::info("n_user {}, topt {}", n_user_, disk_ins_.topt_);
-            return buffer;
-        };
-
     };
 
     const int write_every_ = 1000;
@@ -191,7 +184,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &n_interval, const int &index_size_gb) {
+                                      const int &n_interval) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -202,13 +195,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         ScoreSearch rank_bound_ins(n_interval, n_user, n_data_item);
 
         //disk index
-        const int64_t index_size_kb = index_size_gb * 1024 * 1024 * 1024;
-        int topt = int(index_size_kb / sizeof(int) / n_user);
-        if (index_size_kb >= sizeof(int) * n_data_item * n_user) {
-            spdlog::info("index size larger than the whole score table, use whole table setting");
-            topt = n_data_item / 2;
-        }
-        IDIndex disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
+        IDIndex disk_ins(n_user, n_data_item, vec_dim, index_path);
 
         std::vector<DistancePair> write_distance_cache(write_every_ * n_data_item);
         const int n_batch = n_user / write_every_;

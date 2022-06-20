@@ -30,9 +30,10 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'RankSample': 'cache_bound_every_512',
         'ScoreSample': 'n_sample_50',
 
-        # 'CompressTopTIDBruteForce': 'cache_bound_every_512-n_sample_1024-topt_perc_50',
+        'CompressTopTIDBruteForce': 'n_sample_20-index_size_gb_50',
         'CompressTopTIDIPBruteForce': 'n_sample_20-index_size_gb_50',
         'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
+        'FullID': 'n_sample_20',
 
         'CAGrid': 'codeword_32',
         'CAFullInt': 'scale_100',
@@ -89,11 +90,12 @@ def run():
 
         # 'BPlusTree',
         # 'HashBound',
-        'HRBMergeRankBound',
+        # 'HRBMergeRankBound',
         # 'QuadraticRankBound',
         # 'QuadraticScoreBound',
         # 'RankSample',
         # 'ScoreSample',
+        'FullID',
 
         # 'CAGrid',
         # 'CAFullDim',
@@ -114,8 +116,8 @@ def run():
     for ds in dataset_l:
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
@@ -123,14 +125,14 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HashBound'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'HRBMergeRankBound'))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticScoreBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
+        os.system('cd build/attribution && ./pc --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))
