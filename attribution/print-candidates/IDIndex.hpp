@@ -144,7 +144,8 @@ namespace ReverseMIPS {
 
                 std::vector<int> itemID_l(read_count);
                 itemID_l.assign(disk_cache_.get(), disk_cache_.get() + read_count);
-                ID_candidate_l.emplace_back(itemID_l, userID);
+                std::sort(itemID_l.begin(), itemID_l.end());
+                ID_candidate_l.emplace_back(itemID_l, userID, rank_lb, rank_ub);
 
                 exact_rank_record_.reset();
                 ComputeCandIP(item, user_vecs, read_count);

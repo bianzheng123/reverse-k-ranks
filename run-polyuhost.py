@@ -138,9 +138,9 @@ def run_compress_topt():
     index_size_l = [100, 150, 200, 250, 300]
     for ds in dataset_l:
         for index_size in index_size_l:
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "HRBMergeRankBound", 128, index_size))
+            # os.system(
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+            #         ds, basic_dir, "HRBMergeRankBound", 128, index_size))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
                     ds, basic_dir, "CompressTopTIDBruteForce", 128, index_size))

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REVERSE_KRANKS_VECTORIO_HPP
+#define REVERSE_KRANKS_VECTORIO_HPP
 
 #include "struct/VectorMatrix.hpp"
 #include <iostream>
@@ -65,3 +66,4 @@ namespace ReverseMIPS {
         return res;
     }
 }
+#endif //REVERSE_KRANKS_VECTORIO_HPP

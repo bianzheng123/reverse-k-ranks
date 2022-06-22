@@ -7,7 +7,6 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "IDIndex.hpp"
 #include "StoreIDIndex.hpp"
 #include "OtherUsefulFunc.hpp"
 
@@ -91,6 +90,8 @@ int main(int argc, char **argv) {
     vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
 //    vector<int> topk_l{20};
+    CreateCandidateFile(dataset_name);
+
     for (int topk: topk_l) {
         record.reset();
         std::vector<std::vector<ItemCandidates>> result_cand;
@@ -105,7 +106,7 @@ int main(int argc, char **argv) {
 
         printf("topk %d\n", topk);
         WriteRankResult(result_rk, dataset_name, method_name.c_str(), other_name);
-        WriteCandidateResult(result_cand, topk, dataset_name, method_name.c_str(), other_name);
+        WriteCandidateResult(result_cand, topk, dataset_name);
         spdlog::info("finish top-{}", topk);
     }
     return 0;
