@@ -5,6 +5,8 @@
 #ifndef REVERSE_K_RANKS_READALL_HPP
 #define REVERSE_K_RANKS_READALL_HPP
 
+#include "struct/UserRankElement.hpp"
+
 #include <memory>
 #include <spdlog/spdlog.h>
 

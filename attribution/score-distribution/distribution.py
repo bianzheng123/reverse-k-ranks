@@ -4,7 +4,10 @@ import os
 
 dataset_m = {
     'movielens-27m': [283228, 53889],
-    'netflix': [480189, 17770]
+    'netflix': [480189, 17770],
+    'yahoomusic_big': [1948882, 98213],
+    'yelp': [2189457, 160585],
+    'book-crossing': [1, 2],
 }
 
 
@@ -29,23 +32,15 @@ def show_bin_hist(bins, hist, name, dataset_name):
 
 
 if __name__ == '__main__':
+    dataset_name_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'book-crossing']
     basic_dir = '../../result/attribution'
-    for file in os.listdir('../../result/attribution'):
-        if 'score-distribution-netflix.csv' in file:
-            file_dir = os.path.join(basic_dir, file)
-            arr = np.loadtxt(file_dir, delimiter=',')
-            n_interval = len(arr)
-            arr_idx_l = np.arange(0, n_interval, 1)
-            new_arr = arr[arr_idx_l]
-            print(np.sum(arr[:, 1]))
-            show_bin_hist(new_arr[:, 0], new_arr[:, 1], file.split('.')[0], 'netflix')
-            print(file)
-        # if 'score-distribution-movielens-27m.csv' in file:
-        #     file_dir = os.path.join(basic_dir, file)
-        #     arr = np.loadtxt(file_dir, delimiter=',')
-        #     n_interval = len(arr)
-        #     arr_idx_l = np.arange(0, n_interval, 1)
-        #     new_arr = arr[arr_idx_l]
-        #     print(np.sum(arr[:, 1]))
-        #     show_bin_hist(new_arr[:, 0], new_arr[:, 1], file.split('.')[0], 'movielens-27m')
-        #     print(file)
+    # for file in os.listdir('../../result/attribution'):
+    for dataset_name in dataset_name_l:
+        file_dir = 'score-distribution-{}.csv'.format(dataset_name)
+        arr = np.loadtxt(file_dir, delimiter=',')
+        n_interval = len(arr)
+        arr_idx_l = np.arange(0, n_interval, 1)
+        new_arr = arr[arr_idx_l]
+        print(np.sum(arr[:, 1]))
+        show_bin_hist(new_arr[:, 0], new_arr[:, 1], file_dir.split('.')[0], dataset_name)
+        print(file_dir)

@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
     record.reset();
 
     {
-        const int n_sample_query = 15;
+        const int n_sample_query = 5;
         //generate the number sequentially, then shuffle
         std::vector<int> query_idx_l(n_query_item);
         std::iota(query_idx_l.begin(), query_idx_l.end(), 0);

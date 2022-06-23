@@ -44,3 +44,7 @@ target_link_libraries(pc PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::O
 add_executable(udd disk-index-compression/UserDistanceDistribution.cpp)
 target_include_directories(udd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(udd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+add_executable(mpr disk-index-compression/MeasurePruneRatio.cpp)
+target_include_directories(mpr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(mpr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})

@@ -19,3 +19,5 @@ cmake-build-release/
 *.eps
 /attribution/disk-index-compression/*.jpg
 /attribution/disk-index-compression/*.txt
+/attribution/score-distribution/*.csv
+/attribution/score-distribution/*.jpg
