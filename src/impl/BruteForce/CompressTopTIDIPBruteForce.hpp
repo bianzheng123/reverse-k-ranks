@@ -203,7 +203,8 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
 
         //disk index
         const int64_t index_size_kb = index_size_gb * 1024 * 1024 * 1024;
-        int topt = int(index_size_kb / (sizeof(double) + sizeof(int)) / n_user);
+        const int64_t topt_big_size = index_size_kb / (int64_t) (sizeof(double) + sizeof(int)) / n_user;
+        int topt = int(topt_big_size);
         if (index_size_kb >= (sizeof(double) + sizeof(int)) * n_data_item * n_user) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             topt = n_data_item / 2;
