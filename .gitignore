@@ -15,4 +15,7 @@ index
 cmake-build-debug/
 cmake-build-release/
 /attribution/*.jpg
+/attribution/*.txt
 *.eps
+/attribution/disk-index-compression/*.jpg
+/attribution/disk-index-compression/*.txt

@@ -165,6 +165,6 @@ if __name__ == '__main__':
     # run_compute_all_n_codeword()
 
     for ds in ['movielens-small', 'movielens-27m', 'netflix']:
-        os.system(
-            'cd build/attribution && ./pc --dataset_name {} --basic_dir {} --n_sample {}'.format(ds, basic_dir, 128))
-    run_compress_topt()
+        for topk in [10, 50]:
+            os.system(
+                'cd build/attribution && ./udd {} {}'.format(ds, topk))

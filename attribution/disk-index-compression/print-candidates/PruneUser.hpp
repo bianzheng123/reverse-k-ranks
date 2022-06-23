@@ -5,8 +5,8 @@
 #ifndef REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
 #define REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
 
-#include "IDIndex.hpp"
-#include "OtherUsefulFunc.hpp"
+#include "CandidatesIO.hpp"
+#include "DiskIndex.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
@@ -40,7 +40,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         //for hash search, store in memory
         ScoreSearch rank_bound_ins_;
         //read all instance
-        IDIndex disk_ins_;
+        DiskIndex disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -58,7 +58,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
                 // hash search
                 ScoreSearch &rank_bound_ins,
                 //disk index
-                IDIndex &disk_ins,
+                DiskIndex &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
             //rank search
@@ -195,7 +195,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         ScoreSearch rank_bound_ins(n_interval, n_user, n_data_item);
 
         //disk index
-        IDIndex disk_ins(n_user, n_data_item, vec_dim, index_path);
+        DiskIndex disk_ins(n_user, n_data_item, vec_dim, index_path);
 
         std::vector<DistancePair> write_distance_cache(write_every_ * n_data_item);
         const int n_batch = n_user / write_every_;

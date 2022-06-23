@@ -7,8 +7,8 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "StoreIDIndex.hpp"
-#include "OtherUsefulFunc.hpp"
+#include "print-candidates/PruneUser.hpp"
+#include "print-candidates/CandidatesIO.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index, time {}s", build_index_time);
 
-    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
+    vector<int> topk_l{50, 10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
 //    vector<int> topk_l{20};
     CreateCandidateFile(dataset_name);

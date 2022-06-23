@@ -8,7 +8,7 @@
 #include "struct/DistancePair.hpp"
 
 namespace ReverseMIPS {
-    class IDIndex {
+    class DiskIndex {
 
         void BuildIndexPreprocess() {
             out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
@@ -150,10 +150,10 @@ namespace ReverseMIPS {
         int n_candidate_;
         std::vector<UserRankElement> user_topk_cache_l_;
 
-        inline IDIndex() = default;
+        inline DiskIndex() = default;
 
-        inline IDIndex(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
-                       const int &topt) {
+        inline DiskIndex(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
+                         const int &topt) {
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
