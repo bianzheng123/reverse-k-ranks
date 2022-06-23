@@ -41,7 +41,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         //for hash search, store in memory
         ScoreSearch rank_bound_ins_;
         //read all instance
-        IDIndex disk_ins_;
+        TopTID disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -59,7 +59,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
                 // hash search
                 ScoreSearch &rank_bound_ins,
                 //disk index
-                IDIndex &disk_ins,
+                TopTID &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
             //rank search
@@ -209,7 +209,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             topt = n_data_item / 2;
         }
-        IDIndex disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
+        TopTID disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
 
         std::vector<DistancePair> write_distance_cache(write_every_ * n_data_item);
         const int n_batch = n_user / write_every_;
