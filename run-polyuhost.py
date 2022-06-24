@@ -164,13 +164,13 @@ if __name__ == '__main__':
     # run_compute_all_n_codebook()
     # run_compute_all_n_codeword()
 
-    for ds in ['movielens-small', 'movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']:
-        for topk in [10, 50]:
-            os.system(
-                'cd build/attribution && ./udd {} {}'.format(ds, topk))
-
     for n_sample in [64, 128, 256, 512]:
         for ds in ['movielens-small', 'movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']:
             os.system(
                 'cd build/attribution && ./mpr --dataset_name {} --n_sample {} --basic_dir {}'.format(
                     ds, n_sample, basic_dir))
+
+    for ds in ['movielens-small', 'movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']:
+        for topk in [10, 50]:
+            os.system(
+                'cd build/attribution && ./udd {} {}'.format(ds, topk))
