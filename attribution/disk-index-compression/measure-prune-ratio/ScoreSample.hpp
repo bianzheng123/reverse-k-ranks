@@ -153,7 +153,7 @@ namespace ReverseMIPS::ScoreSample {
 
     };
 
-    const int write_every_ = 1000;
+    const int write_every_ = 10;
     const int report_batch_every_ = 100;
 
     /*
