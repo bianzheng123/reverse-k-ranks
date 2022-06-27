@@ -13,7 +13,7 @@
 #include "BruteForce/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
-#include "BruteForce/OnlineBruteForce.hpp"
+#include "../../obsoluted/OnlineBruteForce.hpp"
 
 #include "Online/GridIndex.hpp"
 

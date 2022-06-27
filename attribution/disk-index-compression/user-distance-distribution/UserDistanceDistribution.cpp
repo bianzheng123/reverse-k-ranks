@@ -2,7 +2,7 @@
 // Created by BianZheng on 2022/6/23.
 //
 
-#include "user-distance-distribution/CandidatesIO.hpp"
+#include "CandidatesIO.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "util/VectorIO.hpp"
@@ -15,7 +15,6 @@
 #include <string>
 #include <random>
 #include <algorithm>
-#include <iomanip>
 
 using namespace ReverseMIPS;
 

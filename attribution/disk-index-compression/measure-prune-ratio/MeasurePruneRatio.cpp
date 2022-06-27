@@ -6,8 +6,8 @@
 #include "util/TimeMemory.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "measure-prune-ratio/ScoreSample.hpp"
-#include "measure-prune-ratio/AttributionIO.hpp"
+#include "ScoreSample.hpp"
+#include "AttributionIO.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>

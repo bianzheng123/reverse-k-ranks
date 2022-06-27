@@ -17,8 +17,7 @@ cmake-build-release/
 /attribution/*.jpg
 /attribution/*.txt
 *.eps
-/attribution/disk-index-compression/*.jpg
-/attribution/disk-index-compression/*.txt
+/attribution/disk-index-compression/ignore-fig
 /attribution/score-distribution/*.csv
 /attribution/score-distribution/*.jpg
 /attribution/theory/*.jpg

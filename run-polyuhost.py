@@ -163,7 +163,8 @@ if __name__ == '__main__':
     # run_compute_all_scale()
     # run_compute_all_n_codebook()
     # run_compute_all_n_codeword()
-    os.system('cd build/attribution && ./pur {} {}'.format('movielens-27m', basic_dir))
+    os.system('cd build/attribution && ./crd {} {}'.format('movielens-27m', basic_dir))
+    os.system('cd build/attribution && ./crd {} {}'.format('netflix', basic_dir))
 
     # for n_sample in [64, 128, 256, 512]:
     #     for ds in ['goodreads', 'amazon', 'book-crossing']:

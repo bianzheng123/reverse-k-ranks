@@ -7,8 +7,8 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "print-candidates/PruneUser.hpp"
-#include "print-candidates/CandidatesIO.hpp"
+#include "PruneUser.hpp"
+#include "CandidatesIO.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
