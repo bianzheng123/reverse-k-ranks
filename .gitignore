@@ -21,4 +21,4 @@ cmake-build-release/
 /attribution/disk-index-compression/*.txt
 /attribution/score-distribution/*.csv
 /attribution/score-distribution/*.jpg
-/attribution/theory/random-corrleation.jpg
+/attribution/theory/*.jpg

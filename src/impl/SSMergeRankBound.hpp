@@ -27,7 +27,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::HRBMergeRankBound {
+namespace ReverseMIPS::SSMergeRankBound {
 
     class Index : public BaseIndex {
         void ResetTimer() {

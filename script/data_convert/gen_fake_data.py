@@ -11,9 +11,9 @@ def delete_file_if_exist(dire):
 
 
 def gen_data_normal(n_user, n_data_item, n_query_item, vec_dim, dataset):
-    query_item_l = np.random.normal(scale=10, size=(n_query_item, vec_dim))
-    data_item_l = np.random.normal(scale=10, size=(n_data_item, vec_dim))
-    user_l = np.random.normal(scale=10, size=(n_user, vec_dim))
+    query_item_l = np.random.normal(loc=0, scale=1, size=(n_query_item, vec_dim))
+    data_item_l = np.random.normal(loc=0, scale=1, size=(n_data_item, vec_dim))
+    user_l = np.random.normal(loc=0, scale=1, size=(n_user, vec_dim))
 
     output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
     delete_file_if_exist(output_dir)
@@ -25,9 +25,9 @@ def gen_data_normal(n_user, n_data_item, n_query_item, vec_dim, dataset):
 
 
 def gen_data_uniform(n_user, n_data_item, n_query_item, vec_dim, dataset):
-    query_item_l = np.random.uniform(0, 100, size=(n_query_item, vec_dim))
-    data_item_l = np.random.uniform(0, 100, size=(n_data_item, vec_dim))
-    user_l = np.random.uniform(0, 100, size=(n_user, vec_dim))
+    query_item_l = np.random.uniform(0, 1, size=(n_query_item, vec_dim))
+    data_item_l = np.random.uniform(0, 1, size=(n_data_item, vec_dim))
+    user_l = np.random.uniform(0, 1, size=(n_user, vec_dim))
 
     output_dir = '/home/bianzheng/Dataset/ReverseMIPS/%s' % dataset
     delete_file_if_exist(output_dir)
@@ -54,13 +54,14 @@ def gen_data_independent(n_user, n_data_item, n_query_item, vec_dim, dataset):
 
 if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
-    n_query_item = 100
+    n_query_item = 5000
     n_dim = 50
     n_data_item = 3000
     n_user = 6000
 
-    # gen_data_normal(n_user, n_data_item, n_query_item, n_dim, "fake-normal")
+    gen_data_normal(n_user, n_data_item, n_query_item, n_dim, "fake-test-rank-normal")
+    gen_data_uniform(n_user, n_data_item, n_query_item, n_dim, "fake-test-rank-uniform")
     # gen_data_uniform(n_user, n_data_item, n_query_item, n_dim, "fake-uniform")
     # gen_data_uniform(100, 500, 10, 10, "fake-small")
     # gen_data_independent(n_user, n_data_item, n_query_item, n_dim, "fake-independent")
-    gen_data_independent(100, 50, 10, n_dim, "fake-tiny")
+    # gen_data_independent(100, 50, 10, n_dim, "fake-tiny")

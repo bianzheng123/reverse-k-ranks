@@ -19,10 +19,8 @@
 #include "Online/GridIndex.hpp"
 
 #include "BPlusTree.hpp"
-#include "HRBMergeRankBound.hpp"
 #include "QuadraticRankBound.hpp"
 #include "QuadraticScoreBound.hpp"
-#include "RankSample.hpp"
 #include "ScoreSample.hpp"
 
 #include <spdlog/spdlog.h>
@@ -154,16 +152,6 @@ int main(int argc, char **argv) {
         index = BPlusTree::BuildIndex(data_item, user, index_path, cache_bound_every);
         sprintf(parameter_name, "node_size_%d", cache_bound_every);
 
-    } else if (method_name == "HRBMergeRankBound") {
-        const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = HRBMergeRankBound::BuildIndex(data_item, user, index_path,
-                                              n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
-                n_sample, index_size_gb);
-
     } else if (method_name == "QuadraticRankBound") {
         const int n_sample = para.n_sample;
         spdlog::info("input parameter: n_sample {}", n_sample);
@@ -175,12 +163,6 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: n_sample {}", n_sample);
         index = QuadraticScoreBound::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
-
-    } else if (method_name == "RankSample") {
-        const int cache_bound_every = para.cache_bound_every;
-        spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
-        index = RankSample::BuildIndex(data_item, user, index_path, cache_bound_every);
-        sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
 
     } else if (method_name == "ScoreSample") {
         const int n_sample = para.n_sample;

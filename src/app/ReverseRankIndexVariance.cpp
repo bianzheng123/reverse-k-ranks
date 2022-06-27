@@ -18,7 +18,7 @@
 #include "Online/GridIndex.hpp"
 
 #include "BPlusTree.hpp"
-#include "HRBMergeRankBound.hpp"
+#include "SSMergeRankBound.hpp"
 #include "ScoreSample.hpp"
 #include "RankSample.hpp"
 

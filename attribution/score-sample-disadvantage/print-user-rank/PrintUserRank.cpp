@@ -18,7 +18,7 @@ void WriteRank(const std::vector<std::vector<int>> &all_rank_l, const char *data
                const int &n_data_item) {
 
     char resPath[256];
-    std::sprintf(resPath, "../../result/attribution/print-user-rank-%s.csv", dataset_name);
+    std::sprintf(resPath, "../../result/attribution/PrintUserRank/print-user-rank-%s.csv", dataset_name);
     std::ofstream file(resPath);
     if (!file) {
         std::printf("error in write result\n");
@@ -36,7 +36,15 @@ void WriteRank(const std::vector<std::vector<int>> &all_rank_l, const char *data
 
         for (int userID = 0; userID < n_user; userID++) {
             const int rank = all_rank_l[qID][userID];
-            int binID = (rank - 1) / node_size;
+            int binID;
+            if (rank == 1) {
+                binID = 0;
+            } else {
+                binID = (rank - 1) / node_size + 1;
+                if (binID == n_bin) {
+                    binID = n_bin - 1;
+                }
+            }
             assert(0 <= binID && binID < n_bin);
             bin_l[binID]++;
         }
