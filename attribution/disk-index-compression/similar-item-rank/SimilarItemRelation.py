@@ -27,13 +27,14 @@ def plot_scatter(data, fig_name):
 
 
 n_sample = 15
-# dataset_name = 'netflix-small'
-dataset_name = 'fake-normal'
-for similar_type in ['far-user', 'nearest-user']:
-    for method_name in ['single-rank-distribution', 'score-interval', 'compress-rank-relation']:
-        for sampleID in range(n_sample):
-            data = np.loadtxt(
-                '../../../result/attribution/SimilarItemRank/{}-{}-{}-sampleID-{}.csv'.format(
-                    method_name, dataset_name, similar_type, sampleID),
-                delimiter=',')
-            plot_scatter(data, '../ignore-fig/correlation-{}-{}-{}.jpg'.format(similar_type, method_name, sampleID))
+for dataset_name in ['movielens-27m', 'netflix']:
+    for similar_type in ['far-user', 'nearest-user']:
+        for method_name in ['single-rank-distribution', 'score-interval', 'compress-rank-relation']:
+            for sampleID in range(n_sample):
+                data = np.loadtxt(
+                    '../../../result/attribution/SimilarItemRank/{}-{}-{}-sampleID-{}.csv'.format(
+                        method_name, dataset_name, similar_type, sampleID),
+                    delimiter=',')
+                plot_scatter(data,
+                             '../ignore-fig/correlation-{}-{}-{}-{}.jpg'.format(similar_type, method_name, sampleID,
+                                                                                dataset_name))

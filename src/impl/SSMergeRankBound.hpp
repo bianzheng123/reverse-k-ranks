@@ -215,9 +215,11 @@ namespace ReverseMIPS::SSMergeRankBound {
             exit(-1);
         }
 
-        const int64_t index_size_kb = index_size_gb * 1024 * 1024 * 1024;
-        int n_merge_user = int(index_size_kb / (sizeof(int) * 2) / n_data_item);
-        if (index_size_kb >= (sizeof(int) * 2) * n_data_item * n_user) {
+        const uint64_t index_size_kb = index_size_gb * 1024 * 1024 * 1024;
+        const uint64_t predict_index_size_kb = (sizeof(int) * 2) * n_data_item * n_user;
+        const uint64_t n_merge_user_big_size = index_size_kb / (sizeof(int) * 2) / n_data_item;
+        int n_merge_user = int(n_merge_user_big_size);
+        if (index_size_kb >= predict_index_size_kb) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             n_merge_user = n_user - 1;
         }

@@ -181,8 +181,7 @@ int main(int argc, char **argv) {
         index = SSComputeAll::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    }
-    if (method_name == "SSMergeInterval") {
+    } else if (method_name == "SSMergeInterval") {
         const int n_sample = para.n_sample;
         const int index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",

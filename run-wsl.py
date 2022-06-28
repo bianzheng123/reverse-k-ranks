@@ -29,6 +29,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'RankSample': 'cache_bound_every_512',
         'ScoreSample': 'n_sample_50',
         'SSComputeAll': 'n_sample_20',
+        'SSMergeInterval': 'n_sample_20-index_size_gb_50',
         'SSMergeRankBound': 'n_sample_20-index_size_gb_50',
 
         'CompressTopTIDBruteForce': 'n_sample_20-index_size_gb_50',
@@ -95,8 +96,9 @@ def run():
         # 'QuadraticScoreBound',
         # 'RankSample',
         # 'ScoreSample',
-        'SSComputeAll',
+        # 'SSComputeAll',
         # 'SSMergeRankBound',
+        'SSMergeInterval',
         # 'FullID',
 
         # 'CAGrid',
@@ -133,9 +135,9 @@ def run():
         #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticScoreBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSMergeInterval'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeInterval'))
         # os.system('cd build/attribution && ./pc --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
@@ -155,7 +157,7 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['fake-small', 'fake']
     run()

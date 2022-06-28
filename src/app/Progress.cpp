@@ -8,8 +8,7 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "SSMergeInterval.hpp"
-#include "SSMergeRankBound.hpp"
+#include "BruteForce/MemoryBruteForce.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
