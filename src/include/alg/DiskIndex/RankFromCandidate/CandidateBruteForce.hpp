@@ -28,34 +28,38 @@ namespace ReverseMIPS {
             IPcandidate_l_.resize(n_data_item);
         }
 
+        template<typename T>
         int QueryRankByCandidate
-                (const VectorMatrix &user, const VectorMatrix &item, const double &queryIP,
-                 const std::vector<UserRankBound> &item_rank_bound_l, const int &userID,
-                 const std::pair<double, double> &IPbound_pair, const std::pair<int, int> &rank_bound_pair) {
+                (const double *user_vecs, const VectorMatrix &item,
+                 const double &queryIP, const std::pair<double, double> &queryIPbound_pair,
+                 const std::vector<std::pair<T, T>> &item_itvID_bound_l,
+                 const std::pair<int, int> &query_itvID_bound_pair
+                ) {
 
             //calculate all the IP, then get the lower bound
             //make different situation by the information
             int avail_n_cand = 0;
-            const double &IP_lb = IPbound_pair.first;
-            const double &IP_ub = IPbound_pair.second;
-            const int query_rank_lb = rank_bound_pair.first;
-            const int query_rank_ub = rank_bound_pair.second;
-            if(query_rank_lb == query_rank_ub){
-                return 0;
-            }
-            assert(0 <= query_rank_ub && query_rank_ub <= query_rank_lb && query_rank_lb <= n_data_item_);
-            assert(IP_lb <= queryIP && queryIP <= IP_ub);
+            const double &queryIP_lb = queryIPbound_pair.first;
+            const double &queryIP_ub = queryIPbound_pair.second;
+
+            //set bound for compatible
+            const int query_itvID_lb = query_itvID_bound_pair.first;
+            const int query_itvID_ub = query_itvID_bound_pair.second;
+            assert(query_itvID_ub <= query_itvID_lb);
+
+            assert(queryIP_lb <= queryIP && queryIP <= queryIP_ub);
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                UserRankBound element = item_rank_bound_l[itemID];
-                assert(0 <= element.rank_ub_ && element.rank_ub_ <= element.rank_lb_ &&
-                       element.rank_lb_ <= n_data_item_);
-                bool top_element = element.rank_lb_ < query_rank_ub;
-                bool bottom_element = query_rank_lb < element.rank_ub_;
-                if (top_element || bottom_element) {
+                const T item_itvID_lb = item_itvID_bound_l[itemID].first;
+                const T item_itvID_ub = item_itvID_bound_l[itemID].second;
+                assert(0 <= item_itvID_ub && item_itvID_ub <= item_itvID_lb &&
+                       item_itvID_lb <= n_data_item_);
+                bool bottom_query = item_itvID_lb < query_itvID_ub;
+                bool top_query = query_itvID_lb < item_itvID_ub;
+                if (bottom_query || top_query) {
                     continue;
                 }
-                double ip = InnerProduct(item.getVector(itemID), user.getVector(userID), vec_dim_);
-                if (IP_lb <= ip && ip <= IP_ub) {
+                double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
+                if (queryIP_lb <= ip && ip <= queryIP_ub) {
                     IPcandidate_l_[avail_n_cand] = ip;
                     avail_n_cand++;
                 }
@@ -72,6 +76,7 @@ namespace ReverseMIPS {
 
             return loc_rk;
         }
+
     };
 }
 #endif //REVERSE_KRANKS_CANDIDATEBRUTEFORCE_HPP

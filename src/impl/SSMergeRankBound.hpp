@@ -56,6 +56,7 @@ namespace ReverseMIPS::SSMergeRankBound {
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
+        std::vector<int> itvID_l_;
 
         Index(
                 // score search
@@ -82,6 +83,7 @@ namespace ReverseMIPS::SSMergeRankBound {
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
+            this->itvID_l_.resize(n_user_);
 
         }
 
@@ -121,7 +123,8 @@ namespace ReverseMIPS::SSMergeRankBound {
 
                 //rank bound refinement
                 rank_bound_refinement_record_.reset();
-                rank_bound_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_, queryIPbound_l_);
+                rank_bound_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_, queryIPbound_l_,
+                                          itvID_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
@@ -174,6 +177,15 @@ namespace ReverseMIPS::SSMergeRankBound {
             return str;
         }
 
+        std::string BuildIndexStatistics() override {
+            const int n_merge_user = disk_ins_.n_merge_user_;
+            const uint64_t index_size_mb = n_merge_user * n_data_item_ * 2 * sizeof(int) / 1024 / 1024;
+            char str[256];
+            sprintf(str, "Build Index Info: index size %luMB", index_size_mb);
+            std::string string_ins(str);
+            return string_ins;
+        }
+
     };
 
     const int report_batch_every = 100;
@@ -214,7 +226,7 @@ namespace ReverseMIPS::SSMergeRankBound {
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
 
-        std::vector<UserRankBound> merge_user_list(n_data_item);
+        std::vector<UserRankBound<int>> merge_user_list(n_data_item);
 
         std::vector<DistancePair> distance_pair_l(n_data_item);
         TimeRecord batch_report_record;

@@ -207,7 +207,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         int topt = int(topt_big_size);
         if (index_size_kb >= sizeof(int) * n_data_item * n_user) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
-            topt = n_data_item / 2;
+            topt = n_data_item;
         }
         TopTID disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
 

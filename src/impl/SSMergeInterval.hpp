@@ -27,7 +27,6 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-//TODO modify to MergeInterval
 namespace ReverseMIPS::SSMergeInterval {
 
     class Index : public BaseIndex {
@@ -57,6 +56,7 @@ namespace ReverseMIPS::SSMergeInterval {
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
+        std::vector<int> itvID_l_;
 
         Index(
                 // score search
@@ -83,6 +83,7 @@ namespace ReverseMIPS::SSMergeInterval {
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
+            this->itvID_l_.resize(n_user_);
 
         }
 
@@ -122,7 +123,8 @@ namespace ReverseMIPS::SSMergeInterval {
 
                 //rank bound refinement
                 rank_bound_refinement_record_.reset();
-                rank_bound_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_, queryIPbound_l_);
+                rank_bound_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_, queryIPbound_l_,
+                                          itvID_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
@@ -137,7 +139,8 @@ namespace ReverseMIPS::SSMergeInterval {
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, itvID_l_, prune_l_, user_,
+                                  data_item_);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
@@ -175,6 +178,15 @@ namespace ReverseMIPS::SSMergeInterval {
             return str;
         }
 
+        std::string BuildIndexStatistics() override {
+            const int n_merge_user = disk_ins_.n_merge_user_;
+            const uint64_t index_size_mb = n_merge_user * n_data_item_ * 2 * sizeof(unsigned char) / 1024 / 1024;
+            char str[256];
+            sprintf(str, "Build Index Info: index size %luMB", index_size_mb);
+            std::string string_ins(str);
+            return string_ins;
+        }
+
     };
 
     const int report_batch_every = 100;
@@ -195,9 +207,6 @@ namespace ReverseMIPS::SSMergeInterval {
         //rank search
         ScoreSearch rank_bound_ins(n_sample, n_user, n_data_item);
 
-        //exact rank refinement
-        CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
-
         //disk index
         if (index_size_gb <= 0) {
             spdlog::error("compress index size too small, program exit");
@@ -205,19 +214,22 @@ namespace ReverseMIPS::SSMergeInterval {
         }
 
         const int64_t index_size_kb = index_size_gb * 1024 * 1024 * 1024;
-        int n_merge_user = int(index_size_kb / (sizeof(int) * 2) / n_data_item);
-        if (index_size_kb >= (sizeof(int) * 2) * n_data_item * n_user) {
+        int n_merge_user = int(index_size_kb / (sizeof(unsigned char) * 2) / n_data_item);
+        if (index_size_kb >= (sizeof(unsigned char) * 2) * n_data_item * n_user) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             n_merge_user = n_user - 1;
         }
 
-        MergeInterval disk_ins(exact_rank_ins, user, n_data_item, index_path, n_merge_user);
+        //exact rank refinement
+        CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
+
+        MergeInterval disk_ins(exact_rank_ins, user, index_path, n_data_item, n_merge_user);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
 
-        std::vector<UserRankBound> merge_user_list(n_data_item);
-
         std::vector<DistancePair> distance_pair_l(n_data_item);
+        std::vector<unsigned char> itvID_l(n_data_item);
+
         TimeRecord batch_report_record;
         batch_report_record.reset();
         for (int labelID = 0; labelID < n_merge_user; labelID++) {
@@ -235,8 +247,9 @@ namespace ReverseMIPS::SSMergeInterval {
 
                 //rank search
                 rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
+                rank_bound_ins.GetItvID(distance_pair_l.data(), userID, itvID_l);
 
-                disk_ins.BuildIndexLoop(distance_pair_l, userID);
+                disk_ins.BuildIndexLoop(itvID_l, userID);
             }
             disk_ins.WriteIndex();
             if (labelID % report_batch_every == 0) {

@@ -2,8 +2,8 @@
 // Created by BianZheng on 2022/5/17.
 //
 
-#ifndef REVERSE_KRANKS_GREEDYMERGE_HPP
-#define REVERSE_KRANKS_GREEDYMERGE_HPP
+#ifndef REVERSE_KRANKS_GREEDYMERGEMINCLUSTERSIZE_HPP
+#define REVERSE_KRANKS_GREEDYMERGEMINCLUSTERSIZE_HPP
 
 #include <algorithm>
 #include <cassert>
@@ -19,7 +19,7 @@
 #include "alg/SpaceEuclidean.hpp"
 #include "struct/VectorMatrix.hpp"
 
-namespace ReverseMIPS::GreedyMerge {
+namespace ReverseMIPS::GreedyMergeMinClusterSize {
 
     class PQCluster {
     public:
@@ -169,4 +169,4 @@ namespace ReverseMIPS::GreedyMerge {
 
 } // namespace dkm
 
-#endif //REVERSE_KRANKS_GREEDYMERGE_HPP
+#endif //REVERSE_KRANKS_GREEDYMERGEMINCLUSTERSIZE_HPP

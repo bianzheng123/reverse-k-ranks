@@ -134,37 +134,43 @@ def run_compute_all_n_codeword():
 
 
 def run_compress_topt():
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
-    index_size_l = [100, 150, 200, 250, 300]
+    dataset_l = ['movielens-27m']
+    index_size_l = [10, 30, 50, 70, 90]
+    n_sample = 128
     for ds in dataset_l:
+        os.system(
+            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+                ds, basic_dir, "SSComputeAll", n_sample))
+        os.system(
+            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+                ds, basic_dir, "ScoreSample", n_sample))
         for index_size in index_size_l:
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "HRBMergeRankBound", 128, index_size))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "CompressTopTIDBruteForce", 128, index_size))
+                    ds, basic_dir, "CompressTopTIDBruteForce", n_sample, index_size))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "CompressTopTIDIPBruteForce", 128, index_size))
+                    ds, basic_dir, "CompressTopTIDIPBruteForce", n_sample, index_size))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "CompressTopTIPBruteForce", 128, index_size))
+                    ds, basic_dir, "CompressTopTIPBruteForce", n_sample, index_size))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "SSMergeInterval", n_sample, index_size))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "SSMergeRankBound", n_sample, index_size))
 
 
 if __name__ == '__main__':
     basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
     # basic_dir = os.path.join('/home', 'bianzheng', 'Dataset', 'ReverseMIPS')
-    dataset_l = ['movielens-27m', 'netflix']
+    # dataset_l = ['movielens-27m', 'netflix']
     # dataset_l = ['fake-normal']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    # run_compute_all_scale()
-    # run_compute_all_n_codebook()
-    # run_compute_all_n_codeword()
-    os.system('cd build/attribution && ./crd {} {}'.format('movielens-27m', basic_dir))
-    os.system('cd build/attribution && ./crd {} {}'.format('netflix', basic_dir))
+    run_compress_topt()
 
     # for n_sample in [64, 128, 256, 512]:
     #     for ds in ['goodreads', 'amazon', 'book-crossing']:

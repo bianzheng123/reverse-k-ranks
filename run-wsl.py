@@ -133,8 +133,9 @@ def run():
         #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticScoreBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSMergeInterval'))
         # os.system('cd build/attribution && ./pc --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
@@ -154,6 +155,7 @@ def run():
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal']
     # dataset_l = ['fake-small', 'fake']
     run()

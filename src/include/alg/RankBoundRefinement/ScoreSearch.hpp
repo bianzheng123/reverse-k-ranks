@@ -43,8 +43,8 @@ namespace ReverseMIPS {
 
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
             std::vector<double> IP_l(n_data_item_);
-            for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                IP_l[itemID] = distance_ptr[itemID].dist_;
+            for (int candID = 0; candID < n_data_item_; candID++) {
+                IP_l[candID] = distance_ptr[candID].dist_;
             }
             LoopPreprocess(IP_l.data(), userID);
         }
@@ -73,6 +73,28 @@ namespace ReverseMIPS {
                 interval_ptr[intervalID] += interval_ptr[intervalID - 1];
             }
             assert(interval_ptr[n_interval_ - 1] == n_data_item_);
+
+        }
+
+        void GetItvID(const DistancePair *distance_ptr, const int &userID,
+                      std::vector<unsigned char> &itvID_l) const {
+            if (n_interval_ > 256) {
+                spdlog::error("the number of interval larger than 256, program exit");
+                exit(-1);
+            }
+            assert(itvID_l.size() == n_data_item_);
+            for (int candID = 0; candID < n_data_item_; candID++) {
+                assert(user_ip_bound_l_[userID].first <= user_ip_bound_l_[userID].second);
+                const double IP_lb = user_ip_bound_l_[userID].first;
+                const double IP_ub = user_ip_bound_l_[userID].second;
+                const double itv_dist = interval_dist_l_[userID];
+                const int itemID = distance_ptr[candID].ID_;
+                const double ip = distance_ptr[candID].dist_;
+                assert(IP_lb <= ip && ip <= IP_ub);
+                const unsigned char itvID = std::floor((IP_ub - ip) / itv_dist);
+                itvID_l[itemID] = itvID;
+                assert(0 <= itvID && itvID < n_interval_);
+            }
 
         }
 
@@ -118,7 +140,8 @@ namespace ReverseMIPS {
         void RankBound(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
                        const int &topk,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
-                       std::vector<std::pair<double, double>>& queryIPBound_l) {
+                       std::vector<std::pair<double, double>> &queryIPBound_l,
+                       std::vector<int> &itvID_l) {
 
             assert(prune_l.size() == n_user_);
             assert(rank_lb_l.size() == n_user_ && rank_ub_l.size() == n_user_);
@@ -135,6 +158,7 @@ namespace ReverseMIPS {
                 const double user_IP_ub = user_IPbound.second;
                 const double itv_dist = interval_dist_l_[userID];
                 const int itvID = std::floor((user_IP_ub - queryIP) / itv_dist);
+                itvID_l[userID] = itvID;
                 if (itvID < 0) {
                     assert(rank_ub_l[userID] <= 0 && 0 <= rank_lb_l[userID]);
                     rank_ub_l[userID] = 0;

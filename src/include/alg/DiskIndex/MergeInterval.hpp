@@ -7,7 +7,7 @@
 
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
-#include "alg/Cluster/GreedyMerge.hpp"
+#include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
 #include "alg/DiskIndex/RankFromCandidate/CandidateBruteForce.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
@@ -19,7 +19,6 @@
 #include <spdlog/spdlog.h>
 #include <armadillo>
 
-//TODO modify to MergeInterval
 namespace ReverseMIPS {
 
     class MergeInterval {
@@ -38,18 +37,19 @@ namespace ReverseMIPS {
         //variable in build index
         std::ofstream out_stream_;
         //n_data_item, stores the UserRankBound in the disk, used for build index and retrieval
-        std::vector<UserRankBound> disk_cache_l_;
+        std::vector<UserRankBound<unsigned char>> disk_write_cache_l_;
 
         //variable in retrieval
         std::ifstream index_stream_;
         int n_candidate_;
         std::vector<bool> is_compute_l_;
         std::vector<UserRankElement> user_topk_cache_l_; //n_user, used for sort the element to return the top-k
+        std::vector<std::pair<unsigned char, unsigned char>> disk_retrieval_cache_l_;
 
         inline MergeInterval() {}
 
         inline MergeInterval(const CandidateBruteForce &exact_rank_ins, const VectorMatrix &user,
-                             const int &n_data_item, const char *index_path,
+                             const char *index_path, const int &n_data_item,
                              const int &n_merge_user) {
             this->n_user_ = user.n_vector_;
             this->n_data_item_ = n_data_item;
@@ -61,19 +61,20 @@ namespace ReverseMIPS {
             spdlog::info("n_merge_user {}", n_merge_user_);
 
             this->merge_label_l_.resize(n_user_);
-            this->disk_cache_l_.resize(n_data_item);
+            this->disk_write_cache_l_.resize(n_data_item_);
             for (int itemID = 0; itemID < n_data_item; itemID++) {
-                this->disk_cache_l_[itemID].Reset();
+                this->disk_write_cache_l_[itemID].Reset();
             }
             this->is_compute_l_.resize(n_merge_user_);
             this->user_topk_cache_l_.resize(n_user_);
+            this->disk_retrieval_cache_l_.resize(n_data_item_);
 
             BuildIndexPreprocess(user);
         }
 
         void
         BuildIndexPreprocess(const VectorMatrix &user) {
-            merge_label_l_ = GreedyMerge::ClusterLabel(user, n_merge_user_);
+            merge_label_l_ = GreedyMergeMinClusterSize::ClusterLabel(user, n_merge_user_);
 
 //            printf("cluster size\n");
 //            for (int mergeID = 0; mergeID < n_merge_user_; mergeID++) {
@@ -107,25 +108,32 @@ namespace ReverseMIPS {
             return eval_seq_l;
         }
 
-        void BuildIndexLoop(const std::vector<DistancePair> &distance_pair_l, const int &userID) {
-            for (int rank = 0; rank < n_data_item_; rank++) {
-                int itemID = distance_pair_l[rank].ID_;
-                disk_cache_l_[itemID].Merge(rank);
+        void BuildIndexLoop(const std::vector<unsigned char> &itvID_l, const int &userID) {
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                int itvID = itvID_l[itemID];
+                disk_write_cache_l_[itemID].Merge(itvID);
             }
         }
 
         void WriteIndex() {
             //get the number of users in each bucket, assign into the cache_bkt_vec
-            assert(disk_cache_l_.size() == n_data_item_);
+            assert(disk_write_cache_l_.size() == n_data_item_);
 
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                assert(disk_cache_l_[itemID].rank_lb_ != -1 && disk_cache_l_[itemID].rank_ub_ != -1);
+                assert(disk_write_cache_l_[itemID].is_assign_);
             }
-            out_stream_.write((char *) disk_cache_l_.data(),
-                              (std::streamsize) (n_data_item_ * sizeof(UserRankBound)));
+
+            assert(disk_retrieval_cache_l_.size() == n_data_item_);
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                std::pair<unsigned char, unsigned char> itvID_bound_pair = disk_write_cache_l_[itemID].GetRankBound();
+                disk_retrieval_cache_l_[itemID] = itvID_bound_pair;
+            }
+
+            out_stream_.write((char *) disk_retrieval_cache_l_.data(),
+                              (std::streamsize) (n_data_item_ * sizeof(std::pair<unsigned char, unsigned char>)));
 
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                disk_cache_l_[itemID].Reset();
+                disk_write_cache_l_[itemID].Reset();
             }
 
         }
@@ -145,7 +153,8 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                     const std::vector<std::pair<double, double>> &IPbound_l,
+                     const std::vector<std::pair<double, double>> &queryIPbound_l,
+                     const std::vector<int> &itvID_l,
                      const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
             is_compute_l_.assign(n_merge_user_, false);
 
@@ -170,12 +179,22 @@ namespace ReverseMIPS {
                     assert(0 <= rank_ub_l[userID] && rank_ub_l[userID] <= rank_lb_l[userID] &&
                            rank_lb_l[userID] <= n_data_item_);
                     exact_rank_refinement_record_.reset();
-                    const double queryIP = queryIP_l[userID];
+
                     const int base_rank = rank_ub_l[userID];
-                    int loc_rk = exact_rank_ins_.QueryRankByCandidate(user, item, queryIP, disk_cache_l_,
-                                                                      userID, IPbound_l[userID],
-                                                                      std::make_pair(rank_lb_l[userID],
-                                                                                     rank_ub_l[userID]));
+                    const double queryIP = queryIP_l[userID];
+                    int loc_rk;
+                    if (rank_lb_l[userID] == rank_ub_l[userID]) {
+                        loc_rk = 0;
+                    } else {
+                        const double *user_vecs = user.getVector(userID);
+                        const std::pair<int, int> query_itvID_bound_pair = std::make_pair(
+                                itvID_l[userID], itvID_l[userID]);
+                        loc_rk = exact_rank_ins_.QueryRankByCandidate<unsigned char>(user_vecs, item,
+                                                                                     queryIP, queryIPbound_l[userID],
+                                                                                     disk_retrieval_cache_l_,
+                                                                                     query_itvID_bound_pair);
+                    }
+
                     int rank = base_rank + loc_rk + 1;
                     exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
 
@@ -193,9 +212,10 @@ namespace ReverseMIPS {
 
         inline void ReadDisk(const int &labelID) {
             uint64_t offset = n_data_item_ * labelID;
-            std::basic_istream<char>::off_type offset_byte = offset * sizeof(UserRankBound);
+            std::basic_istream<char>::off_type offset_byte = offset * sizeof(std::pair<unsigned char, unsigned char>);
             index_stream_.seekg(offset_byte, std::ios::beg);
-            index_stream_.read((char *) disk_cache_l_.data(), n_data_item_ * sizeof(UserRankBound));
+            index_stream_.read((char *) disk_retrieval_cache_l_.data(),
+                               (std::streamsize) (n_data_item_ * sizeof(std::pair<unsigned char, unsigned char>)));
         }
 
         void FinishRetrieval() {
