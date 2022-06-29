@@ -15,13 +15,13 @@ size = n_interval * np.ceil(n_user / 8) / 1024 / 1024
 print("{} {}MB".format(description, size))
 
 description = 'merge by interval, store ID, bloom filter'
-n = np.ceil(n_user / 8)
-m = np.ceil(n / 1000)
+n = n_user
+m = np.ceil(n / 8)
 # k = np.ceil(np.log(2) * n / m)
 k = 6
 fp = (1 - np.power(1 - 1 / n, k * m)) ** k
 
-size = n_interval * m / 1024 / 1024
+size = size_char * n_interval * m / 1024 / 1024
 print("{} {}MB, false positive rate {}, k {}, m {}, n_user {}".format(description, size, fp, k, m, n_user))
 
 description = 'merge by item, store score, all'
