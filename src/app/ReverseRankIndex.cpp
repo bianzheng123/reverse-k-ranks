@@ -35,7 +35,8 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_sample, index_size_gb;
+    int cache_bound_every, n_sample;
+    uint64_t index_size_gb;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -56,7 +57,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "how many numbers would cache a value")
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "the numer of sample")
-            ("index_size_gb, tt", po::value<int>(&para.index_size_gb)->default_value(50),
+            ("index_size_gb, tt", po::value<uint64_t>(&para.index_size_gb)->default_value(50),
              "index size, in unit of GB");
 
     po::variables_map vm;
@@ -103,7 +104,7 @@ int main(int argc, char **argv) {
 
     } else if (method_name == "CompressTopTIDBruteForce") {
         const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
+        const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
                      n_sample, index_size_gb);
         index = CompressTopTIDBruteForce::BuildIndex(data_item, user, index_path,
@@ -113,7 +114,7 @@ int main(int argc, char **argv) {
 
     } else if (method_name == "CompressTopTIDIPBruteForce") {
         const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
+        const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
                      n_sample, index_size_gb);
         index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path,
@@ -123,7 +124,7 @@ int main(int argc, char **argv) {
 
     } else if (method_name == "CompressTopTIPBruteForce") {
         const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
+        const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
                      n_sample, index_size_gb);
         index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path,
@@ -183,7 +184,7 @@ int main(int argc, char **argv) {
 
     } else if (method_name == "SSMergeInterval") {
         const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
+        const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
                      n_sample, index_size_gb);
         index = SSMergeInterval::BuildIndex(data_item, user, index_path,
@@ -193,7 +194,7 @@ int main(int argc, char **argv) {
 
     } else if (method_name == "SSMergeRankBound") {
         const int n_sample = para.n_sample;
-        const int index_size_gb = para.index_size_gb;
+        const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
                      n_sample, index_size_gb);
         index = SSMergeRankBound::BuildIndex(data_item, user, index_path,
@@ -225,6 +226,7 @@ int main(int argc, char **argv) {
 
         result_rank_l.emplace_back(result_rk);
         spdlog::info("finish top-{}", topk);
+        spdlog::info("{}", performance_str);
     }
 
     spdlog::info("build index time: total {}s", build_index_time);

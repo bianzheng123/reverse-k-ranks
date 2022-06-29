@@ -135,15 +135,15 @@ def run_compute_all_n_codeword():
 
 def run_compress_topt():
     dataset_l = ['movielens-27m']
-    index_size_l = [10, 30, 50, 70, 90]
+    index_size_l = [170, 150, 130, 110, 90]
     n_sample = 128
     for ds in dataset_l:
-        os.system(
-            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-                ds, basic_dir, "SSComputeAll", n_sample))
-        os.system(
-            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-                ds, basic_dir, "ScoreSample", n_sample))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+        #         ds, basic_dir, "SSComputeAll", n_sample))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+        #         ds, basic_dir, "ScoreSample", n_sample))
         for index_size in index_size_l:
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(

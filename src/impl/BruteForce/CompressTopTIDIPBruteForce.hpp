@@ -191,7 +191,7 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &n_interval, const int &index_size_gb) {
+                                      const int &n_interval, const uint64_t &index_size_gb) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;

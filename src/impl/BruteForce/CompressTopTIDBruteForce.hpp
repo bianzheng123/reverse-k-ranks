@@ -191,7 +191,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &n_interval, const int &index_size_gb) {
+                                      const int &n_interval, const uint64_t &index_size_gb) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -206,6 +206,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         const uint64_t predict_index_size_kb = sizeof(int) * n_data_item * n_user;
         const uint64_t topt_big_size = index_size_kb / sizeof(int) / n_user;
         int topt = int(topt_big_size);
+        printf("index size kb: %lu, predict index size kb: %lu\n", index_size_kb, predict_index_size_kb);
         if (index_size_kb >= predict_index_size_kb) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             topt = n_data_item;
