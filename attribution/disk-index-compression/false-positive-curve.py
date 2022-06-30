@@ -2,12 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot(x_l, y_l, z_l):
+def plot(x_l, y_l):
     # plot
     fig, ax = plt.subplots()
 
     ax.plot(x_l, y_l, linestyle='solid', color='#000000', label="distribution")
-    ax.plot(x_l, z_l, linestyle='solid', color='#555555', label="distribution")
 
     ax.legend(loc='upper left')
 
@@ -26,17 +25,19 @@ def plot(x_l, y_l, z_l):
 
 
 def f(m, k, n):
-    fp = (1 - np.exp(-k * n / m)) ** k
+    fp = (1 - (1 - 1 / m) ** (k * n)) ** k
     return fp
 
 
 n_user = 6218834
 n_data_item = 2166750
 
-m_l = np.arange(1, n_user, 1000)
+# m_l = np.arange(1, n_user, 1000)
+m_l = np.array([100, 1000, 50000])
 n = n_user
-k = np.ceil(np.log(2) * n / m)
-k = 6
+k_l = np.ceil(np.log(2) * n / m_l)
+# k = 6
+print(k_l)
 
-fp_l = [f(m, k, n) for m in m_l]
+fp_l = [f(m_l[i], k_l[i], n) for i in range(len(m_l))]
 plot(m_l, fp_l)

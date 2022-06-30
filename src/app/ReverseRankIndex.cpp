@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
                      n_sample, index_size_gb);
         index = CompressTopTIDBruteForce::BuildIndex(data_item, user, index_path,
                                                      n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
     } else if (method_name == "CompressTopTIDIPBruteForce") {
@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
                      n_sample, index_size_gb);
         index = CompressTopTIDIPBruteForce::BuildIndex(data_item, user, index_path,
                                                        n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
     } else if (method_name == "CompressTopTIPBruteForce") {
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
                      n_sample, index_size_gb);
         index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path,
                                                      n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
     } else if (method_name == "DiskBruteForce") {
@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
                      n_sample, index_size_gb);
         index = SSMergeInterval::BuildIndex(data_item, user, index_path,
                                             n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
     } else if (method_name == "SSMergeRankBound") {
@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
                      n_sample, index_size_gb);
         index = SSMergeRankBound::BuildIndex(data_item, user, index_path,
                                              n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
     } else {

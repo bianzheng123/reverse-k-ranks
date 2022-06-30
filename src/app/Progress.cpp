@@ -80,8 +80,9 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
+    //TODO add the bloom filter interface
 //     else {
-        spdlog::error("not such method");
+    spdlog::error("not such method");
 //    }
 
     double build_index_time = record.get_elapsed_time_second();

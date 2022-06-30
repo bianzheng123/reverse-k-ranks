@@ -136,7 +136,7 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeInterval'))
         # os.system('cd build/attribution && ./pc --dataset_name {}'.format(ds))
 

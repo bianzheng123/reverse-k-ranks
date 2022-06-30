@@ -188,7 +188,7 @@ namespace ReverseMIPS::SSMergeRankBound {
 
     };
 
-    const int report_batch_every = 100;
+    const int report_batch_every = 10000;
 
     /*
      * bruteforce index

@@ -170,6 +170,9 @@ namespace ReverseMIPS {
                 ReadDisk(iter_labelID);
                 read_disk_time_ += read_disk_record_.get_elapsed_time_second();
                 for (int userID = iter_userID; userID < n_user_; userID++) {
+                    if (prune_l[userID]) {
+                        continue;
+                    }
                     int user_labelID = (int) merge_label_l_[userID];
                     if (user_labelID != iter_labelID) {
                         continue;

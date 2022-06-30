@@ -1,5 +1,0 @@
-#	FlinkGIS_baseline	Query_Replica_Baseline	Thor	
-4	129	105	125	
-8	131	82	129	
-12	137	119	135	
-16	140	97	137	
