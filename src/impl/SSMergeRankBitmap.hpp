@@ -1,13 +1,13 @@
 //
-// Created by BianZheng on 2022/6/30.
+// Created by BianZheng on 2022/7/3.
 //
 
-#ifndef REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP
-#define REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP
+#ifndef REVERSE_K_RANKS_SSMERGERANKBITMAP_HPP
+#define REVERSE_K_RANKS_SSMERGERANKBITMAP_HPP
 
 #include "alg/DiskIndex/MergeIntervalBitmap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/ScoreSearchTopT.hpp"
+#include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -27,7 +27,8 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::SSMergeIntervalBitmap {
+//TODO change to merge rank bitmap
+namespace ReverseMIPS::SSMergeRankBitmap {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -40,7 +41,7 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
 
     public:
         //for rank search, store in memory
-        ScoreSearchTopT rank_bound_ins_;
+        ScoreSearch rank_bound_ins_;
         //read all instance
         MergeIntervalBitmap disk_ins_;
 
@@ -60,7 +61,7 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
 
         Index(
                 // score search
-                ScoreSearchTopT &rank_bound_ins,
+                ScoreSearch &rank_bound_ins,
                 //disk index
                 MergeIntervalBitmap &disk_ins,
                 //general retrieval
@@ -205,8 +206,7 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
         user.vectorNormalize();
 
         //rank search
-        const int topt = n_data_item;
-        ScoreSearchTopT rank_bound_ins(n_sample, topt, n_user, n_data_item);
+        ScoreSearch rank_bound_ins(n_sample, n_user, n_data_item);
 
         //disk index
         if (index_size_gb <= 0) {
@@ -214,10 +214,11 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
             exit(-1);
         }
 
+        const int topt = n_data_item / 2;
         const int bitmap_size_byte = n_data_item / 8 + (n_data_item % 8 == 0 ? 0 : 1);
         const uint64_t index_size_byte = index_size_gb * 1024 * 1024 * 1024;
-        const uint64_t predict_index_size_byte = bitmap_size_byte * n_sample * n_user;
-        const uint64_t n_merge_user_big_size = index_size_byte / (bitmap_size_byte * n_sample);
+        const uint64_t predict_index_size_byte = n_user * topt * bitmap_size_byte;
+        const uint64_t n_merge_user_big_size = index_size_byte / bitmap_size_byte / n_data_item;
         int n_merge_user = int(n_merge_user_big_size);
         if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
@@ -281,4 +282,4 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
     }
 
 }
-#endif //REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP
+#endif //REVERSE_K_RANKS_SSMERGERANKBITMAP_HPP
