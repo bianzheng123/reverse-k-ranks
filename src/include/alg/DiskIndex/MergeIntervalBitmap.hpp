@@ -2,8 +2,8 @@
 // Created by BianZheng on 2022/6/30.
 //
 
-#ifndef REVERSE_K_RANKS_MERGEBITMAP_HPP
-#define REVERSE_K_RANKS_MERGEBITMAP_HPP
+#ifndef REVERSE_K_RANKS_MERGEINTERVALBITMAP_HPP
+#define REVERSE_K_RANKS_MERGEINTERVALBITMAP_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
@@ -79,11 +79,11 @@ namespace ReverseMIPS {
         }
     };
 
-    class MergeBitmap {
+    class MergeIntervalBitmap {
     public:
         //index variable
         int n_user_, n_data_item_, vec_dim_, n_interval_;
-        int topt_, n_merge_user_, bitmap_size_byte_;
+        int n_merge_user_, bitmap_size_byte_;
         //n_cache_rank_: stores how many intervals for each merged user
         std::vector<uint32_t> merge_label_l_; // n_user, stores which cluster the user belons to
         CandidateBruteForce exact_rank_ins_;
@@ -105,25 +105,21 @@ namespace ReverseMIPS {
         Bitmap retrieval_bitmap_;
         std::vector<bool> item_cand_l_;
 
-        inline MergeBitmap() {}
+        inline MergeIntervalBitmap() {}
 
-        inline MergeBitmap(const CandidateBruteForce &exact_rank_ins, const VectorMatrix &user,
-                           const char *index_path, const int &n_data_item, const int &n_interval,
-                           const int &topt, const int &n_merge_user, const int &bitmap_size_byte) {
+        inline MergeIntervalBitmap(const CandidateBruteForce &exact_rank_ins, const VectorMatrix &user,
+                                   const char *index_path, const int &n_data_item, const int &n_interval,
+                                   const int &n_merge_user, const int &bitmap_size_byte) {
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
             this->index_path_ = index_path;
             this->n_data_item_ = n_data_item;
 
             this->n_interval_ = n_interval;
-            this->topt_ = topt;
             this->n_merge_user_ = n_merge_user;
             this->bitmap_size_byte_ = bitmap_size_byte;
             this->exact_rank_ins_ = exact_rank_ins;
             assert(bitmap_size_byte_ == (n_data_item / 8 + (n_data_item % 8 == 0 ? 0 : 1)));
-
-            spdlog::info("n_interval {}, topt {}, n_merge_user {}, bitmap_size_byte {}",
-                         n_interval_, topt_, n_merge_user_, bitmap_size_byte_);
 
             this->merge_label_l_.resize(n_user_);
             this->disk_cache_write_l_.resize(n_interval);
@@ -281,4 +277,4 @@ namespace ReverseMIPS {
 
     };
 }
-#endif //REVERSE_K_RANKS_MERGEBITMAP_HPP
+#endif //REVERSE_K_RANKS_MERGEINTERVALBITMAP_HPP

@@ -2,10 +2,10 @@
 // Created by BianZheng on 2022/6/30.
 //
 
-#ifndef REVERSE_K_RANKS_SSMERGEBITMAP_HPP
-#define REVERSE_K_RANKS_SSMERGEBITMAP_HPP
+#ifndef REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP
+#define REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP
 
-#include "alg/DiskIndex/MergeBitmap.hpp"
+#include "alg/DiskIndex/MergeIntervalBitmap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearchTopT.hpp"
 #include "alg/SpaceInnerProduct.hpp"
@@ -27,7 +27,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::SSMergeBitmap {
+namespace ReverseMIPS::SSMergeIntervalBitmap {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -42,7 +42,7 @@ namespace ReverseMIPS::SSMergeBitmap {
         //for rank search, store in memory
         ScoreSearchTopT rank_bound_ins_;
         //read all instance
-        MergeBitmap disk_ins_;
+        MergeIntervalBitmap disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -62,7 +62,7 @@ namespace ReverseMIPS::SSMergeBitmap {
                 // score search
                 ScoreSearchTopT &rank_bound_ins,
                 //disk index
-                MergeBitmap &disk_ins,
+                MergeIntervalBitmap &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
             //hash search
@@ -205,7 +205,7 @@ namespace ReverseMIPS::SSMergeBitmap {
         user.vectorNormalize();
 
         //rank search
-        const int topt = n_data_item / 2;
+        const int topt = n_data_item;
         ScoreSearchTopT rank_bound_ins(n_sample, topt, n_user, n_data_item);
 
         //disk index
@@ -224,12 +224,15 @@ namespace ReverseMIPS::SSMergeBitmap {
             n_merge_user = n_user - 1;
         }
 
+        spdlog::info("n_interval {}, topt {}, n_merge_user {}, bitmap_size_byte {}",
+                     n_sample, topt, n_merge_user, bitmap_size_byte);
+
         //exact rank refinement
         CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
 
-        MergeBitmap disk_ins(exact_rank_ins, user,
-                             index_path, n_data_item, n_sample,
-                             topt, n_merge_user, bitmap_size_byte);
+        MergeIntervalBitmap disk_ins(exact_rank_ins, user,
+                                     index_path, n_data_item, n_sample,
+                                     n_merge_user, bitmap_size_byte);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
 
@@ -278,4 +281,4 @@ namespace ReverseMIPS::SSMergeBitmap {
     }
 
 }
-#endif //REVERSE_K_RANKS_SSMERGEBITMAP_HPP
+#endif //REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP

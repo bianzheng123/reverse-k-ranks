@@ -9,7 +9,6 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "BruteForce/MemoryBruteForce.hpp"
-#include "SSMergeBitmap.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>

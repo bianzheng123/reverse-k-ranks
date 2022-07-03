@@ -117,7 +117,7 @@ namespace ReverseMIPS {
         int QueryRankByCandidate
                 (const double *user_vecs, const VectorMatrix &item,
                  const double &queryIP
-                ) {
+                ) const {
 
             //calculate all the IP, then get the lower bound
             //make different situation by the information

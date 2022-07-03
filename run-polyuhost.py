@@ -162,7 +162,7 @@ def run_compress_topt():
             #         ds, basic_dir, "SSMergeRankBound", n_sample, index_size))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "SSMergeBitmap", n_sample, index_size))
+                    ds, basic_dir, "SSMergeIntervalBitmap", n_sample, index_size))
 
 
 if __name__ == '__main__':
