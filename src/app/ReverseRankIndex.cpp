@@ -23,6 +23,7 @@
 #include "RankSample.hpp"
 #include "ScoreSample.hpp"
 #include "SSComputeAll.hpp"
+#include "SSMergeBitmap.hpp"
 #include "SSMergeInterval.hpp"
 #include "SSMergeRankBound.hpp"
 
@@ -181,6 +182,16 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: n_sample {}", n_sample);
         index = SSComputeAll::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
+
+    } else if (method_name == "SSMergeBitmap") {
+        const int n_sample = para.n_sample;
+        const uint64_t index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = SSMergeBitmap::BuildIndex(data_item, user, index_path,
+                                          n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
+                n_sample, index_size_gb);
 
     } else if (method_name == "SSMergeInterval") {
         const int n_sample = para.n_sample;

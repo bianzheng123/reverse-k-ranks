@@ -187,6 +187,7 @@ namespace ReverseMIPS {
                 spdlog::error("top-t larger than n_data_item, program exit");
                 exit(-1);
             }
+            spdlog::info("topt {}", topt_);
 
             this->disk_cache_ = std::make_unique<DistancePair[]>(topt);
             this->user_topk_cache_l_.resize(n_user);

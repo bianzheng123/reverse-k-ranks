@@ -172,10 +172,8 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
 
         std::string BuildIndexStatistics() override {
             char buffer[512];
-            double index_size = 1.0 * n_user_ * disk_ins_.topt_ * sizeof(double) / (1024 * 1024 * 1024);
-            sprintf(buffer, "Build Index Info: index size %.3f GB", index_size);
-            spdlog::info(buffer);
-            spdlog::info("n_user {}, topt {}", n_user_, disk_ins_.topt_);
+            double index_size_gb = 1.0 * n_user_ * disk_ins_.topt_ * sizeof(double) / (1024 * 1024 * 1024);
+            sprintf(buffer, "Build Index Info: index size %.3f GB", index_size_gb);
             return buffer;
         };
 
@@ -201,11 +199,11 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
         ScoreSearch rank_bound_ins(n_interval, n_user, n_data_item);
 
         //disk index
-        const uint64_t index_size_kb = index_size_gb * 1024 * 1024 * 1024;
-        const uint64_t predict_index_size_kb = sizeof(double) * n_data_item * n_user;
-        const uint64_t topt_big_size = index_size_kb / sizeof(double) / n_user;
+        const uint64_t index_size_byte = index_size_gb * 1024 * 1024 * 1024;
+        const uint64_t predict_index_size_byte = sizeof(double) * n_data_item * n_user;
+        const uint64_t topt_big_size = index_size_byte / sizeof(double) / n_user;
         int topt = int(topt_big_size);
-        if (index_size_kb >= predict_index_size_kb) {
+        if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             topt = n_data_item;
         }

@@ -29,6 +29,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'RankSample': 'cache_bound_every_512',
         'ScoreSample': 'n_sample_50',
         'SSComputeAll': 'n_sample_20',
+        'SSMergeBitmap': 'n_sample_20-index_size_gb_50',
         'SSMergeInterval': 'n_sample_20-index_size_gb_50',
         'SSMergeRankBound': 'n_sample_20-index_size_gb_50',
 
@@ -97,8 +98,9 @@ def run():
         # 'RankSample',
         # 'ScoreSample',
         # 'SSComputeAll',
+        # 'SSMergeBitmap',
+        # 'SSMergeInterval',
         # 'SSMergeRankBound',
-        'SSMergeInterval',
         # 'FullID',
 
         # 'CAGrid',
@@ -107,7 +109,7 @@ def run():
         # 'CAFullInt',
         # 'CAPartDimPartInt',
         # 'CAPartDimPartNorm',
-        # 'CAPartIntPartNorm',
+        'CAPartIntPartNorm',
         # 'CAUserItemPQ',
         # 'CAItemPQ',
     ]
@@ -136,8 +138,9 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeInterval'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSMergeBitmap'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeInterval'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
         # os.system('cd build/attribution && ./pc --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
@@ -146,18 +149,18 @@ def run():
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullInt'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartDimPartInt'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartDimPartNorm'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartIntPartNorm'))
+        os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartIntPartNorm'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAUserItemPQ'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAItemPQ'))
 
     type_arr = ['userID', 'IP', 'rank']
-    topk_l = [10, 20, 30, 40, 50, 60, 70]
-    # topk_l = [10, 20]
+    # topk_l = [10, 20, 30, 40, 50, 60, 70]
+    topk_l = [10, 20]
     cmp_file_all(method_name_l, type_arr, dataset_l, topk_l)
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-normal']
-    # dataset_l = ['fake-small', 'fake']
+    dataset_l = ['fake-small', 'fake']
     run()

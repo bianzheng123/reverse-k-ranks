@@ -33,7 +33,7 @@ if (FINISH)
 
 endif ()
 
-add_executable(pur score-sample-disadvantage/print-user-rank/PrintUserRank.cpp)
+add_executable(pur score-sample-advantage/print-user-rank/PrintUserRank.cpp)
 target_include_directories(pur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(pur PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 

@@ -178,12 +178,11 @@ namespace ReverseMIPS::SSMergeRankBound {
         }
 
         std::string BuildIndexStatistics() override {
-            const int n_merge_user = disk_ins_.n_merge_user_;
-            const uint64_t index_size_mb = n_merge_user * n_data_item_ * 2 * sizeof(int) / 1024 / 1024;
-            char str[256];
-            sprintf(str, "Build Index Info: index size %luMB", index_size_mb);
-            std::string string_ins(str);
-            return string_ins;
+            char buffer[512];
+            double index_size_gb =
+                    1.0 * disk_ins_.n_merge_user_ * n_data_item_ * (2 * sizeof(int)) / (1024 * 1024 * 1024);
+            sprintf(buffer, "Build Index Info: index size %.3f GB", index_size_gb);
+            return buffer;
         }
 
     };
@@ -215,11 +214,11 @@ namespace ReverseMIPS::SSMergeRankBound {
             exit(-1);
         }
 
-        const uint64_t index_size_kb = index_size_gb * 1024 * 1024 * 1024;
-        const uint64_t predict_index_size_kb = (sizeof(int) * 2) * n_data_item * n_user;
-        const uint64_t n_merge_user_big_size = index_size_kb / (sizeof(int) * 2) / n_data_item;
+        const uint64_t index_size_byte = index_size_gb * 1024 * 1024 * 1024;
+        const uint64_t predict_index_size_byte = (sizeof(int) * 2) * n_data_item * n_user;
+        const uint64_t n_merge_user_big_size = index_size_byte / (sizeof(int) * 2) / n_data_item;
         int n_merge_user = int(n_merge_user_big_size);
-        if (index_size_kb >= predict_index_size_kb) {
+        if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             n_merge_user = n_user - 1;
         }

@@ -153,7 +153,7 @@ namespace ReverseMIPS {
         inline TopTID() = default;
 
         inline TopTID(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
-                         const int &topt) {
+                      const int &topt) {
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
@@ -169,6 +169,7 @@ namespace ReverseMIPS {
                 spdlog::error("top-t larger than n_data_item, program exit");
                 exit(-1);
             }
+            spdlog::info("topt {}", topt_);
 
             this->disk_cache_ = std::make_unique<int[]>(topt);
             this->candIP_cache_ = std::make_unique<double[]>(topt);

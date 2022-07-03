@@ -1,7 +1,12 @@
-#include <algorithm>
 #include <iostream>
 #include <vector>
+#include <cfloat>
+#include <cassert>
 
-int main() {
-    printf("hello world\n");
+using namespace std;
+
+int main(int argc, char *argv[]) {
+    cout << -DBL_MAX << std::endl;
+
+    return 0;
 }

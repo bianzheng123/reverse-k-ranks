@@ -15,7 +15,7 @@ def show_bin_hist(bins, hist, dataset_name, topk):
     # 直方图会进行统计各个区间的数值
     print(bins)
     fig, ax = plt.subplots()
-    ax.bar(bins, hist, color='fuchsia', width=1)  # alpha设置透明度，0为完全透明
+    ax.bar(bins, hist, color='#b2b2b2', width=30)  # alpha设置透明度，0为完全透明
 
     # ax.set(xlim=(-5, 10), xticks=np.arange(-5, 10),   #)
     # ylim=(0, 1e8), yticks=np.arange(10000000, 90000000))
@@ -27,13 +27,14 @@ def show_bin_hist(bins, hist, dataset_name, topk):
     ax.set_xlabel('rank')
     ax.set_ylabel('frequency')
     # plt.xlim(0, 100)  # 设置x轴分布范围
-    plt.savefig('rank-distribution-{}-top{}.jpg'.format(dataset_name, topk))
+    plt.savefig('rank-distribution-{}-top{}.jpg'.format(dataset_name, topk), dpi=600)
     np.savetxt('rank-distribution-{}-top{}.txt'.format(dataset_name, topk), hist, fmt="%d")
     plt.close()
 
 
 if __name__ == '__main__':
-    for dataset_name in ['fake-normal', 'netflix', 'movielens-27m']:
+    # for dataset_name in ['fake-normal', 'netflix', 'movielens-27m']:
+    for dataset_name in ['netflix']:
         for topk in [10, 50]:
             n_user = dataset_stat_m[dataset_name][0]
             n_data_item = dataset_stat_m[dataset_name][1]

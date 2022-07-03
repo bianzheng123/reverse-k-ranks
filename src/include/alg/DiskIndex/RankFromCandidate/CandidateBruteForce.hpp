@@ -77,6 +77,62 @@ namespace ReverseMIPS {
             return loc_rk;
         }
 
+        int QueryRankByCandidate
+                (const double *user_vecs, const VectorMatrix &item,
+                 const double &queryIP, const std::pair<double, double> &queryIPbound_pair,
+                 const std::vector<bool> &item_cand_l // true means it has the candidates
+                ) {
+
+            //calculate all the IP, then get the lower bound
+            //make different situation by the information
+            int avail_n_cand = 0;
+            const double &queryIP_lb = queryIPbound_pair.first;
+            const double &queryIP_ub = queryIPbound_pair.second;
+
+            assert(item_cand_l.size() == n_data_item_);
+            assert(queryIP_lb <= queryIP && queryIP <= queryIP_ub);
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                if (!item_cand_l[itemID]) {
+                    continue;
+                }
+                double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
+                if (queryIP_lb <= ip && ip <= queryIP_ub) {
+                    IPcandidate_l_[avail_n_cand] = ip;
+                    avail_n_cand++;
+                }
+            }
+
+            std::sort(IPcandidate_l_.begin(), IPcandidate_l_.begin() + avail_n_cand, std::greater());
+
+            auto lb_ptr = std::lower_bound(IPcandidate_l_.begin(), IPcandidate_l_.begin() + avail_n_cand,
+                                           queryIP,
+                                           [](const double &info, double value) {
+                                               return info > value;
+                                           });
+            int loc_rk = (int) (lb_ptr - IPcandidate_l_.begin());
+
+            return loc_rk;
+        }
+
+        int QueryRankByCandidate
+                (const double *user_vecs, const VectorMatrix &item,
+                 const double &queryIP
+                ) {
+
+            //calculate all the IP, then get the lower bound
+            //make different situation by the information
+            int avail_n_cand = 0;
+            int rank = 0;
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
+                if (queryIP < ip) {
+                    rank++;
+                }
+            }
+
+            return rank;
+        }
+
     };
 }
 #endif //REVERSE_KRANKS_CANDIDATEBRUTEFORCE_HPP

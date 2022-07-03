@@ -167,10 +167,12 @@ namespace ReverseMIPS {
                     assert(rank_ub_l[userID] <= 0 && 0 <= rank_lb_l[userID]);
                     rank_ub_l[userID] = 0;
                     rank_lb_l[userID] = 0;
+                    queryIPBound_l[userID] = std::make_pair(queryIP, queryIP);
                     continue;
                 } else if (itvID >= n_interval_) {
                     rank_ub_l[userID] = topt_;
                     rank_lb_l[userID] = n_data_item_;
+                    queryIPBound_l[userID] = std::make_pair(-DBL_MAX, user_IPbound.first);
                     continue;
                 }
 
