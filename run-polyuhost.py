@@ -135,7 +135,7 @@ def run_compute_all_n_codeword():
 
 def run_compress_topt():
     dataset_l = ['movielens-27m']
-    index_size_l = [110, 90, 70, 50, 30]
+    index_size_l = [110, 90, 70, 50, 30, 10, 5, 1]
     n_sample = 128
     for ds in dataset_l:
         # os.system(
