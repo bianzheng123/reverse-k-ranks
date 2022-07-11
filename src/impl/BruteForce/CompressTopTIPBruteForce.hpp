@@ -5,6 +5,7 @@
 #ifndef REVERSE_KRANKS_COMPRESSTOPTIPBRUTEFROCE_HPP
 #define REVERSE_KRANKS_COMPRESSTOPTIPBRUTEFROCE_HPP
 
+#include "../../gpu/GPUScoreTable.hpp"
 #include "alg/DiskIndex/TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
@@ -179,9 +180,6 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
 
     };
 
-    const int write_every_ = 1000;
-    const int report_batch_every_ = 100;
-
     /*
      * bruteforce index
      * shape: n_user * n_data_item, type: double, the distance pair for each user
@@ -199,8 +197,8 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
         ScoreSearch rank_bound_ins(n_interval, n_user, n_data_item);
 
         //disk index
-        const uint64_t index_size_byte = index_size_gb * 1024 * 1024 * 1024;
-        const uint64_t predict_index_size_byte = sizeof(double) * n_data_item * n_user;
+        const uint64_t index_size_byte = (uint64_t) index_size_gb * 1024 * 1024 * 1024;
+        const uint64_t predict_index_size_byte = (uint64_t) sizeof(double) * n_data_item * n_user;
         const uint64_t topt_big_size = index_size_byte / sizeof(double) / n_user;
         int topt = int(topt_big_size);
         if (index_size_byte >= predict_index_size_byte) {
@@ -209,55 +207,28 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
         }
         TopTIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
 
-        std::vector<double> write_distance_cache(write_every_ * n_data_item);
-        const int n_batch = n_user / write_every_;
-        const int n_remain = n_user % write_every_;
-        spdlog::info("write_every_ {}, n_batch {}, n_remain {}", write_every_, n_batch, n_remain);
+        //GPU
+        const int report_user_every = 1000000;
+        GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
 
-        TimeRecord batch_report_record;
-        batch_report_record.reset();
-        for (int i = 0; i < n_batch; i++) {
-#pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, rank_bound_ins) shared(write_every_, n_data_item, vec_dim, n_interval)
-            for (int cacheID = 0; cacheID < write_every_; cacheID++) {
-                int userID = write_every_ * i + cacheID;
-                for (int itemID = 0; itemID < n_data_item; itemID++) {
-                    double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
-                    write_distance_cache[cacheID * n_data_item + itemID] = ip;
-                }
-                std::sort(write_distance_cache.begin() + cacheID * n_data_item,
-                          write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
+        TimeRecord record;
+        record.reset();
+        std::vector<double> distance_l(n_data_item);
+        for (int userID = 0; userID < n_user; userID++) {
+            gpu.ComputeList(userID, distance_l.data());
+            std::sort(distance_l.begin(), distance_l.end(), std::greater());
 
-                //hash search
-                const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-                rank_bound_ins.LoopPreprocess(distance_ptr, userID);
-            }
-            disk_ins.BuildIndexLoop(write_distance_cache.data(), write_every_);
+            rank_bound_ins.LoopPreprocess(distance_l.data(), userID);
+            disk_ins.BuildIndexLoop(distance_l.data(), 1);
 
-            if (i % report_batch_every_ == 0) {
-                std::cout << "preprocessed " << i / (0.01 * n_batch) << " %, "
-                          << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
+            if (userID % report_user_every == 0) {
+                std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
+                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
-                batch_report_record.reset();
+                record.reset();
             }
         }
-
-        {
-            for (int cacheID = 0; cacheID < n_remain; cacheID++) {
-                int userID = write_every_ * n_batch + cacheID;
-                for (int itemID = 0; itemID < n_data_item; itemID++) {
-                    double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
-                    write_distance_cache[cacheID * n_data_item + itemID] = ip;
-                }
-
-                std::sort(write_distance_cache.begin() + cacheID * n_data_item,
-                          write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
-
-                //hash search
-                const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-                rank_bound_ins.LoopPreprocess(distance_ptr, userID);
-            }
-            disk_ins.BuildIndexLoop(write_distance_cache.data(), n_remain);
-        }
+        gpu.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 //score search

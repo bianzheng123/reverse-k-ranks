@@ -1,18 +1,20 @@
 //
-// Created by BianZheng on 2022/6/20.
+// Created by BianZheng on 2022/7/6.
 //
 
-#ifndef REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
-#define REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
+#ifndef REVERSE_K_RANKS_SSMERGEQUADRATICRANKBOUNDBYBITMAP_HPP
+#define REVERSE_K_RANKS_SSMERGEQUADRATICRANKBOUNDBYBITMAP_HPP
 
-#include "../../gpu/GPUScoreTable.hpp"
-#include "alg/DiskIndex/TopTID.hpp"
+#include "../gpu/GPUScoreTable.hpp"
+#include "alg/DiskIndex/MergeQuadraticRankBoundByBitmap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
+#include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
+#include "struct/DistancePair.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
 #include "util/FileIO.hpp"
@@ -26,44 +28,45 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::CompressTopTIDBruteForce {
+namespace ReverseMIPS::SSMergeQuadraticRankBoundByBitmap {
 
     class Index : public BaseIndex {
         void ResetTimer() {
-            inner_product_time_ = 0;
-            hash_search_time_ = 0;
             read_disk_time_ = 0;
-            exact_rank_time_ = 0;
-
-            hash_prune_ratio_ = 0;
+            inner_product_time_ = 0;
+            rank_bound_refinement_time_ = 0;
+            exact_rank_refinement_time_ = 0;
+            rank_search_prune_ratio_ = 0;
         }
 
     public:
-        //for hash search, store in memory
+        //for rank search, store in memory
         ScoreSearch rank_bound_ins_;
         //read all instance
-        TopTID disk_ins_;
+        MergeQuadraticRankBoundByBitmap disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
-        double inner_product_time_, hash_search_time_, read_disk_time_, exact_rank_time_;
-        TimeRecord inner_product_record_, hash_search_record_;
-        double hash_prune_ratio_;
+        double inner_product_time_, rank_bound_refinement_time_, read_disk_time_, exact_rank_refinement_time_;
+        TimeRecord inner_product_record_, rank_bound_refinement_record_;
+        double rank_search_prune_ratio_;
 
         //temporary retrieval variable
         std::vector<bool> prune_l_;
+        std::vector<std::pair<double, double>> queryIPbound_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
+        std::vector<int> itvID_l_;
 
         Index(
-                // hash search
+                // score search
                 ScoreSearch &rank_bound_ins,
                 //disk index
-                TopTID &disk_ins,
+                MergeQuadraticRankBoundByBitmap &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
-            //rank search
+            //hash search
             this->rank_bound_ins_ = std::move(rank_bound_ins);
             //read disk
             this->disk_ins_ = std::move(disk_ins);
@@ -77,9 +80,11 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
 
             //retrieval variable
             this->prune_l_.resize(n_user_);
+            this->queryIPbound_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
+            this->itvID_l_.resize(n_user_);
 
         }
 
@@ -105,7 +110,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
 
-                const double *query_vecs = query_item.getVector(queryID);
+                double *query_vecs = query_item.getVector(queryID);
 
                 //calculate the exact IP
                 inner_product_record_.reset();
@@ -117,13 +122,14 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
 
-                //coarse binary search
-                hash_search_record_.reset();
-                rank_bound_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
+                //rank bound refinement
+                rank_bound_refinement_record_.reset();
+                rank_bound_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_, queryIPbound_l_,
+                                          itvID_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       prune_l_, rank_topk_max_heap);
-                hash_search_time_ += hash_search_record_.get_elapsed_time_second();
+                rank_bound_refinement_time_ += rank_bound_refinement_record_.get_elapsed_time_second();
                 int n_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
                     if (!prune_l_[userID]) {
@@ -131,10 +137,10 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
                     }
                 }
                 assert(n_candidate >= topk);
-                hash_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
@@ -143,10 +149,10 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
             }
             disk_ins_.FinishRetrieval();
 
-            exact_rank_time_ = disk_ins_.exact_rank_time_;
+            exact_rank_refinement_time_ = disk_ins_.exact_rank_refinement_time_;
             read_disk_time_ = disk_ins_.read_disk_time_;
 
-            hash_prune_ratio_ /= n_query_item;
+            rank_search_prune_ratio_ /= n_query_item;
             return query_heap_l;
         }
 
@@ -154,19 +160,19 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
             // int topk;
             //double total_time,
-            //          inner_product_time, hash_search_time_,
-            //          read_disk_time_, exact_rank_time_,
-            //          hash_prune_ratio_
+            //          inner_product_time, rank_bound_refinement_time_
+            //          read_disk_time_, exact_rank_refinement_time_,
+            //          rank_search_prune_ratio_
             //double ms_per_query;
             //unit: second
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, hash search %.3fs\n\tread disk time %.3f, exact rank time %.3fs\n\thash prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, coarse binary search %.3fs\n\tread disk time %.3fs, exact rank refinement %.3fs\n\trank search prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
-                    inner_product_time_, hash_search_time_,
-                    read_disk_time_, exact_rank_time_,
-                    hash_prune_ratio_,
+                    inner_product_time_, rank_bound_refinement_time_,
+                    read_disk_time_, exact_rank_refinement_time_,
+                    rank_search_prune_ratio_,
                     ms_per_query);
             std::string str(buff);
             return str;
@@ -174,12 +180,15 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
 
         std::string BuildIndexStatistics() override {
             char buffer[512];
-            double index_size_gb = 1.0 * n_user_ * disk_ins_.topt_ * sizeof(int) / (1024 * 1024 * 1024);
+            double index_size_gb =
+                    1.0 * disk_ins_.n_merge_user_ * n_data_item_ * (2 * sizeof(int)) / (1024 * 1024 * 1024);
             sprintf(buffer, "Build Index Info: index size %.3f GB", index_size_gb);
             return buffer;
-        };
+        }
 
     };
+
+    const int report_batch_every = 10000;
 
     /*
      * bruteforce index
@@ -187,7 +196,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &n_interval, const uint64_t &index_size_gb) {
+                                      const int &n_sample, const uint64_t &index_size_gb) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -195,46 +204,67 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         user.vectorNormalize();
 
         //rank search
-        ScoreSearch rank_bound_ins(n_interval, n_user, n_data_item);
+        ScoreSearch rank_bound_ins(n_sample, n_user, n_data_item);
+
+        //exact rank refinement
+        CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
 
         //disk index
+        if (index_size_gb <= 0) {
+            spdlog::error("compress index size too small, program exit");
+            exit(-1);
+        }
+
+        const int bitmap_size_byte = (n_data_item / 8 + (n_data_item % 8 == 0 ? 0 : 1)) * sizeof(unsigned char);
+        const int n_rank_bound = n_sample;
+
         const uint64_t index_size_byte = (uint64_t) index_size_gb * 1024 * 1024 * 1024;
-        const uint64_t predict_index_size_byte = (uint64_t) sizeof(int) * n_data_item * n_user;
-        const uint64_t topt_big_size = index_size_byte / sizeof(int) / n_user;
-        int topt = int(topt_big_size);
-        printf("index size byte: %lu, predict index size byte: %lu\n", index_size_byte, predict_index_size_byte);
+        const uint64_t predict_index_size_byte = (uint64_t) bitmap_size_byte * n_rank_bound * n_user;
+        const uint64_t n_merge_user_big_size = index_size_byte / (bitmap_size_byte * n_rank_bound);
+        int n_merge_user = int(n_merge_user_big_size);
         if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
-            topt = n_data_item;
+            n_merge_user = n_user - 1;
+//            n_merge_user = n_user / 2;
         }
-        TopTID disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
 
-        //GPU
-        const int report_user_every = 1000000;
+        MergeQuadraticRankBoundByBitmap disk_ins(exact_rank_ins, user, n_data_item, index_path, n_rank_bound,
+                                                 n_merge_user);
+        std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
+        assert(eval_seq_l.size() == n_merge_user);
+
         GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
-
         std::vector<DistancePair> distance_pair_l(n_data_item);
-
-        TimeRecord record;
-        record.reset();
         std::vector<double> distance_l(n_data_item);
-        for (int userID = 0; userID < n_user; userID++) {
-            gpu.ComputeList(userID, distance_l.data());
-            for (int itemID = 0; itemID < n_data_item; itemID++) {
-                distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
+
+        TimeRecord batch_report_record;
+        batch_report_record.reset();
+        for (int labelID = 0; labelID < n_merge_user; labelID++) {
+            std::vector<int> &user_l = eval_seq_l[labelID];
+            const unsigned int n_eval = user_l.size();
+
+            for (int evalID = 0; evalID < n_eval; evalID++) {
+                int userID = user_l[evalID];
+                gpu.ComputeList(userID, distance_l.data());
+                for (int itemID = 0; itemID < n_data_item; itemID++) {
+                    distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
+                }
+                std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
+
+                //rank search
+                rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
+
+                disk_ins.BuildIndexLoop(distance_pair_l, userID);
             }
-            std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
-
-            rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
-            disk_ins.BuildIndexLoop(distance_pair_l.data(), 1);
-
-            if (userID % report_user_every == 0) {
-                std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+            disk_ins.WriteIndex();
+            if (labelID % report_batch_every == 0) {
+                std::cout << "preprocessed " << labelID / (0.01 * n_merge_user) << " %, "
+                          << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
-                record.reset();
+                batch_report_record.reset();
             }
         }
+        disk_ins.FinishWrite();
         gpu.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
@@ -248,4 +278,4 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
     }
 
 }
-#endif //REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
+#endif //REVERSE_K_RANKS_SSMERGEQUADRATICRANKBOUNDBYBITMAP_HPP

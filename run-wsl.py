@@ -24,14 +24,18 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'BPlusTree': 'node_size_512',
 
         'HashBound': 'cache_bound_every_512-n_sample_1024',
-        'QuadraticRankBound': 'n_sample_16',
-        'QuadraticScoreBound': 'n_sample_16',
+        'QuadraticRankBound': 'n_sample_20',
+        'QuadraticScoreBound': 'n_sample_20',
         'RankSample': 'cache_bound_every_512',
-        'ScoreSample': 'n_sample_50',
+        'ScoreSample': 'n_sample_20',
         'SSComputeAll': 'n_sample_20',
-        'SSMergeInterval': 'n_sample_20-index_size_gb_50',
-        'SSMergeIntervalBitmap': 'n_sample_20-index_size_gb_50',
-        'SSMergeRankBound': 'n_sample_20-index_size_gb_50',
+        'GPUScoreSample': 'n_sample_20',
+
+        'SSMergeIntervalIDByBitmap': 'n_sample_20-index_size_gb_50',
+        'SSMergeIntervalIDByInterval': 'n_sample_20-index_size_gb_50',
+        'SSMergeQuadraticRankBoundByBitmap': 'n_sample_20-index_size_gb_50',
+        'SSMergeRankByBitmap': 'n_sample_20-index_size_gb_50',
+        'SSMergeRankByInterval': 'n_sample_20-index_size_gb_50',
 
         'CompressTopTIDBruteForce': 'n_sample_20-index_size_gb_50',
         'CompressTopTIDIPBruteForce': 'n_sample_20-index_size_gb_50',
@@ -81,27 +85,28 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
 
 def run():
     method_name_l = [
-        'BatchDiskBruteForce',
+        # 'BatchDiskBruteForce',
         # 'CompressTopTIDBruteForce',
         # 'CompressTopTIDIPBruteForce',
         # 'CompressTopTIPBruteForce',
         # 'DiskBruteForce',
-        'MemoryBruteForce',
+        # 'MemoryBruteForce',
         # 'OnlineBruteForce',
 
         # 'GridIndex',
 
-        # 'BPlusTree',
-        # 'HashBound',
         # 'QuadraticRankBound',
         # 'QuadraticScoreBound',
         # 'RankSample',
         # 'ScoreSample',
         # 'SSComputeAll',
-        # 'SSMergeInterval',
-        'SSMergeIntervalBitmap',
-        # 'SSMergeRankBound',
-        # 'FullID',
+        # 'GPUScoreSample',
+
+        'SSMergeIntervalIDByBitmap',
+        'SSMergeIntervalIDByInterval',
+        'SSMergeQuadraticRankBoundByBitmap',
+        # 'SSMergeRankByBitmap',
+        'SSMergeRankByInterval',
 
         # 'CAGrid',
         # 'CAFullDim',
@@ -120,27 +125,31 @@ def run():
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-small', 'fake']
     for ds in dataset_l:
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
         # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticRankBound'))
+        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QuadraticRankBound'))
         # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample 16'.format(ds, 'QuadraticScoreBound'))
+        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QuadraticScoreBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeInterval'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalBitmap'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankBound'))
+
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalIDByBitmap'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalIDByInterval'))
+        os.system(
+            'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByBitmap'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
         # os.system('cd build/attribution && ./pc --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
@@ -154,13 +163,14 @@ def run():
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAItemPQ'))
 
     type_arr = ['userID', 'IP', 'rank']
-    # topk_l = [10, 20, 30, 40, 50, 60, 70]
-    topk_l = [10, 20]
+    topk_l = [10, 20, 30, 40, 50, 60, 70]
+    # topk_l = [10, 20]
     cmp_file_all(method_name_l, type_arr, dataset_l, topk_l)
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['netflix-small']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-uniform']
+    # dataset_l = ['netflix-small']
     # dataset_l = ['fake-small', 'fake']
     run()

@@ -5,6 +5,7 @@
 #ifndef REVERSE_K_RANKS_TOPTID_HPP
 #define REVERSE_K_RANKS_TOPTID_HPP
 
+#include "alg/SpaceInnerProduct.hpp"
 #include "struct/DistancePair.hpp"
 
 namespace ReverseMIPS {

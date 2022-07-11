@@ -1,13 +1,14 @@
 //
-// Created by BianZheng on 2022/6/30.
+// Created by BianZheng on 2022/4/19.
 //
 
-#ifndef REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP
-#define REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP
+#ifndef REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
+#define REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
 
-#include "alg/DiskIndex/MergeIntervalBitmap.hpp"
+#include "../gpu/GPUScoreTable.hpp"
+#include "alg/DiskIndex/MergeRankByInterval.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/ScoreSearchTopT.hpp"
+#include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -27,7 +28,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::SSMergeIntervalBitmap {
+namespace ReverseMIPS::SSMergeRankByInterval {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -40,9 +41,9 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
 
     public:
         //for rank search, store in memory
-        ScoreSearchTopT rank_bound_ins_;
+        ScoreSearch rank_bound_ins_;
         //read all instance
-        MergeIntervalBitmap disk_ins_;
+        MergeRankByInterval disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -60,9 +61,9 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
 
         Index(
                 // score search
-                ScoreSearchTopT &rank_bound_ins,
+                ScoreSearch &rank_bound_ins,
                 //disk index
-                MergeIntervalBitmap &disk_ins,
+                MergeRankByInterval &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
             //hash search
@@ -139,9 +140,7 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
-                                  queryIPbound_l_, prune_l_, itvID_l_,
-                                  user_, data_item_, queryID);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
@@ -181,8 +180,8 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
 
         std::string BuildIndexStatistics() override {
             char buffer[512];
-            double index_size_gb = 1.0 * disk_ins_.n_merge_user_ * disk_ins_.n_interval_ * disk_ins_.bitmap_size_byte_ /
-                                   (1024 * 1024 * 1024);
+            double index_size_gb =
+                    1.0 * disk_ins_.n_merge_user_ * n_data_item_ * (2 * sizeof(int)) / (1024 * 1024 * 1024);
             sprintf(buffer, "Build Index Info: index size %.3f GB", index_size_gb);
             return buffer;
         }
@@ -205,8 +204,10 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
         user.vectorNormalize();
 
         //rank search
-        const int topt = n_data_item;
-        ScoreSearchTopT rank_bound_ins(n_sample, topt, n_user, n_data_item);
+        ScoreSearch rank_bound_ins(n_sample, n_user, n_data_item);
+
+        //exact rank refinement
+        CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
 
         //disk index
         if (index_size_gb <= 0) {
@@ -214,30 +215,22 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
             exit(-1);
         }
 
-        const int bitmap_size_byte = n_data_item / 8 + (n_data_item % 8 == 0 ? 0 : 1);
-        const uint64_t index_size_byte = index_size_gb * 1024 * 1024 * 1024;
-        const uint64_t predict_index_size_byte = bitmap_size_byte * n_sample * n_user;
-        const uint64_t n_merge_user_big_size = index_size_byte / (bitmap_size_byte * n_sample);
+        const uint64_t index_size_byte = (uint64_t) index_size_gb * 1024 * 1024 * 1024;
+        const uint64_t predict_index_size_byte = (uint64_t) (sizeof(int) * 2) * n_data_item * n_user;
+        const uint64_t n_merge_user_big_size = index_size_byte / (sizeof(int) * 2) / n_data_item;
         int n_merge_user = int(n_merge_user_big_size);
         if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             n_merge_user = n_user - 1;
         }
 
-        spdlog::info("n_interval {}, topt {}, n_merge_user {}, bitmap_size_byte {}",
-                     n_sample, topt, n_merge_user, bitmap_size_byte);
-
-        //exact rank refinement
-        CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
-
-        MergeIntervalBitmap disk_ins(exact_rank_ins, user,
-                                     index_path, n_data_item, n_sample,
-                                     n_merge_user, bitmap_size_byte);
+        MergeRankByInterval disk_ins(exact_rank_ins, user, n_data_item, index_path, n_merge_user);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
 
+        GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
         std::vector<DistancePair> distance_pair_l(n_data_item);
-        std::vector<unsigned char> itvID_l(n_data_item);
+        std::vector<double> distance_l(n_data_item);
 
         TimeRecord batch_report_record;
         batch_report_record.reset();
@@ -247,18 +240,16 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
 
             for (int evalID = 0; evalID < n_eval; evalID++) {
                 int userID = user_l[evalID];
-#pragma omp parallel for default(none) shared(n_data_item, data_item, user, userID, vec_dim, distance_pair_l)
+                gpu.ComputeList(userID, distance_l.data());
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
-                    double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
-                    distance_pair_l[itemID] = DistancePair(ip, itemID);
+                    distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
                 }
                 std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
 
                 //rank search
                 rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
-                rank_bound_ins.GetItvID(distance_pair_l.data(), userID, itvID_l);
 
-                disk_ins.BuildIndexLoop(itvID_l, userID);
+                disk_ins.BuildIndexLoop(distance_pair_l, userID);
             }
             disk_ins.WriteIndex();
             if (labelID % report_batch_every == 0) {
@@ -269,6 +260,7 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
             }
         }
         disk_ins.FinishWrite();
+        gpu.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 //score search
@@ -281,4 +273,4 @@ namespace ReverseMIPS::SSMergeIntervalBitmap {
     }
 
 }
-#endif //REVERSE_K_RANKS_SSMERGEINTERVALBITMAP_HPP
+#endif //REVERSE_KRANKS_IRBMERGERANKBOUND_HPP

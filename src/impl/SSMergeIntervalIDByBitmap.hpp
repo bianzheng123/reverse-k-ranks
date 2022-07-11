@@ -1,13 +1,14 @@
 //
-// Created by BianZheng on 2022/7/3.
+// Created by BianZheng on 2022/6/30.
 //
 
-#ifndef REVERSE_K_RANKS_SSMERGERANKBITMAP_HPP
-#define REVERSE_K_RANKS_SSMERGERANKBITMAP_HPP
+#ifndef REVERSE_K_RANKS_SSMERGEINTERVALIDBYBITMAP_HPP
+#define REVERSE_K_RANKS_SSMERGEINTERVALIDBYBITMAP_HPP
 
-#include "alg/DiskIndex/MergeIntervalBitmap.hpp"
+#include "../gpu/GPUScoreTable.hpp"
+#include "alg/DiskIndex/MergeIntervalIDByBitmap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "alg/RankBoundRefinement/ScoreSearchTopT.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -27,8 +28,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-//TODO change to merge rank bitmap
-namespace ReverseMIPS::SSMergeRankBitmap {
+namespace ReverseMIPS::SSMergeIntervalIDByBitmap {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -41,9 +41,9 @@ namespace ReverseMIPS::SSMergeRankBitmap {
 
     public:
         //for rank search, store in memory
-        ScoreSearch rank_bound_ins_;
+        ScoreSearchTopT rank_bound_ins_;
         //read all instance
-        MergeIntervalBitmap disk_ins_;
+        MergeIntervalIDByBitmap disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -61,9 +61,9 @@ namespace ReverseMIPS::SSMergeRankBitmap {
 
         Index(
                 // score search
-                ScoreSearch &rank_bound_ins,
+                ScoreSearchTopT &rank_bound_ins,
                 //disk index
-                MergeIntervalBitmap &disk_ins,
+                MergeIntervalIDByBitmap &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
             //hash search
@@ -190,7 +190,7 @@ namespace ReverseMIPS::SSMergeRankBitmap {
 
     };
 
-    const int report_batch_every = 10000;
+    const int report_merge_every = 100000;
 
     /*
      * bruteforce index
@@ -206,7 +206,8 @@ namespace ReverseMIPS::SSMergeRankBitmap {
         user.vectorNormalize();
 
         //rank search
-        ScoreSearch rank_bound_ins(n_sample, n_user, n_data_item);
+        const int topt = n_data_item;
+        ScoreSearchTopT rank_bound_ins(n_sample, topt, n_user, n_data_item);
 
         //disk index
         if (index_size_gb <= 0) {
@@ -214,11 +215,10 @@ namespace ReverseMIPS::SSMergeRankBitmap {
             exit(-1);
         }
 
-        const int topt = n_data_item / 2;
-        const int bitmap_size_byte = n_data_item / 8 + (n_data_item % 8 == 0 ? 0 : 1);
-        const uint64_t index_size_byte = index_size_gb * 1024 * 1024 * 1024;
-        const uint64_t predict_index_size_byte = n_user * topt * bitmap_size_byte;
-        const uint64_t n_merge_user_big_size = index_size_byte / bitmap_size_byte / n_data_item;
+        const int bitmap_size_byte = (n_data_item / 8 + (n_data_item % 8 == 0 ? 0 : 1)) * sizeof(unsigned char);
+        const uint64_t index_size_byte = (uint64_t) index_size_gb * 1024 * 1024 * 1024;
+        const uint64_t predict_index_size_byte = (uint64_t) bitmap_size_byte * n_sample * n_user;
+        const uint64_t n_merge_user_big_size = index_size_byte / (bitmap_size_byte * n_sample);
         int n_merge_user = int(n_merge_user_big_size);
         if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
@@ -231,14 +231,16 @@ namespace ReverseMIPS::SSMergeRankBitmap {
         //exact rank refinement
         CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
 
-        MergeIntervalBitmap disk_ins(exact_rank_ins, user,
-                                     index_path, n_data_item, n_sample,
-                                     n_merge_user, bitmap_size_byte);
+        MergeIntervalIDByBitmap disk_ins(exact_rank_ins, user,
+                                         index_path, n_data_item, n_sample,
+                                         n_merge_user, bitmap_size_byte);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
 
+        GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
         std::vector<DistancePair> distance_pair_l(n_data_item);
         std::vector<unsigned char> itvID_l(n_data_item);
+        std::vector<double> distance_l(n_data_item);
 
         TimeRecord batch_report_record;
         batch_report_record.reset();
@@ -248,10 +250,9 @@ namespace ReverseMIPS::SSMergeRankBitmap {
 
             for (int evalID = 0; evalID < n_eval; evalID++) {
                 int userID = user_l[evalID];
-#pragma omp parallel for default(none) shared(n_data_item, data_item, user, userID, vec_dim, distance_pair_l)
+                gpu.ComputeList(userID, distance_l.data());
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
-                    double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
-                    distance_pair_l[itemID] = DistancePair(ip, itemID);
+                    distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
                 }
                 std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
 
@@ -262,7 +263,8 @@ namespace ReverseMIPS::SSMergeRankBitmap {
                 disk_ins.BuildIndexLoop(itvID_l, userID);
             }
             disk_ins.WriteIndex();
-            if (labelID % report_batch_every == 0) {
+
+            if (labelID % report_merge_every == 0) {
                 std::cout << "preprocessed " << labelID / (0.01 * n_merge_user) << " %, "
                           << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
@@ -270,6 +272,7 @@ namespace ReverseMIPS::SSMergeRankBitmap {
             }
         }
         disk_ins.FinishWrite();
+        gpu.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 //score search
@@ -282,4 +285,4 @@ namespace ReverseMIPS::SSMergeRankBitmap {
     }
 
 }
-#endif //REVERSE_K_RANKS_SSMERGERANKBITMAP_HPP
+#endif //REVERSE_K_RANKS_SSMERGEINTERVALIDBYBITMAP_HPP

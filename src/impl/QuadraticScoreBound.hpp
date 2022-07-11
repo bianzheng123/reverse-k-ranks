@@ -5,6 +5,7 @@
 #ifndef REVERSE_KRANKS_QUADRATICSCOREBOUND_HPP
 #define REVERSE_KRANKS_QUADRATICSCOREBOUND_HPP
 
+#include "../gpu/GPUScoreTable.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/QuadraticScoreSearch.hpp"
@@ -189,9 +190,6 @@ namespace ReverseMIPS::QuadraticScoreBound {
 
     };
 
-    const int write_every_ = 100;
-    const int report_batch_every_ = 100;
-
     /*
      * bruteforce index
      * shape: n_user * n_data_item, type: double, the distance pair for each user
@@ -201,10 +199,7 @@ namespace ReverseMIPS::QuadraticScoreBound {
     BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &n_sample) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
-        std::vector<double> write_distance_cache(write_every_ * n_data_item);
         const int vec_dim = data_item.vec_dim_;
-        const int n_batch = user.n_vector_ / write_every_;
-        const int n_remain = user.n_vector_ % write_every_;
 
         user.vectorNormalize();
 
@@ -213,53 +208,28 @@ namespace ReverseMIPS::QuadraticScoreBound {
         //disk index
         ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);
 
-        TimeRecord batch_report_record;
-        batch_report_record.reset();
-        for (int i = 0; i < n_batch; i++) {
-#pragma omp parallel for default(none) shared(i, data_item, user, write_distance_cache, rank_ins) shared(write_every_, n_data_item, vec_dim)
-            for (int cacheID = 0; cacheID < write_every_; cacheID++) {
-                int userID = write_every_ * i + cacheID;
-                for (int itemID = 0; itemID < n_data_item; itemID++) {
-                    double ip = InnerProduct(data_item.getVector(itemID), user.getVector(userID), vec_dim);
-                    write_distance_cache[cacheID * n_data_item + itemID] = ip;
-                }
-                std::sort(write_distance_cache.begin() + cacheID * n_data_item,
-                          write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
+        //GPU
+        const int report_user_every = 1000000;
+        GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
 
-                //rank search
-                const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-                rank_ins.LoopPreprocess(distance_ptr, userID);
-            }
-            disk_ins.BuildIndexLoop(write_distance_cache, write_every_);
+        TimeRecord record;
+        record.reset();
+        std::vector<double> distance_l(n_data_item);
+        for (int userID = 0; userID < n_user; userID++) {
+            gpu.ComputeList(userID, distance_l.data());
+            std::sort(distance_l.begin(), distance_l.end(), std::greater());
 
-            if (i % report_batch_every_ == 0) {
-                std::cout << "preprocessed " << i / (0.01 * n_batch) << " %, "
-                          << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
+            rank_ins.LoopPreprocess(distance_l.data(), userID);
+            disk_ins.BuildIndexLoop(distance_l, 1);
+
+            if (userID % report_user_every == 0) {
+                std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
+                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
-                batch_report_record.reset();
+                record.reset();
             }
-
         }
-
-        {
-            for (int cacheID = 0; cacheID < n_remain; cacheID++) {
-                int userID = write_every_ * n_batch + cacheID;
-                for (int itemID = 0; itemID < data_item.n_vector_; itemID++) {
-                    double ip = InnerProduct(data_item.getRawData() + itemID * vec_dim,
-                                             user.getRawData() + userID * vec_dim, vec_dim);
-                    write_distance_cache[cacheID * data_item.n_vector_ + itemID] = ip;
-                }
-
-                std::sort(write_distance_cache.begin() + cacheID * n_data_item,
-                          write_distance_cache.begin() + (cacheID + 1) * n_data_item, std::greater());
-
-                //rank search
-                const double *distance_ptr = write_distance_cache.data() + cacheID * n_data_item;
-                rank_ins.LoopPreprocess(distance_ptr, userID);
-            }
-
-            disk_ins.BuildIndexLoop(write_distance_cache, n_remain);
-        }
+        gpu.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;

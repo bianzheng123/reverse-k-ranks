@@ -1,12 +1,12 @@
 //
-// Created by BianZheng on 2022/6/27.
+// Created by BianZheng on 2022/5/19.
 //
 
-#ifndef REVERSE_KRANKS_SSCOMPUTEALL_HPP
-#define REVERSE_KRANKS_SSCOMPUTEALL_HPP
+#ifndef REVERSE_K_RANKS_SCORESAMPLE_HPP
+#define REVERSE_K_RANKS_SCORESAMPLE_HPP
 
 #include "../gpu/GPUScoreTable.hpp"
-#include "alg/DiskIndex/ComputeAll.hpp"
+#include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
@@ -26,12 +26,13 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::SSComputeAll {
+namespace ReverseMIPS::GPUScoreSample {
 
     class Index : public BaseIndex {
         void ResetTimer() {
             inner_product_time_ = 0;
             interval_search_time_ = 0;
+            read_disk_time_ = 0;
             exact_rank_refinement_time_ = 0;
             interval_prune_ratio_ = 0;
         }
@@ -41,11 +42,11 @@ namespace ReverseMIPS::SSComputeAll {
         ScoreSearch interval_ins_;
 
         //read all instance
-        ComputeAll disk_ins_;
+        ReadAll disk_ins_;
 
-        VectorMatrix user_, data_item_;
+        VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
-        double inner_product_time_, interval_search_time_, exact_rank_refinement_time_;
+        double inner_product_time_, interval_search_time_, read_disk_time_, exact_rank_refinement_time_;
         TimeRecord inner_product_record_, interval_search_record_;
         double interval_prune_ratio_;
 
@@ -59,9 +60,9 @@ namespace ReverseMIPS::SSComputeAll {
                 //interval search
                 ScoreSearch &interval_ins,
                 //disk index
-                ComputeAll &disk_ins,
+                ReadAll &disk_ins,
                 //general retrieval
-                VectorMatrix &user, VectorMatrix &data_item) {
+                VectorMatrix &user, const int &n_data_item) {
             //interval search
             this->interval_ins_ = std::move(interval_ins);
             //read disk
@@ -70,9 +71,7 @@ namespace ReverseMIPS::SSComputeAll {
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
             this->user_ = std::move(user);
-
-            this->n_data_item_ = data_item.n_vector_;
-            this->data_item_ = std::move(data_item);
+            this->n_data_item_ = n_data_item;
             assert(0 < this->user_.vec_dim_);
 
             //retrieval variable
@@ -83,7 +82,8 @@ namespace ReverseMIPS::SSComputeAll {
 
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>>
+        Retrieval(const VectorMatrix &query_item, const int &topk) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -136,15 +136,17 @@ namespace ReverseMIPS::SSComputeAll {
                 interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(user_, data_item_, queryIP_l_, prune_l_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
                 }
                 assert(query_heap_l[queryID].size() == topk);
             }
+            disk_ins_.FinishRetrieval();
 
             exact_rank_refinement_time_ = disk_ins_.exact_rank_refinement_time_;
+            read_disk_time_ = disk_ins_.read_disk_time_;
 
             interval_prune_ratio_ /= n_query_item;
             return query_heap_l;
@@ -166,17 +168,17 @@ namespace ReverseMIPS::SSComputeAll {
             // int topk;
             //double total_time,
             //          inner_product_time, interval_search_time_,
-            //          exact_rank_refinement_time_,
+            //          read_disk_time_, exact_rank_refinement_time_,
             //          interval_prune_ratio_
             //double ms_per_query;
             //unit: second
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, interval search %.3fs, \n\texact rank refinement time %.3fs\n\tinterval prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, interval search %.3fs, \n\tread disk time %.3f, exact rank refinement time %.3fs\n\tinterval prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, interval_search_time_,
-                    exact_rank_refinement_time_,
+                    read_disk_time_, exact_rank_refinement_time_,
                     interval_prune_ratio_,
                     ms_per_query);
             std::string str(buff);
@@ -186,7 +188,7 @@ namespace ReverseMIPS::SSComputeAll {
     };
 
     const int write_every_ = 1000;
-    const int report_batch_every_ = 100;
+    const int report_user_every_ = 1000;
 
     /*
      * bruteforce index
@@ -205,28 +207,33 @@ namespace ReverseMIPS::SSComputeAll {
         ScoreSearch interval_ins(n_interval, n_user, n_data_item);
 
         //disk index
-        ComputeAll disk_ins(n_user, n_data_item, vec_dim);
+        ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);
 
         //GPU
-        const int report_user_every = 1000000;
         GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
 
-        TimeRecord record;
-        record.reset();
-        std::vector<double> distance_l(n_data_item);
+        std::vector<double> write_distance_cache(n_data_item);
+
+        TimeRecord batch_report_record;
+        batch_report_record.reset();
         for (int userID = 0; userID < n_user; userID++) {
-            gpu.ComputeList(userID, distance_l.data());
-            std::sort(distance_l.begin(), distance_l.end(), std::greater());
+            gpu.ComputeList(userID, write_distance_cache.data());
+            std::sort(write_distance_cache.begin(), write_distance_cache.end(), std::greater());
 
-            interval_ins.LoopPreprocess(distance_l.data(), userID);
+            //interval search
+            const double *distance_ptr = write_distance_cache.data();
+            interval_ins.LoopPreprocess(distance_ptr, userID);
 
-            if (userID % report_user_every == 0) {
+            disk_ins.BuildIndexLoop(write_distance_cache, 1);
+
+            if (userID % report_user_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                          << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
-                record.reset();
+                batch_report_record.reset();
             }
         }
+
         gpu.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
@@ -235,9 +242,9 @@ namespace ReverseMIPS::SSComputeAll {
                 //disk index
                 disk_ins,
                 //general retrieval
-                user, data_item);
+                user, n_data_item);
         return index_ptr;
     }
 
 }
-#endif //REVERSE_KRANKS_SSCOMPUTEALL_HPP
+#endif //REVERSE_K_RANKS_SCORESAMPLE_HPP

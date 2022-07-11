@@ -53,7 +53,7 @@ def plot_rank_pdf(score_distri, idx, n_sample):
     # ax.set_title('movielens-27m, n_data_item={}'.format(n_data_item))
 
     # plt.show()
-    plt.savefig('rank_pdf_{}.jpg'.format(idx), dpi=600, bbox_inches = 'tight')
+    plt.savefig('rank_pdf_{}.jpg'.format(idx), dpi=600, bbox_inches='tight')
     plt.close()
 
 

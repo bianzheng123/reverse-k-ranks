@@ -6,7 +6,10 @@ import numpy as np
 # max_val = max(arr)
 # print((arr - min_val) / (max_val - min_val))
 
-for i in range(1):
-    arr = np.random.uniform(low=4, high=8, size=6)
+count = 0
+for i in range(100):
+    arr = np.random.randint(low=1, high=30, size=11)
     arr = np.sort(arr)
-    print(arr)
+    if len(set(arr)) == 11:
+        count += 1
+        print(arr)

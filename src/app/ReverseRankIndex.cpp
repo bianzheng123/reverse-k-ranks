@@ -8,24 +8,22 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "BruteForce/BatchDiskBruteForce.hpp"
 #include "BruteForce/CompressTopTIDBruteForce.hpp"
 #include "BruteForce/CompressTopTIDIPBruteForce.hpp"
 #include "BruteForce/CompressTopTIPBruteForce.hpp"
-#include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 
 #include "Online/GridIndex.hpp"
 
-#include "BPlusTree.hpp"
 #include "QuadraticRankBound.hpp"
 #include "QuadraticScoreBound.hpp"
 #include "RankSample.hpp"
 #include "ScoreSample.hpp"
 #include "SSComputeAll.hpp"
-#include "SSMergeInterval.hpp"
-#include "SSMergeIntervalBitmap.hpp"
-#include "SSMergeRankBound.hpp"
+#include "SSMergeIntervalIDByBitmap.hpp"
+#include "SSMergeIntervalIDByInterval.hpp"
+#include "SSMergeQuadraticRankBoundByBitmap.hpp"
+#include "SSMergeRankByInterval.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -98,12 +96,7 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
-    if (method_name == "BatchDiskBruteForce") {
-        ///BruteForce
-        spdlog::info("input parameter: none");
-        index = BatchDiskBruteForce::BuildIndex(data_item, user, index_path);
-
-    } else if (method_name == "CompressTopTIDBruteForce") {
+    if (method_name == "CompressTopTIDBruteForce") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
@@ -133,25 +126,10 @@ int main(int argc, char **argv) {
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
-    } else if (method_name == "DiskBruteForce") {
-        spdlog::info("input parameter: none");
-        index = DiskBruteForce::BuildIndex(data_item, user, index_path);
-
-    } else if (method_name == "MemoryBruteForce") {
-        spdlog::info("input parameter: none");
-        index = MemoryBruteForce::BuildIndex(data_item, user);
-
     } else if (method_name == "GridIndex") {
         ///Online
         spdlog::info("input parameter: none");
         index = GridIndex::BuildIndex(data_item, user);
-
-    } else if (method_name == "BPlusTree") {
-        ///Proposed method
-        const int cache_bound_every = para.cache_bound_every;
-        spdlog::info("input parameter: node_size {}", cache_bound_every);
-        index = BPlusTree::BuildIndex(data_item, user, index_path, cache_bound_every);
-        sprintf(parameter_name, "node_size_%d", cache_bound_every);
 
     } else if (method_name == "QuadraticRankBound") {
         const int n_sample = para.n_sample;
@@ -183,33 +161,43 @@ int main(int argc, char **argv) {
         index = SSComputeAll::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    } else if (method_name == "SSMergeInterval") {
+    } else if (method_name == "SSMergeIntervalIDByBitmap") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
                      n_sample, index_size_gb);
-        index = SSMergeInterval::BuildIndex(data_item, user, index_path,
-                                            n_sample, index_size_gb);
+        index = SSMergeIntervalIDByBitmap::BuildIndex(data_item, user, index_path,
+                                                      n_sample, index_size_gb);
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
-    } else if (method_name == "SSMergeIntervalBitmap") {
+    } else if (method_name == "SSMergeIntervalIDByInterval") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
                      n_sample, index_size_gb);
-        index = SSMergeIntervalBitmap::BuildIndex(data_item, user, index_path,
+        index = SSMergeIntervalIDByInterval::BuildIndex(data_item, user, index_path,
+                                                        n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
+                n_sample, index_size_gb);
+
+    } else if (method_name == "SSMergeQuadraticRankBoundByBitmap") {
+        const int n_sample = para.n_sample;
+        const uint64_t index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = SSMergeQuadraticRankBoundByBitmap::BuildIndex(data_item, user, index_path,
+                                                              n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
+                n_sample, index_size_gb);
+
+    } else if (method_name == "SSMergeRankByInterval") {
+        const int n_sample = para.n_sample;
+        const uint64_t index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+                     n_sample, index_size_gb);
+        index = SSMergeRankByInterval::BuildIndex(data_item, user, index_path,
                                                   n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
-                n_sample, index_size_gb);
-
-    } else if (method_name == "SSMergeRankBound") {
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = SSMergeRankBound::BuildIndex(data_item, user, index_path,
-                                             n_sample, index_size_gb);
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 

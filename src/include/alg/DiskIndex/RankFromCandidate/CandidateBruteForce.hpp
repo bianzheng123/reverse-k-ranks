@@ -121,7 +121,6 @@ namespace ReverseMIPS {
 
             //calculate all the IP, then get the lower bound
             //make different situation by the information
-            int avail_n_cand = 0;
             int rank = 0;
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
