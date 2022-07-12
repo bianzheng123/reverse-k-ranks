@@ -67,7 +67,7 @@ namespace GPU {
         }
 
         void ComputeList(const int &userID, double *distance_l) {
-            const int n_block = 512;
+            const int n_block = 1024;
             const int n_thread = n_data_item_ / n_block + (n_data_item_ % n_block == 0 ? 0 : 1);
             dim3 threadsPerBlock(n_thread);
             dim3 blocksPerGrid(n_block);
