@@ -210,28 +210,46 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         TopTID disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
 
         //GPU
-        const int report_user_every = 1000000;
+        const int report_user_every = 1000;
         GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
 
         std::vector<DistancePair> distance_pair_l(n_data_item);
 
         TimeRecord record;
         record.reset();
+
+        TimeRecord ip_compute_record, sort_record, index_record;
+        double ip_compute_time = 0;
+        double sort_time = 0;
+        double index_time = 0;
+
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
+            ip_compute_record.reset();
             gpu.ComputeList(userID, distance_l.data());
             for (int itemID = 0; itemID < n_data_item; itemID++) {
                 distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
             }
-            std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
+            ip_compute_time += ip_compute_record.get_elapsed_time_second();
 
+            sort_record.reset();
+            std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
+            sort_time += sort_record.get_elapsed_time_second();
+
+            index_record.reset();
             rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
             disk_ins.BuildIndexLoop(distance_pair_l.data(), 1);
+            index_time += index_record.get_elapsed_time_second();
 
-            if (userID % report_user_every == 0) {
+            if (userID != 0 && userID % report_user_every == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
+                std::cout << "IP Compute Time " << ip_compute_time << "s, Sort Time " << sort_time << "s, Index Time "
+                          << index_time << "s" << std::endl;
+                ip_compute_time = 0;
+                sort_time = 0;
+                index_time = 0;
                 record.reset();
             }
         }

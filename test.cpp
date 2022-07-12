@@ -2,13 +2,12 @@
 // Created by bianzheng on 2022/5/3.
 //
 
+#include "alg/SpaceInnerProduct.hpp"
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
-
-#include "GPUScoreSample.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -73,54 +72,28 @@ int main(int argc, char **argv) {
     VectorMatrix &query_item = data[2];
     spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
-    char index_path[256];
-    sprintf(index_path, "../index/index");
+    TimeRecord ip_compute_record;
+    ip_compute_record.reset();
+    double ip_compute_time = 0;
 
-    TimeRecord record;
-    record.reset();
-    unique_ptr<BaseIndex> index;
-    char parameter_name[256] = "";
-    if (method_name == "GPUScoreSample") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = GPUScoreSample::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
+    TimeRecord sort_record;
+    sort_record.reset();
+    double sort_time = 0;
 
-    } else {
-        spdlog::error("not such method");
+    std::vector<double> vecs(n_data_item);
+    for (int userID = 0; userID < n_user; userID++) {
+        ip_compute_record.reset();
+        for (int itemID = 0; itemID < n_data_item; itemID++) {
+            double ip = InnerProduct(user.getVector(userID), data_item.getVector(itemID), vec_dim);
+            vecs[itemID] = ip;
+        }
+        ip_compute_time += ip_compute_record.get_elapsed_time_second();
+
+        sort_record.reset();
+        std::sort(vecs.begin(), vecs.end(), std::greater());
+        sort_time += sort_record.get_elapsed_time_second();
     }
+    printf("sort_time %.3f, ip_compute_time %.3f\n", sort_time, ip_compute_time);
 
-    double build_index_time = record.get_elapsed_time_second();
-    spdlog::info("finish preprocess and save the index");
-
-    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-//    vector<int> topk_l{10};
-    RetrievalResult config;
-    vector<vector<vector<UserRankElement>>> result_rank_l;
-    for (int topk: topk_l) {
-        record.reset();
-        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk);
-
-        double retrieval_time = record.get_elapsed_time_second();
-        double ms_per_query = retrieval_time / n_query_item * 1000;
-
-        string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
-        config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
-
-        result_rank_l.emplace_back(result_rk);
-        spdlog::info("finish top-{}", topk);
-    }
-
-    spdlog::info("build index time: total {}s", build_index_time);
-    int n_topk = (int) topk_l.size();
-
-    for (int i = 0; i < n_topk; i++) {
-        cout << config.GetConfig(i) << endl;
-        WriteRankResult(result_rank_l[i], dataset_name, method_name.c_str(), parameter_name);
-    }
-
-    config.AddBuildIndexInfo(index->BuildIndexStatistics());
-    config.AddBuildIndexTime(build_index_time);
-    config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     return 0;
 }
