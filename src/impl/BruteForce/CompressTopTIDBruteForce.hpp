@@ -25,6 +25,7 @@
 #include <set>
 #include <cassert>
 #include <spdlog/spdlog.h>
+#include <boost/sort/sort.hpp>
 
 namespace ReverseMIPS::CompressTopTIDBruteForce {
 
@@ -233,7 +234,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
             ip_compute_time += ip_compute_record.get_elapsed_time_second();
 
             sort_record.reset();
-            std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
+            boost::sort::parallel_stable_sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
             sort_time += sort_record.get_elapsed_time_second();
 
             index_record.reset();
@@ -245,8 +246,8 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
-                std::cout << "IP Compute Time " << ip_compute_time << "s, Sort Time " << sort_time << "s, Index Time "
-                          << index_time << "s" << std::endl;
+                spdlog::info("IP Compute Time {}s, Sort Time {}s, Index Time {}s",
+                             ip_compute_time, sort_time, index_time);
                 ip_compute_time = 0;
                 sort_time = 0;
                 index_time = 0;

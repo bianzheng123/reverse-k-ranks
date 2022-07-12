@@ -216,7 +216,7 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
             gpu.ComputeList(userID, distance_l.data());
-            std::sort(distance_l.begin(), distance_l.end(), std::greater());
+            boost::sort::parallel_stable_sort(distance_l.begin(), distance_l.end(), std::greater());
 
             rank_bound_ins.LoopPreprocess(distance_l.data(), userID);
             disk_ins.BuildIndexLoop(distance_l.data(), 1);

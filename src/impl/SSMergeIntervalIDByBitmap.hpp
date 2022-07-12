@@ -254,7 +254,7 @@ namespace ReverseMIPS::SSMergeIntervalIDByBitmap {
                 for (int itemID = 0; itemID < n_data_item; itemID++) {
                     distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
                 }
-                std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
+                boost::sort::parallel_stable_sort(distance_l.begin(), distance_l.end(), std::greater());
 
                 //rank search
                 rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);

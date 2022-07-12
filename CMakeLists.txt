@@ -34,42 +34,13 @@ set(BUILD_ATTRIBUTION ON)
 set(BUILD_PROGRESS ON)
 set(BUILD_VAR OFF)
 
-#set(CUDA_TOOLKIT_INCLUDE /usr/local/cuda/include)
-#set(CUDA_NVCC_EXECUTABLE /usr/local/cuda/bin/nvcc)
-#set(CUDA_INCLUDE_DIRS /usr/local/cuda/include)
-#set(CUDA_CUDART_LIBRARY /usr/local/cuda)
-#set(CMAKE_CUDA_ARCHITECTURES 75)
-#set(CMAKE_CUDA_LINK_EXECUTABLE "${CMAKE_INSTALL_BINDIR}")
-#set(CMAKE_CUDA_LINK_EXECUTABLE "usr/local/cuda/bin/nvcc")
-#find_package(CUDA REQUIRED)
-#set(CUDA_64_BIT_DEVICE_CODE ON)
-#set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++17 -arch=sm_52")
-
-#CUDA_ADD_LIBRARY(gpu ${PROJECT_SOURCE_DIR}/src/gpu/GPUScoreTable.cu)
-#target_include_directories(gpu PRIVATE ${PROJECT_SOURCE_DIR}/src/gpu/GPUScoreTable.hpp ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-#target_link_libraries(gpu ${CUDA_LIBRARIES})
-
-#add_library(gpu SHARED
-#        ${PROJECT_SOURCE_DIR}/src/gpu/GPUScoreTable.cu
-#        )
-#target_include_directories(gpu
-#        PUBLIC
-#        ${PROJECT_SOURCE_DIR}/src/gpu
-#        ${PROJECT_SOURCE_DIR}/src/include
-#        ${CUDA_INCLUDE_DIRS}
-#        )
-#set_target_properties(gpu
-#        PROPERTIES
-#        LINKER_LANGUAGE CUDA
-#        CUDA_STANDARD 17
-#        CUDA_STANDARD_REQUIRED ON
-#        )
-
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
 #
 #target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
 #target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
+
+set(CMAKE_CUDA_ARCHITECTURES 75)
 
 enable_language(CUDA)
 
@@ -80,10 +51,6 @@ target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::
 set_property(TARGET rri PROPERTY CXX_STANDARD "17")
 set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
-
-#add_executable(rri src/app/ReverseRankIndex.cpp)
-#target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-#target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 if (BUILD_VAR)
     add_executable(rrivar src/app/ReverseRankIndexVariance.cpp)

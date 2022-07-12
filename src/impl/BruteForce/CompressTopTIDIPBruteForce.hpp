@@ -25,6 +25,7 @@
 #include <set>
 #include <cassert>
 #include <spdlog/spdlog.h>
+#include "boost/sort/sort.hpp"
 
 namespace ReverseMIPS::CompressTopTIDIPBruteForce {
 
@@ -222,7 +223,7 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
             for (int itemID = 0; itemID < n_data_item; itemID++) {
                 distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
             }
-            std::sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
+            boost::sort::parallel_stable_sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
 
             rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
             disk_ins.BuildIndexLoop(distance_pair_l.data(), 1);
