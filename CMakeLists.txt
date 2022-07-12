@@ -40,7 +40,7 @@ set(BUILD_VAR OFF)
 #target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
 #target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
 
-set(CMAKE_CUDA_ARCHITECTURES 75)
+#set(CMAKE_CUDA_ARCHITECTURES 75)
 
 enable_language(CUDA)
 

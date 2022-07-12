@@ -211,7 +211,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         TopTID disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
 
         //GPU
-        const int report_user_every = 1000;
+        const int report_user_every = 10000;
         GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
 
         std::vector<DistancePair> distance_pair_l(n_data_item);
