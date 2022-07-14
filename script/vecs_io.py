@@ -98,18 +98,10 @@ def bvecs_write(filename, vecs):
 
 
 if __name__ == '__main__':
-    item_l, d = fvecs_read(
-        '/home/bianzheng/Dataset/MIPS/user_item/dataset-dimension/movielens-27m-1000d/movielens-27m_item.fvecs')
-    user_l, d = fvecs_read(
-        '/home/bianzheng/Dataset/MIPS/user_item/dataset-dimension/movielens-27m-1000d/movielens-27m_user.fvecs')
-    item_l = item_l[:, :]
-    user_l = user_l[:, :]
+    item_l, d = dvecs_read(
+        '/home/bianzheng/Dataset/ReverseMIPS/yahoomusic/yahoomusic_data_item.dvecs')
+    user_l, d = dvecs_read(
+        '/home/bianzheng/Dataset/ReverseMIPS/yahoomusic/yahoomusic_user.dvecs')
     print(item_l)
     print(user_l)
-    # fvecs_write('/home/bianzheng/Dataset/Reverse-MIPS/netflixsmall/netflixsmall_item.fvecs', item_l)
-    # fvecs_write('/home/bianzheng/Dataset/Reverse-MIPS/netflixsmall/netflixsmall_user.fvecs', user_l)
-    pass
-
-# data, d = ivecs_read("data/dataset/deep/gnd-50.ivecs")
-# print(data.shape)
-# print(d)
+    print(item_l.shape, user_l.shape)

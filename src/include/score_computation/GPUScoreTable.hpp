@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <iostream>
 
 namespace ReverseMIPS {
 
@@ -15,8 +16,8 @@ namespace ReverseMIPS {
   const cudaError_t error=call;\
   if(error!=cudaSuccess)\
   {\
-      std::printf("ERROR: %s:%d,",__FILE__,__LINE__);\
-      std::printf("code:%d,reason:%s\n",error,cudaGetErrorString(error));\
+      printf("ERROR: %s:%d,",__FILE__,__LINE__);\
+      printf("code:%d,reason:%s\n",error,cudaGetErrorString(error));\
       exit(1);\
   }\
 }
