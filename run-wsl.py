@@ -21,10 +21,11 @@ def cmp_file(file1, file2):
 
 def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
     suffix_m = {
-        'BPlusTree': 'node_size_512',
+        'CompressTopTIDBruteForce': 'n_sample_20-index_size_gb_50',
+        'CompressTopTIDIPBruteForce': 'n_sample_20-index_size_gb_50',
+        'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
 
-        'HashBound': 'cache_bound_every_512-n_sample_1024',
-        'QuadraticRankBound': 'n_sample_20',
+        'QuadraticBound': 'n_sample_20',
         'QuadraticScoreBound': 'n_sample_20',
         'RankSample': 'cache_bound_every_512',
         'ScoreSample': 'n_sample_20',
@@ -36,11 +37,6 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'SSMergeQuadraticRankBoundByBitmap': 'n_sample_20-index_size_gb_50',
         'SSMergeRankByBitmap': 'n_sample_20-index_size_gb_50',
         'SSMergeRankByInterval': 'n_sample_20-index_size_gb_50',
-
-        'CompressTopTIDBruteForce': 'n_sample_20-index_size_gb_50',
-        'CompressTopTIDIPBruteForce': 'n_sample_20-index_size_gb_50',
-        'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
-        'FullID': 'n_sample_20',
 
         'CAGrid': 'codeword_32',
         'CAFullInt': 'scale_100',
@@ -85,28 +81,26 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
 
 def run():
     method_name_l = [
-        # 'BatchDiskBruteForce',
+        'BatchDiskBruteForce',
         # 'CompressTopTIDBruteForce',
         # 'CompressTopTIDIPBruteForce',
         # 'CompressTopTIPBruteForce',
         # 'DiskBruteForce',
-        # 'MemoryBruteForce',
+        'MemoryBruteForce',
         # 'OnlineBruteForce',
 
         # 'GridIndex',
 
-        # 'QuadraticRankBound',
+        # 'QuadraticBound',
         # 'QuadraticScoreBound',
         # 'RankSample',
         # 'ScoreSample',
         # 'SSComputeAll',
-        # 'GPUScoreSample',
 
         'SSMergeIntervalIDByBitmap',
-        'SSMergeIntervalIDByInterval',
-        'SSMergeQuadraticRankBoundByBitmap',
-        # 'SSMergeRankByBitmap',
-        'SSMergeRankByInterval',
+        # 'SSMergeIntervalIDByInterval',
+        # 'SSMergeQuadraticRankBoundByBitmap',
+        # 'SSMergeRankByInterval',
 
         # 'CAGrid',
         # 'CAFullDim',
@@ -126,31 +120,27 @@ def run():
     # dataset_l = ['fake-small', 'fake']
     for ds in dataset_l:
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'OnlineBruteForce'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'BPlusTree'))
         # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QuadraticRankBound'))
+        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QuadraticBound'))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QuadraticScoreBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
-
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalIDByBitmap'))
+        #
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalIDByBitmap'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalIDByInterval'))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByBitmap'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
-        # os.system('cd build/attribution && ./pc --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))
@@ -169,8 +159,8 @@ def run():
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    # dataset_l = ['fake-uniform']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['netflix-small']
     # dataset_l = ['netflix-small']
     # dataset_l = ['fake-small', 'fake']
     run()

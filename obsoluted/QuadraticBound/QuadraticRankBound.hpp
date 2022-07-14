@@ -2,13 +2,13 @@
 // Created by BianZheng on 2022/6/3.
 //
 
-#ifndef REVERSE_KRANKS_QUADRATICSCOREBOUND_HPP
-#define REVERSE_KRANKS_QUADRATICSCOREBOUND_HPP
+#ifndef REVERSE_KRANKS_QUADRATICRANKBOUND_HPP
+#define REVERSE_KRANKS_QUADRATICRANKBOUND_HPP
 
-#include "../gpu/GPUScoreTable.hpp"
+#include "score_computation/ComputeScoreTable.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QuadraticScoreSearch.hpp"
+#include "QuadraticRankSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
@@ -25,7 +25,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::QuadraticScoreBound {
+namespace ReverseMIPS::QuadraticRankBound {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -37,7 +37,7 @@ namespace ReverseMIPS::QuadraticScoreBound {
         }
 
         //rank search
-        QuadraticScoreSearch rank_ins_;
+        QuadraticRankSearch rank_ins_;
         //read disk
         ReadAll disk_ins_;
 
@@ -57,7 +57,7 @@ namespace ReverseMIPS::QuadraticScoreBound {
         std::vector<bool> prune_l_;
 
         Index(//rank search
-                QuadraticScoreSearch &rank_ins,
+                QuadraticRankSearch &rank_ins,
                 //disk index
                 ReadAll &disk_ins,
                 //general retrieval
@@ -119,7 +119,7 @@ namespace ReverseMIPS::QuadraticScoreBound {
 
                 //rank search
                 coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_);
+                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_, rank_topk_max_heap);
 
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
@@ -204,32 +204,30 @@ namespace ReverseMIPS::QuadraticScoreBound {
         user.vectorNormalize();
 
         //rank search
-        QuadraticScoreSearch rank_ins(n_sample, n_data_item, n_user);
+        QuadraticRankSearch rank_ins(n_sample, n_data_item, n_user);
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);
+        ReadAll disk_ins(n_user, n_data_item, index_path, rank_ins.n_max_disk_read_);
 
-        //GPU
-        const int report_user_every = 1000000;
-        GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
+        //Compute Score Table
+        ComputeScoreTable cst(user, data_item);
 
         TimeRecord record;
         record.reset();
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
-            gpu.ComputeList(userID, distance_l.data());
-            std::sort(distance_l.begin(), distance_l.end(), std::greater());
+            cst.ComputeSortItems(userID, distance_l.data());
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
             disk_ins.BuildIndexLoop(distance_l, 1);
 
-            if (userID % report_user_every == 0) {
+            if (userID % cst.report_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
                 record.reset();
             }
         }
-        gpu.FinishCompute();
+        cst.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;
@@ -237,4 +235,4 @@ namespace ReverseMIPS::QuadraticScoreBound {
 
 }
 
-#endif //REVERSE_KRANKS_QUADRATICSCOREBOUND_HPP
+#endif //REVERSE_KRANKS_QUADRATICRANKBOUND_HPP

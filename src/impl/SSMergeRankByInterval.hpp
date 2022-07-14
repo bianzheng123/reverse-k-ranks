@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
 #define REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
 
-#include "../gpu/GPUScoreTable.hpp"
+#include "score_computation/ComputeScoreTable.hpp"
 #include "alg/DiskIndex/MergeRankByInterval.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
@@ -228,9 +228,8 @@ namespace ReverseMIPS::SSMergeRankByInterval {
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
 
-        GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
+        ComputeScoreTable cst(user, data_item);
         std::vector<DistancePair> distance_pair_l(n_data_item);
-        std::vector<double> distance_l(n_data_item);
 
         TimeRecord batch_report_record;
         batch_report_record.reset();
@@ -240,11 +239,7 @@ namespace ReverseMIPS::SSMergeRankByInterval {
 
             for (int evalID = 0; evalID < n_eval; evalID++) {
                 int userID = user_l[evalID];
-                gpu.ComputeList(userID, distance_l.data());
-                for (int itemID = 0; itemID < n_data_item; itemID++) {
-                    distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
-                }
-                boost::sort::parallel_stable_sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
+                cst.ComputeSortItems(userID, distance_pair_l.data());
 
                 //rank search
                 rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
@@ -260,7 +255,7 @@ namespace ReverseMIPS::SSMergeRankByInterval {
             }
         }
         disk_ins.FinishWrite();
-        gpu.FinishCompute();
+        cst.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 //score search

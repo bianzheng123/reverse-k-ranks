@@ -13,11 +13,11 @@
 #include "BruteForce/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
-#include "../../obsoluted/OnlineBruteForce.hpp"
+#include "OnlineBruteForce.hpp"
 
 #include "Online/GridIndex.hpp"
 
-#include "../../obsoluted/BPlusTree/BPlusTree.hpp"
+#include "BPlusTree/BPlusTree.hpp"
 #include "SSMergeRankByInterval.hpp"
 #include "ScoreSample.hpp"
 #include "RankSample.hpp"

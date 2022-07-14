@@ -34,26 +34,27 @@ set(BUILD_ATTRIBUTION ON)
 set(BUILD_PROGRESS ON)
 set(BUILD_VAR OFF)
 
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
 #target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
 #target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
 #
 #target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
 #target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
 
-set(CMAKE_CUDA_ARCHITECTURES 75)
+#set(CMAKE_CUDA_ARCHITECTURES 75)
+#enable_language(CUDA)
+#set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
 
-enable_language(CUDA)
-
-set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(rri src/app/ReverseRankIndex.cpp)
 target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-set_property(TARGET rri PROPERTY CXX_STANDARD "17")
-set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
+target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
+#set_property(TARGET rri PROPERTY CXX_STANDARD "17")
+#set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
+#set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
 
 if (BUILD_VAR)
-    add_executable(rrivar src/app/ReverseRankIndexVariance.cpp)
+    add_executable(rrivar obsoluted/ReverseRankIndexVariance.cpp)
     target_include_directories(rrivar PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(rrivar PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
@@ -68,13 +69,10 @@ if (BUILD_PROGRESS)
     target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
-set_source_files_properties(test.cpp PROPERTIES LANGUAGE CUDA)
+
 add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-set_property(TARGET t1 PROPERTY CXX_STANDARD "17")
-set_property(TARGET t1 PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET t1 PROPERTY CXX_EXTENSIONS OFF)
+target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} Eigen3::Eigen)
 
 #if (BUILD_ATTRIBUTION)
 #    add_subdirectory(attribution)

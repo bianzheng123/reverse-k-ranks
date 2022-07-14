@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_COMPRESSTOPTIDIPBRUTEFORCE_HPP
 #define REVERSE_KRANKS_COMPRESSTOPTIDIPBRUTEFORCE_HPP
 
-#include "../../gpu/GPUScoreTable.hpp"
+#include "score_computation/ComputeScoreTable.hpp"
 #include "alg/DiskIndex/TopTIDIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
@@ -209,33 +209,26 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
         }
         TopTIDIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
 
-        //GPU
-        const int report_user_every = 1000000;
-        GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
-
+        //Compute Score Table
+        ComputeScoreTable cst(user, data_item);
         std::vector<DistancePair> distance_pair_l(n_data_item);
 
         TimeRecord record;
         record.reset();
-        std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
-            gpu.ComputeList(userID, distance_l.data());
-            for (int itemID = 0; itemID < n_data_item; itemID++) {
-                distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
-            }
-            boost::sort::parallel_stable_sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
+            cst.ComputeSortItems(userID, distance_pair_l.data());
 
             rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
             disk_ins.BuildIndexLoop(distance_pair_l.data(), 1);
 
-            if (userID % report_user_every == 0) {
+            if (userID % cst.report_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
                 record.reset();
             }
         }
-        gpu.FinishCompute();
+        cst.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 //score search

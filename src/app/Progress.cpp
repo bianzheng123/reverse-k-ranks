@@ -12,8 +12,6 @@
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 
-#include "SSMergeRankByBitmap.hpp"
-
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -96,17 +94,6 @@ int main(int argc, char **argv) {
     } else if (method_name == "MemoryBruteForce") {
         spdlog::info("input parameter: none");
         index = MemoryBruteForce::BuildIndex(data_item, user);
-
-    } else if (method_name == "SSMergeRankByBitmap") {
-        //TODO have bug
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = SSMergeRankByBitmap::BuildIndex(data_item, user, index_path,
-                                                n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
-                n_sample, index_size_gb);
 
     } else {
         spdlog::error("not such method");

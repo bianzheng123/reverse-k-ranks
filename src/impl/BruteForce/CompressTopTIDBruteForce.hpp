@@ -5,7 +5,7 @@
 #ifndef REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
 #define REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
 
-#include "../../gpu/GPUScoreTable.hpp"
+#include "score_computation/ComputeScoreTable.hpp"
 #include "alg/DiskIndex/TopTID.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
@@ -210,51 +210,27 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         }
         TopTID disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
 
-        //GPU
-        const int report_user_every = 1000;
-        GPU::GPUScoreTable gpu(user.getRawData(), data_item.getRawData(), n_user, n_data_item, vec_dim);
-
+        //Compute Score Table
+        ComputeScoreTable cst(user, data_item);
         std::vector<DistancePair> distance_pair_l(n_data_item);
 
         TimeRecord record;
         record.reset();
 
-        TimeRecord ip_compute_record, sort_record, index_record;
-        double ip_compute_time = 0;
-        double sort_time = 0;
-        double index_time = 0;
-
-        std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
-            ip_compute_record.reset();
-            gpu.ComputeList(userID, distance_l.data());
-            for (int itemID = 0; itemID < n_data_item; itemID++) {
-                distance_pair_l[itemID] = DistancePair(distance_l[itemID], itemID);
-            }
-            ip_compute_time += ip_compute_record.get_elapsed_time_second();
+            cst.ComputeSortItems(userID, distance_pair_l.data());
 
-            sort_record.reset();
-            boost::sort::parallel_stable_sort(distance_pair_l.begin(), distance_pair_l.end(), std::greater());
-            sort_time += sort_record.get_elapsed_time_second();
-
-            index_record.reset();
             rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
             disk_ins.BuildIndexLoop(distance_pair_l.data(), 1);
-            index_time += index_record.get_elapsed_time_second();
 
-            if (userID != 0 && userID % report_user_every == 0) {
+            if (userID != 0 && userID % cst.report_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
-                spdlog::info("IP Compute Time {}s, Sort Time {}s, Index Time {}s",
-                             ip_compute_time, sort_time, index_time);
-                ip_compute_time = 0;
-                sort_time = 0;
-                index_time = 0;
                 record.reset();
             }
         }
-        gpu.FinishCompute();
+        cst.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 //score search

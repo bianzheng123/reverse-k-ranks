@@ -167,6 +167,6 @@ namespace ReverseMIPS::GreedyMergeMinClusterSize {
         return label_l;
     }
 
-} // namespace dkm
+}
 
 #endif //REVERSE_KRANKS_GREEDYMERGEMINCLUSTERSIZE_HPP

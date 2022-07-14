@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace GPU {
+namespace ReverseMIPS {
 
 #define CHECK(call)\
 {\

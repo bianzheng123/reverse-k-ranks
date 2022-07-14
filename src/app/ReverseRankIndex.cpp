@@ -15,8 +15,6 @@
 
 #include "Online/GridIndex.hpp"
 
-#include "QuadraticRankBound.hpp"
-#include "QuadraticScoreBound.hpp"
 #include "RankSample.hpp"
 #include "ScoreSample.hpp"
 #include "SSComputeAll.hpp"
@@ -131,18 +129,6 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: none");
         index = GridIndex::BuildIndex(data_item, user);
 
-    } else if (method_name == "QuadraticRankBound") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = QuadraticRankBound::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
-    } else if (method_name == "QuadraticScoreBound") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = QuadraticScoreBound::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
     } else if (method_name == "RankSample") {
         const int cache_bound_every = para.cache_bound_every;
         spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
@@ -208,8 +194,8 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-//    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
-    vector<int> topk_l{30, 20, 10};
+    vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
+//    vector<int> topk_l{30, 20, 10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
 //    vector<int> topk_l{20};
     RetrievalResult config;
