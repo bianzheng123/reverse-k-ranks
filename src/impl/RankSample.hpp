@@ -5,11 +5,11 @@
 #ifndef REVERSE_KRANKS_RANKBOUND_HPP
 #define REVERSE_KRANKS_RANKBOUND_HPP
 
-#include "score_computation/ComputeScoreTable.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
+#include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
@@ -55,6 +55,7 @@ namespace ReverseMIPS::RankSample {
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
         std::vector<bool> prune_l_;
+        std::unique_ptr<double[]> query_cache_;
 
         Index(//rank search
                 RankSearch &rank_ins,
@@ -79,6 +80,7 @@ namespace ReverseMIPS::RankSample {
             rank_lb_l_.resize(n_user_);
             rank_ub_l_.resize(n_user_);
             prune_l_.resize(n_user_);
+            query_cache_ = std::make_unique<double[]>(vec_dim_);
         }
 
         std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
@@ -107,12 +109,16 @@ namespace ReverseMIPS::RankSample {
                 IPbound_l_.assign(n_user_, std::pair<double, double>(-std::numeric_limits<double>::max(),
                                                                      std::numeric_limits<double>::max()));
 
+                const double *query_item_vec = query_item.getVector(queryID);
+                double *query_vecs = query_cache_.get();
+                disk_ins_.PreprocessQuery(query_item_vec, vec_dim_, query_vecs);
+
                 //calculate IP
-                double *query_item_vec = query_item.getVector(queryID);
+
                 inner_product_record_.reset();
                 for (int userID = 0; userID < n_user_; userID++) {
                     double *user_vec = user_.getVector(userID);
-                    double queryIP = InnerProduct(query_item_vec, user_vec, vec_dim_);
+                    double queryIP = InnerProduct(query_vecs, user_vec, vec_dim_);
                     queryIP_l_[userID] = queryIP;
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
@@ -204,8 +210,10 @@ namespace ReverseMIPS::RankSample {
 
         //rank search
         RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
+
         //disk index
         ReadAll disk_ins(n_user, n_data_item, index_path, rank_ins.n_max_disk_read_);
+        disk_ins.PreprocessData(user, data_item);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);

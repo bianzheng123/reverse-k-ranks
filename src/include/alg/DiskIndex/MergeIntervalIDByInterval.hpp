@@ -8,7 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
-#include "alg/DiskIndex/RankFromCandidate/CandidateBruteForce.hpp"
+#include "alg/DiskIndex/ComputeRank/CandidateBruteForce.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/UserRankBound.hpp"
@@ -45,18 +45,19 @@ namespace ReverseMIPS {
         std::vector<bool> is_compute_l_;
         std::vector<UserRankElement> user_topk_cache_l_; //n_user, used for sort the element to return the top-k
         std::vector<std::pair<unsigned char, unsigned char>> disk_retrieval_cache_l_;
+        std::vector<bool> item_cand_l_;
 
         inline MergeIntervalIDByInterval() {}
 
-        inline MergeIntervalIDByInterval(const CandidateBruteForce &exact_rank_ins, const VectorMatrix &user,
+        inline MergeIntervalIDByInterval(const VectorMatrix &user,
                                          const char *index_path, const int &n_data_item,
                                          const int &n_merge_user) {
+            this->exact_rank_ins_ = CandidateBruteForce(n_data_item, user.vec_dim_);;
             this->n_user_ = user.n_vector_;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = user.vec_dim_;
             this->index_path_ = index_path;
             this->n_merge_user_ = n_merge_user;
-            exact_rank_ins_ = exact_rank_ins;
 
             spdlog::info("n_merge_user {}", n_merge_user_);
 
@@ -68,6 +69,7 @@ namespace ReverseMIPS {
             this->is_compute_l_.resize(n_merge_user_);
             this->user_topk_cache_l_.resize(n_user_);
             this->disk_retrieval_cache_l_.resize(n_data_item_);
+            this->item_cand_l_.resize(n_data_item_);
 
             BuildIndexPreprocess(user);
         }
@@ -94,6 +96,10 @@ namespace ReverseMIPS {
                 exit(-1);
             }
         }
+
+        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
+            exact_rank_ins_.PreprocessData(user, data_item);
+        };
 
         std::vector<std::vector<int>> &BuildIndexMergeUser() {
             static std::vector<std::vector<int>> eval_seq_l(n_merge_user_);
@@ -151,6 +157,10 @@ namespace ReverseMIPS {
             }
         }
 
+        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
+            exact_rank_ins_.PreprocessQuery(query_vecs, vec_dim, query_write_vecs);
+        }
+
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<std::pair<double, double>> &queryIPbound_l,
@@ -190,12 +200,29 @@ namespace ReverseMIPS {
                         loc_rk = 0;
                     } else {
                         const double *user_vecs = user.getVector(userID);
-                        const std::pair<int, int> query_itvID_bound_pair = std::make_pair(
-                                itvID_l[userID], itvID_l[userID]);
-                        loc_rk = exact_rank_ins_.QueryRankByCandidate<unsigned char>(user_vecs, item,
-                                                                                     queryIP, queryIPbound_l[userID],
-                                                                                     disk_retrieval_cache_l_,
-                                                                                     query_itvID_bound_pair);
+
+                        item_cand_l_.assign(n_data_item_, false);
+
+                        const int query_itvID_lb = itvID_l[userID];
+                        const int query_itvID_ub = itvID_l[userID];
+                        assert(query_itvID_ub <= query_itvID_lb);
+
+                        for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                            const unsigned char item_itvID_lb = disk_retrieval_cache_l_[itemID].first;
+                            const unsigned char item_itvID_ub = disk_retrieval_cache_l_[itemID].second;
+                            assert(0 <= item_itvID_ub && item_itvID_ub <= item_itvID_lb &&
+                                   item_itvID_lb <= n_data_item_);
+                            bool bottom_query = item_itvID_lb < query_itvID_ub;
+                            bool top_query = query_itvID_lb < item_itvID_ub;
+                            if (bottom_query || top_query) {
+                                continue;
+                            }
+                            item_cand_l_[itemID] = true;
+                        }
+
+                        loc_rk = exact_rank_ins_.QueryRankByCandidate(queryIPbound_l[userID], queryIP,
+                                                                      user_vecs, userID,
+                                                                      item, item_cand_l_);
                     }
 
                     int rank = base_rank + loc_rk + 1;

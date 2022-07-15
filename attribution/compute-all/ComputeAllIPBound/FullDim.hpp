@@ -7,7 +7,7 @@
 
 #include <cfloat>
 
-#include "alg/ExactRankByIPBound/BaseIPBound.hpp"
+#include "BaseIPBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 
 namespace ReverseMIPS {

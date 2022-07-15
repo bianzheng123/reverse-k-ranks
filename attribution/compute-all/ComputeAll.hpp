@@ -5,15 +5,16 @@
 #ifndef REVERSE_KRANKS_COMPUTEALL_HPP
 #define REVERSE_KRANKS_COMPUTEALL_HPP
 
-#include "alg/ExactRankByIPBound/FullDim.hpp"
-#include "alg/ExactRankByIPBound/FullInt.hpp"
-#include "alg/ExactRankByIPBound/FullNorm.hpp"
-#include "alg/ExactRankByIPBound/Grid.hpp"
-#include "alg/ExactRankByIPBound/ItemPQ.hpp"
-#include "alg/ExactRankByIPBound/PartDimPartInt.hpp"
-#include "alg/ExactRankByIPBound/PartDimPartNorm.hpp"
-#include "alg/ExactRankByIPBound/PartIntPartNorm.hpp"
-#include "alg/ExactRankByIPBound/UserItemPQ.hpp"
+#include "ComputeAllIPBound/BaseIPBound.hpp"
+#include "ComputeAllIPBound/FullDim.hpp"
+#include "ComputeAllIPBound/FullInt.hpp"
+#include "ComputeAllIPBound/FullNorm.hpp"
+#include "ComputeAllIPBound/Grid.hpp"
+#include "ComputeAllIPBound/ItemPQ.hpp"
+#include "ComputeAllIPBound/PartDimPartInt.hpp"
+#include "ComputeAllIPBound/PartDimPartNorm.hpp"
+#include "ComputeAllIPBound/PartIntPartNorm.hpp"
+#include "ComputeAllIPBound/UserItemPQ.hpp"
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"

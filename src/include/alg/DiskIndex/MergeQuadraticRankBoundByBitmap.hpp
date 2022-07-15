@@ -8,7 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
-#include "alg/DiskIndex/RankFromCandidate/CandidateBruteForce.hpp"
+#include "alg/DiskIndex/ComputeRank/CandidateBruteForce.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/UserRankBound.hpp"
@@ -178,10 +178,10 @@ namespace ReverseMIPS {
 
         inline MergeQuadraticRankBoundByBitmap() {}
 
-        inline MergeQuadraticRankBoundByBitmap(const CandidateBruteForce &exact_rank_ins, const VectorMatrix &user,
+        inline MergeQuadraticRankBoundByBitmap(const VectorMatrix &user,
                                                const int &n_data_item, const char *index_path,
                                                const int &n_rank_bound, const int &n_merge_user) {
-            this->exact_rank_ins_ = exact_rank_ins;
+            this->exact_rank_ins_ = CandidateBruteForce(n_data_item, user.vec_dim_);;
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
             this->n_data_item_ = n_data_item;
@@ -239,6 +239,10 @@ namespace ReverseMIPS {
             }
         }
 
+        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
+            exact_rank_ins_.PreprocessData(user, data_item);
+        };
+
         std::vector<std::vector<int>> &BuildIndexMergeUser() {
             static std::vector<std::vector<int>> eval_seq_l(n_merge_user_);
             for (int labelID = 0; labelID < n_merge_user_; labelID++) {
@@ -289,6 +293,10 @@ namespace ReverseMIPS {
             }
         }
 
+        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
+            exact_rank_ins_.PreprocessQuery(query_vecs, vec_dim, query_write_vecs);
+        }
+
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<std::pair<double, double>> &queryIPbound_l,
@@ -317,9 +325,9 @@ namespace ReverseMIPS {
                     loc_rk = 0;
                 } else {
                     const double *user_vecs = user.getVector(userID);
-                    loc_rk = exact_rank_ins_.QueryRankByCandidate(user_vecs, item,
-                                                                  queryIP, queryIPbound_l[userID],
-                                                                  item_cand_l_);
+                    loc_rk = exact_rank_ins_.QueryRankByCandidate(queryIPbound_l[userID], queryIP,
+                                                                  user_vecs, userID,
+                                                                  item, item_cand_l_);
                 }
                 int rank = base_rank + loc_rk + 1;
                 exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();

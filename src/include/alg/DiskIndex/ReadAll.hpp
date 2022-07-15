@@ -79,6 +79,9 @@ namespace ReverseMIPS {
             BuildIndexPreprocess();
         }
 
+        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
+        };
+
         void BuildIndexLoop(const std::vector<double> &distance_cache, const int &n_write) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
             int64_t offset = (int64_t) n_write * n_data_item_;
@@ -94,6 +97,10 @@ namespace ReverseMIPS {
             if (!index_stream_) {
                 spdlog::error("error in writing index");
             }
+        }
+
+        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
+            memcpy(query_write_vecs, query_vecs, vec_dim * sizeof(double));
         }
 
         void GetRank(const std::vector<double> &queryIP_l,

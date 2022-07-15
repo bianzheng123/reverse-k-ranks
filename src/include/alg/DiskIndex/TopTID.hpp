@@ -5,6 +5,7 @@
 #ifndef REVERSE_K_RANKS_TOPTID_HPP
 #define REVERSE_K_RANKS_TOPTID_HPP
 
+#include "alg/DiskIndex/ComputeRank/CandidateBruteForce.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/DistancePair.hpp"
 
@@ -137,6 +138,7 @@ namespace ReverseMIPS {
     public:
         int n_data_item_, n_user_, vec_dim_, topt_;
         const char *index_path_;
+        CandidateBruteForce exact_rank_ins_;
 
         TimeRecord read_disk_record_, exact_rank_record_;
         double read_disk_time_, exact_rank_time_;
@@ -153,8 +155,10 @@ namespace ReverseMIPS {
 
         inline TopTID() = default;
 
-        inline TopTID(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
+        inline TopTID(const int &n_user, const int &n_data_item, const int &vec_dim,
+                      const char *index_path,
                       const int &topt) {
+            this->exact_rank_ins_ = CandidateBruteForce(n_data_item, n_user);
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
@@ -179,6 +183,10 @@ namespace ReverseMIPS {
             BuildIndexPreprocess();
         }
 
+        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
+            exact_rank_ins_.PreprocessData(user, data_item);
+        };
+
         void BuildIndexLoop(const DistancePair *distance_cache, const int &n_write) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
             std::vector<int> distID_l(n_data_item_);
@@ -197,6 +205,10 @@ namespace ReverseMIPS {
             if (!index_stream_) {
                 spdlog::error("error in writing index");
             }
+        }
+
+        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
+            exact_rank_ins_.PreprocessQuery(query_vecs, vec_dim, query_write_vecs);
         }
 
         void GetRank(const std::vector<double> &queryIP_l,

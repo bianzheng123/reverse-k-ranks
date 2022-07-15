@@ -89,15 +89,12 @@ def run():
         'MemoryBruteForce',
         # 'OnlineBruteForce',
 
-        # 'GridIndex',
-
-        # 'QuadraticBound',
-        # 'QuadraticScoreBound',
+        'GridIndex',
         # 'RankSample',
         # 'ScoreSample',
         # 'SSComputeAll',
 
-        'SSMergeIntervalIDByBitmap',
+        # 'SSMergeIntervalIDByBitmap',
         # 'SSMergeIntervalIDByInterval',
         # 'SSMergeQuadraticRankBoundByBitmap',
         # 'SSMergeRankByInterval',
@@ -126,17 +123,13 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
 
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QuadraticBound'))
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QuadraticScoreBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
-        #
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalIDByBitmap'))
+
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalIDByBitmap'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeIntervalIDByInterval'))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
@@ -160,7 +153,7 @@ def run():
 
 if __name__ == '__main__':
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['netflix-small']
+    # dataset_l = ['fake-uniform']
     # dataset_l = ['netflix-small']
-    # dataset_l = ['fake-small', 'fake']
+    dataset_l = ['fake-small', 'fake']
     run()

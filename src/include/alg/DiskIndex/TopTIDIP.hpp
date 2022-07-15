@@ -5,6 +5,7 @@
 #ifndef REVERSE_KRANKS_TOPTIDIP_HPP
 #define REVERSE_KRANKS_TOPTIDIP_HPP
 
+#include "alg/DiskIndex/ComputeRank/CandidateBruteForce.hpp"
 #include "struct/DistancePair.hpp"
 
 namespace ReverseMIPS {
@@ -154,6 +155,7 @@ namespace ReverseMIPS {
     public:
         int n_data_item_, n_user_, vec_dim_, topt_;
         const char *index_path_;
+        CandidateBruteForce exact_rank_ins_;
 
         TimeRecord read_disk_record_, exact_rank_record_;
         double read_disk_time_, exact_rank_time_;
@@ -171,7 +173,8 @@ namespace ReverseMIPS {
         inline TopTIDIP() = default;
 
         inline TopTIDIP(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
-                        const int topt) {
+                        const int &topt) {
+            this->exact_rank_ins_ = CandidateBruteForce(n_data_item, vec_dim);
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
@@ -196,12 +199,20 @@ namespace ReverseMIPS {
             BuildIndexPreprocess();
         }
 
+        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
+            exact_rank_ins_.PreprocessData(user, data_item);
+        };
+
         void BuildIndexLoop(const DistancePair *distance_cache, const int &n_write) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
             for (int writeID = 0; writeID < n_write; writeID++) {
                 const DistancePair *tmp_distance_cache = distance_cache + writeID * n_data_item_;
                 out_stream_.write((char *) tmp_distance_cache, topt_ * sizeof(DistancePair));
             }
+        }
+
+        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
+            exact_rank_ins_.PreprocessQuery(query_vecs, vec_dim, query_write_vecs);
         }
 
         void RetrievalPreprocess() {

@@ -8,7 +8,7 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "Online/ComputeAll.hpp"
+#include "ComputeAll.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>

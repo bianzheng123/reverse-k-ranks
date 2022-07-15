@@ -8,7 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
-#include "alg/DiskIndex/RankFromCandidate/CandidateBruteForce.hpp"
+#include "alg/DiskIndex/ComputeRank/CandidateBruteForce.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/UserRankBound.hpp"
@@ -107,9 +107,10 @@ namespace ReverseMIPS {
 
         inline MergeIntervalIDByBitmap() {}
 
-        inline MergeIntervalIDByBitmap(const CandidateBruteForce &exact_rank_ins, const VectorMatrix &user,
+        inline MergeIntervalIDByBitmap(const VectorMatrix &user,
                                        const char *index_path, const int &n_data_item, const int &n_interval,
                                        const int &n_merge_user, const int &bitmap_size_byte) {
+            this->exact_rank_ins_ = CandidateBruteForce(n_data_item, user.vec_dim_);;
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
             this->index_path_ = index_path;
@@ -118,7 +119,6 @@ namespace ReverseMIPS {
             this->n_interval_ = n_interval;
             this->n_merge_user_ = n_merge_user;
             this->bitmap_size_byte_ = bitmap_size_byte;
-            this->exact_rank_ins_ = exact_rank_ins;
             assert(bitmap_size_byte_ == (n_data_item / 8 + (n_data_item % 8 == 0 ? 0 : 1)));
 
             this->merge_label_l_.resize(n_user_);
@@ -155,6 +155,10 @@ namespace ReverseMIPS {
                 exit(-1);
             }
         }
+
+        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
+            exact_rank_ins_.PreprocessData(user, data_item);
+        };
 
         std::vector<std::vector<int>> &BuildIndexMergeUser() {
             static std::vector<std::vector<int>> eval_seq_l(n_merge_user_);
@@ -209,6 +213,10 @@ namespace ReverseMIPS {
             }
         }
 
+        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
+            exact_rank_ins_.PreprocessQuery(query_vecs, vec_dim, query_write_vecs);
+        }
+
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<std::pair<double, double>> &queryIPbound_l,
@@ -234,7 +242,7 @@ namespace ReverseMIPS {
                     const double *user_vecs = user.getVector(userID);
                     if (user_itvID >= n_interval_) {
                         exact_rank_refinement_record_.reset();
-                        loc_rk = exact_rank_ins_.QueryRankByCandidate(user_vecs, item, queryIP);
+                        loc_rk = ComputeRankByAll(user_vecs, item, queryIP);
                         base_rank = 0;
                         exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
 
@@ -252,9 +260,9 @@ namespace ReverseMIPS {
                         }
 
                         exact_rank_refinement_record_.reset();
-                        loc_rk = exact_rank_ins_.QueryRankByCandidate(user_vecs, item,
-                                                                      queryIP, queryIPbound_l[userID],
-                                                                      item_cand_l_);
+                        loc_rk = exact_rank_ins_.QueryRankByCandidate(queryIPbound_l[userID], queryIP,
+                                                                      user_vecs, userID,
+                                                                      item, item_cand_l_);
                         exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
                     }
 
@@ -269,6 +277,22 @@ namespace ReverseMIPS {
             std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_candidate_,
                       std::less());
 
+        }
+
+        int ComputeRankByAll(const double *user_vecs, const VectorMatrix &item,
+                             const double &queryIP) const {
+
+            //calculate all the IP, then get the lower bound
+            //make different situation by the information
+            int rank = 0;
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
+                if (queryIP < ip) {
+                    rank++;
+                }
+            }
+
+            return rank;
         }
 
         void FinishRetrieval() {

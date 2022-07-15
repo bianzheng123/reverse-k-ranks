@@ -5,11 +5,11 @@
 #ifndef REVERSE_KRANKS_COMPRESSTOPTIDIPBRUTEFORCE_HPP
 #define REVERSE_KRANKS_COMPRESSTOPTIDIPBRUTEFORCE_HPP
 
-#include "score_computation/ComputeScoreTable.hpp"
 #include "alg/DiskIndex/TopTIDIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
+#include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
@@ -56,6 +56,7 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
+        std::unique_ptr<double[]> query_cache_;
 
         Index(
                 // hash search
@@ -81,6 +82,7 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
+            this->query_cache_ = std::make_unique<double[]>(vec_dim_);
 
         }
 
@@ -106,7 +108,9 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
 
-                const double *query_vecs = query_item.getVector(queryID);
+                const double *tmp_query_vecs = query_item.getVector(queryID);
+                double *query_vecs = query_cache_.get();
+                disk_ins_.PreprocessQuery(tmp_query_vecs, vec_dim_, query_vecs);
 
                 //calculate the exact IP
                 inner_product_record_.reset();
@@ -195,9 +199,6 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
 
         user.vectorNormalize();
 
-        //rank search
-        ScoreSearch rank_bound_ins(n_interval, n_user, n_data_item);
-
         //disk index
         const uint64_t index_size_byte = (uint64_t) index_size_gb * 1024 * 1024 * 1024;
         const uint64_t predict_index_size_byte = (uint64_t) (sizeof(double) + sizeof(int)) * n_data_item * n_user;
@@ -208,6 +209,10 @@ namespace ReverseMIPS::CompressTopTIDIPBruteForce {
             topt = n_data_item;
         }
         TopTIDIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
+        disk_ins.PreprocessData(user, data_item);
+
+        //rank search
+        ScoreSearch rank_bound_ins(n_interval, n_user, n_data_item);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);

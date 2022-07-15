@@ -5,7 +5,7 @@
 #ifndef REVERSE_K_RANKS_GRIDINDEX_HPP
 #define REVERSE_K_RANKS_GRIDINDEX_HPP
 
-#include "alg/ExactRankByIPBound/Grid.hpp"
+#include "alg/Grid.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -33,7 +33,7 @@ namespace ReverseMIPS::GridIndex {
             early_prune_ratio_ = 0;
         }
 
-        std::unique_ptr<BaseIPBound> ip_bound_ins_;
+        std::unique_ptr<Grid> ip_bound_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -49,7 +49,7 @@ namespace ReverseMIPS::GridIndex {
 
         Index(
                 //ip_bound_ins
-                std::unique_ptr<BaseIPBound> &ip_bound_ins,
+                std::unique_ptr<Grid> &ip_bound_ins,
                 //general retrieval
                 VectorMatrix &data_item,
                 VectorMatrix &user
@@ -212,7 +212,7 @@ namespace ReverseMIPS::GridIndex {
         user.vectorNormalize();
         assert(user.vec_dim_ == data_item.vec_dim_);
 
-        std::unique_ptr<BaseIPBound> IPbound_ptr;
+        std::unique_ptr<Grid> IPbound_ptr;
 
         int n_user = user.n_vector_;
         int n_data_item = data_item.n_vector_;

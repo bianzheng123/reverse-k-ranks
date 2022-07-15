@@ -32,7 +32,6 @@ set(BUILD_TEST_MODULE OFF)
 set(BUILD_ATTRIBUTION ON)
 
 set(BUILD_PROGRESS ON)
-set(BUILD_VAR OFF)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
@@ -53,20 +52,10 @@ target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::
 #set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
 #set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
 
-if (BUILD_VAR)
-    add_executable(rrivar obsoluted/ReverseRankIndexVariance.cpp)
-    target_include_directories(rrivar PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(rrivar PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-endif ()
-
-add_executable(ca src/app/ComputeAll.cpp)
-target_include_directories(ca PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(ca PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
 if (BUILD_PROGRESS)
     add_executable(progress src/app/Progress.cpp)
     target_include_directories(progress PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
 endif ()
 
 

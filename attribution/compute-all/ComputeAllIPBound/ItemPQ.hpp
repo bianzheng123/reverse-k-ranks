@@ -8,7 +8,7 @@
 #include <cfloat>
 
 #include "alg/Cluster/KMeansParallel.hpp"
-#include "alg/ExactRankByIPBound/BaseIPBound.hpp"
+#include "BaseIPBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SpaceEuclidean.hpp"
 

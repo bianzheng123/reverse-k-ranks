@@ -5,12 +5,12 @@
 #ifndef REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
 #define REVERSE_KRANKS_IRBMERGERANKBOUND_HPP
 
-#include "score_computation/ComputeScoreTable.hpp"
 #include "alg/DiskIndex/MergeRankByInterval.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
+#include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
@@ -58,6 +58,7 @@ namespace ReverseMIPS::SSMergeRankByInterval {
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
         std::vector<int> itvID_l_;
+        std::unique_ptr<double[]> query_cache_;
 
         Index(
                 // score search
@@ -85,6 +86,7 @@ namespace ReverseMIPS::SSMergeRankByInterval {
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
             this->itvID_l_.resize(n_user_);
+            this->query_cache_ = std::make_unique<double[]>(vec_dim_);
 
         }
 
@@ -110,7 +112,9 @@ namespace ReverseMIPS::SSMergeRankByInterval {
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
 
-                double *query_vecs = query_item.getVector(queryID);
+                const double *tmp_query_vecs = query_item.getVector(queryID);
+                double* query_vecs = query_cache_.get();
+                disk_ins_.PreprocessQuery(tmp_query_vecs, vec_dim_, query_vecs);
 
                 //calculate the exact IP
                 inner_product_record_.reset();
@@ -203,12 +207,6 @@ namespace ReverseMIPS::SSMergeRankByInterval {
 
         user.vectorNormalize();
 
-        //rank search
-        ScoreSearch rank_bound_ins(n_sample, n_user, n_data_item);
-
-        //exact rank refinement
-        CandidateBruteForce exact_rank_ins(n_data_item, vec_dim);
-
         //disk index
         if (index_size_gb <= 0) {
             spdlog::error("compress index size too small, program exit");
@@ -224,9 +222,13 @@ namespace ReverseMIPS::SSMergeRankByInterval {
             n_merge_user = n_user - 1;
         }
 
-        MergeRankByInterval disk_ins(exact_rank_ins, user, n_data_item, index_path, n_merge_user);
+        MergeRankByInterval disk_ins(user, n_data_item, index_path, n_merge_user);
+        disk_ins.PreprocessData(user, data_item);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
+
+        //rank search
+        ScoreSearch rank_bound_ins(n_sample, n_user, n_data_item);
 
         ComputeScoreTable cst(user, data_item);
         std::vector<DistancePair> distance_pair_l(n_data_item);

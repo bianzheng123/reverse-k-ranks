@@ -7,7 +7,7 @@
 
 #include <cfloat>
 
-#include "alg/ExactRankByIPBound/BaseIPBound.hpp"
+#include "BaseIPBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 
@@ -57,7 +57,7 @@ namespace ReverseMIPS {
             this->scale_ = scale;
         }
 
-        [[nodiscard]] double MatrixCheckMaxVal(const VectorMatrix &vm) const {
+        [[nodiscard]] double MatrixMaxVal(const VectorMatrix &vm) const {
             double max_dim = vm.getVector(0)[0];
             const int &n_vector = vm.n_vector_;
             const int &vec_dim = vm.vec_dim_;
@@ -99,8 +99,8 @@ namespace ReverseMIPS {
             item_int_ptr_ = std::make_unique<int[]>(n_data_item_ * check_dim_);
             item_int_sum_ptr_ = std::make_unique<int[]>(n_data_item_);
 
-            const double user_max_dim = MatrixCheckMaxVal(user);
-            const double item_max_dim = MatrixCheckMaxVal(data_item);
+            const double user_max_dim = MatrixMaxVal(user);
+            const double item_max_dim = MatrixMaxVal(data_item);
 
             IntArrayVal(user, user_max_dim, user_int_ptr_.get(), user_int_sum_ptr_.get());
 

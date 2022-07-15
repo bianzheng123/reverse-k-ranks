@@ -15,7 +15,7 @@
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "OnlineBruteForce.hpp"
 
-#include "Online/GridIndex.hpp"
+#include "GridIndex.hpp"
 
 #include "BPlusTree/BPlusTree.hpp"
 #include "SSMergeRankByInterval.hpp"

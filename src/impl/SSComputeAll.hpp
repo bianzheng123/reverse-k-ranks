@@ -5,11 +5,11 @@
 #ifndef REVERSE_KRANKS_SSCOMPUTEALL_HPP
 #define REVERSE_KRANKS_SSCOMPUTEALL_HPP
 
-#include "score_computation/ComputeScoreTable.hpp"
 #include "alg/DiskIndex/ComputeAll.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
+#include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/MethodBase.hpp"
@@ -54,6 +54,7 @@ namespace ReverseMIPS::SSComputeAll {
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
+        std::unique_ptr<double[]> query_cache_;
 
         Index(
                 //interval search
@@ -80,6 +81,7 @@ namespace ReverseMIPS::SSComputeAll {
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
+            this->query_cache_ = std::make_unique<double[]>(vec_dim_);
 
         }
 
@@ -105,7 +107,9 @@ namespace ReverseMIPS::SSComputeAll {
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
 
-                const double *query_vecs = query_item.getVector(queryID);
+                const double *tmp_query_vecs = query_item.getVector(queryID);
+                double *query_vecs = query_cache_.get();
+                disk_ins_.PreprocessQuery(tmp_query_vecs, vec_dim_, query_vecs);
 
                 //calculate the exact IP
                 inner_product_record_.reset();
@@ -201,11 +205,12 @@ namespace ReverseMIPS::SSComputeAll {
 
         user.vectorNormalize();
 
-        //interval search
-        ScoreSearch interval_ins(n_interval, n_user, n_data_item);
-
         //disk index
         ComputeAll disk_ins(n_user, n_data_item, vec_dim);
+        disk_ins.PreprocessData(user, data_item);
+
+        //interval search
+        ScoreSearch interval_ins(n_interval, n_user, n_data_item);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);

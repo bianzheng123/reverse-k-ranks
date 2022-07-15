@@ -13,7 +13,7 @@
 #include "BruteForce/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 
-#include "Online/GridIndex.hpp"
+#include "GridIndex.hpp"
 
 #include "RankSample.hpp"
 #include "ScoreSample.hpp"
