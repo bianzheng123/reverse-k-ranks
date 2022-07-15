@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_TOPTIDIP_HPP
 #define REVERSE_KRANKS_TOPTIDIP_HPP
 
-#include "alg/DiskIndex/ComputeRank/CandidateBruteForce.hpp"
+#include "alg/DiskIndex/ComputeRank/PartIntPartNorm.hpp"
 #include "struct/DistancePair.hpp"
 
 namespace ReverseMIPS {
@@ -155,7 +155,7 @@ namespace ReverseMIPS {
     public:
         int n_data_item_, n_user_, vec_dim_, topt_;
         const char *index_path_;
-        CandidateBruteForce exact_rank_ins_;
+        PartIntPartNorm exact_rank_ins_;
 
         TimeRecord read_disk_record_, exact_rank_record_;
         double read_disk_time_, exact_rank_time_;
@@ -174,7 +174,7 @@ namespace ReverseMIPS {
 
         inline TopTIDIP(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
                         const int &topt) {
-            this->exact_rank_ins_ = CandidateBruteForce(n_data_item, vec_dim);
+            this->exact_rank_ins_ = PartIntPartNorm(n_user, n_data_item, vec_dim);
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;

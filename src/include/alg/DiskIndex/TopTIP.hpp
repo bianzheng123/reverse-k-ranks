@@ -5,19 +5,10 @@
 #ifndef REVERSE_KRANKS_TOPIP_HPP
 #define REVERSE_KRANKS_TOPIP_HPP
 
-#include "alg/DiskIndex/ComputeRank/CandidateBruteForce.hpp"
+#include "alg/DiskIndex/ComputeRank/PartIntPartNorm.hpp"
 
 namespace ReverseMIPS {
     class TopTIP {
-
-        void
-        BuildIndexPreprocess() {
-            out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
-            if (!out_stream_) {
-                spdlog::error("error in write result");
-                exit(-1);
-            }
-        }
 
         inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
             assert(0 <= start_idx + read_count && start_idx + read_count <= topt_);
@@ -92,13 +83,8 @@ namespace ReverseMIPS {
 
             if (rank == topt_ + 1) {
                 exact_rank_record_.reset();
-                rank = 1;
-                for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                    double itemIP = InnerProduct(user_vecs, item.getVector(itemID), vec_dim_);
-                    if (itemIP > queryIP) {
-                        rank++;
-                    }
-                }
+                rank = exact_rank_ins_.QueryRankByCandidate(user_vecs, userID, item, queryIP);
+                rank++;
                 exact_rank_time_ += exact_rank_record_.get_elapsed_time_second();
             }
 
@@ -109,15 +95,10 @@ namespace ReverseMIPS {
         void
         AboveTopt(const double &queryIP,
                   const int &userID, const double *user_vecs, const VectorMatrix &item) {
-            int rank = 1;
 
             exact_rank_record_.reset();
-            for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                double itemIP = InnerProduct(user_vecs, item.getVector(itemID), vec_dim_);
-                if (itemIP > queryIP) {
-                    rank++;
-                }
-            }
+            int rank = exact_rank_ins_.QueryRankByCandidate(user_vecs, userID, item, queryIP);
+            rank++;
             exact_rank_time_ += exact_rank_record_.get_elapsed_time_second();
 
             user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
@@ -126,7 +107,7 @@ namespace ReverseMIPS {
 
     public:
         int n_data_item_, n_user_, vec_dim_, topt_;
-        CandidateBruteForce exact_rank_ins_;
+        PartIntPartNorm exact_rank_ins_;
         const char *index_path_;
 
         TimeRecord read_disk_record_, exact_rank_record_;
@@ -145,7 +126,7 @@ namespace ReverseMIPS {
 
         inline TopTIP(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
                       const int &topt) {
-            this->exact_rank_ins_ = CandidateBruteForce(n_data_item, vec_dim);
+            this->exact_rank_ins_ = PartIntPartNorm(n_user, n_data_item, vec_dim);
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
@@ -166,7 +147,15 @@ namespace ReverseMIPS {
             this->disk_cache_ = std::make_unique<double[]>(topt);
             this->user_topk_cache_l_.resize(n_user);
 
-            BuildIndexPreprocess();
+        }
+
+        void
+        BuildIndexPreprocess() {
+            out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
+            if (!out_stream_) {
+                spdlog::error("error in write result");
+                exit(-1);
+            }
         }
 
         void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
@@ -233,6 +222,12 @@ namespace ReverseMIPS {
         void FinishRetrieval() {
             index_stream_.close();
         }
+
+        std::string IndexInfo() {
+            std::string info = "Exact rank method_name: " + exact_rank_ins_.method_name;
+            return info;
+        }
+
     };
 }
 

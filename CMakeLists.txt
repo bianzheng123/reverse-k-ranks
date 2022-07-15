@@ -44,6 +44,7 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 #set(CMAKE_CUDA_ARCHITECTURES 75)
 
 #enable_language(CUDA)
+
 #set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(rri src/app/ReverseRankIndex.cpp)
 target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
@@ -51,6 +52,14 @@ target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::
 #set_property(TARGET rri PROPERTY CXX_STANDARD "17")
 #set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
 #set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
+
+#set_source_files_properties(src/app/BatchBuildIndexTopT.cpp PROPERTIES LANGUAGE CUDA)
+add_executable(bbit src/app/BatchBuildIndexTopT.cpp)
+target_include_directories(bbit PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(bbit PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
+#set_property(TARGET bbit PROPERTY CXX_STANDARD "17")
+#set_property(TARGET bbit PROPERTY CXX_STANDARD_REQUIRED ON)
+#set_property(TARGET bbit PROPERTY CXX_EXTENSIONS OFF)
 
 if (BUILD_PROGRESS)
     add_executable(progress src/app/Progress.cpp)

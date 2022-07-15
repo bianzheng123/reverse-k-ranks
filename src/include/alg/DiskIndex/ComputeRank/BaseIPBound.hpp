@@ -2,8 +2,10 @@
 // Created by BianZheng on 2022/4/19.
 //
 
-#ifndef REVERSE_KRANKS_CANDIDATEBRUTEFORCE_HPP
-#define REVERSE_KRANKS_CANDIDATEBRUTEFORCE_HPP
+#ifndef REVERSE_KRANKS_BASEIPBOUND_HPP
+#define REVERSE_KRANKS_BASEIPBOUND_HPP
+
+#include <cstring>
 
 #include "alg/DiskIndex/ComputeRank/BaseComputeRank.hpp"
 #include "alg/SpaceInnerProduct.hpp"
@@ -12,15 +14,20 @@
 
 namespace ReverseMIPS {
 
-    class CandidateBruteForce : public BaseComputeRank {
+    class BaseIPBound : public BaseComputeRank {
         int n_data_item_, vec_dim_;
     public:
 
-        inline CandidateBruteForce() = default;
+        inline BaseIPBound() {
+            n_data_item_ = 0;
+            vec_dim_ = 0;
+            BaseComputeRank::method_name = "BaseIPBound";
+        };
 
-        inline CandidateBruteForce(const int &n_data_item, const int &vec_dim) {
+        inline BaseIPBound(const int &n_data_item, const int &vec_dim) {
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
+            BaseComputeRank::method_name = "BaseIPBound";
         }
 
         void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) override {
@@ -75,4 +82,4 @@ namespace ReverseMIPS {
 
     };
 }
-#endif //REVERSE_KRANKS_CANDIDATEBRUTEFORCE_HPP
+#endif //REVERSE_KRANKS_BASEIPBOUND_HPP

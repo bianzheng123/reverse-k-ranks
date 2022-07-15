@@ -52,13 +52,15 @@ namespace ReverseMIPS {
 
             user_norm_l_ = nullptr;
             item_norm_l_ = nullptr;
+            BaseComputeRank::method_name = "PartIntPartNorm";
         };
 
-        inline PartIntPartNorm(const int &n_user, const int &n_data_item, const int &vec_dim, const double &scale) {
+        inline PartIntPartNorm(const int &n_user, const int &n_data_item, const int &vec_dim) {
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
-            this->scale_ = scale;
+            this->scale_ = 10;
+            BaseComputeRank::method_name = "PartIntPartNorm";
         }
 
         [[nodiscard]] double MatrixMaxVal(const VectorMatrix &vm) const {
@@ -92,7 +94,7 @@ namespace ReverseMIPS {
             }
         }
 
-        void Preprocess(VectorMatrix &user, VectorMatrix &data_item) {
+        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) override {
             const double SIGMA = 0.7;
             check_dim_ = svd_ins_.Preprocess(user, data_item, SIGMA);
             int remain_dim = vec_dim_ - check_dim_;
@@ -140,36 +142,79 @@ namespace ReverseMIPS {
             svd_ins_.TransferQuery(query_vecs, vec_dim_, query_write_vecs);
         }
 
-        double IPUpperBound(const double *user_vecs, const int &userID,
-                            const double *item_vecs, const int &itemID) override {
-            const int *user_int_vecs = user_int_ptr_.get() + userID * check_dim_;
-            const int *item_int_vecs = item_int_ptr_.get() + itemID * check_dim_;
+        int QueryRankByCandidate(const std::pair<double, double> &queryIPbound_pair, const double &queryIP,
+                                 const double *user_vecs, const int &userID,
+                                 const VectorMatrix &item, const std::vector<bool> &item_cand_l) const override {
+            assert(queryIPbound_pair.first <= queryIP && queryIP <= queryIPbound_pair.second);
 
-            int leftIP = InnerProduct(user_int_vecs, item_int_vecs, check_dim_);
-            int left_otherIP = user_int_sum_ptr_[userID] + item_int_sum_ptr_[itemID];
-            int ub_left_part = leftIP + left_otherIP;
+            int rank = 0;
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                if (!item_cand_l[itemID]) {
+                    continue;
+                }
+                const std::pair<double, double> itemIPbound_pair = IPBound(userID, itemID);
+                assert(itemIPbound_pair.first <= itemIPbound_pair.second);
+                bool no_intersect_item_greater = itemIPbound_pair.first > queryIPbound_pair.second;
+                bool no_intersect_query_greater = itemIPbound_pair.second < queryIPbound_pair.first;
+                if (no_intersect_item_greater || no_intersect_query_greater) {
+                    continue;
+                }
+                bool has_intersect_query_ub = itemIPbound_pair.first <= queryIPbound_pair.second &&
+                                              queryIPbound_pair.second <= itemIPbound_pair.second;
+                bool has_intersect_query_lb = itemIPbound_pair.first <= queryIPbound_pair.first &&
+                                              queryIPbound_pair.first <= itemIPbound_pair.second;
+                if (has_intersect_query_lb || has_intersect_query_ub) {
+                    double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
+                    if (queryIPbound_pair.second >= ip && ip >= queryIP) {
+                        rank++;
+                    }
+                    continue;
+                }
+                assert(queryIPbound_pair.first <= itemIPbound_pair.first &&
+                       itemIPbound_pair.first <= itemIPbound_pair.second &&
+                       itemIPbound_pair.second <= queryIPbound_pair.second);
+                if (queryIP <= itemIPbound_pair.first) {
+                    rank++;
+                } else if (queryIP >= itemIPbound_pair.second) {
+                    continue;
+                } else {
+                    assert(itemIPbound_pair.first <= queryIP && queryIP <= itemIPbound_pair.second);
+                    double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
+                    if (ip >= queryIP) {
+                        rank++;
+                    }
+                }
+            }
 
-            double rightIP = user_norm_l_[userID] * item_norm_l_[itemID];
-            double upper_bound = convert_coe_ * ub_left_part + rightIP;
-            return upper_bound;
+            return rank;
         }
 
-        double IPLowerBound(const double *user_vecs, const int &userID,
-                            const double *item_vecs, const int &itemID) override {
-            const int *user_int_vecs = user_int_ptr_.get() + userID * check_dim_;
-            const int *item_int_vecs = item_int_ptr_.get() + itemID * check_dim_;
+        int QueryRankByCandidate(const double *user_vecs, const int &userID,
+                                 const VectorMatrix &item,
+                                 const double &queryIP) const override {
+            //calculate all the IP, then get the lower bound
+            //make different situation by the information
+            int rank = 0;
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                const std::pair<double, double> itemIPbound_pair = IPBound(userID, itemID);
+                if (queryIP <= itemIPbound_pair.first) {
+                    rank++;
+                } else if (queryIP > itemIPbound_pair.second) {
+                    continue;
+                } else { // in between
+                    double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
+                    if (ip >= queryIP) {
+                        rank++;
+                    }
+                }
 
-            int leftIP = InnerProduct(user_int_vecs, item_int_vecs, check_dim_);
-            int left_otherIP = user_int_sum_ptr_[userID] + item_int_sum_ptr_[itemID];
-            int lb_left_part = leftIP - left_otherIP;
+            }
 
-            double rightIP = -user_norm_l_[userID] * item_norm_l_[itemID];
-            double lower_bound = convert_coe_ * lb_left_part + rightIP;
-            return lower_bound;
+            return rank;
         }
 
-        std::pair<double, double>
-        IPBound(const double *user_vecs, const int &userID, const double *item_vecs, const int &itemID) override {
+        [[nodiscard]] std::pair<double, double>
+        IPBound(const int &userID, const int &itemID) const {
             const int *user_int_vecs = user_int_ptr_.get() + userID * check_dim_;
             const int *item_int_vecs = item_int_ptr_.get() + itemID * check_dim_;
 
@@ -179,23 +224,12 @@ namespace ReverseMIPS {
             int ub_left_part = leftIP + left_otherIP;
 
             double rightIP_lb = -user_norm_l_[userID] * item_norm_l_[itemID];
-            double rightIP_ub = user_norm_l_[userID] * item_norm_l_[itemID];
+            double rightIP_ub = -rightIP_lb;
 
             double lower_bound = convert_coe_ * lb_left_part + rightIP_lb;
             double upper_bound = convert_coe_ * ub_left_part + rightIP_ub;
 
             return std::make_pair(lower_bound, upper_bound);
-        }
-
-        void
-        IPBound(const double *user_vecs, const int &userID,
-                const std::vector<int> &item_cand_l,
-                const VectorMatrix &item,
-                std::pair<double, double> *IPbound_l) override {
-            for (const int &itemID: item_cand_l) {
-                const double *item_vecs = item.getVector(itemID);
-                IPbound_l[itemID] = IPBound(user_vecs, userID, item_vecs, itemID);
-            }
         }
 
     };

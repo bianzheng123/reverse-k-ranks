@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_COMPRESSTOPTIDIPBRUTEFORCE_HPP
 #define REVERSE_KRANKS_COMPRESSTOPTIDIPBRUTEFORCE_HPP
 
-#include "alg/DiskIndex/TopTIDIP.hpp"
+#include "TopTIDIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"

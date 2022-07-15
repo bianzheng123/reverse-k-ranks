@@ -27,6 +27,7 @@
 #include <set>
 #include <cassert>
 #include <spdlog/spdlog.h>
+#include <filesystem>
 
 namespace ReverseMIPS::SSMergeRankByInterval {
 
@@ -113,7 +114,7 @@ namespace ReverseMIPS::SSMergeRankByInterval {
                 rank_ub_l_.assign(n_user_, 0);
 
                 const double *tmp_query_vecs = query_item.getVector(queryID);
-                double* query_vecs = query_cache_.get();
+                double *query_vecs = query_cache_.get();
                 disk_ins_.PreprocessQuery(tmp_query_vecs, vec_dim_, query_vecs);
 
                 //calculate the exact IP
@@ -183,11 +184,15 @@ namespace ReverseMIPS::SSMergeRankByInterval {
         }
 
         std::string BuildIndexStatistics() override {
+            uint64_t file_size = std::filesystem::file_size(disk_ins_.index_path_);
             char buffer[512];
             double index_size_gb =
-                    1.0 * disk_ins_.n_merge_user_ * n_data_item_ * (2 * sizeof(int)) / (1024 * 1024 * 1024);
+                    1.0 * file_size / (1024 * 1024 * 1024);
             sprintf(buffer, "Build Index Info: index size %.3f GB", index_size_gb);
-            return buffer;
+            std::string index_size_str(buffer);
+
+            std::string disk_index_str = "Exact rank name: " + disk_ins_.IndexInfo();
+            return index_size_str + "\n" + disk_index_str;
         }
 
     };

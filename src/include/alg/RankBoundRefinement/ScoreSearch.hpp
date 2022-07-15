@@ -41,12 +41,34 @@ namespace ReverseMIPS {
             spdlog::info("interval bound: n_interval {}", n_interval);
         }
 
+        inline ScoreSearch(const char *index_path) {
+            LoadIndex(index_path);
+        }
+
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
-            std::vector<double> IP_l(n_data_item_);
-            for (int candID = 0; candID < n_data_item_; candID++) {
-                IP_l[candID] = distance_ptr[candID].dist_;
+            double upper_bound = distance_ptr[0].dist_ + 0.01;
+            double lower_bound = distance_ptr[n_data_item_ - 1].dist_ - 0.01;
+            const std::pair<double, double> &bound_pair = std::make_pair(lower_bound, upper_bound);
+
+            double lb = bound_pair.first;
+            double ub = bound_pair.second;
+            user_ip_bound_l_[userID] = std::make_pair(lb, ub);
+            double interval_distance = (ub - lb) / n_interval_;
+            interval_dist_l_[userID] = interval_distance;
+
+            int *interval_ptr = interval_table_.get() + userID * n_interval_;
+#pragma omp parallel for default(none) shared(ub, interval_distance, interval_ptr, distance_ptr)
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                double ip = distance_ptr[itemID].dist_;
+                int itv_idx = std::floor((ub - ip) / interval_distance);
+                assert(0 <= itv_idx && itv_idx < n_interval_);
+#pragma omp critical
+                interval_ptr[itv_idx]++;
             }
-            LoopPreprocess(IP_l.data(), userID);
+            for (int intervalID = 1; intervalID < n_interval_; intervalID++) {
+                interval_ptr[intervalID] += interval_ptr[intervalID - 1];
+            }
+            assert(interval_ptr[n_interval_ - 1] == n_data_item_);
         }
 
         void
@@ -63,38 +85,18 @@ namespace ReverseMIPS {
             interval_dist_l_[userID] = interval_distance;
 
             int *interval_ptr = interval_table_.get() + userID * n_interval_;
+#pragma omp parallel for default(none) shared(ub, interval_distance, interval_ptr, distance_ptr)
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 double ip = distance_ptr[itemID];
                 int itv_idx = std::floor((ub - ip) / interval_distance);
                 assert(0 <= itv_idx && itv_idx < n_interval_);
+#pragma omp critical
                 interval_ptr[itv_idx]++;
             }
             for (int intervalID = 1; intervalID < n_interval_; intervalID++) {
                 interval_ptr[intervalID] += interval_ptr[intervalID - 1];
             }
             assert(interval_ptr[n_interval_ - 1] == n_data_item_);
-
-        }
-
-        void GetItvID(const DistancePair *distance_ptr, const int &userID,
-                      std::vector<unsigned char> &itvID_l) const {
-            if (n_interval_ > 256) {
-                spdlog::error("the number of interval larger than 256, program exit");
-                exit(-1);
-            }
-            assert(itvID_l.size() == n_data_item_);
-            for (int candID = 0; candID < n_data_item_; candID++) {
-                assert(user_ip_bound_l_[userID].first <= user_ip_bound_l_[userID].second);
-                const double IP_lb = user_ip_bound_l_[userID].first;
-                const double IP_ub = user_ip_bound_l_[userID].second;
-                const double itv_dist = interval_dist_l_[userID];
-                const int itemID = distance_ptr[candID].ID_;
-                const double ip = distance_ptr[candID].dist_;
-                assert(IP_lb <= ip && ip <= IP_ub);
-                const unsigned char itvID = std::floor((IP_ub - ip) / itv_dist);
-                itvID_l[itemID] = itvID;
-                assert(0 <= itvID && itvID < n_interval_);
-            }
 
         }
 
@@ -180,6 +182,45 @@ namespace ReverseMIPS {
                 const double itv_IP_ub = user_IP_ub - itvID * itv_dist;
                 queryIPBound_l[userID] = std::make_pair(itv_IP_lb, itv_IP_ub);
             }
+        }
+
+        void SaveIndex(const char *index_path) {
+            std::ofstream out_stream_ = std::ofstream(index_path, std::ios::binary | std::ios::out);
+            if (!out_stream_) {
+                spdlog::error("error in write result");
+                exit(-1);
+            }
+            out_stream_.write((char *) &n_interval_, sizeof(int));
+            out_stream_.write((char *) &n_user_, sizeof(int));
+            out_stream_.write((char *) &n_data_item_, sizeof(int));
+            out_stream_.write((char *) interval_table_.get(), n_user_ * n_interval_ * sizeof(int));
+            out_stream_.write((char *) interval_dist_l_.get(), n_user_ * sizeof(double));
+            out_stream_.write((char *) user_ip_bound_l_.get(), n_user_ * sizeof(std::pair<double, double>));
+
+            out_stream_.close();
+        }
+
+        void LoadIndex(const char *index_path) {
+            std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
+            if (!index_stream) {
+                spdlog::error("error in reading index");
+                exit(-1);
+            }
+
+            index_stream.read((char *) &n_interval_, sizeof(int));
+            index_stream.read((char *) &n_user_, sizeof(int));
+            index_stream.read((char *) &n_data_item_, sizeof(int));
+
+            interval_table_ = std::make_unique<int[]>(n_user_ * n_interval_);
+            index_stream.read((char *) interval_table_.get(), sizeof(int) * n_user_ * n_interval_);
+
+            interval_dist_l_ = std::make_unique<double[]>(n_user_);
+            index_stream.read((char *) interval_dist_l_.get(), sizeof(double) * n_user_);
+
+            user_ip_bound_l_ = std::make_unique<std::pair<double, double>[]>(n_user_);
+            index_stream.read((char *) user_ip_bound_l_.get(), sizeof(std::pair<double, double>) * n_user_);
+
+            index_stream.close();
         }
 
     };

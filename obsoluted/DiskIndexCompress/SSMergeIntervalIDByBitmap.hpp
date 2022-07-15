@@ -1,11 +1,11 @@
 //
-// Created by BianZheng on 2022/6/27.
+// Created by BianZheng on 2022/6/30.
 //
 
-#ifndef REVERSE_KRANKS_SSMERGEINTERVAL_HPP
-#define REVERSE_KRANKS_SSMERGEINTERVAL_HPP
+#ifndef REVERSE_K_RANKS_SSMERGEINTERVALIDBYBITMAP_HPP
+#define REVERSE_K_RANKS_SSMERGEINTERVALIDBYBITMAP_HPP
 
-#include "alg/DiskIndex/MergeIntervalIDByInterval.hpp"
+#include "MergeIntervalIDByBitmap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
@@ -28,7 +28,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::SSMergeIntervalIDByInterval {
+namespace ReverseMIPS::SSMergeIntervalIDByBitmap {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -43,7 +43,7 @@ namespace ReverseMIPS::SSMergeIntervalIDByInterval {
         //for rank search, store in memory
         ScoreSearch rank_bound_ins_;
         //read all instance
-        MergeIntervalIDByInterval disk_ins_;
+        MergeIntervalIDByBitmap disk_ins_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -64,7 +64,7 @@ namespace ReverseMIPS::SSMergeIntervalIDByInterval {
                 // score search
                 ScoreSearch &rank_bound_ins,
                 //disk index
-                MergeIntervalIDByInterval &disk_ins,
+                MergeIntervalIDByBitmap &disk_ins,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item) {
             //hash search
@@ -144,8 +144,9 @@ namespace ReverseMIPS::SSMergeIntervalIDByInterval {
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, itvID_l_, prune_l_, user_,
-                                  data_item_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
+                                  queryIPbound_l_, prune_l_, itvID_l_,
+                                  user_, data_item_, queryID);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
@@ -185,15 +186,15 @@ namespace ReverseMIPS::SSMergeIntervalIDByInterval {
 
         std::string BuildIndexStatistics() override {
             char buffer[512];
-            double index_size_gb =
-                    1.0 * disk_ins_.n_merge_user_ * n_data_item_ * (2 * sizeof(unsigned char)) / (1024 * 1024 * 1024);
+            double index_size_gb = 1.0 * disk_ins_.n_merge_user_ * disk_ins_.n_interval_ * disk_ins_.bitmap_size_byte_ /
+                                   (1024 * 1024 * 1024);
             sprintf(buffer, "Build Index Info: index size %.3f GB", index_size_gb);
             return buffer;
         }
 
     };
 
-    const int report_batch_every = 10000;
+    const int report_merge_every = 100000;
 
     /*
      * bruteforce index
@@ -214,16 +215,22 @@ namespace ReverseMIPS::SSMergeIntervalIDByInterval {
             exit(-1);
         }
 
+        const int bitmap_size_byte = (n_data_item / 8 + (n_data_item % 8 == 0 ? 0 : 1)) * sizeof(unsigned char);
         const uint64_t index_size_byte = (uint64_t) index_size_gb * 1024 * 1024 * 1024;
-        const uint64_t predict_index_size_byte = (uint64_t) (sizeof(unsigned char) * 2) * n_data_item * n_user;
-        const uint64_t n_merge_user_big_size = index_size_byte / (sizeof(unsigned char) * 2) / n_data_item;
+        const uint64_t predict_index_size_byte = (uint64_t) bitmap_size_byte * n_sample * n_user;
+        const uint64_t n_merge_user_big_size = index_size_byte / (bitmap_size_byte * n_sample);
         int n_merge_user = int(n_merge_user_big_size);
         if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
             n_merge_user = n_user - 1;
         }
 
-        MergeIntervalIDByInterval disk_ins(user, index_path, n_data_item, n_merge_user);
+        spdlog::info("n_interval {}, n_merge_user {}, bitmap_size_byte {}",
+                     n_sample, n_merge_user, bitmap_size_byte);
+
+        MergeIntervalIDByBitmap disk_ins(user,
+                                         index_path, n_data_item, n_sample,
+                                         n_merge_user, bitmap_size_byte);
         disk_ins.PreprocessData(user, data_item);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
@@ -252,7 +259,8 @@ namespace ReverseMIPS::SSMergeIntervalIDByInterval {
                 disk_ins.BuildIndexLoop(itvID_l, userID);
             }
             disk_ins.WriteIndex();
-            if (labelID % report_batch_every == 0) {
+
+            if (labelID % report_merge_every == 0) {
                 std::cout << "preprocessed " << labelID / (0.01 * n_merge_user) << " %, "
                           << batch_report_record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
@@ -273,4 +281,4 @@ namespace ReverseMIPS::SSMergeIntervalIDByInterval {
     }
 
 }
-#endif //REVERSE_KRANKS_SSMERGEINTERVAL_HPP
+#endif //REVERSE_K_RANKS_SSMERGEINTERVALIDBYBITMAP_HPP

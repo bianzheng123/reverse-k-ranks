@@ -143,6 +143,11 @@ namespace ReverseMIPS {
             index_stream_.close();
         }
 
+        std::string IndexInfo() {
+            std::string info = "ReadAll do not need to calculate the information";
+            return info;
+        }
+
     };
 }
 #endif //REVERSE_K_RANKS_READALL_HPP

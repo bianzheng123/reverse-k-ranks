@@ -36,6 +36,7 @@ namespace ReverseMIPS {
 #endif
     public:
         const int report_every_ = 100000;
+
         ComputeScoreTable() = default;
 
         inline ComputeScoreTable(const VectorMatrix &user, const VectorMatrix &data_item) {

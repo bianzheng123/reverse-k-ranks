@@ -8,7 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
-#include "alg/DiskIndex/ComputeRank/CandidateBruteForce.hpp"
+#include "alg/DiskIndex/ComputeRank/PartIntPartNorm.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/UserRankBound.hpp"
@@ -86,7 +86,7 @@ namespace ReverseMIPS {
         int n_merge_user_, bitmap_size_byte_;
         //n_cache_rank_: stores how many intervals for each merged user
         std::vector<uint32_t> merge_label_l_; // n_user, stores which cluster the user belons to
-        CandidateBruteForce exact_rank_ins_;
+        PartIntPartNorm exact_rank_ins_;
         const char *index_path_;
 
         //record time memory
@@ -110,7 +110,7 @@ namespace ReverseMIPS {
         inline MergeIntervalIDByBitmap(const VectorMatrix &user,
                                        const char *index_path, const int &n_data_item, const int &n_interval,
                                        const int &n_merge_user, const int &bitmap_size_byte) {
-            this->exact_rank_ins_ = CandidateBruteForce(n_data_item, user.vec_dim_);;
+            this->exact_rank_ins_ = PartIntPartNorm(user.n_vector_, n_data_item, user.vec_dim_);
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
             this->index_path_ = index_path;

@@ -53,11 +53,6 @@ namespace ReverseMIPS {
             n_max_disk_read_ = std::max(cache_bound_every_,
                                         n_data_item_ - known_rank_idx_l_[n_cache_rank_ - 1]);
 
-            for (int sampleID = 0; sampleID < n_cache_rank_; sampleID++) {
-                printf("%d ", known_rank_idx_l_[sampleID]);
-            }
-            printf("\n");
-
             spdlog::info("rank bound: cache_bound_every {}, n_cache_rank {}", cache_bound_every_, n_cache_rank_);
         }
 

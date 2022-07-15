@@ -6,11 +6,14 @@
 #define REVERSE_KRANKS_BASECANDIDATE_HPP
 
 #include <vector>
+#include <string>
 #include "struct/VectorMatrix.hpp"
 
 namespace ReverseMIPS {
     class BaseComputeRank {
     public:
+        std::string method_name;
+
         virtual void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) = 0;
 
         virtual void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) = 0;

@@ -9,7 +9,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "BruteForce/BatchDiskBruteForce.hpp"
-#include "BruteForce/CompressTopTIDIPBruteForce.hpp"
+#include "DiskIndexCompress/CompressTopTIDIPBruteForce.hpp"
 #include "BruteForce/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"

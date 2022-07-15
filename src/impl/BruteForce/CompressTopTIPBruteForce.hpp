@@ -25,6 +25,7 @@
 #include <set>
 #include <cassert>
 #include <spdlog/spdlog.h>
+#include <filesystem>
 
 namespace ReverseMIPS::CompressTopTIPBruteForce {
 
@@ -176,10 +177,14 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
         }
 
         std::string BuildIndexStatistics() override {
+            uint64_t file_size = std::filesystem::file_size(disk_ins_.index_path_);
             char buffer[512];
-            double index_size_gb = 1.0 * n_user_ * disk_ins_.topt_ * sizeof(double) / (1024 * 1024 * 1024);
+            double index_size_gb = 1.0 * file_size / (1024 * 1024 * 1024);
             sprintf(buffer, "Build Index Info: index size %.3f GB", index_size_gb);
-            return buffer;
+            std::string index_size_str(buffer);
+
+            std::string disk_index_str = "Exact rank name: " + disk_ins_.IndexInfo();
+            return index_size_str + "\n" + disk_index_str;
         };
 
     };
@@ -207,6 +212,7 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
             topt = n_data_item;
         }
         TopTIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
+        disk_ins.BuildIndexPreprocess();
         disk_ins.PreprocessData(user, data_item);
 
         //hash search
