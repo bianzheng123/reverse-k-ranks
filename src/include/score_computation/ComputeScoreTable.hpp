@@ -35,7 +35,7 @@ namespace ReverseMIPS {
         CPUScoreTable cpu;
 #endif
     public:
-        const int report_every_ = 100000;
+        const int report_every_ = 10000;
 
         ComputeScoreTable() = default;
 

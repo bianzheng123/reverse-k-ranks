@@ -5,39 +5,38 @@
 #ifndef REVERSE_KRANKS_GPUSCORETABLE_HPP
 #define REVERSE_KRANKS_GPUSCORETABLE_HPP
 
+#include <cublas_v2.h>
 #include <algorithm>
 #include <vector>
 #include <iostream>
 
 namespace ReverseMIPS {
 
-#define CHECK(call)\
-{\
-  const cudaError_t error=call;\
-  if(error!=cudaSuccess)\
-  {\
-      printf("ERROR: %s:%d,",__FILE__,__LINE__);\
-      printf("code:%d,reason:%s\n",error,cudaGetErrorString(error));\
-      exit(1);\
-  }\
-}
+// error check macros
+#define cudaCheckErrors(msg) \
+    do { \
+        cudaError_t __err = cudaGetLastError(); \
+        if (__err != cudaSuccess) { \
+            fprintf(stderr, "Fatal error: %s (%s at %s:%d)\n", \
+                msg, cudaGetErrorString(__err), \
+                __FILE__, __LINE__); \
+            fprintf(stderr, "*** FAILED - ABORTING\n"); \
+            exit(1); \
+        } \
+    } while (0)
 
-    __global__ void ComputeInnerProductGPU(const double *user_ptr, const double *data_item_ptr,
-                                           const int n_data_item, const int vec_dim, const int userID,
-                                           double *IP_ptr) {
-
-        int itemID = blockIdx.x * blockDim.x + threadIdx.x;
-        if (itemID >= n_data_item) {
-            return;
-        }
-        double ip = 0;
-        const double *tmp_data_item_ptr = data_item_ptr + itemID * vec_dim;
-
-        for (int dim = 0; dim < vec_dim; dim++) {
-            ip += user_ptr[dim] * tmp_data_item_ptr[dim];
-        }
-        IP_ptr[itemID] = ip;
-    }
+// for CUBLAS V2 API
+#define cublasCheckErrors(fn) \
+    do { \
+        cublasStatus_t __err = fn; \
+        if (__err != CUBLAS_STATUS_SUCCESS) { \
+            fprintf(stderr, "Fatal cublas error: %d (at %s:%d)\n", \
+                (int)(__err), \
+                __FILE__, __LINE__); \
+            fprintf(stderr, "*** FAILED - ABORTING\n"); \
+            exit(1); \
+        } \
+    } while (0)
 
     class GPUScoreTable {
 
@@ -46,6 +45,7 @@ namespace ReverseMIPS {
         double *data_item_gpu_ptr_;
         double *ip_cache_gpu_ptr_;
         std::vector<double> ip_cache_;
+        cublasHandle_t handle_;
     public:
         GPUScoreTable() = default;
 
@@ -56,29 +56,45 @@ namespace ReverseMIPS {
             vec_dim_ = vec_dim;
             ip_cache_.resize(n_data_item_);
 
-            CHECK(cudaMalloc((void **) &user_gpu_ptr_, n_user_ * vec_dim_ * sizeof(double)));
-            CHECK(cudaMalloc((void **) &data_item_gpu_ptr_, n_data_item_ * vec_dim_ * sizeof(double)));
-            CHECK(cudaMalloc((void **) &ip_cache_gpu_ptr_, n_data_item_ * sizeof(double)));
-            CHECK(cudaMemcpy(user_gpu_ptr_, user, n_user_ * vec_dim_ * sizeof(double),
-                             cudaMemcpyHostToDevice));
-            CHECK(cudaMemcpy(data_item_gpu_ptr_, data_item, n_data_item_ * vec_dim_ * sizeof(double),
-                             cudaMemcpyHostToDevice));
-            CHECK(cudaMemset(ip_cache_gpu_ptr_, 0, n_data_item_ * sizeof(double)););
+            cudaMalloc((void **) &user_gpu_ptr_, n_user_ * vec_dim_ * sizeof(double));
+            cudaMalloc((void **) &data_item_gpu_ptr_, n_data_item_ * vec_dim_ * sizeof(double));
+            cudaMalloc((void **) &ip_cache_gpu_ptr_, n_data_item_ * sizeof(double));
+            cudaCheckErrors("cuda malloc fail");
+
+            cublasCheckErrors(cublasSetVector(vec_dim_ * n_user_, sizeof(double), (void *) user, 1, user_gpu_ptr_, 1));
+
+            cublasCheckErrors(
+                    cublasSetMatrix(vec_dim, n_data_item_, sizeof(double), (void *) data_item, vec_dim,
+                                    data_item_gpu_ptr_,
+                                    vec_dim));
+//            cublasCheckErrors(
+//                    cublasSetMatrix(vec_dim, n_user, sizeof(double), (void *) user, vec_dim, user_gpu_ptr_,
+//                                    vec_dim));
+
+            cublasCheckErrors(cublasCreate(&handle_));
+//            cublasCheckErrors(cublasSetVector(vec_dim, sizeof(double), &(vector[0]), 1, vector_gpu, 1));
+
+//            cudaCheckErrors(cudaMemcpy(user_gpu_ptr_, user, n_user_ * vec_dim_ * sizeof(double),
+//                                       cudaMemcpyHostToDevice));
+//            cudaCheckErrors(cudaMemcpy(data_item_gpu_ptr_, data_item, n_data_item_ * vec_dim_ * sizeof(double),
+//                                       cudaMemcpyHostToDevice));
+//            cudaCheckErrors(cudaMemset(ip_cache_gpu_ptr_, 0, n_data_item_ * sizeof(double)));
 
         }
 
         void ComputeList(const int &userID, double *distance_l) {
-            const int n_block = 1024;
-            const int n_thread = n_data_item_ / n_block + (n_data_item_ % n_block == 0 ? 0 : 1);
-            dim3 threadsPerBlock(n_thread);
-            dim3 blocksPerGrid(n_block);
             const double *tmp_user_gpu_ptr = user_gpu_ptr_ + userID * vec_dim_;
 
-            ComputeInnerProductGPU<<<blocksPerGrid, threadsPerBlock>>>(tmp_user_gpu_ptr, data_item_gpu_ptr_,
-                    n_data_item_, vec_dim_, userID,
-                    ip_cache_gpu_ptr_);
-            cudaDeviceSynchronize();
-            CHECK(cudaMemcpy(distance_l, ip_cache_gpu_ptr_, n_data_item_ * sizeof(double), cudaMemcpyDeviceToHost));
+            double alpha = 1.0;
+            double beta = 0.0;
+            cublasCheckErrors(
+                    cublasDgemv(handle_, CUBLAS_OP_T, vec_dim_, n_data_item_, &alpha, data_item_gpu_ptr_, vec_dim_,
+                                tmp_user_gpu_ptr, 1, &beta,
+                                ip_cache_gpu_ptr_, 1));
+
+            cublasCheckErrors(cublasGetVector(n_data_item_, sizeof(double), ip_cache_gpu_ptr_, 1, distance_l, 1));
+
+//            cudaCheckErrors(cudaMemcpy(distance_l, ip_cache_gpu_ptr_, n_data_item_ * sizeof(double), cudaMemcpyDeviceToHost));
         }
 
         void FinishCompute() {
