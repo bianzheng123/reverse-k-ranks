@@ -182,7 +182,7 @@ namespace ReverseMIPS {
         void BuildIndexLoop(const DistancePair *distance_cache, const int &n_write) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
             for (int writeID = 0; writeID < n_write; writeID++) {
-#pragma omp parallel for default(none) shared(writeID, disk_cache_, distance_cache)
+//#pragma omp parallel for default(none) shared(writeID, disk_cache_, distance_cache)
                 for (int candID = 0; candID < topt_; candID++) {
                     disk_cache_[candID] = distance_cache[writeID * topt_ + candID].ID_;
                 }

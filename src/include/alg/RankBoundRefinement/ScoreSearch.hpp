@@ -57,12 +57,12 @@ namespace ReverseMIPS {
             interval_dist_l_[userID] = interval_distance;
 
             int *interval_ptr = interval_table_.get() + userID * n_interval_;
-#pragma omp parallel for default(none) shared(ub, interval_distance, interval_ptr, distance_ptr)
+//#pragma omp parallel for default(none) shared(ub, interval_distance, interval_ptr, distance_ptr)
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 double ip = distance_ptr[itemID].dist_;
                 int itv_idx = std::floor((ub - ip) / interval_distance);
                 assert(0 <= itv_idx && itv_idx < n_interval_);
-#pragma omp critical
+//#pragma omp critical
                 interval_ptr[itv_idx]++;
             }
             for (int intervalID = 1; intervalID < n_interval_; intervalID++) {
@@ -85,12 +85,12 @@ namespace ReverseMIPS {
             interval_dist_l_[userID] = interval_distance;
 
             int *interval_ptr = interval_table_.get() + userID * n_interval_;
-#pragma omp parallel for default(none) shared(ub, interval_distance, interval_ptr, distance_ptr)
+//#pragma omp parallel for default(none) shared(ub, interval_distance, interval_ptr, distance_ptr)
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 double ip = distance_ptr[itemID];
                 int itv_idx = std::floor((ub - ip) / interval_distance);
                 assert(0 <= itv_idx && itv_idx < n_interval_);
-#pragma omp critical
+//#pragma omp critical
                 interval_ptr[itv_idx]++;
             }
             for (int intervalID = 1; intervalID < n_interval_; intervalID++) {

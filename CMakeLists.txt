@@ -43,9 +43,9 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 #set(CMAKE_CUDA_ARCHITECTURES 75)
 
-#enable_language(CUDA)
+enable_language(CUDA)
 
-#set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
+set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(rri src/app/ReverseRankIndex.cpp)
 target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
@@ -53,7 +53,7 @@ target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::
 #set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
 #set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
 
-#set_source_files_properties(src/app/BatchBuildIndexTopT.cpp PROPERTIES LANGUAGE CUDA)
+set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(brtt src/app/BatchRunTopT.cpp)
 target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
