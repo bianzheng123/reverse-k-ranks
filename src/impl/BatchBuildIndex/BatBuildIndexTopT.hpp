@@ -1,8 +1,0 @@
-//
-// Created by BianZheng on 2022/7/15.
-//
-
-#ifndef REVERSE_KRANKS_BATBUILDINDEXTOPT_HPP
-#define REVERSE_KRANKS_BATBUILDINDEXTOPT_HPP
-//TODO batch build index topt
-#endif //REVERSE_KRANKS_BATBUILDINDEXTOPT_HPP

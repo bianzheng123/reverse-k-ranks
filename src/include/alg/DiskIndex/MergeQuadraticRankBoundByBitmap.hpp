@@ -8,7 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
-#include "alg/DiskIndex/ComputeRank/PartIntPartNorm.hpp"
+#include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/UserRankBound.hpp"
@@ -158,7 +158,7 @@ namespace ReverseMIPS {
         int sample_unit_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_rank_bound
         std::vector<uint32_t> merge_label_l_; // n_user, stores which cluster the user belons to
-        PartIntPartNorm exact_rank_ins_;
+        BaseIPBound exact_rank_ins_;
         const char *index_path_;
 
         //record time memory
@@ -181,7 +181,7 @@ namespace ReverseMIPS {
         inline MergeQuadraticRankBoundByBitmap(const VectorMatrix &user,
                                                const int &n_data_item, const char *index_path,
                                                const int &n_rank_bound, const int &n_merge_user) {
-            this->exact_rank_ins_ = PartIntPartNorm(user.n_vector_, n_data_item, user.vec_dim_);;
+            this->exact_rank_ins_ = BaseIPBound(n_data_item, user.vec_dim_);;
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
             this->n_data_item_ = n_data_item;

@@ -5,9 +5,14 @@
 #ifndef REVERSE_K_RANKS_TOPTID_HPP
 #define REVERSE_K_RANKS_TOPTID_HPP
 
-#include "alg/DiskIndex/ComputeRank/PartIntPartNorm.hpp"
+#include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/DistancePair.hpp"
+#include "struct/UserRankElement.hpp"
+#include "util/TimeMemory.hpp"
+
+#include <fstream>
+#include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
     class TopTID {
@@ -119,7 +124,7 @@ namespace ReverseMIPS {
     public:
         int n_data_item_, n_user_, vec_dim_, topt_;
         const char *index_path_;
-        PartIntPartNorm exact_rank_ins_;
+        BaseIPBound exact_rank_ins_;
 
         TimeRecord read_disk_record_, exact_rank_record_;
         double read_disk_time_, exact_rank_time_;
@@ -139,7 +144,7 @@ namespace ReverseMIPS {
         inline TopTID(const int &n_user, const int &n_data_item, const int &vec_dim,
                       const char *index_path,
                       const int &topt) {
-            this->exact_rank_ins_ = PartIntPartNorm(n_user, n_data_item, vec_dim);
+            this->exact_rank_ins_ = BaseIPBound(n_data_item, vec_dim);
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
@@ -183,6 +188,10 @@ namespace ReverseMIPS {
                 }
                 out_stream_.write((char *) disk_cache_.get(), sizeof(int) * topt_);
             }
+        }
+
+        void FinishBuildIndex() {
+            out_stream_.close();
         }
 
         void RetrievalPreprocess() {

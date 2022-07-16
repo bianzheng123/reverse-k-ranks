@@ -193,6 +193,7 @@ namespace ReverseMIPS {
             out_stream_.write((char *) &n_interval_, sizeof(int));
             out_stream_.write((char *) &n_user_, sizeof(int));
             out_stream_.write((char *) &n_data_item_, sizeof(int));
+
             out_stream_.write((char *) interval_table_.get(), n_user_ * n_interval_ * sizeof(int));
             out_stream_.write((char *) interval_dist_l_.get(), n_user_ * sizeof(double));
             out_stream_.write((char *) user_ip_bound_l_.get(), n_user_ * sizeof(std::pair<double, double>));

@@ -145,25 +145,26 @@ def run_compress_topt():
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "ScoreSample", n_sample))
         for ds in dataset_l:
-            compress_method_l = ['CompressTopTIDBruteForce', 'CompressTopTIDIPBruteForce', 'CompressTopTIPBruteForce',
-                                 'SSMergeIntervalIDByBitmap', 'SSMergeIntervalIDByInterval',
-                                 'SSMergeQuadraticRankBoundByBitmap',
-                                 'SSMergeRankByBitmap', 'SSMergeRankByInterval']
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "CompressTopTIDBruteForce", n_sample, index_size))
+            os.system('cd build && ./brtt --dataset_name {}'.format(ds))
+            # compress_method_l = ['CompressTopTIDBruteForce', 'CompressTopTIDIPBruteForce', 'CompressTopTIPBruteForce',
+            #                      'SSMergeIntervalIDByBitmap', 'SSMergeIntervalIDByInterval',
+            #                      'SSMergeQuadraticRankBoundByBitmap',
+            #                      'SSMergeRankByBitmap', 'SSMergeRankByInterval']
+            # os.system(
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+            #         ds, basic_dir, "CompressTopTIDBruteForce", n_sample, index_size))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "CompressTopTIDIPBruteForce", n_sample, index_size))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "CompressTopTIPBruteForce", n_sample, index_size))
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "SSMergeQuadraticRankBoundByBitmap", n_sample, index_size))
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
+            # os.system(
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+            #         ds, basic_dir, "SSMergeQuadraticRankBoundByBitmap", n_sample, index_size))
+            # os.system(
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+            #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
 
 
 if __name__ == '__main__':

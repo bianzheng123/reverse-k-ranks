@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_TOPIP_HPP
 #define REVERSE_KRANKS_TOPIP_HPP
 
-#include "alg/DiskIndex/ComputeRank/PartIntPartNorm.hpp"
+#include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"
 
 namespace ReverseMIPS {
     class TopTIP {
@@ -107,7 +107,7 @@ namespace ReverseMIPS {
 
     public:
         int n_data_item_, n_user_, vec_dim_, topt_;
-        PartIntPartNorm exact_rank_ins_;
+        BaseIPBound exact_rank_ins_;
         const char *index_path_;
 
         TimeRecord read_disk_record_, exact_rank_record_;
@@ -126,7 +126,7 @@ namespace ReverseMIPS {
 
         inline TopTIP(const int &n_user, const int &n_data_item, const int &vec_dim, const char *index_path,
                       const int &topt) {
-            this->exact_rank_ins_ = PartIntPartNorm(n_user, n_data_item, vec_dim);
+            this->exact_rank_ins_ = BaseIPBound(n_data_item, vec_dim);
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
@@ -168,6 +168,10 @@ namespace ReverseMIPS {
                 const double *tmp_distance_cache = distance_cache + writeID * n_data_item_;
                 out_stream_.write((char *) tmp_distance_cache, topt_ * sizeof(double));
             }
+        }
+
+        void FinishBuildIndex(){
+            out_stream_.close();
         }
 
         void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
