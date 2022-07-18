@@ -46,55 +46,54 @@ namespace ReverseMIPS {
         }
 
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
-            double upper_bound = distance_ptr[0].dist_ + 0.01;
-            double lower_bound = distance_ptr[n_data_item_ - 1].dist_ - 0.01;
-            const std::pair<double, double> &bound_pair = std::make_pair(lower_bound, upper_bound);
-
-            double lb = bound_pair.first;
-            double ub = bound_pair.second;
-            user_ip_bound_l_[userID] = std::make_pair(lb, ub);
-            double interval_distance = (ub - lb) / n_interval_;
+            const double IP_ub = distance_ptr[0].dist_ + 0.01;
+            const double IP_lb = distance_ptr[n_data_item_ - 1].dist_ - 0.01;
+            const std::pair<double, double> &bound_pair = std::make_pair(IP_lb, IP_ub);
+            //lb == IP_lb, ub == IP_ub
+            user_ip_bound_l_[userID] = bound_pair;
+            const double interval_distance = (IP_ub - IP_lb) / n_interval_;
             interval_dist_l_[userID] = interval_distance;
 
             int *interval_ptr = interval_table_.get() + userID * n_interval_;
-#pragma omp parallel for default(none) shared(ub, interval_distance, interval_ptr, distance_ptr)
-            for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                double ip = distance_ptr[itemID].dist_;
-                int itv_idx = std::floor((ub - ip) / interval_distance);
-                assert(0 <= itv_idx && itv_idx < n_interval_);
-#pragma omp critical
-                interval_ptr[itv_idx]++;
-            }
-            for (int intervalID = 1; intervalID < n_interval_; intervalID++) {
-                interval_ptr[intervalID] += interval_ptr[intervalID - 1];
+#pragma omp parallel for default(none) shared(IP_ub, interval_distance, interval_ptr, distance_ptr)
+            for (int itvID = 0; itvID < n_interval_; itvID++) {
+                double itv_IP_lb = IP_ub - (itvID + 1) * interval_distance;
+                const DistancePair *iter_begin = distance_ptr;
+                const DistancePair *iter_end = distance_ptr + n_data_item_;
+
+                const DistancePair *lb_ptr = std::lower_bound(iter_begin, iter_end, itv_IP_lb,
+                                                              [](const DistancePair &arrIP, double queryIP) {
+                                                                  return arrIP.dist_ > queryIP;
+                                                              });
+                const int n_item = (int) (lb_ptr - iter_begin);
+                interval_ptr[itvID] = n_item;
             }
             assert(interval_ptr[n_interval_ - 1] == n_data_item_);
         }
 
         void
         LoopPreprocess(const double *distance_ptr, const int &userID) {
-
-            double upper_bound = distance_ptr[0] + 0.01;
-            double lower_bound = distance_ptr[n_data_item_ - 1] - 0.01;
-            const std::pair<double, double> &bound_pair = std::make_pair(lower_bound, upper_bound);
-
-            double lb = bound_pair.first;
-            double ub = bound_pair.second;
-            user_ip_bound_l_[userID] = std::make_pair(lb, ub);
-            double interval_distance = (ub - lb) / n_interval_;
+            const double IP_ub = distance_ptr[0] + 0.01;
+            const double IP_lb = distance_ptr[n_data_item_ - 1] - 0.01;
+            const std::pair<double, double> &bound_pair = std::make_pair(IP_lb, IP_ub);
+            //lb == IP_lb, ub == IP_ub
+            user_ip_bound_l_[userID] = bound_pair;
+            const double interval_distance = (IP_ub - IP_lb) / n_interval_;
             interval_dist_l_[userID] = interval_distance;
 
             int *interval_ptr = interval_table_.get() + userID * n_interval_;
-//#pragma omp parallel for default(none) shared(ub, interval_distance, interval_ptr, distance_ptr)
-            for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                double ip = distance_ptr[itemID];
-                int itv_idx = std::floor((ub - ip) / interval_distance);
-                assert(0 <= itv_idx && itv_idx < n_interval_);
-//#pragma omp critical
-                interval_ptr[itv_idx]++;
-            }
-            for (int intervalID = 1; intervalID < n_interval_; intervalID++) {
-                interval_ptr[intervalID] += interval_ptr[intervalID - 1];
+#pragma omp parallel for default(none) shared(IP_ub, interval_distance, interval_ptr, distance_ptr)
+            for (int itvID = 0; itvID < n_interval_; itvID++) {
+                double itv_IP_lb = IP_ub - (itvID + 1) * interval_distance;
+                const double *iter_begin = distance_ptr;
+                const double *iter_end = distance_ptr + n_data_item_;
+
+                const double *lb_ptr = std::lower_bound(iter_begin, iter_end, itv_IP_lb,
+                                                        [](const double &arrIP, double queryIP) {
+                                                            return arrIP > queryIP;
+                                                        });
+                const int n_item = (int) (lb_ptr - iter_begin);
+                interval_ptr[itvID] = n_item;
             }
             assert(interval_ptr[n_interval_ - 1] == n_data_item_);
 
