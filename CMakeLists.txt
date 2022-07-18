@@ -43,31 +43,52 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 #set(CMAKE_CUDA_ARCHITECTURES 10)
 
-#enable_language(CUDA)
+set(USE_CUDA ON)
 
-#set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
-add_executable(rri src/app/ReverseRankIndex.cpp)
-target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-#target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
-#target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
-set_target_properties(rri PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-        )
+if (USE_CUDA)
+    enable_language(CUDA)
 
-#set_property(TARGET rri PROPERTY CXX_STANDARD "17")
-#set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
-#set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
+    set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(rri src/app/ReverseRankIndex.cpp)
+    target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+    set_target_properties(rri PROPERTIES
+            POSITION_INDEPENDENT_CODE ON
+            )
+    set_property(TARGET rri PROPERTY CXX_STANDARD "17")
+    set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
 
-#set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
-add_executable(brtt src/app/BatchRunTopT.cpp)
-target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-#target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
-#target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
-set_target_properties(brtt PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-        )
+    set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(brtt src/app/BatchRunTopT.cpp)
+    target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+    set_target_properties(brtt PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_property(TARGET brtt PROPERTY CXX_STANDARD "17")
+    set_property(TARGET brtt PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET brtt PROPERTY CXX_EXTENSIONS OFF)
+
+else () # not use cuda
+    add_executable(rri src/app/ReverseRankIndex.cpp)
+    target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
+    set_target_properties(rri PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+    add_executable(brtt src/app/BatchRunTopT.cpp)
+    target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
+    set_target_properties(brtt PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif ()
+
+##set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
+#add_executable(brtt src/app/BatchRunTopT.cpp)
+#target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+##target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+#target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
+##target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+#set_target_properties(brtt PROPERTIES
+#        POSITION_INDEPENDENT_CODE ON
+#        )
 
 #set_property(TARGET brtt PROPERTY CXX_STANDARD "17")
 #set_property(TARGET brtt PROPERTY CXX_STANDARD_REQUIRED ON)
