@@ -126,7 +126,7 @@ namespace ReverseMIPS {
         for (int userID = 0; userID < n_user; userID++) {
             component_record.reset();
             cst.ComputeSortItems(userID, distance_pair_l.data());
-            compute_score_time + = component_record.get_elapsed_time_second();
+            compute_score_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
             ss_128.LoopPreprocess(distance_pair_l.data(), userID);
@@ -145,7 +145,7 @@ namespace ReverseMIPS {
 
             toptIP128_ins.BuildIndexLoop(distance_l.data(), 1);
             toptIP256_ins.BuildIndexLoop(distance_l.data(), 1);
-            toptIP_time = component_record.get_elapsed_time_second();
+            toptIP_time += component_record.get_elapsed_time_second();
 
             if (userID != 0 && userID % cst.report_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
