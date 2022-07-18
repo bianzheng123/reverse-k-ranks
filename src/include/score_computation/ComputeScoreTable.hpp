@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_COMPUTESCORETABLE_HPP
 #define REVERSE_KRANKS_COMPUTESCORETABLE_HPP
 
-//#define USE_GPU
+#define USE_GPU
 
 #include "struct/DistancePair.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -15,7 +15,7 @@
 
 #ifdef USE_GPU
 
-#include "score_computation/GPUScoreTable.hpp"
+//#include "score_computation/GPUScoreTable.hpp"
 #include "score_computation/GPUScoreTableOrigin.hpp"
 
 #else
@@ -31,7 +31,7 @@ namespace ReverseMIPS {
         std::vector<double> ip_cache_l_;
 
 #ifdef USE_GPU
-        GPUScoreTable gpu;
+        GPUScoreTableOrigin gpu;
 #else
         CPUScoreTable cpu;
 #endif
@@ -49,7 +49,7 @@ namespace ReverseMIPS {
             this->n_data_item_ = n_data_item;
             this->ip_cache_l_.resize(n_data_item);
 #ifdef USE_GPU
-            gpu = GPUScoreTable(user_vecs, item_vecs, n_user, n_data_item, vec_dim);
+            gpu = GPUScoreTableOrigin(user_vecs, item_vecs, n_user, n_data_item, vec_dim);
 #else
             cpu = CPUScoreTable(user_vecs, item_vecs, n_user, n_data_item, vec_dim);
 #endif
