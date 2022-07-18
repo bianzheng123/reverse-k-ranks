@@ -27,6 +27,7 @@
 
 namespace ReverseMIPS {
     class ComputeScoreTable {
+        TimeRecord record_;
         int n_data_item_;
         std::vector<double> ip_cache_l_;
 
@@ -37,6 +38,8 @@ namespace ReverseMIPS {
 #endif
     public:
         const int report_every_ = 10000;
+
+        double compute_time_, sort_time_;
 
         ComputeScoreTable() = default;
 
@@ -57,25 +60,34 @@ namespace ReverseMIPS {
         }
 
         void ComputeSortItems(const int &userID, double *distance_l) {
+            record_.reset();
 #ifdef USE_GPU
             gpu.ComputeList(userID, distance_l);
 #else
             cpu.ComputeList(userID, distance_l);
 #endif
+            compute_time_ += record_.get_elapsed_time_second();
 
+            record_.reset();
             boost::sort::parallel_stable_sort(distance_l, distance_l + n_data_item_, std::greater());
+            sort_time_ += record_.get_elapsed_time_second();
         }
 
         void ComputeSortItems(const int &userID, DistancePair *distance_l) {
+            record_.reset();
 #ifdef USE_GPU
             gpu.ComputeList(userID, ip_cache_l_.data());
 #else
             cpu.ComputeList(userID, ip_cache_l_.data());
 #endif
+            compute_time_ += record_.get_elapsed_time_second();
+
+            record_.reset();
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 distance_l[itemID] = DistancePair(ip_cache_l_[itemID], itemID);
             }
             boost::sort::parallel_stable_sort(distance_l, distance_l + n_data_item_, std::greater());
+            sort_time_ += record_.get_elapsed_time_second();
         }
 
         void FinishCompute() {

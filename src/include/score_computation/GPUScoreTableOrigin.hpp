@@ -30,37 +30,45 @@ namespace ReverseMIPS {
         if (itemID >= n_data_item) {
             return;
         }
-        double ip = 0;
-        const double *tmp_data_item_ptr = data_item_ptr + itemID * vec_dim;
+        int total_count_offset = n_data_item - itemID;
+        const int n_calc = total_count_offset >= 4 ? 4 : total_count_offset;
 
-        for (int dim = 0; dim < vec_dim; dim++) {
-            ip += user_ptr[dim] * tmp_data_item_ptr[dim];
+        const double *tmp_data_item_ptr = data_item_ptr + itemID * vec_dim;
+        for (int calcID = 0; calcID < n_calc; calcID++) {
+            const int tmp_itemID = itemID + calcID;
+            double ip = 0;
+            for (int dim = 0; dim < vec_dim; dim++) {
+                ip += user_ptr[dim] * tmp_data_item_ptr[dim];
+            }
+            IP_ptr[tmp_itemID] = ip;
+            tmp_data_item_ptr += vec_dim;
         }
-        IP_ptr[itemID] = ip;
+
     }
 
     class GPUScoreTableOrigin {
 
         int n_user_, n_data_item_, vec_dim_;
-        double *user_gpu_ptr_;
+        double *user_vecs_gpu_ptr_;
         double *data_item_gpu_ptr_;
         double *ip_cache_gpu_ptr_;
+        const double *user_cpu_ptr_;
         std::vector<double> ip_cache_;
     public:
         GPUScoreTableOrigin() = default;
 
         inline GPUScoreTableOrigin(const double *user, const double *data_item,
-                             const int n_user, const int n_data_item, const int vec_dim) {
+                                   const int n_user, const int n_data_item, const int vec_dim) {
             n_user_ = n_user;
             n_data_item_ = n_data_item;
             vec_dim_ = vec_dim;
+            user_cpu_ptr_ = user;
             ip_cache_.resize(n_data_item_);
 
-            CHECK(cudaMalloc((void **) &user_gpu_ptr_, n_user_ * vec_dim_ * sizeof(double)));
+            CHECK(cudaMalloc((void **) &user_vecs_gpu_ptr_, vec_dim_ * sizeof(double)));
             CHECK(cudaMalloc((void **) &data_item_gpu_ptr_, n_data_item_ * vec_dim_ * sizeof(double)));
             CHECK(cudaMalloc((void **) &ip_cache_gpu_ptr_, n_data_item_ * sizeof(double)));
-            CHECK(cudaMemcpy(user_gpu_ptr_, user, n_user_ * vec_dim_ * sizeof(double),
-                             cudaMemcpyHostToDevice));
+
             CHECK(cudaMemcpy(data_item_gpu_ptr_, data_item, n_data_item_ * vec_dim_ * sizeof(double),
                              cudaMemcpyHostToDevice));
             CHECK(cudaMemset(ip_cache_gpu_ptr_, 0, n_data_item_ * sizeof(double)););
@@ -72,9 +80,12 @@ namespace ReverseMIPS {
             const int n_thread = n_data_item_ / n_block + (n_data_item_ % n_block == 0 ? 0 : 1);
             dim3 threadsPerBlock(n_thread);
             dim3 blocksPerGrid(n_block);
-            const double *tmp_user_gpu_ptr = user_gpu_ptr_ + userID * vec_dim_;
 
-            ComputeInnerProductGPU<<<blocksPerGrid, threadsPerBlock>>>(tmp_user_gpu_ptr, data_item_gpu_ptr_,
+            const double *tmp_user_cpu_ptr = user_cpu_ptr_ + userID * vec_dim_;
+            CHECK(cudaMemcpy(user_vecs_gpu_ptr_, tmp_user_cpu_ptr, vec_dim_ * sizeof(double),
+                             cudaMemcpyHostToDevice));
+
+            ComputeInnerProductGPU<<<blocksPerGrid, threadsPerBlock>>>(user_vecs_gpu_ptr_, data_item_gpu_ptr_,
                     n_data_item_, vec_dim_, userID,
                     ip_cache_gpu_ptr_);
             cudaDeviceSynchronize();
@@ -82,8 +93,8 @@ namespace ReverseMIPS {
         }
 
         void FinishCompute() {
-            if (user_gpu_ptr_ != nullptr) {
-                cudaFree(user_gpu_ptr_);
+            if (user_vecs_gpu_ptr_ != nullptr) {
+                cudaFree(user_vecs_gpu_ptr_);
             }
             if (data_item_gpu_ptr_ != nullptr) {
                 cudaFree(data_item_gpu_ptr_);

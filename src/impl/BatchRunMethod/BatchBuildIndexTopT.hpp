@@ -117,16 +117,13 @@ namespace ReverseMIPS {
         record.reset();
         TimeRecord component_record;
 
-        double compute_score_time = 0;
         double score_search_time = 0;
         double toptID_time = 0;
         double toptIP_time = 0;
 
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
-            component_record.reset();
             cst.ComputeSortItems(userID, distance_pair_l.data());
-            compute_score_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
             ss_128.LoopPreprocess(distance_pair_l.data(), userID);
@@ -152,9 +149,11 @@ namespace ReverseMIPS {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
-                spdlog::info("Compute Score Time {}s, Score Search Time {}s, TopTID Time {}s, TopTIP Time {}s",
-                             compute_score_time, score_search_time, toptID_time, toptIP_time);
-                compute_score_time = 0;
+                spdlog::info(
+                        "Compute Score Time {}s, Sort Score Time {}s, Score Search Time {}s, TopTID Time {}s, TopTIP Time {}s",
+                        cst.compute_time_, cst.sort_time_, score_search_time, toptID_time, toptIP_time);
+                cst.compute_time_ = 0;
+                cst.sort_time_ = 0;
                 score_search_time = 0;
                 toptID_time = 0;
                 toptIP_time = 0;
