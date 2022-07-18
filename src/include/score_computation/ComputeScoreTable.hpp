@@ -69,7 +69,8 @@ namespace ReverseMIPS {
             compute_time_ += record_.get_elapsed_time_second();
 
             record_.reset();
-            boost::sort::parallel_stable_sort(distance_l, distance_l + n_data_item_, std::greater());
+            boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
+                                             std::thread::hardware_concurrency());
             sort_time_ += record_.get_elapsed_time_second();
         }
 
@@ -86,7 +87,8 @@ namespace ReverseMIPS {
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 distance_l[itemID] = DistancePair(ip_cache_l_[itemID], itemID);
             }
-            boost::sort::parallel_stable_sort(distance_l, distance_l + n_data_item_, std::greater());
+            boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
+                                             std::thread::hardware_concurrency());
             sort_time_ += record_.get_elapsed_time_second();
         }
 
