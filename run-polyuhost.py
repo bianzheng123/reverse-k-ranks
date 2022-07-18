@@ -134,18 +134,20 @@ def run_compute_all_n_codeword():
 
 
 def run_compress_topt():
-    dataset_l = ['amazon', 'yahoomusic_big', 'yelp', 'goodreads']
+    # dataset_l = ['amazon', 'yahoomusic_big', 'yelp', 'goodreads']
+    dataset_l = ['amazon']
     index_size_l = [128, 256, 512, 1024]
     n_sample = 128
-    for index_size in index_size_l:
+    os.system('cd build && ./brtt --dataset_name {}'.format('amazon'))
+    # for index_size in index_size_l:
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "SSComputeAll", n_sample))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "ScoreSample", n_sample))
-        for ds in dataset_l:
-            os.system('cd build && ./brtt --dataset_name {}'.format(ds))
+        # for ds in dataset_l:
+        #     os.system('cd build && ./brtt --dataset_name {}'.format(ds))
             # compress_method_l = ['CompressTopTIDBruteForce', 'CompressTopTIDIPBruteForce', 'CompressTopTIPBruteForce',
             #                      'SSMergeIntervalIDByBitmap', 'SSMergeIntervalIDByInterval',
             #                      'SSMergeQuadraticRankBoundByBitmap',

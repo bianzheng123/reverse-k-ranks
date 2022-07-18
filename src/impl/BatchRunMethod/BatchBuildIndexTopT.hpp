@@ -117,21 +117,26 @@ namespace ReverseMIPS {
         record.reset();
         TimeRecord component_record;
 
+        double compute_score_time = 0;
+        double score_search_time = 0;
+        double toptID_time = 0;
+        double toptIP_time = 0;
+
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
             component_record.reset();
             cst.ComputeSortItems(userID, distance_pair_l.data());
-            const double compute_score_time = component_record.get_elapsed_time_second();
+            compute_score_time + = component_record.get_elapsed_time_second();
 
             component_record.reset();
             ss_128.LoopPreprocess(distance_pair_l.data(), userID);
             ss_1024.LoopPreprocess(distance_pair_l.data(), userID);
-            const double score_search_time = component_record.get_elapsed_time_second();
+            score_search_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
             toptID128_ins.BuildIndexLoop(distance_pair_l.data(), 1);
             toptID256_ins.BuildIndexLoop(distance_pair_l.data(), 1);
-            const double toptID_time = component_record.get_elapsed_time_second();
+            toptID_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
             for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -140,7 +145,7 @@ namespace ReverseMIPS {
 
             toptIP128_ins.BuildIndexLoop(distance_l.data(), 1);
             toptIP256_ins.BuildIndexLoop(distance_l.data(), 1);
-            const double toptIP_time = component_record.get_elapsed_time_second();
+            toptIP_time = component_record.get_elapsed_time_second();
 
             if (userID != 0 && userID % cst.report_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
@@ -148,6 +153,10 @@ namespace ReverseMIPS {
                           << get_current_RSS() / 1000000 << " Mb \n";
                 spdlog::info("Compute Score Time {}s, Score Search Time {}s, TopTID Time {}s, TopTIP Time {}s",
                              compute_score_time, score_search_time, toptID_time, toptIP_time);
+                compute_score_time = 0;
+                score_search_time = 0;
+                toptID_time = 0;
+                toptIP_time = 0;
                 record.reset();
             }
         }

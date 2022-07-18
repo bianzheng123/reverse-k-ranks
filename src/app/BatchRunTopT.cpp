@@ -53,14 +53,14 @@ int main(int argc, char **argv) {
     spdlog::info("TopT dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     double build_index_time;
-    {
-        TimeRecord record;
-        record.reset();
-        BuildIndex(basic_dir, dataset_name);
-
-        build_index_time = record.get_elapsed_time_second();
-        spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
-    }
+//    {
+//        TimeRecord record;
+//        record.reset();
+//        BuildIndex(basic_dir, dataset_name);
+//
+//        build_index_time = record.get_elapsed_time_second();
+//        spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
+//    }
 
     {
         //measure prune ratio
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
         ScoreSampleMeasurePruneRatio::RetrievalResultAttribution config;
         std::vector<int> topk_l = {10, 20, 30, 40, 50};
         TimeRecord record;
-        for(const int topk: topk_l){
+        for (const int topk: topk_l) {
             record.reset();
             index->Retrieval(query_item, topk);
             const double retrieval_time = record.get_elapsed_time_second();
