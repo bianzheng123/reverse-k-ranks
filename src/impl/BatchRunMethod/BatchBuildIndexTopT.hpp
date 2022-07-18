@@ -139,6 +139,7 @@ namespace ReverseMIPS {
             toptID_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
+#pragma omp parallel for default(none) shared(n_data_item, distance_pair_l, distance_l)
             for (int itemID = 0; itemID < n_data_item; itemID++) {
                 distance_l[itemID] = distance_pair_l[itemID].dist_;
             }

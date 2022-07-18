@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_COMPUTESCORETABLE_HPP
 #define REVERSE_KRANKS_COMPUTESCORETABLE_HPP
 
-#define USE_GPU
+//#define USE_GPU
 
 #include "struct/DistancePair.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -16,6 +16,7 @@
 #ifdef USE_GPU
 
 #include "score_computation/GPUScoreTable.hpp"
+#include "score_computation/GPUScoreTableOrigin.hpp"
 
 #else
 

@@ -147,7 +147,7 @@ def run():
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fakebig', 'netflix-small']
     # dataset_l = ['fake-uniform']
     # dataset_l = ['netflix-small']
     # dataset_l = ['fake-small', 'fake']

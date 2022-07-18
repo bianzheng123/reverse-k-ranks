@@ -43,7 +43,7 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 #set(CMAKE_CUDA_ARCHITECTURES 10)
 
-set(USE_CUDA ON)
+set(USE_CUDA OFF)
 
 if (USE_CUDA)
     enable_language(CUDA)
