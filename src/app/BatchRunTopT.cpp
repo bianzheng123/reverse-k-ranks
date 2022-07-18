@@ -53,14 +53,14 @@ int main(int argc, char **argv) {
     spdlog::info("TopT dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     double build_index_time;
-//    {
-//        TimeRecord record;
-//        record.reset();
-//        BuildIndex(basic_dir, dataset_name);
-//
-//        build_index_time = record.get_elapsed_time_second();
-//        spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
-//    }
+    {
+        TimeRecord record;
+        record.reset();
+        BuildIndex(basic_dir, dataset_name);
+
+        build_index_time = record.get_elapsed_time_second();
+        spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
+    }
 
     {
         //measure prune ratio
