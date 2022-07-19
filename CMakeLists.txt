@@ -55,9 +55,7 @@ if (USE_CUDA)
     add_executable(rri src/app/ReverseRankIndex.cpp)
     target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
     target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
-    set_target_properties(rri PROPERTIES
-            POSITION_INDEPENDENT_CODE ON
-            )
+    set_target_properties(rri PROPERTIES POSITION_INDEPENDENT_CODE ON)
     set_property(TARGET rri PROPERTY CXX_STANDARD "17")
     set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
     set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
