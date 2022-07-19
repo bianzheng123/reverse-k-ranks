@@ -17,7 +17,6 @@
 #include <cfloat>
 #include <memory>
 #include <spdlog/spdlog.h>
-#include <armadillo>
 
 namespace ReverseMIPS {
 

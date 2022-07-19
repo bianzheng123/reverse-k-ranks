@@ -6,6 +6,9 @@
 #define REVERSE_KRANKS_SVD_HPP
 
 #include <cassert>
+
+#define ARMA_ALLOW_FAKE_GCC
+
 #include <armadillo>
 #include <memory>
 #include "alg/SpaceInnerProduct.hpp"
