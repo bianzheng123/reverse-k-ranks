@@ -121,7 +121,6 @@ namespace ReverseMIPS {
         double toptID_time = 0;
         double toptIP_time = 0;
 
-        std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
             cst.ComputeSortItems(userID, distance_pair_l.data());
 
@@ -136,13 +135,8 @@ namespace ReverseMIPS {
             toptID_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
-#pragma omp parallel for default(none) shared(n_data_item, distance_pair_l, distance_l)
-            for (int itemID = 0; itemID < n_data_item; itemID++) {
-                distance_l[itemID] = distance_pair_l[itemID].dist_;
-            }
-
-            toptIP128_ins.BuildIndexLoop(distance_l.data(), 1);
-            toptIP256_ins.BuildIndexLoop(distance_l.data(), 1);
+            toptIP128_ins.BuildIndexLoop(distance_pair_l.data(), 1);
+            toptIP256_ins.BuildIndexLoop(distance_pair_l.data(), 1);
             toptIP_time += component_record.get_elapsed_time_second();
 
             if (userID != 0 && userID % cst.report_every_ == 0) {

@@ -162,6 +162,16 @@ namespace ReverseMIPS {
             exact_rank_ins_.PreprocessData(user, data_item);
         };
 
+        void BuildIndexLoop(const DistancePair *distance_cache, const int &n_write) {
+            // distance_cache: write_every * n_data_item_, n_write <= write_every
+            for (int writeID = 0; writeID < n_write; writeID++) {
+                for (int candID = 0; candID < topt_; candID++) {
+                    disk_cache_[candID] = distance_cache[writeID * n_data_item_ + candID].dist_;
+                }
+                out_stream_.write((char *) disk_cache_.get(), topt_ * sizeof(double));
+            }
+        }
+
         void BuildIndexLoop(const double *distance_cache, const int &n_write) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
             for (int writeID = 0; writeID < n_write; writeID++) {
@@ -170,7 +180,7 @@ namespace ReverseMIPS {
             }
         }
 
-        void FinishBuildIndex(){
+        void FinishBuildIndex() {
             out_stream_.close();
         }
 
