@@ -12,6 +12,7 @@
 
 #include <boost/sort/sort.hpp>
 #include <vector>
+#include <parallel/algorithm>
 
 #ifdef USE_GPU
 
@@ -69,8 +70,9 @@ namespace ReverseMIPS {
             compute_time_ += record_.get_elapsed_time_second();
 
             record_.reset();
-            boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
-                                             std::thread::hardware_concurrency());
+            __gnu_parallel::sort(distance_l, distance_l + n_data_item_, std::greater());
+//            boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
+//                                             std::thread::hardware_concurrency());
             sort_time_ += record_.get_elapsed_time_second();
         }
 
@@ -84,11 +86,13 @@ namespace ReverseMIPS {
             compute_time_ += record_.get_elapsed_time_second();
 
             record_.reset();
+#pragma omp parallel for default(none) shared(distance_l)
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 distance_l[itemID] = DistancePair(ip_cache_l_[itemID], itemID);
             }
-            boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
-                                             std::thread::hardware_concurrency());
+            __gnu_parallel::sort(distance_l, distance_l + n_data_item_, std::greater());
+//            boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
+//                                             std::thread::hardware_concurrency());
             sort_time_ += record_.get_elapsed_time_second();
         }
 
