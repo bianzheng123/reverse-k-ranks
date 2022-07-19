@@ -97,47 +97,47 @@ int main(int argc, char **argv) {
         config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     }
 
-//    {
-//        //search on TopTIP
-//        int n_data_item, n_query_item, n_user, vec_dim;
-//        std::vector<VectorMatrix> data = readData(basic_dir, dataset_name,
-//                                                  n_data_item, n_query_item, n_user, vec_dim);
-//        VectorMatrix &user = data[0];
-//        VectorMatrix &data_item = data[1];
-//        VectorMatrix &query_item = data[2];
-//        user.vectorNormalize();
-//
-//        //search on TopTID
-//        char disk_path[256];
-//        sprintf(disk_path, "../index/%s_TopTID128.index", dataset_name);
-//        char memory_path[256];
-//        sprintf(memory_path, "../index/%s_ScoreSearch128.index", dataset_name);
-//        RunRetrieval(user, data_item, query_item,
-//                     disk_path, memory_path,
-//                     128, 128,
-//                     dataset_name, "CompressTopTIDBruteForce", build_index_time);
-//    }
-//
-//    {
-//        //search on TopTIP
-//        int n_data_item, n_query_item, n_user, vec_dim;
-//        std::vector<VectorMatrix> data = readData(basic_dir, dataset_name,
-//                                                  n_data_item, n_query_item, n_user, vec_dim);
-//        VectorMatrix &user = data[0];
-//        VectorMatrix &data_item = data[1];
-//        VectorMatrix &query_item = data[2];
-//        user.vectorNormalize();
-//
-//        //search on TopTID
-//        char disk_path[256];
-//        sprintf(disk_path, "../index/%s_TopTIP128.index", dataset_name);
-//        char memory_path[256];
-//        sprintf(memory_path, "../index/%s_ScoreSearch128.index", dataset_name);
-//        RunRetrieval(user, data_item, query_item,
-//                     disk_path, memory_path,
-//                     128, 128,
-//                     dataset_name, "CompressTopTIPBruteForce", build_index_time);
-//    }
+    {
+        //search on TopTIP
+        int n_data_item, n_query_item, n_user, vec_dim;
+        std::vector<VectorMatrix> data = readData(basic_dir, dataset_name,
+                                                  n_data_item, n_query_item, n_user, vec_dim);
+        VectorMatrix &user = data[0];
+        VectorMatrix &data_item = data[1];
+        VectorMatrix &query_item = data[2];
+        user.vectorNormalize();
+
+        //search on TopTID
+        char disk_path[256];
+        sprintf(disk_path, "../index/%s_TopTID128.index", dataset_name);
+        char memory_path[256];
+        sprintf(memory_path, "../index/%s_ScoreSearch128.index", dataset_name);
+        RunRetrieval(user, data_item, query_item,
+                     disk_path, memory_path,
+                     128, 128,
+                     dataset_name, "CompressTopTIDBruteForce", build_index_time);
+    }
+
+    {
+        //search on TopTIP
+        int n_data_item, n_query_item, n_user, vec_dim;
+        std::vector<VectorMatrix> data = readData(basic_dir, dataset_name,
+                                                  n_data_item, n_query_item, n_user, vec_dim);
+        VectorMatrix &user = data[0];
+        VectorMatrix &data_item = data[1];
+        VectorMatrix &query_item = data[2];
+        user.vectorNormalize();
+
+        //search on TopTID
+        char disk_path[256];
+        sprintf(disk_path, "../index/%s_TopTIP128.index", dataset_name);
+        char memory_path[256];
+        sprintf(memory_path, "../index/%s_ScoreSearch128.index", dataset_name);
+        RunRetrieval(user, data_item, query_item,
+                     disk_path, memory_path,
+                     128, 128,
+                     dataset_name, "CompressTopTIPBruteForce", build_index_time);
+    }
 
 //    const char *toptID128_path = "../index/Amazon_TopTID128.index";
 //    const char *toptID256_path = "../index/Amazon_TopTID256.index";

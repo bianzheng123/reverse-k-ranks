@@ -119,8 +119,8 @@ if __name__ == '__main__':
     k = 2
     topt = 8
     n_sample = 3
-    n_rank_sample_refine = 4
-    n_score_sample_refine = 2
+    n_rank_sample_refine = 2
+    n_score_sample_refine = 4
     for i in range(10000000):
         # query = (np.random.rand(d).reshape(-1, d) * 10).astype(np.int32) / 10 * 4
         # item_l = (np.random.rand(n_item * d).reshape(-1, d) * 10).astype(np.int32) / 10 * 4

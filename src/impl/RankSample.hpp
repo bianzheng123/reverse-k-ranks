@@ -204,7 +204,6 @@ namespace ReverseMIPS::RankSample {
     BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &cache_bound_every) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
-        const int vec_dim = data_item.vec_dim_;
 
         user.vectorNormalize();
 

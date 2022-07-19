@@ -29,22 +29,18 @@ def show_bin_hist(hist, name):
     # 直方图会进行统计各个区间的数值
     plt.bar(bins, hist, len(bins) * 10, color='#828487')  # alpha设置透明度，0为完全透明
 
-    # plt.title(
-    #     r'rank distribution of a single query, $\tau=512$' + '\n{}, user: {}, item: {}'.format(dataset_name, n_user,
-    #                                                                                            n_data_item))
+    plt.title(
+        'rank distribution of a single query' + '\n{}, user: {}, item: {}'.format(dataset_name, n_user,
+                                                                                               n_data_item))
     plt.xlabel('rank')
     plt.ylabel('number of user')
-    plt.yscale('log')
+    # plt.yscale('log')
     # plt.xlim(0, 100)  # 设置x轴分布范围
-    plt.savefig('RankSampleDisadvantage.pdf', dpi=600, bbox_inches = 'tight')
+    plt.savefig('RankSampleDisadvantage.pdf', bbox_inches='tight')
     plt.close()
 
 
 if __name__ == '__main__':
     arr = np.loadtxt('../../../result/attribution/PrintUserRank/print-user-rank-movielens-27m.csv', delimiter=',')
-    print(len(arr))
-    print(np.sum(arr))
-    idx = np.argmax(arr[:, 1])
-    print(idx)
-    # for i in range(100):
-    show_bin_hist(arr[idx], 'fig-{}'.format(1))
+    # avg_arr = [np.average(arr[:, i]) for i in range(len(arr[0]))]
+    show_bin_hist(arr[9], 'fig-{}'.format(1))

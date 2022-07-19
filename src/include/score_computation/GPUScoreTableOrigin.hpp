@@ -88,19 +88,19 @@ namespace ReverseMIPS {
             ComputeInnerProductGPU<<<blocksPerGrid, threadsPerBlock>>>(user_vecs_gpu_ptr_, data_item_gpu_ptr_,
                     n_data_item_, vec_dim_, userID,
                     ip_cache_gpu_ptr_);
-            cudaDeviceSynchronize();
+            CHECK(cudaDeviceSynchronize());
             CHECK(cudaMemcpy(distance_l, ip_cache_gpu_ptr_, n_data_item_ * sizeof(double), cudaMemcpyDeviceToHost));
         }
 
         void FinishCompute() {
             if (user_vecs_gpu_ptr_ != nullptr) {
-                cudaFree(user_vecs_gpu_ptr_);
+                CHECK(cudaFree(user_vecs_gpu_ptr_));
             }
             if (data_item_gpu_ptr_ != nullptr) {
-                cudaFree(data_item_gpu_ptr_);
+                CHECK(cudaFree(data_item_gpu_ptr_));
             }
             if (ip_cache_gpu_ptr_ != nullptr) {
-                cudaFree(ip_cache_gpu_ptr_);
+                CHECK(cudaFree(ip_cache_gpu_ptr_));
             }
         }
     };

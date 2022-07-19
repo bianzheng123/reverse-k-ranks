@@ -37,56 +37,56 @@ appr_rs_l = [(scale_arr > score).sum() for score in rank_sample_l]
 fig, ax = plt.subplots()
 
 
-def refinement_ratio(x, appr_l, n):
+def prune_ratio(x, appr_l, n):
     # assert plot_min <= x <= plot_max
     idx = np.argmax(appr_l >= x)
     appr = appr_l[idx]
-    return appr / n
+    return 1 - appr / n
 
 
 for i, appr in enumerate(appr_ss_l, 0):
     if appr > plot_max:
         x_l = np.geomspace(appr_ss_l[i - 1] + 1, plot_max, num=2, endpoint=True)
-        y_l = [refinement_ratio(num, appr_ss_l, n) for num in x_l]
+        y_l = [prune_ratio(num, appr_ss_l, n) for num in x_l]
         ax.plot(x_l, y_l, color='#343434', linestyle='-', marker=marker_l[0], markersize=markersize,
                 label="Score Sample")
         break
     if i == 0:
         x_l = np.geomspace(0.1, appr, num=5, endpoint=True)
-        y_l = [refinement_ratio(num, appr_ss_l, n) for num in x_l]
+        y_l = [prune_ratio(num, appr_ss_l, n) for num in x_l]
         print(x_l, y_l)
         ax.plot(x_l, y_l, color='#343434', linestyle='-', marker=marker_l[0], markersize=markersize)
     else:
         x_l = np.geomspace(appr_ss_l[i - 1] + 1, appr_ss_l[i], num=5, endpoint=True)
-        y_l = [refinement_ratio(num, appr_ss_l, n) for num in x_l]
+        y_l = [prune_ratio(num, appr_ss_l, n) for num in x_l]
         ax.plot(x_l, y_l, color='#343434', linestyle='-', marker=marker_l[0], markersize=markersize)
 
 for i, appr in enumerate(appr_rs_l, 0):
     if appr > plot_max:
         x_l = np.geomspace(appr_rs_l[i - 1] + 1, plot_max, num=2, endpoint=True)
-        y_l = [refinement_ratio(num, appr_rs_l, n) for num in x_l]
+        y_l = [prune_ratio(num, appr_rs_l, n) for num in x_l]
         ax.plot(x_l, y_l, color='#343434', linestyle='-', marker=marker_l[1], markersize=markersize,
                 label="Rank Sample")
         break
     if i == 0:
         x_l = np.geomspace(0.1, appr, num=5, endpoint=True)
-        y_l = [refinement_ratio(num, appr_rs_l, n) for num in x_l]
+        y_l = [prune_ratio(num, appr_rs_l, n) for num in x_l]
         ax.plot(x_l, y_l, color='#343434', linestyle='-', marker=marker_l[1], markersize=markersize)
     else:
         x_l = np.geomspace(appr_rs_l[i - 1] + 1, appr_rs_l[i], num=5, endpoint=True)
-        y_l = [refinement_ratio(num, appr_rs_l, n) for num in x_l]
+        y_l = [prune_ratio(num, appr_rs_l, n) for num in x_l]
         ax.plot(x_l, y_l, color='#343434', linestyle='-', marker=marker_l[1], markersize=markersize)
 
 asym_x_l = np.arange(plot_min, plot_max)
-asym_y_l = [k / n for k in asym_x_l]
+asym_y_l = [1 - k / n for k in asym_x_l]
 ax.plot(asym_x_l, asym_y_l, color='#343434', linestyle='dotted', label="Theoretical Minimum")
 plt.xlim(plot_min, plot_max)
-plt.ylim(0.001, 1)
+plt.ylim(0.5, 1)
 
 ax.legend(frameon=False, loc='lower right')
 
 plt.xscale("log")
-plt.yscale("log")
+# plt.yscale("log")
 
 ax.xaxis.set_major_formatter(ScalarFormatter())
 
@@ -110,7 +110,7 @@ def DecimalPlacesFormat(y, pos):
     return formatstring.format(y)
 
 
-ax.yaxis.set_major_formatter(ticker.FuncFormatter(DecimalPlacesFormat))
+# ax.yaxis.set_major_formatter(ticker.FuncFormatter(DecimalPlacesFormat))
 
 plt.xlabel(r'$k$')
 plt.ylabel('Refinement Ratio')
