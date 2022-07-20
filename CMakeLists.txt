@@ -102,8 +102,6 @@ if (BUILD_PROGRESS)
 endif ()
 
 
-enable_language(CUDA)
-
 set_source_files_properties(test.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
