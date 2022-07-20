@@ -41,7 +41,8 @@ namespace ReverseMIPS {
     class GPUScoreTable {
 
         int n_user_, n_data_item_, vec_dim_;
-        double *user_gpu_ptr_;
+        const double *user_cpu_ptr_;
+        double *user_vecs_gpu_ptr_;
         double *data_item_gpu_ptr_;
         double *ip_cache_gpu_ptr_;
         std::vector<double> ip_cache_;
@@ -51,17 +52,16 @@ namespace ReverseMIPS {
 
         inline GPUScoreTable(const double *user, const double *data_item,
                              const int n_user, const int n_data_item, const int vec_dim) {
+            this->user_cpu_ptr_ = user;
             n_user_ = n_user;
             n_data_item_ = n_data_item;
             vec_dim_ = vec_dim;
             ip_cache_.resize(n_data_item_);
 
-            cudaMalloc((void **) &user_gpu_ptr_, n_user_ * vec_dim_ * sizeof(double));
+            cudaMalloc((void **) &user_vecs_gpu_ptr_, vec_dim_ * sizeof(double));
             cudaMalloc((void **) &data_item_gpu_ptr_, n_data_item_ * vec_dim_ * sizeof(double));
             cudaMalloc((void **) &ip_cache_gpu_ptr_, n_data_item_ * sizeof(double));
             cudaCheckErrors("cuda malloc fail");
-
-            cublasCheckErrors(cublasSetVector(vec_dim_ * n_user_, sizeof(double), (void *) user, 1, user_gpu_ptr_, 1));
 
             cublasCheckErrors(
                     cublasSetMatrix(vec_dim, n_data_item_, sizeof(double), (void *) data_item, vec_dim,
@@ -83,13 +83,17 @@ namespace ReverseMIPS {
         }
 
         void ComputeList(const int &userID, double *distance_l) {
-            const double *tmp_user_gpu_ptr = user_gpu_ptr_ + userID * vec_dim_;
+            const double *tmp_user_vecs_cpu_ptr = user_cpu_ptr_ + userID * vec_dim_;
+
+            cublasCheckErrors(
+                    cublasSetVector(vec_dim_, sizeof(double), (void *) tmp_user_vecs_cpu_ptr, 1, user_vecs_gpu_ptr_,
+                                    1));
 
             double alpha = 1.0;
             double beta = 0.0;
             cublasCheckErrors(
                     cublasDgemv(handle_, CUBLAS_OP_T, vec_dim_, n_data_item_, &alpha, data_item_gpu_ptr_, vec_dim_,
-                                tmp_user_gpu_ptr, 1, &beta,
+                                user_vecs_gpu_ptr_, 1, &beta,
                                 ip_cache_gpu_ptr_, 1));
 
             cublasCheckErrors(cublasGetVector(n_data_item_, sizeof(double), ip_cache_gpu_ptr_, 1, distance_l, 1));
@@ -98,8 +102,8 @@ namespace ReverseMIPS {
         }
 
         void FinishCompute() {
-            if (user_gpu_ptr_ != nullptr) {
-                cudaFree(user_gpu_ptr_);
+            if (user_vecs_gpu_ptr_ != nullptr) {
+                cudaFree(user_vecs_gpu_ptr_);
             }
             if (data_item_gpu_ptr_ != nullptr) {
                 cudaFree(data_item_gpu_ptr_);
