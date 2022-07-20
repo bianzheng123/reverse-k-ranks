@@ -101,6 +101,10 @@ if (BUILD_PROGRESS)
     target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
 endif ()
 
+
+enable_language(CUDA)
+
+set_source_files_properties(test.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} Eigen3::Eigen)

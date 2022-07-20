@@ -27,23 +27,15 @@ namespace ReverseMIPS {
                                            double *IP_ptr) {
 
         int itemID = blockIdx.x * blockDim.x + threadIdx.x;
-        if (itemID >= n_data_item) {
-            return;
-        }
-        int total_count_offset = n_data_item - itemID;
-        const int n_calc = total_count_offset >= 4 ? 4 : total_count_offset;
-
-        const double *tmp_data_item_ptr = data_item_ptr + itemID * vec_dim;
-        for (int calcID = 0; calcID < n_calc; calcID++) {
-            const int tmp_itemID = itemID + calcID;
+        if (itemID < n_data_item) {
             double ip = 0;
+            const double *tmp_data_item_ptr = data_item_ptr + itemID * vec_dim;
+
             for (int dim = 0; dim < vec_dim; dim++) {
                 ip += user_ptr[dim] * tmp_data_item_ptr[dim];
             }
-            IP_ptr[tmp_itemID] = ip;
-            tmp_data_item_ptr += vec_dim;
+            IP_ptr[itemID] = ip;
         }
-
     }
 
     class GPUScoreTableOrigin {
@@ -54,6 +46,7 @@ namespace ReverseMIPS {
         double *ip_cache_gpu_ptr_;
         const double *user_cpu_ptr_;
         std::vector<double> ip_cache_;
+        int n_thread_, n_block_;
     public:
         GPUScoreTableOrigin() = default;
 
@@ -73,22 +66,24 @@ namespace ReverseMIPS {
                              cudaMemcpyHostToDevice));
             CHECK(cudaMemset(ip_cache_gpu_ptr_, 0, n_data_item_ * sizeof(double)););
 
+            const int n_thread = 1024;
+            const int n_block = n_data_item_ / n_thread + 1;
+
+            this->n_thread_ = n_thread;
+            this->n_block_ = n_block;
+
         }
 
         void ComputeList(const int &userID, double *distance_l) {
-            const int n_block = 1024;
-            const int n_thread = n_data_item_ / n_block + (n_data_item_ % n_block == 0 ? 0 : 1);
-            dim3 threadsPerBlock(n_thread);
-            dim3 blocksPerGrid(n_block);
 
             const double *tmp_user_cpu_ptr = user_cpu_ptr_ + userID * vec_dim_;
             CHECK(cudaMemcpy(user_vecs_gpu_ptr_, tmp_user_cpu_ptr, vec_dim_ * sizeof(double),
                              cudaMemcpyHostToDevice));
 
-            ComputeInnerProductGPU<<<blocksPerGrid, threadsPerBlock>>>(user_vecs_gpu_ptr_, data_item_gpu_ptr_,
+            ComputeInnerProductGPU<<<n_block_, n_thread_>>>(user_vecs_gpu_ptr_, data_item_gpu_ptr_,
                     n_data_item_, vec_dim_, userID,
                     ip_cache_gpu_ptr_);
-            CHECK(cudaDeviceSynchronize());
+//            CHECK(cudaDeviceSynchronize());
             CHECK(cudaMemcpy(distance_l, ip_cache_gpu_ptr_, n_data_item_ * sizeof(double), cudaMemcpyDeviceToHost));
         }
 
