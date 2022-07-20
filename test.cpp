@@ -1,79 +1,46 @@
-/*
- * Copyright 1993-2010 NVIDIA Corporation.  All rights reserved.
- *
- * NVIDIA Corporation and its licensors retain all intellectual property and 
- * proprietary rights in and to this software and related documentation. 
- * Any use, reproduction, disclosure, or distribution of this software 
- * and related documentation without an express license agreement from
- * NVIDIA Corporation is strictly prohibited.
- *
- * Please refer to the applicable NVIDIA end user license agreement (EULA) 
- * associated with this source code for terms and conditions that govern 
- * your use of this NVIDIA software.
- * 
- */
-#include <iostream>
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+#include <thrust/generate.h>
+#include <thrust/sort.h>
+#include <thrust/copy.h>
+#include <thrust/random.h>
 
-static void HandleError(cudaError_t err,
-                        const char *file,
-                        int line) {
-    if (err != cudaSuccess) {
-        printf("%s in %s at line %d\n", cudaGetErrorString(err),
-               file, line);
-        exit(EXIT_FAILURE);
+struct SortByDoubleDescending {
+    __host__ __device__
+    bool operator()(const thrust::pair<double, int> &o1, const thrust::pair<double, int> &o2) {
+        return o1.first > o2.first;
     }
+};
+
+// Return a host vector with random values in the range [0,1)
+thrust::host_vector<thrust::pair<double, int>> random_vector(const size_t N,
+                                                             unsigned int seed = thrust::default_random_engine::default_seed) {
+    thrust::default_random_engine rng(seed);
+    thrust::uniform_real_distribution<double> u01(0.0f, 100.f);
+    thrust::host_vector<thrust::pair<double, int>> temp(N);
+    for (size_t i = 0; i < N; i++) {
+        temp[i] = thrust::make_pair<double, int>(u01(rng), i);
+    }
+    return temp;
 }
 
-#define HANDLE_ERROR(err) (HandleError( err, __FILE__, __LINE__ ))
+int main() {
+    // Generate 32M random numbers serially.
+    thrust::default_random_engine rng(1337);
+    thrust::uniform_int_distribution<int> dist;
 
+    thrust::host_vector<thrust::pair<double, int>> h_vec = random_vector(32);  // x components of the 'A' vectors
 
-#define HANDLE_NULL(a) {if (a == NULL) { \
-                            printf( "Host memory failed in %s at line %d\n", \
-                                    __FILE__, __LINE__ ); \
-                            exit( EXIT_FAILURE );}}
+    // Transfer data to the device.
+    thrust::device_vector<thrust::pair<double, int>> d_vec = h_vec;
 
-int main(void) {
-    cudaDeviceProp prop;
+    // Sort data on the device.
+    thrust::sort(d_vec.begin(), d_vec.end(), SortByDoubleDescending());
 
-    int count;
-    HANDLE_ERROR(cudaGetDeviceCount(&count));
-    for (int i = 0; i < count; i++) {
-        HANDLE_ERROR(cudaGetDeviceProperties(&prop, i));
-        printf("   --- General Information for device %d ---\n", i);
-        printf("Name:  %s\n", prop.name);
-        printf("Compute capability:  %d.%d\n", prop.major, prop.minor);
-        printf("Clock rate:  %d\n", prop.clockRate);
-        printf("Device copy overlap:  ");
-        if (prop.deviceOverlap)
-            printf("Enabled\n");
-        else
-            printf("Disabled\n");
-        printf("Kernel execution timeout :  ");
-        if (prop.kernelExecTimeoutEnabled)
-            printf("Enabled\n");
-        else
-            printf("Disabled\n");
-
-        printf("   --- Memory Information for device %d ---\n", i);
-        printf("Total global mem:  %ld\n", prop.totalGlobalMem);
-        printf("Total constant Mem:  %ld\n", prop.totalConstMem);
-        printf("Max mem pitch:  %ld\n", prop.memPitch);
-        printf("Texture Alignment:  %ld\n", prop.textureAlignment);
-
-        printf("   --- MP Information for device %d ---\n", i);
-        printf("Multiprocessor count:  %d\n",
-               prop.multiProcessorCount);
-        printf("Shared mem per mp:  %ld\n", prop.sharedMemPerBlock);
-        printf("Registers per mp:  %d\n", prop.regsPerBlock);
-        printf("Threads in warp:  %d\n", prop.warpSize);
-        printf("Max threads per block:  %d\n",
-               prop.maxThreadsPerBlock);
-        printf("Max thread dimensions:  (%d, %d, %d)\n",
-               prop.maxThreadsDim[0], prop.maxThreadsDim[1],
-               prop.maxThreadsDim[2]);
-        printf("Max grid dimensions:  (%d, %d, %d)\n",
-               prop.maxGridSize[0], prop.maxGridSize[1],
-               prop.maxGridSize[2]);
-        printf("\n");
+    // Transfer data back to host.
+    thrust::copy(d_vec.begin(), d_vec.end(), h_vec.begin());
+    for (int i = 0; i < 32; i++) {
+        printf("%.3f %d\n", h_vec[i].first, h_vec[i].second);
     }
+    printf("\n");
 }

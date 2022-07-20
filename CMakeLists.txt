@@ -50,6 +50,8 @@ set(USE_CUDA ON)
 
 if (USE_CUDA)
     enable_language(CUDA)
+    find_package(Thrust REQUIRED CONFIG)
+    thrust_create_target(Thrust)
 
     set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
     add_executable(rri src/app/ReverseRankIndex.cpp)
@@ -101,11 +103,10 @@ if (BUILD_PROGRESS)
     target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
 endif ()
 
-
 set_source_files_properties(test.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} Eigen3::Eigen)
+target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} Thrust)
 
 #if (BUILD_ATTRIBUTION)
 #    add_subdirectory(attribution)

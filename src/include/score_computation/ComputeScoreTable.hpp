@@ -17,6 +17,7 @@
 #ifdef USE_GPU
 
 #include "score_computation/GPUScoreTable.hpp"
+#include "score_computation/GPUSort.hpp"
 //#include "score_computation/GPUScoreTableOrigin.hpp"
 
 #else
@@ -34,6 +35,7 @@ namespace ReverseMIPS {
 
 #ifdef USE_GPU
         GPUScoreTable gpu;
+        GPUSort gpu_sort;
 #else
         CPUScoreTable cpu;
 #endif
@@ -54,6 +56,7 @@ namespace ReverseMIPS {
             this->ip_cache_l_.resize(n_data_item);
 #ifdef USE_GPU
             gpu = GPUScoreTable(user_vecs, item_vecs, n_user, n_data_item, vec_dim);
+            gpu_sort = GPUSort(n_data_item);
 #else
             cpu = CPUScoreTable(user_vecs, item_vecs, n_user, n_data_item, vec_dim);
 #endif
@@ -70,9 +73,15 @@ namespace ReverseMIPS {
             compute_time_ += record_.get_elapsed_time_second();
 
             record_.reset();
-//            __gnu_parallel::sort(distance_l, distance_l + n_data_item_, std::greater());
+#ifdef USE_GPU
+            gpu_sort.SortList(distance_l);
+#else
+            //            __gnu_parallel::sort(distance_l, distance_l + n_data_item_, std::greater());
             boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
                                              std::thread::hardware_concurrency());
+#endif
+
+
             sort_time_ += record_.get_elapsed_time_second();
         }
 
@@ -86,13 +95,16 @@ namespace ReverseMIPS {
             compute_time_ += record_.get_elapsed_time_second();
 
             record_.reset();
+#ifdef USE_GPU
+            gpu_sort.SortList(ip_cache_l_.data(), distance_l);
+#else
 #pragma omp parallel for default(none) shared(distance_l)
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 distance_l[itemID] = DistancePair(ip_cache_l_[itemID], itemID);
             }
-//            __gnu_parallel::sort(distance_l, distance_l + n_data_item_, std::greater());
             boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
                                              std::thread::hardware_concurrency());
+#endif
             sort_time_ += record_.get_elapsed_time_second();
         }
 
