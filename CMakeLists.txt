@@ -46,9 +46,10 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 #set(CMAKE_CUDA_ARCHITECTURES 10)
 
-set(USE_CUDA ON)
+set(USE_CUDA OFF)
 
 if (USE_CUDA)
+    add_definitions(-DUSE_GPU)
     enable_language(CUDA)
     find_package(Thrust REQUIRED CONFIG)
     thrust_create_target(Thrust)
@@ -103,10 +104,9 @@ if (BUILD_PROGRESS)
     target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
 endif ()
 
-set_source_files_properties(test.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} Thrust)
+target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
 
 #if (BUILD_ATTRIBUTION)
 #    add_subdirectory(attribution)
