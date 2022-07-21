@@ -93,8 +93,8 @@ def run():
         'ScoreSample',
         # 'SSComputeAll',
 
-        # 'SSMergeQuadraticRankBoundByBitmap',
-        # 'SSMergeRankByInterval',
+        'SSMergeQuadraticRankBoundByBitmap',
+        'SSMergeRankByInterval',
 
         # 'CAGrid',
         # 'CAFullDim',
@@ -126,9 +126,9 @@ def run():
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
 
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
+        os.system(
+            'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))
@@ -147,7 +147,8 @@ def run():
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fakebig']
     # dataset_l = ['fake-uniform']
     # dataset_l = ['netflix-small']
     # dataset_l = ['fake-small', 'fake']

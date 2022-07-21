@@ -46,7 +46,7 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 #set(CMAKE_CUDA_ARCHITECTURES 10)
 
-set(USE_CUDA OFF)
+set(USE_CUDA ON)
 
 if (USE_CUDA)
     add_definitions(-DUSE_GPU)

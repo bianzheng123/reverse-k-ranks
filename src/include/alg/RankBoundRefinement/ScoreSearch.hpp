@@ -17,7 +17,7 @@ namespace ReverseMIPS {
     class ScoreSearch {
     public:
 
-        int n_interval_, n_user_, n_data_item_;
+        size_t n_interval_, n_user_, n_data_item_;
         // n_user * n_interval, the last element of an interval column must be n_data_item
         std::unique_ptr<int[]> interval_table_;
         // n_user, stores the distance of interval for each user
@@ -51,7 +51,7 @@ namespace ReverseMIPS {
             const std::pair<double, double> &bound_pair = std::make_pair(IP_lb, IP_ub);
             //lb == IP_lb, ub == IP_ub
             user_ip_bound_l_[userID] = bound_pair;
-            const double interval_distance = (IP_ub - IP_lb) / n_interval_;
+            const double interval_distance = (IP_ub - IP_lb) / (double) n_interval_;
             interval_dist_l_[userID] = interval_distance;
 
             int *interval_ptr = interval_table_.get() + userID * n_interval_;
@@ -78,7 +78,7 @@ namespace ReverseMIPS {
             const std::pair<double, double> &bound_pair = std::make_pair(IP_lb, IP_ub);
             //lb == IP_lb, ub == IP_ub
             user_ip_bound_l_[userID] = bound_pair;
-            const double interval_distance = (IP_ub - IP_lb) / n_interval_;
+            const double interval_distance = (IP_ub - IP_lb) / (double) n_interval_;
             interval_dist_l_[userID] = interval_distance;
 
             int *interval_ptr = interval_table_.get() + userID * n_interval_;
@@ -189,9 +189,9 @@ namespace ReverseMIPS {
                 spdlog::error("error in write result");
                 exit(-1);
             }
-            out_stream_.write((char *) &n_interval_, sizeof(int));
-            out_stream_.write((char *) &n_user_, sizeof(int));
-            out_stream_.write((char *) &n_data_item_, sizeof(int));
+            out_stream_.write((char *) &n_interval_, sizeof(size_t));
+            out_stream_.write((char *) &n_user_, sizeof(size_t));
+            out_stream_.write((char *) &n_data_item_, sizeof(size_t));
 
             out_stream_.write((char *) interval_table_.get(), n_user_ * n_interval_ * sizeof(int));
             out_stream_.write((char *) interval_dist_l_.get(), n_user_ * sizeof(double));
@@ -207,9 +207,9 @@ namespace ReverseMIPS {
                 exit(-1);
             }
 
-            index_stream.read((char *) &n_interval_, sizeof(int));
-            index_stream.read((char *) &n_user_, sizeof(int));
-            index_stream.read((char *) &n_data_item_, sizeof(int));
+            index_stream.read((char *) &n_interval_, sizeof(size_t));
+            index_stream.read((char *) &n_user_, sizeof(size_t));
+            index_stream.read((char *) &n_data_item_, sizeof(size_t));
 
             interval_table_ = std::make_unique<int[]>(n_user_ * n_interval_);
             index_stream.read((char *) interval_table_.get(), sizeof(int) * n_user_ * n_interval_);
