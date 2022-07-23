@@ -32,7 +32,7 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST_MODULE OFF)
-set(BUILD_ATTRIBUTION ON)
+set(BUILD_ATTRIBUTION OFF)
 
 set(BUILD_PROGRESS ON)
 
@@ -46,7 +46,7 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 #set(CMAKE_CUDA_ARCHITECTURES 10)
 
-set(USE_CUDA ON)
+set(USE_CUDA OFF)
 
 if (USE_CUDA)
     add_definitions(-DUSE_GPU)
@@ -72,16 +72,27 @@ if (USE_CUDA)
     set_property(TARGET brtt PROPERTY CXX_STANDARD_REQUIRED ON)
     set_property(TARGET brtt PROPERTY CXX_EXTENSIONS OFF)
 
+    set_source_files_properties(src/app/BatchRunQuadraticRankBoundByBitmap.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(brqrbb src/app/BatchRunQuadraticRankBoundByBitmap.cpp)
+    target_include_directories(brqrbb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(brqrbb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+    set_target_properties(brqrbb PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_property(TARGET brqrbb PROPERTY CXX_STANDARD "17")
+    set_property(TARGET brqrbb PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET brqrbb PROPERTY CXX_EXTENSIONS OFF)
+
 else () # not use cuda
     add_executable(rri src/app/ReverseRankIndex.cpp)
     target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
-    set_target_properties(rri PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(brtt src/app/BatchRunTopT.cpp)
     target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
-    set_target_properties(brtt PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(brqrbb src/app/BatchRunQuadraticRankBoundByBitmap.cpp)
+    target_include_directories(brqrbb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(brqrbb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 ##set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
@@ -108,9 +119,9 @@ add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
 
-#if (BUILD_ATTRIBUTION)
-#    add_subdirectory(attribution)
-#endif ()
+if (BUILD_ATTRIBUTION)
+    add_subdirectory(attribution)
+endif ()
 
 if (BUILD_TEST_MODULE)
     #    add_subdirectory(test)

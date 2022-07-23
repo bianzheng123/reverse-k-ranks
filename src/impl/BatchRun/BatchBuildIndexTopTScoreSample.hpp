@@ -60,40 +60,29 @@ namespace ReverseMIPS {
 
         user.vectorNormalize();
 
-        spdlog::info("input parameter: n_sample: {128, 1024}, index_size_gb {128, 256}, method_name TopTID, TopTIP");
+        spdlog::info("input parameter: n_sample: {128, 1024}, index_size_gb {256}, method_name TopTID, TopTIP");
 
-        const int index_size_gb_128 = 128;
         const int index_size_gb_256 = 256;
-        char toptID128_path[256];
-        sprintf(toptID128_path, "../index/%s_TopTID128.index", dataset_name);
         char toptID256_path[256];
         sprintf(toptID256_path, "../index/%s_TopTID256.index", dataset_name);
-        char toptIP128_path[256];
-        sprintf(toptIP128_path, "../index/%s_TopTIP128.index", dataset_name);
         char toptIP256_path[256];
         sprintf(toptIP256_path, "../index/%s_TopTIP256.index", dataset_name);
 
         user.vectorNormalize();
 
-        int toptID128, toptID256;
-        TopTIDParameter(n_data_item, n_user, index_size_gb_128, toptID128);
+        int toptID256;
         TopTIDParameter(n_data_item, n_user, index_size_gb_256, toptID256);
-        TopTID toptID128_ins(n_user, n_data_item, vec_dim, toptID128_path, toptID128);
         TopTID toptID256_ins(n_user, n_data_item, vec_dim, toptID256_path, toptID256);
-        toptID128_ins.BuildIndexPreprocess();
         toptID256_ins.BuildIndexPreprocess();
         //do not have PreprocessData since only applicable for BaseIPBound
 
-        int toptIP128, toptIP256;
-        TopTIPParameter(n_data_item, n_user, index_size_gb_128, toptIP128);
+        int toptIP256;
         TopTIPParameter(n_data_item, n_user, index_size_gb_256, toptIP256);
-        TopTIP toptIP128_ins(n_user, n_data_item, vec_dim, toptIP128_path, toptIP128);
         TopTIP toptIP256_ins(n_user, n_data_item, vec_dim, toptIP256_path, toptIP256);
-        toptIP128_ins.BuildIndexPreprocess();
         toptIP256_ins.BuildIndexPreprocess();
 
-        if (toptID128_ins.exact_rank_ins_.method_name != "BaseIPBound" ||
-            toptIP128_ins.exact_rank_ins_.method_name != "BaseIPBound") {
+        if (toptID256_ins.exact_rank_ins_.method_name != "BaseIPBound" ||
+            toptIP256_ins.exact_rank_ins_.method_name != "BaseIPBound") {
             spdlog::error("TopTID and TopTIP, its exact_rank_ins_ should all be BaseIPBound");
             exit(-1);
         }
@@ -130,12 +119,10 @@ namespace ReverseMIPS {
             score_search_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
-            toptID128_ins.BuildIndexLoop(distance_pair_l.data(), 1);
             toptID256_ins.BuildIndexLoop(distance_pair_l.data(), 1);
             toptID_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
-            toptIP128_ins.BuildIndexLoop(distance_pair_l.data(), 1);
             toptIP256_ins.BuildIndexLoop(distance_pair_l.data(), 1);
             toptIP_time += component_record.get_elapsed_time_second();
 
@@ -155,9 +142,7 @@ namespace ReverseMIPS {
             }
         }
         cst.FinishCompute();
-        toptID128_ins.FinishBuildIndex();
         toptID256_ins.FinishBuildIndex();
-        toptIP128_ins.FinishBuildIndex();
         toptIP256_ins.FinishBuildIndex();
 
         ss_128.SaveIndex(ss128_path);

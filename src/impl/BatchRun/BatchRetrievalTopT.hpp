@@ -31,7 +31,7 @@ namespace ReverseMIPS {
         ScoreSearch rank_bound_ins(score_search_index_path);
 
         int topt;
-        if (method_name == "CompressTopTIDBruteForce") {
+        if (method_name == "CompressTopTIDBruteForceBatchRun") {
             TopTIDParameter(n_data_item, n_user, index_size_gb, topt);
             //disk index
             TopTID disk_ins(n_user, n_data_item, vec_dim, disk_topt_index_path, topt);
@@ -43,7 +43,7 @@ namespace ReverseMIPS {
                     disk_ins,
                     //general retrieval
                     user, data_item);
-        } else if (method_name == "CompressTopTIPBruteForce") {
+        } else if (method_name == "CompressTopTIPBruteForceBatchRun") {
             TopTIPParameter(n_data_item, n_user, index_size_gb, topt);
             //disk index
             TopTIP disk_ins(n_user, n_data_item, vec_dim, disk_topt_index_path, topt);
@@ -62,15 +62,22 @@ namespace ReverseMIPS {
 
     void RunRetrieval(
             //index storage info
-            VectorMatrix &user, VectorMatrix &data_item, const VectorMatrix &query_item,
             const char *disk_topt_index_path, const char *memory_score_search_index_path,
             const int &n_sample, const int &index_size_gb,
             //index result info
-            const std::string &dataset_name, const std::string &method_name, const double &build_index_time) {
+            const char *basic_dir, const std::string &dataset_name, const std::string &method_name) {
+
+        //search on TopTIP
+        int n_data_item, n_query_item, n_user, vec_dim;
+        std::vector<VectorMatrix> data = readData(basic_dir, dataset_name.c_str(),
+                                                  n_data_item, n_query_item, n_user, vec_dim);
+        VectorMatrix &user = data[0];
+        VectorMatrix &data_item = data[1];
+        VectorMatrix &query_item = data[2];
+        user.vectorNormalize();
 
         spdlog::info("{} dataset_name {} start", method_name, dataset_name);
 
-        const int n_query_item = query_item.n_vector_;
         TimeRecord record;
 
         std::unique_ptr<BaseIndex> index = BuildIndex(
@@ -90,7 +97,9 @@ namespace ReverseMIPS {
         std::vector<std::vector<std::vector<UserRankElement>>> result_rank_l;
         for (int topk: topk_l) {
             record.reset();
+            printf("before retrieval\n");
             std::vector<std::vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk);
+            printf("after retrieval\n");
 
             double retrieval_time = record.get_elapsed_time_second();
             double ms_per_query = retrieval_time / n_query_item * 1000;
@@ -103,7 +112,6 @@ namespace ReverseMIPS {
             spdlog::info("{}", performance_str);
         }
 
-        spdlog::info("build index time: total {}s", build_index_time);
         int n_topk = (int) topk_l.size();
 
         for (int i = 0; i < n_topk; i++) {
@@ -111,7 +119,6 @@ namespace ReverseMIPS {
         }
 
         config.AddBuildIndexInfo(index->BuildIndexStatistics());
-        config.AddBuildIndexTime(build_index_time);
         config.WritePerformance(dataset_name.c_str(), method_name.c_str(), parameter_name);
     }
 }

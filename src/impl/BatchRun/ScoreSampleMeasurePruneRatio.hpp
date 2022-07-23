@@ -7,7 +7,6 @@
 
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
-#include "alg/RankBoundRefinement/RankSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -259,6 +258,41 @@ namespace ReverseMIPS::ScoreSampleMeasurePruneRatio {
                 //general retrieval
                 user, n_data_item);
         return index_ptr;
+    }
+
+    void MeasurePruneRatio(const char* dataset_name, const char* basic_dir, const int &n_sample) {
+        //measure prune ratio
+        int n_data_item, n_query_item, n_user, vec_dim;
+        std::vector<VectorMatrix> data = readData(basic_dir, dataset_name,
+                                                  n_data_item, n_query_item, n_user, vec_dim);
+        VectorMatrix &user = data[0];
+        VectorMatrix &data_item = data[1];
+        VectorMatrix &query_item = data[2];
+        user.vectorNormalize();
+
+        char memory_path[256];
+        sprintf(memory_path, "../index/%s_ScoreSearch%d.index",dataset_name, n_sample);
+        std::unique_ptr<ScoreSampleMeasurePruneRatio::Index> index =
+                ScoreSampleMeasurePruneRatio::BuildIndex(data_item, user, memory_path);
+
+        std::string method_name = "ScoreSampleMeasurePruneRatio";
+        char parameter_name[256];
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
+        ScoreSampleMeasurePruneRatio::RetrievalResultAttribution config;
+        std::vector<int> topk_l = {10, 20, 30, 40, 50};
+        TimeRecord record;
+        for (const int topk: topk_l) {
+            record.reset();
+            index->Retrieval(query_item, topk);
+            const double retrieval_time = record.get_elapsed_time_second();
+            const double ms_per_query = retrieval_time / query_item.n_vector_;
+            std::string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
+            std::cout << performance_str << std::endl;
+            config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
+        }
+
+        config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     }
 
 }

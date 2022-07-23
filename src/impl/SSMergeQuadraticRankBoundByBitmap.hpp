@@ -207,7 +207,6 @@ namespace ReverseMIPS::SSMergeQuadraticRankBoundByBitmap {
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
                                       const int &n_sample, const uint64_t &index_size_gb) {
         const int n_data_item = data_item.n_vector_;
-        const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
 
         user.vectorNormalize();
@@ -233,6 +232,7 @@ namespace ReverseMIPS::SSMergeQuadraticRankBoundByBitmap {
 
         MergeQuadraticRankBoundByBitmap disk_ins(user, n_data_item, index_path, n_rank_bound,
                                                  n_merge_user);
+        disk_ins.BuildIndexPreprocess(user);
         disk_ins.PreprocessData(user, data_item);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
@@ -256,7 +256,7 @@ namespace ReverseMIPS::SSMergeQuadraticRankBoundByBitmap {
                 //rank search
                 rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
 
-                disk_ins.BuildIndexLoop(distance_pair_l, userID);
+                disk_ins.BuildIndexLoop(distance_pair_l.data(), userID);
             }
             disk_ins.WriteIndex();
             if (labelID % report_batch_every == 0) {
@@ -266,7 +266,7 @@ namespace ReverseMIPS::SSMergeQuadraticRankBoundByBitmap {
                 batch_report_record.reset();
             }
         }
-        disk_ins.FinishWrite();
+        disk_ins.FinishBuildIndex();
         cst.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(

@@ -31,32 +31,31 @@ if (FINISH)
     target_include_directories(sd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(sd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
+    add_executable(udd disk-index-compression/user-distance-distribution/UserDistanceDistribution.cpp)
+    target_include_directories(udd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(udd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(crd disk-index-compression/similar-item-rank/CompressRankDistribution.cpp)
+    target_include_directories(crd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(crd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(ca compute-all/ComputeAll.cpp)
+    target_include_directories(ca PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(ca PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(sst disk-index-compression/score-sample-table/ScoreSampleTable.cpp)
+    target_include_directories(sst PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(sst PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 add_executable(pur score-sample-advantage/print-user-rank/PrintUserRank.cpp)
 target_include_directories(pur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(pur PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-add_executable(pc disk-index-compression/print-candidates/PrintCandidates.cpp)
+add_executable(pc print-candidates/PrintCandidates.cpp)
 target_include_directories(pc PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(pc PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-add_executable(udd disk-index-compression/user-distance-distribution/UserDistanceDistribution.cpp)
-target_include_directories(udd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(udd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 add_executable(mpr disk-index-compression/measure-prune-ratio/MeasurePruneRatio.cpp)
 target_include_directories(mpr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(mpr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-add_executable(sst disk-index-compression/score-sample-table/ScoreSampleTable.cpp)
-target_include_directories(sst PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(sst PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-add_executable(crd disk-index-compression/similar-item-rank/CompressRankDistribution.cpp)
-target_include_directories(crd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(crd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-add_executable(ca compute-all/ComputeAll.cpp)
-target_include_directories(ca PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(ca PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})

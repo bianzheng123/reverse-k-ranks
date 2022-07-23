@@ -17,6 +17,7 @@
 #include <cfloat>
 #include <memory>
 #include <spdlog/spdlog.h>
+#include <fstream>
 
 namespace ReverseMIPS {
 
@@ -152,9 +153,9 @@ namespace ReverseMIPS {
     class MergeQuadraticRankBoundByBitmap {
     public:
         //index variable
-        int n_user_, n_data_item_, vec_dim_;
-        int topt_, n_rank_bound_, n_merge_user_, bitmap_size_byte_;
-        int sample_unit_;
+        size_t n_user_, n_data_item_, vec_dim_;
+        size_t topt_, n_rank_bound_, n_merge_user_, bitmap_size_byte_;
+        size_t sample_unit_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_rank_bound
         std::vector<uint32_t> merge_label_l_; // n_user, stores which cluster the user belons to
         BaseIPBound exact_rank_ins_;
@@ -196,6 +197,10 @@ namespace ReverseMIPS {
 
             spdlog::info("topt {}, n_rank_bound {}, n_merge_user {}, bitmap_size_byte {}, sample_unit {}",
                          topt_, n_rank_bound_, n_merge_user_, bitmap_size_byte_, sample_unit_);
+            if (sample_unit_ <= 0) {
+                spdlog::error("n_rank_bound too large, consider a smaller n_rank_bound");
+                exit(-1);
+            }
 
             this->merge_label_l_.resize(n_user_);
             this->disk_cache_ = MQRBBitmapDiskCache(n_data_item, n_rank_bound);
@@ -204,12 +209,12 @@ namespace ReverseMIPS {
             this->known_rank_idx_l_ = std::make_unique<int[]>(n_rank_bound);
             this->item_cand_l_.resize(n_data_item);
 
-            BuildIndexPreprocess(user);
         }
 
         void
         BuildIndexPreprocess(const VectorMatrix &user) {
-            merge_label_l_ = GreedyMergeMinClusterSize::ClusterLabel(user, n_merge_user_);
+//            merge_label_l_.assign(n_user_, 0);
+            merge_label_l_ = GreedyMergeMinClusterSize::ClusterLabel(user, (int) n_merge_user_);
 
 //            printf("cluster size\n");
 //            for (int mergeID = 0; mergeID < n_merge_user_; mergeID++) {
@@ -223,13 +228,18 @@ namespace ReverseMIPS {
 //            }
 //            printf("\n");
 
-            for (int rank = sample_unit_, idx = 1;
+            for (int rank = (int) sample_unit_, idx = 1;
                  rank < topt_ && idx <= n_rank_bound_;
-                 rank = (idx + 1) * (idx + 1) * sample_unit_, idx++) {
+                 rank = (int) ((idx + 1) * (idx + 1) * sample_unit_), idx++) {
                 known_rank_idx_l_[idx - 1] = rank;
                 assert(idx <= n_rank_bound_);
             }
-            known_rank_idx_l_[n_rank_bound_ - 1] = topt_;
+            known_rank_idx_l_[n_rank_bound_ - 1] = (int) topt_;
+
+//            for (int rankID = 0; rankID < n_rank_bound_; rankID++) {
+//                std::cout << known_rank_idx_l_[rankID] << " ";
+//            }
+//            std::cout << std::endl;
 
             out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
             if (!out_stream_) {
@@ -244,25 +254,22 @@ namespace ReverseMIPS {
 
         std::vector<std::vector<int>> &BuildIndexMergeUser() {
             static std::vector<std::vector<int>> eval_seq_l(n_merge_user_);
-            for (int labelID = 0; labelID < n_merge_user_; labelID++) {
-                std::vector<int> &eval_l = eval_seq_l[labelID];
-                for (int userID = 0; userID < n_user_; userID++) {
-                    if (merge_label_l_[userID] == labelID) {
-                        eval_l.push_back(userID);
-                    }
-                }
+            for (int userID = 0; userID < n_user_; userID++) {
+                uint32_t labelID = merge_label_l_[userID];
+                assert(0 <= labelID && labelID < n_merge_user_);
+                eval_seq_l[labelID].push_back(userID);
             }
             return eval_seq_l;
         }
 
-        void BuildIndexLoop(const std::vector<DistancePair> &distance_pair_l, const int &userID) {
+        void BuildIndexLoop(const DistancePair *distance_pair_l, const int &userID) {
 #pragma omp parallel for default(none) shared(distance_pair_l)
             for (int crank = 0; crank < n_rank_bound_; crank++) {
                 const int low_rank = crank == 0 ? 0 : known_rank_idx_l_[crank - 1];
                 const int high_rank = known_rank_idx_l_[crank];
                 for (int rank = low_rank; rank < high_rank; rank++) {
                     int itemID = distance_pair_l[rank].ID_;
-//#pragma omp critical
+#pragma omp critical
                     disk_cache_.Add(itemID, crank);
                 }
             }
@@ -281,7 +288,7 @@ namespace ReverseMIPS {
             disk_cache_.WriteDisk(out_stream_);
         }
 
-        void FinishWrite() {
+        void FinishBuildIndex() {
             out_stream_.close();
         }
 
@@ -388,6 +395,34 @@ namespace ReverseMIPS {
         std::string IndexInfo() {
             std::string info = "Exact rank method_name: " + exact_rank_ins_.method_name;
             return info;
+        }
+
+        void SaveMemoryIndex(const char *index_path) {
+            std::ofstream out_stream = std::ofstream(index_path, std::ios::binary | std::ios::out);
+            if (!out_stream) {
+                spdlog::error("error in write result");
+                exit(-1);
+            }
+            out_stream.write((char *) known_rank_idx_l_.get(), (int64_t) (n_rank_bound_ * sizeof(int)));
+            out_stream.write((char *) merge_label_l_.data(), (int64_t) (n_user_ * sizeof(uint32_t)));
+
+            out_stream.close();
+        }
+
+        void LoadMemoryIndex(const char *index_path) {
+            std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
+            if (!index_stream) {
+                spdlog::error("error in reading index");
+                exit(-1);
+            }
+
+            known_rank_idx_l_ = std::make_unique<int[]>(n_rank_bound_);
+            index_stream.read((char *) known_rank_idx_l_.get(), (int64_t) (sizeof(int) * n_rank_bound_));
+
+            merge_label_l_.resize(n_user_);
+            index_stream.read((char *) merge_label_l_.data(), (int64_t) (sizeof(uint32_t) * n_user_));
+
+            index_stream.close();
         }
 
     };

@@ -7,46 +7,37 @@
 
 #include "alg/SpaceInnerProduct.hpp"
 #include <vector>
-#include <Eigen/Dense>
-
-#ifndef EIGEN_USE_MKL_ALL
-#define EIGEN_USE_MKL_ALL
-#endif
-
-#ifndef EIGEN_VECTORIZE_SSE4_2
-#define EIGEN_VECTORIZE_SSE4_2
-#endif
 
 namespace ReverseMIPS {
 
     class CPUScoreTable {
 
         int n_user_, n_data_item_, vec_dim_;
-        std::vector<double> ip_cache_;
 
-        Eigen::MatrixXd user_m_, data_item_m_;
+        const double *user_vecs_;
+        const double *data_item_vecs_;
+
     public:
         CPUScoreTable() = default;
 
-        inline CPUScoreTable(const double *user, const double *data_item,
+        inline CPUScoreTable(const double *user_vecs, const double *data_item_vecs,
                              const int n_user, const int n_data_item, const int vec_dim) {
-            n_user_ = n_user;
-            n_data_item_ = n_data_item;
-            vec_dim_ = vec_dim;
-            ip_cache_.resize(n_data_item_);
-
-            user_m_ = Eigen::Map<const Eigen::VectorXd>(user, n_user * vec_dim);
-            user_m_.resize(vec_dim, n_user);
-
-            data_item_m_ = Eigen::Map<const Eigen::VectorXd>(data_item, n_data_item * vec_dim);
-            data_item_m_.resize(vec_dim, n_data_item);
+            this->user_vecs_ = user_vecs;
+            this->data_item_vecs_ = data_item_vecs;
+            this->n_user_ = n_user;
+            this->n_data_item_ = n_data_item;
+            this->vec_dim_ = vec_dim;
         }
 
         void ComputeList(const int &userID, double *distance_l) {
-            Eigen::VectorXd user_vecs = user_m_.col(userID);
-            Eigen::VectorXd ip_res = data_item_m_.transpose() * user_vecs;
-            const double *ip_ptr = ip_res.data();
-            memcpy(distance_l, ip_ptr, n_data_item_ * sizeof(double));
+            assert(0 <= userID && userID < n_user_);
+            const double *tmp_user_vecs = user_vecs_ + userID * vec_dim_;
+#pragma omp parallel for default(none) shared(tmp_user_vecs, distance_l, n_data_item_)
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                const double *tmp_data_item_vecs = data_item_vecs_ + itemID * vec_dim_;
+                const double ip = InnerProduct(tmp_user_vecs, tmp_data_item_vecs, vec_dim_);
+                distance_l[itemID] = ip;
+            }
         }
 
         void FinishCompute() {}

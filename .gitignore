@@ -23,3 +23,5 @@ cmake-build-release/
 /attribution/theory/*.jpg
 /attribution/disk-index-compression/*.jpg
 /attribution/disk-index-compression/*.txt
+/attribution/user-candidate-appearance/*.jpg
+/attribution/user-candidate-appearance/*.txt

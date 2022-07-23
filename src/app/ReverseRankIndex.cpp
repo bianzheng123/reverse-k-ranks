@@ -29,7 +29,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_sample;
+    int n_sample;
     uint64_t index_size_gb;
 };
 
@@ -47,8 +47,6 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("BatchDiskBruteForce"),
              "method_name")
 
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
-             "how many numbers would cache a value")
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "the numer of sample")
             ("index_size_gb, tt", po::value<uint64_t>(&para.index_size_gb)->default_value(50),
@@ -117,10 +115,10 @@ int main(int argc, char **argv) {
         index = GridIndex::BuildIndex(data_item, user);
 
     } else if (method_name == "RankSample") {
-        const int cache_bound_every = para.cache_bound_every;
-        spdlog::info("input parameter: cache_bound_every {}", cache_bound_every);
-        index = RankSample::BuildIndex(data_item, user, index_path, cache_bound_every);
-        sprintf(parameter_name, "cache_bound_every_%d", cache_bound_every);
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = RankSample::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else if (method_name == "ScoreSample") {
         const int n_sample = para.n_sample;

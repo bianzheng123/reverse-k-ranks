@@ -52,6 +52,7 @@ namespace ReverseMIPS {
             const int n_user = user.n_vector_;
             const int n_data_item = data_item.n_vector_;
             const int vec_dim = user.vec_dim_;
+            assert(user.vec_dim_ == data_item.vec_dim_);
             this->n_data_item_ = n_data_item;
             this->ip_cache_l_.resize(n_data_item);
 #ifdef USE_GPU
@@ -76,7 +77,7 @@ namespace ReverseMIPS {
 #ifdef USE_GPU
             gpu_sort.SortList(distance_l);
 #else
-            //            __gnu_parallel::sort(distance_l, distance_l + n_data_item_, std::greater());
+//                        __gnu_parallel::sort(distance_l, distance_l + n_data_item_, std::greater());
             boost::sort::block_indirect_sort(distance_l, distance_l + n_data_item_, std::greater(),
                                              std::thread::hardware_concurrency());
 #endif

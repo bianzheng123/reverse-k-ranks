@@ -21,7 +21,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int cache_bound_every, n_sample, index_size_gb;
+    int n_sample, index_size_gb;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -38,8 +38,6 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("BatchDiskBruteForce"),
              "method_name")
 
-            ("cache_bound_every, cbe", po::value<int>(&para.cache_bound_every)->default_value(512),
-             "how many numbers would cache a value")
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "number of sample of a rank bound")
             ("index_size_gb, tt", po::value<int>(&para.index_size_gb)->default_value(50),

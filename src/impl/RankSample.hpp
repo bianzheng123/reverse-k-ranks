@@ -125,7 +125,7 @@ namespace ReverseMIPS::RankSample {
 
                 //rank search
                 coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_, rank_topk_max_heap);
+                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_);
 
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
@@ -201,17 +201,17 @@ namespace ReverseMIPS::RankSample {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &cache_bound_every) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &n_sample) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
 
         user.vectorNormalize();
 
         //rank search
-        RankSearch rank_ins(cache_bound_every, n_data_item, n_user);
+        RankSearch rank_ins(n_sample, n_data_item, n_user);
 
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path, rank_ins.n_max_disk_read_);
+        ReadAll disk_ins(n_user, n_data_item, index_path, (int)rank_ins.n_max_disk_read_);
         disk_ins.PreprocessData(user, data_item);
 
         //Compute Score Table

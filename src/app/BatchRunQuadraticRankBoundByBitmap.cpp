@@ -1,10 +1,10 @@
 //
-// Created by BianZheng on 2022/7/15.
+// Created by BianZheng on 2022/7/23.
 //
 
-#include "BatchRun/BatchBuildIndexTopTScoreSample.hpp"
-#include "BatchRun/BatchRetrievalTopT.hpp"
-#include "BatchRun/ScoreSampleMeasurePruneRatio.hpp"
+#include "BatchRun/BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
+#include "BatchRun/BatchRetrievalQuadraticRankBoundByBitmap.hpp"
+#include "BatchRun/RankSampleMeasurePruneRatio.hpp"
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -50,46 +50,41 @@ int main(int argc, char **argv) {
     LoadOptions(argc, argv, para);
     const char *dataset_name = para.dataset_name.c_str();
     const char *basic_dir = para.basic_dir.c_str();
-    spdlog::info("TopT dataset_name {}, basic_dir {}", dataset_name, basic_dir);
+    spdlog::info("QuadraticRankBoundByBitmap dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
-    double build_index_time;
     {
         TimeRecord record;
         record.reset();
         BuildIndex(basic_dir, dataset_name);
 
-        build_index_time = record.get_elapsed_time_second();
+        double build_index_time = record.get_elapsed_time_second();
         spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
     }
 
     {
-        ScoreSampleMeasurePruneRatio::MeasurePruneRatio(dataset_name, basic_dir, 128);
+        RankSampleMeasurePruneRatio::MeasurePruneRatio(dataset_name, basic_dir, 128);
+        RankSampleMeasurePruneRatio::MeasurePruneRatio(dataset_name, basic_dir, 512);
     }
 
     {
-        //search on TopTID
-        const int index_size_gb = 256;
-        const int n_sample = 128;
-        char disk_path[256];
-        sprintf(disk_path, "../index/%s_TopTID%d.index", dataset_name, index_size_gb);
-        char memory_path[256];
-        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, n_sample);
-        RunRetrieval(disk_path, memory_path,
-                     n_sample, index_size_gb,
-                     basic_dir, dataset_name, "CompressTopTIDBruteForceBatchRun");
-    }
+        //search on QuadraticRankBoundByBitmap
+        const int memory_n_sample = 128;
+        const int disk_n_sample = 128;
+//        const int disk_n_sample = 2;
+        const uint64_t index_size_gb = 256;
 
-    {
-        //search on TopTID
-        const int index_size_gb = 256;
-        const int n_sample = 128;
-        char disk_path[256];
-        sprintf(disk_path, "../index/%s_TopTIP%d.index", dataset_name, index_size_gb);
+        char bitmap256_path[256];
+        sprintf(bitmap256_path, "../index/%s_QuadraticRankBoundByBitmap%ld_n_sample_%d.index",
+                dataset_name, index_size_gb, disk_n_sample);
+        char bitmap256_memory_path[256];
+        sprintf(bitmap256_memory_path, "../index/%s_QuadraticRankBoundByBitmap%ld_n_sample_%d_memory.index",
+                dataset_name, index_size_gb, disk_n_sample);
         char memory_path[256];
-        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, n_sample);
-        RunRetrieval(disk_path, memory_path,
-                     n_sample, index_size_gb,
-                     basic_dir, dataset_name, "CompressTopTIPBruteForceBatchRun");
+        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, memory_n_sample);
+
+        RunRetrieval(bitmap256_path, bitmap256_memory_path, memory_path,
+                     memory_n_sample, disk_n_sample, index_size_gb,
+                     basic_dir, dataset_name, "SSMergeQuadraticRankBoundByBitmapBatchRun");
     }
 
 //    const char *toptID128_path = "../index/Amazon_TopTID128.index";

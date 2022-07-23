@@ -138,7 +138,8 @@ def run_compress_topt():
     dataset_l = ['amazon']
     index_size_l = [128, 256, 512, 1024]
     n_sample = 128
-    os.system('cd build && ./brtt --dataset_name {}'.format('amazon'))
+    # os.system('cd build && ./brtt --dataset_name {}'.format('amazon'))
+    os.system('cd build && ./brqrbb --dataset_name {}'.format('amazon'))
     # for index_size in index_size_l:
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
