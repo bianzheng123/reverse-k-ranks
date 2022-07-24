@@ -219,12 +219,12 @@ namespace ReverseMIPS::RankSample {
 
         TimeRecord record;
         record.reset();
-        std::vector<double> distance_l(n_data_item);
+        std::vector<DistancePair> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
             cst.ComputeSortItems(userID, distance_l.data());
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
-            disk_ins.BuildIndexLoop(distance_l, 1);
+            disk_ins.BuildIndexLoop(distance_l.data(), 1);
 
             if (userID % cst.report_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "

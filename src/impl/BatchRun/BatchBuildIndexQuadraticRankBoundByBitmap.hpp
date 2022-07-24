@@ -96,13 +96,15 @@ namespace ReverseMIPS {
         double memory_index_time = 0;
         double disk_index_time = 0;
 
-        const int report_batch_every = 200;
+        const int report_user_every = 10000;
+        int report_count = 0;
 
         for (int labelID = 0; labelID < n_merge_user256; labelID++) {
             std::vector<int> &user_l = eval_seq_l[labelID];
             const unsigned int n_eval = user_l.size();
 
             for (int evalID = 0; evalID < n_eval; evalID++) {
+                report_count++;
                 int userID = user_l[evalID];
                 assert(0 <= userID && userID < n_user);
                 cst.ComputeSortItems(userID, distance_pair_l.data());
@@ -115,21 +117,22 @@ namespace ReverseMIPS {
                 component_record.reset();
                 bitmap256_ins.BuildIndexLoop(distance_pair_l.data(), userID);
                 disk_index_time += component_record.get_elapsed_time_second();
+
+                if (report_count != 0 && report_count % report_user_every == 0) {
+                    std::cout << "preprocessed " << report_count / (0.01 * n_user) << " %, "
+                              << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                              << get_current_RSS() / 1000000 << " Mb \n";
+                    spdlog::info(
+                            "Compute Score Time {}s, Sort Score Time {}s, Memory Index Time {}s, Disk Index Time {}s",
+                            cst.compute_time_, cst.sort_time_, memory_index_time, disk_index_time);
+                    cst.compute_time_ = 0;
+                    cst.sort_time_ = 0;
+                    memory_index_time = 0;
+                    disk_index_time = 0;
+                    record.reset();
+                }
             }
             bitmap256_ins.WriteIndex();
-            if (labelID != 0 && labelID % report_batch_every == 0) {
-                std::cout << "preprocessed " << labelID / (0.01 * n_merge_user256) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                          << get_current_RSS() / 1000000 << " Mb \n";
-                spdlog::info(
-                        "Compute Score Time {}s, Sort Score Time {}s, Memory Index Time {}s, Disk Index Time {}s",
-                        cst.compute_time_, cst.sort_time_, memory_index_time, disk_index_time);
-                cst.compute_time_ = 0;
-                cst.sort_time_ = 0;
-                memory_index_time = 0;
-                disk_index_time = 0;
-                record.reset();
-            }
         }
 
         cst.FinishCompute();

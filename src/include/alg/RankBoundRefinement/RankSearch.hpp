@@ -67,11 +67,10 @@ namespace ReverseMIPS {
         }
 
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
-            std::vector<double> IP_l(n_data_item_);
-            for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                IP_l[itemID] = distance_ptr[itemID].dist_;
+            for (int crankID = 0; crankID < n_sample_; crankID++) {
+                unsigned int rankID = known_rank_idx_l_[crankID];
+                bound_distance_table_[userID * n_sample_ + crankID] = distance_ptr[rankID].dist_;
             }
-            LoopPreprocess(IP_l.data(), userID);
         }
 
         void LoopPreprocess(const double *distance_ptr, const int &userID) {
