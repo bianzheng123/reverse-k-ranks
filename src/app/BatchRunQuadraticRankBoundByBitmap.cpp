@@ -3,16 +3,14 @@
 //
 
 #include "BatchRun/BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
+#include "BatchRun/BatchMeasureRetrievalQuadraticRankBoundByBitmap.hpp"
 #include "BatchRun/BatchRetrievalQuadraticRankBoundByBitmap.hpp"
 #include "BatchRun/RankSampleMeasurePruneRatio.hpp"
-#include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
-#include "struct/VectorMatrix.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
 #include <iostream>
-#include <vector>
 #include <string>
 
 class Parameter {
@@ -55,7 +53,11 @@ int main(int argc, char **argv) {
     {
         TimeRecord record;
         record.reset();
-        BuildIndex(basic_dir, dataset_name);
+
+        const int index_size_gb = 256;
+        const int disk_n_sample = 2;
+//        const int disk_n_sample = 128;
+        BuildIndex(basic_dir, dataset_name, index_size_gb, disk_n_sample);
 
         double build_index_time = record.get_elapsed_time_second();
         spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
@@ -67,10 +69,33 @@ int main(int argc, char **argv) {
     }
 
     {
+        //measure QuadraticRankBoundByBitmap
+        const int memory_n_sample = 128;
+//        const int disk_n_sample = 128;
+        const int disk_n_sample = 2;
+        const uint64_t index_size_gb = 256;
+
+        char bitmap256_path[256];
+        sprintf(bitmap256_path, "../index/%s_QuadraticRankBoundByBitmap%ld_n_sample_%d.index",
+                dataset_name, index_size_gb, disk_n_sample);
+        char bitmap256_memory_path[256];
+        sprintf(bitmap256_memory_path, "../index/%s_QuadraticRankBoundByBitmap%ld_n_sample_%d_memory.index",
+                dataset_name, index_size_gb, disk_n_sample);
+        char memory_path[256];
+        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, memory_n_sample);
+
+        BatchMeasureRetrievalQuadraticRankBoundByBitmap::MeasureQuadraticRankBoundByBitmap(
+                bitmap256_path, bitmap256_memory_path, memory_path,
+                memory_n_sample, disk_n_sample, index_size_gb,
+                basic_dir, dataset_name, "MeasureScoreSampleQuadraticRankBoundByBitmap");
+
+    }
+
+    {
         //search on QuadraticRankBoundByBitmap
         const int memory_n_sample = 128;
-        const int disk_n_sample = 128;
-//        const int disk_n_sample = 2;
+//        const int disk_n_sample = 128;
+        const int disk_n_sample = 2;
         const uint64_t index_size_gb = 256;
 
         char bitmap256_path[256];

@@ -2,17 +2,15 @@
 // Created by BianZheng on 2022/7/15.
 //
 
+#include "BatchRun/BatchMeasureRetrievalTopT.hpp"
 #include "BatchRun/BatchBuildIndexTopTScoreSample.hpp"
 #include "BatchRun/BatchRetrievalTopT.hpp"
 #include "BatchRun/ScoreSampleMeasurePruneRatio.hpp"
-#include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
-#include "struct/VectorMatrix.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
 #include <iostream>
-#include <vector>
 #include <string>
 
 class Parameter {
@@ -67,6 +65,34 @@ int main(int argc, char **argv) {
     }
 
     {
+        //measure TopTID
+        const int index_size_gb = 256;
+        const int n_sample = 128;
+        char disk_path[256];
+        sprintf(disk_path, "../index/%s_TopTID%d.index", dataset_name, index_size_gb);
+        char memory_path[256];
+        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, n_sample);
+        BatchMeasureRetrievalTopT::MeasureTopT("MeasureScoreSampleTopTID",
+                                               disk_path, memory_path,
+                                               n_sample, index_size_gb,
+                                               basic_dir, dataset_name);
+    }
+
+    {
+        //search on TopTIP
+        const int index_size_gb = 256;
+        const int n_sample = 128;
+        char disk_path[256];
+        sprintf(disk_path, "../index/%s_TopTIP%d.index", dataset_name, index_size_gb);
+        char memory_path[256];
+        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, n_sample);
+        BatchMeasureRetrievalTopT::MeasureTopT("MeasureScoreSampleTopTIP",
+                                               disk_path, memory_path,
+                                               n_sample, index_size_gb,
+                                               basic_dir, dataset_name);
+    }
+
+    {
         //search on TopTID
         const int index_size_gb = 256;
         const int n_sample = 128;
@@ -80,7 +106,7 @@ int main(int argc, char **argv) {
     }
 
     {
-        //search on TopTID
+        //search on TopTIP
         const int index_size_gb = 256;
         const int n_sample = 128;
         char disk_path[256];

@@ -34,7 +34,8 @@ namespace ReverseMIPS {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    void BuildIndex(const char *basic_dir, const char *dataset_name) {
+    void
+    BuildIndex(const char *basic_dir, const char *dataset_name, const int &index_size_gb, const int &disk_n_sample) {
         int n_data_item, n_query_item, n_user, vec_dim;
         std::vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
                                                   vec_dim);
@@ -49,9 +50,6 @@ namespace ReverseMIPS {
         spdlog::info(
                 "input parameter: n_sample: {128, 512}, index_size_gb {256}, method_name MergeQuadraticRankBoundByBitmap");
 
-        const int index_size_gb = 256;
-//        const int disk_n_sample = 2;
-        const int disk_n_sample = 128;
         char bitmap256_path[256];
         sprintf(bitmap256_path, "../index/%s_QuadraticRankBoundByBitmap%d_n_sample_%d.index",
                 dataset_name, index_size_gb, disk_n_sample);

@@ -8,7 +8,6 @@
 #include "struct/MethodBase.hpp"
 #include "BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
 #include "SSMergeQuadraticRankBoundByBitmap.hpp"
-#include "alg/DiskIndex/MergeQuadraticRankBoundByBitmap.hpp"
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 
@@ -25,6 +24,11 @@ namespace ReverseMIPS {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = user.vec_dim_;
+
+        if (method_name != "SSMergeQuadraticRankBoundByBitmapBatchRun") {
+            spdlog::error("not support batch run retrieval method, program exit");
+            exit(-1);
+        }
 
         std::unique_ptr<BaseIndex> index;
 
