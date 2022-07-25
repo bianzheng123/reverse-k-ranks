@@ -13,9 +13,9 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/UserRankBound.hpp"
 #include "util/TimeMemory.hpp"
-#include <set>
 #include <cfloat>
 #include <memory>
+#include <fstream>
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
@@ -69,8 +69,6 @@ namespace ReverseMIPS {
             this->user_topk_cache_l_.resize(n_user_);
             this->disk_retrieval_cache_l_.resize(n_data_item);
             this->item_cand_l_.resize(n_data_item_);
-
-            BuildIndexPreprocess(user);
         }
 
         void
@@ -113,7 +111,8 @@ namespace ReverseMIPS {
             return eval_seq_l;
         }
 
-        void BuildIndexLoop(const std::vector<DistancePair> &distance_pair_l, const int &userID) {
+        void BuildIndexLoop(const DistancePair *distance_pair_l, const int &userID) {
+#pragma omp parallel for default(none) shared(distance_pair_l)
             for (int rank = 0; rank < n_data_item_; rank++) {
                 int itemID = distance_pair_l[rank].ID_;
                 disk_write_cache_l_[itemID].Merge(rank);
@@ -137,13 +136,14 @@ namespace ReverseMIPS {
             out_stream_.write((char *) disk_retrieval_cache_l_.data(),
                               (std::streamsize) (n_data_item_ * sizeof(std::pair<int, int>)));
 
+#pragma omp parallel for default(none)
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 disk_write_cache_l_[itemID].Reset();
             }
 
         }
 
-        void FinishWrite() {
+        void FinishBuildIndex() {
             out_stream_.close();
         }
 
@@ -255,6 +255,30 @@ namespace ReverseMIPS {
         std::string IndexInfo() {
             std::string info = "Exact rank method_name: " + exact_rank_ins_.method_name;
             return info;
+        }
+
+        void SaveMemoryIndex(const char *index_path) {
+            std::ofstream out_stream = std::ofstream(index_path, std::ios::binary | std::ios::out);
+            if (!out_stream) {
+                spdlog::error("error in write result");
+                exit(-1);
+            }
+            out_stream.write((char *) merge_label_l_.data(), (int64_t) (n_user_ * sizeof(uint32_t)));
+
+            out_stream.close();
+        }
+
+        void LoadMemoryIndex(const char *index_path) {
+            std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
+            if (!index_stream) {
+                spdlog::error("error in reading index");
+                exit(-1);
+            }
+
+            merge_label_l_.resize(n_user_);
+            index_stream.read((char *) merge_label_l_.data(), (int64_t) (sizeof(uint32_t) * n_user_));
+
+            index_stream.close();
         }
 
     };

@@ -228,6 +228,7 @@ namespace ReverseMIPS::SSMergeRankByInterval {
         }
 
         MergeRankByInterval disk_ins(user, n_data_item, index_path, n_merge_user);
+        disk_ins.BuildIndexPreprocess(user);
         disk_ins.PreprocessData(user, data_item);
         std::vector<std::vector<int>> &eval_seq_l = disk_ins.BuildIndexMergeUser();
         assert(eval_seq_l.size() == n_merge_user);
@@ -251,7 +252,7 @@ namespace ReverseMIPS::SSMergeRankByInterval {
                 //rank search
                 rank_bound_ins.LoopPreprocess(distance_pair_l.data(), userID);
 
-                disk_ins.BuildIndexLoop(distance_pair_l, userID);
+                disk_ins.BuildIndexLoop(distance_pair_l.data(), userID);
             }
             disk_ins.WriteIndex();
             if (labelID % report_batch_every == 0) {
@@ -261,7 +262,7 @@ namespace ReverseMIPS::SSMergeRankByInterval {
                 batch_report_record.reset();
             }
         }
-        disk_ins.FinishWrite();
+        disk_ins.FinishBuildIndex();
         cst.FinishCompute();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(

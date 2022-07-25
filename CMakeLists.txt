@@ -93,6 +93,10 @@ else () # not use cuda
     add_executable(brqrbb src/app/BatchRunQuadraticRankBoundByBitmap.cpp)
     target_include_directories(brqrbb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(brqrbb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(brmrbi src/app/BatchRunMergeRankByInterval.cpp)
+    target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(brmrbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 ##set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)

@@ -55,8 +55,8 @@ int main(int argc, char **argv) {
         record.reset();
 
         const int index_size_gb = 256;
-        const int disk_n_sample = 2;
-//        const int disk_n_sample = 128;
+//        const int disk_n_sample = 2;
+        const int disk_n_sample = 128;
         BuildIndex(basic_dir, dataset_name, index_size_gb, disk_n_sample);
 
         double build_index_time = record.get_elapsed_time_second();
@@ -71,8 +71,8 @@ int main(int argc, char **argv) {
     {
         //measure QuadraticRankBoundByBitmap
         const int memory_n_sample = 128;
-//        const int disk_n_sample = 128;
-        const int disk_n_sample = 2;
+        //        const int disk_n_sample = 2;
+        const int disk_n_sample = 128;
         const uint64_t index_size_gb = 256;
 
         char bitmap256_path[256];
@@ -94,8 +94,8 @@ int main(int argc, char **argv) {
     {
         //search on QuadraticRankBoundByBitmap
         const int memory_n_sample = 128;
-//        const int disk_n_sample = 128;
-        const int disk_n_sample = 2;
+        //        const int disk_n_sample = 2;
+        const int disk_n_sample = 128;
         const uint64_t index_size_gb = 256;
 
         char bitmap256_path[256];
