@@ -5,6 +5,7 @@
 #ifndef REVERSE_K_RANKS_READALL_HPP
 #define REVERSE_K_RANKS_READALL_HPP
 
+#include "alg/TopkLBHeap.hpp"
 #include "struct/UserRankElement.hpp"
 
 #include <memory>
@@ -112,38 +113,54 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                     const std::vector<bool> &prune_l) {
+                     std::vector<bool> &prune_l, TopkLBHeap &topk_lb_heap) {
 
             //read disk and fine binary search
             n_candidate_ = 0;
+            int topk_lb_rank = topk_lb_heap.Front();
+            topk_lb_heap.Reset();
             for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID]) {
+                if (prune_l[userID] && rank_lb_l[userID] + 1 <= topk_lb_rank) {
                     continue;
                 }
+                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID);
+                topk_lb_heap.Update(rank);
+                prune_l[userID] = true;
+            }
+            assert(topk_lb_heap.Front() != -1);
+            topk_lb_rank = topk_lb_heap.Front();
 
-                int end_idx = rank_lb_l[userID];
-                int start_idx = rank_ub_l[userID];
-                assert(0 <= start_idx && start_idx <= end_idx && end_idx <= n_data_item_);
-
-                double queryIP = queryIP_l[userID];
-                int base_rank = start_idx;
-                int read_count = end_idx - start_idx;
-
-                assert(0 <= read_count && read_count <= n_max_disk_read_);
-
-                read_disk_record_.reset();
-                ReadDisk(userID, start_idx, read_count);
-                read_disk_time_ += read_disk_record_.get_elapsed_time_second();
-                exact_rank_refinement_record_.reset();
-                int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
-                exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
-
-                user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
-                n_candidate_++;
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID] || rank_ub_l[userID] > topk_lb_rank) {
+                    continue;
+                }
+                GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID);
             }
 
             std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_candidate_,
                       std::less());
+        }
+
+        int GetSingleRank(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID) {
+            int end_idx = rank_lb;
+            int start_idx = rank_ub;
+            assert(0 <= start_idx && start_idx <= end_idx && end_idx <= n_data_item_);
+
+            int base_rank = start_idx;
+            int read_count = end_idx - start_idx;
+
+            assert(0 <= read_count && read_count <= n_max_disk_read_);
+
+            read_disk_record_.reset();
+            ReadDisk(userID, start_idx, read_count);
+            read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+            exact_rank_refinement_record_.reset();
+            int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
+            exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
+
+            user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
+            n_candidate_++;
+            return rank;
         }
 
         void FinishRetrieval() {

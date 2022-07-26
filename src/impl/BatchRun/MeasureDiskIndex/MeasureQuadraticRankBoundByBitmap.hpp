@@ -247,53 +247,29 @@ namespace ReverseMIPS::MeasureQuadraticRankBoundByBitmap {
                 }
                 const int user_labelID = (int) merge_label_l_[userID];
                 std::pair<int, int> rank_bound_pair = std::make_pair(rank_lb_l[userID], rank_ub_l[userID]);
-                int n_compute = ReadDisk(rank_bound_pair, user_labelID, item_cand_l_);
-                n_compute_upper_bound_ += n_compute;
-                n_compute_lower_bound_ += n_compute;
+                std::pair<size_t, size_t> n_compute = ReadDisk(rank_bound_pair, user_labelID, item_cand_l_);
+                n_compute_upper_bound_ += n_compute.second;
+                n_compute_lower_bound_ += n_compute.first;
                 n_total_compute_ += n_data_item_;
                 n_total_candidate_++;
             }
 
         }
 
-        inline int ReadDisk(const std::pair<int, int> &rank_bound_pair, const int &user_labelID,
-                            std::vector<bool> &item_cand_l) {
+        inline std::pair<size_t, size_t> ReadDisk(const std::pair<int, int> &rank_bound_pair, const int &user_labelID,
+                                                  std::vector<bool> &item_cand_l) {
             assert(0 <= rank_bound_pair.second && rank_bound_pair.second <= rank_bound_pair.first &&
                    rank_bound_pair.first <= n_data_item_);
             if (rank_bound_pair.first == rank_bound_pair.second) {
-                return 0;
+                return std::make_pair(0, 0);
             }
             if (rank_bound_pair.first >= topt_) {
                 item_cand_l.assign(n_data_item_, true);
-                return 0;
+                return std::make_pair(n_data_item_, n_data_item_);
             }
             item_cand_l.assign(n_data_item_, false);
 
-            const int rank_lb = rank_bound_pair.first;
-            const int rank_ub = rank_bound_pair.second;
-            int bucket_lb = std::floor(std::sqrt(1.0 * (rank_lb + 1) / sample_unit_));
-            int bucket_ub = std::floor(std::sqrt(1.0 * (rank_ub + 1) / sample_unit_));
-            if ((rank_ub + 1) % sample_unit_ == 0 && rank_ub != 0) {
-                bucket_ub--;
-            }
-
-            if (bucket_lb >= n_rank_bound_) {
-                bucket_lb = n_rank_bound_ - 1;
-            }
-            const int read_count = bucket_lb - bucket_ub + 1;
-            assert(0 <= bucket_ub && bucket_ub <= bucket_lb && bucket_lb < n_rank_bound_);
-            disk_cache_.ReadDisk(index_stream_, user_labelID,
-                                 bucket_ub, read_count,
-                                 candidate_bitmap_);
-
-            candidate_bitmap_.AssignVector(n_data_item_, item_cand_l);
-            int n_cand = 0;
-            for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                if (item_cand_l[itemID]) {
-                    n_cand++;
-                }
-            }
-            return n_cand;
+            return std::make_pair(0, n_data_item_);
         }
 
         void FinishRetrieval() {
