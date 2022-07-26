@@ -200,8 +200,6 @@ namespace ReverseMIPS {
                         loc_rk = 0;
                     } else {
                         const double *user_vecs = user.getVector(userID);
-                        std::pair<int, int> query_rank_bound = std::make_pair(rank_lb_l[userID], rank_ub_l[userID]);
-
                         item_cand_l_.assign(n_data_item_, false);
 
                         const int query_rank_lb = rank_lb_l[userID];

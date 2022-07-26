@@ -81,6 +81,15 @@ if (USE_CUDA)
     set_property(TARGET brqrbb PROPERTY CXX_STANDARD_REQUIRED ON)
     set_property(TARGET brqrbb PROPERTY CXX_EXTENSIONS OFF)
 
+    set_source_files_properties(src/app/BatchRunMergeRankByInterval.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(brmrbi src/app/BatchRunMergeRankByInterval.cpp)
+    target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(brmrbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    set_target_properties(brmrbi PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_property(TARGET brmrbi PROPERTY CXX_STANDARD "17")
+    set_property(TARGET brmrbi PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET brmrbi PROPERTY CXX_EXTENSIONS OFF)
+
 else () # not use cuda
     add_executable(rri src/app/ReverseRankIndex.cpp)
     target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
