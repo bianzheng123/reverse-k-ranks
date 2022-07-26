@@ -5,10 +5,12 @@
 #ifndef REVERSE_KRANKS_RANKBOUND_HPP
 #define REVERSE_KRANKS_RANKBOUND_HPP
 
+#include "alg/SpaceInnerProduct.hpp"
+#include "alg/TopkLBHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
-#include "alg/SpaceInnerProduct.hpp"
+
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
@@ -101,20 +103,20 @@ namespace ReverseMIPS::RankSample {
             }
 
             // for binary search, check the number
-            std::vector<int> rank_topk_max_heap(topk);
+            TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
                 IPbound_l_.assign(n_user_, std::pair<double, double>(-std::numeric_limits<double>::max(),
                                                                      std::numeric_limits<double>::max()));
+                topkLbHeap.Reset();
 
                 const double *query_item_vec = query_item.getVector(queryID);
                 double *query_vecs = query_cache_.get();
                 disk_ins_.PreprocessQuery(query_item_vec, vec_dim_, query_vecs);
 
                 //calculate IP
-
                 inner_product_record_.reset();
                 for (int userID = 0; userID < n_user_; userID++) {
                     double *user_vec = user_.getVector(userID);
@@ -125,11 +127,10 @@ namespace ReverseMIPS::RankSample {
 
                 //rank search
                 coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, topk, rank_lb_l_, rank_ub_l_, IPbound_l_, prune_l_);
-
+                rank_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_, IPbound_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_, topk,
-                                      prune_l_, rank_topk_max_heap);
+                                      n_user_,
+                                      prune_l_, topkLbHeap);
                 coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
 
                 int n_candidate = 0;
@@ -211,7 +212,7 @@ namespace ReverseMIPS::RankSample {
         RankSearch rank_ins(n_sample, n_data_item, n_user);
 
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path, (int)rank_ins.n_max_disk_read_);
+        ReadAll disk_ins(n_user, n_data_item, index_path, (int) rank_ins.n_max_disk_read_);
         disk_ins.PreprocessData(user, data_item);
 
         //Compute Score Table
@@ -224,7 +225,7 @@ namespace ReverseMIPS::RankSample {
             cst.ComputeSortItems(userID, distance_l.data());
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
-            disk_ins.BuildIndexLoop(distance_l.data(), 1);
+            disk_ins.BuildIndexLoop(distance_l.data());
 
             if (userID % cst.report_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "

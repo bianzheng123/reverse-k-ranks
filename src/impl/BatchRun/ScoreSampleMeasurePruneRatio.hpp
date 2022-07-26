@@ -5,10 +5,12 @@
 #ifndef REVERSE_K_RANKS_SCORESAMPLEMEASUREPRUNERATIO_HPP
 #define REVERSE_K_RANKS_SCORESAMPLEMEASUREPRUNERATIO_HPP
 
+#include "alg/SpaceInnerProduct.hpp"
+#include "alg/TopkLBHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/SpaceInnerProduct.hpp"
+
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "util/TimeMemory.hpp"
@@ -171,11 +173,12 @@ namespace ReverseMIPS::ScoreSampleMeasurePruneRatio {
             }
 
             // store queryIP
-            std::vector<int> rank_topk_max_heap(topk);
+            TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
+                topkLbHeap.Reset();
 
                 const double *query_vecs = query_item.getVector(queryID);
 
@@ -191,11 +194,11 @@ namespace ReverseMIPS::ScoreSampleMeasurePruneRatio {
 
                 interval_search_record_.reset();
                 //count rank bound
-                interval_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
+                interval_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
                 //prune the bound
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_, topk,
-                                      prune_l_, rank_topk_max_heap);
+                                      n_user_,
+                                      prune_l_, topkLbHeap);
 
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 int n_candidate = 0;

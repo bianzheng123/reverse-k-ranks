@@ -162,22 +162,17 @@ namespace ReverseMIPS {
             exact_rank_ins_.PreprocessData(user, data_item);
         };
 
-        void BuildIndexLoop(const DistancePair *distance_cache, const int &n_write) {
+        void BuildIndexLoop(const DistancePair *distance_cache) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
-            for (int writeID = 0; writeID < n_write; writeID++) {
-                for (int candID = 0; candID < topt_; candID++) {
-                    disk_cache_[candID] = distance_cache[writeID * n_data_item_ + candID].dist_;
-                }
-                out_stream_.write((char *) disk_cache_.get(), topt_ * sizeof(double));
+            for (int candID = 0; candID < topt_; candID++) {
+                disk_cache_[candID] = distance_cache[candID].dist_;
             }
+            out_stream_.write((char *) disk_cache_.get(), topt_ * sizeof(double));
         }
 
-        void BuildIndexLoop(const double *distance_cache, const int &n_write) {
+        void BuildIndexLoop(const double *distance_cache) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
-            for (int writeID = 0; writeID < n_write; writeID++) {
-                const double *tmp_distance_cache = distance_cache + writeID * n_data_item_;
-                out_stream_.write((char *) tmp_distance_cache, topt_ * sizeof(double));
-            }
+            out_stream_.write((char *) distance_cache, topt_ * sizeof(double));
         }
 
         void FinishBuildIndex() {

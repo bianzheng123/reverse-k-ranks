@@ -5,6 +5,7 @@
 #ifndef REVERSE_KRANKS_MEASUREMERGERANKBYINTERVAL_HPP
 #define REVERSE_KRANKS_MEASUREMERGERANKBYINTERVAL_HPP
 
+#include "alg/TopkLBHeap.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
@@ -275,11 +276,12 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
             const int n_query_item = query_item.n_vector_;
 
             // store queryIP
-            std::vector<int> rank_topk_max_heap(topk);
+            TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
+                topkLbHeap.Reset();
 
                 const double *tmp_query_vecs = query_item.getVector(queryID);
                 double *query_vecs = query_cache_.get();
@@ -297,11 +299,11 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
 
                 //rank bound refinement
                 rank_bound_refinement_record_.reset();
-                rank_bound_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_, queryIPbound_l_,
+                rank_bound_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_,
                                           itvID_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_, topk,
-                                      prune_l_, rank_topk_max_heap);
+                                      n_user_,
+                                      prune_l_, topkLbHeap);
                 rank_bound_refinement_time_ += rank_bound_refinement_record_.get_elapsed_time_second();
                 int n_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {

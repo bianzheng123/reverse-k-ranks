@@ -5,10 +5,12 @@
 #ifndef REVERSE_K_RANKS_SCORESAMPLE_HPP
 #define REVERSE_K_RANKS_SCORESAMPLE_HPP
 
+#include "alg/SpaceInnerProduct.hpp"
+#include "alg/TopkLBHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/SpaceInnerProduct.hpp"
+
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
@@ -100,11 +102,12 @@ namespace ReverseMIPS::ScoreSample {
             }
 
             // store queryIP
-            std::vector<int> rank_topk_max_heap(topk);
+            TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
+                topkLbHeap.Reset();
 
                 const double *tmp_query_vecs = query_item.getVector(queryID);
                 double *query_vecs = query_cache_.get();
@@ -122,11 +125,11 @@ namespace ReverseMIPS::ScoreSample {
 
                 interval_search_record_.reset();
                 //count rank bound
-                interval_ins_.RankBound(queryIP_l_, prune_l_, topk, rank_lb_l_, rank_ub_l_);
+                interval_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
                 //prune the bound
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_, topk,
-                                      prune_l_, rank_topk_max_heap);
+                                      n_user_,
+                                      prune_l_, topkLbHeap);
 
                 this->interval_search_time_ += interval_search_record_.get_elapsed_time_second();
                 int n_candidate = 0;
@@ -220,7 +223,7 @@ namespace ReverseMIPS::ScoreSample {
             cst.ComputeSortItems(userID, distance_l.data());
 
             interval_ins.LoopPreprocess(distance_l.data(), userID);
-            disk_ins.BuildIndexLoop(distance_l, 1);
+            disk_ins.BuildIndexLoop(distance_l.data());
 
             if (userID % cst.report_every_ == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "

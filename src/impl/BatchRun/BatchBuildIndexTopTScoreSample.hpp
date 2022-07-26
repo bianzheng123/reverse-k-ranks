@@ -119,11 +119,11 @@ namespace ReverseMIPS {
             score_search_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
-            toptID256_ins.BuildIndexLoop(distance_pair_l.data(), 1);
+            toptID256_ins.BuildIndexLoop(distance_pair_l.data());
             toptID_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
-            toptIP256_ins.BuildIndexLoop(distance_pair_l.data(), 1);
+            toptIP256_ins.BuildIndexLoop(distance_pair_l.data());
             toptIP_time += component_record.get_elapsed_time_second();
 
             if (userID != 0 && userID % cst.report_every_ == 0) {

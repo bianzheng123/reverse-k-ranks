@@ -100,18 +100,13 @@ namespace ReverseMIPS {
         }
 
         //convert ip_bound to rank_bound
-        void RankBound(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
-                       const int &topk,
+        void RankBound(const std::vector<double> &queryIP_l,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) {
 
-            assert(prune_l.size() == n_user_);
             assert(rank_lb_l.size() == n_user_ && rank_ub_l.size() == n_user_);
             assert(queryIP_l.size() == n_user_);
 
             for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID]) {
-                    continue;
-                }
 
                 const double queryIP = queryIP_l[userID];
                 std::pair<double, double> user_IPbound = user_ip_bound_l_[userID];
@@ -138,21 +133,16 @@ namespace ReverseMIPS {
         }
 
         //convert ip_bound to rank_bound
-        void RankBound(const std::vector<double> &queryIP_l, const std::vector<bool> &prune_l,
-                       const int &topk,
+        void RankBound(const std::vector<double> &queryIP_l,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
                        std::vector<std::pair<double, double>> &queryIPBound_l,
                        std::vector<int> &itvID_l) {
 
-            assert(prune_l.size() == n_user_);
             assert(rank_lb_l.size() == n_user_ && rank_ub_l.size() == n_user_);
             assert(queryIP_l.size() == n_user_);
             assert(queryIPBound_l.size() == n_user_);
 
             for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID]) {
-                    continue;
-                }
 
                 const double queryIP = queryIP_l[userID];
                 std::pair<double, double> user_IPbound = user_ip_bound_l_[userID];

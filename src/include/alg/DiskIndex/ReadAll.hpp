@@ -82,20 +82,19 @@ namespace ReverseMIPS {
         void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
         };
 
-        void BuildIndexLoop(const DistancePair *distance_cache, const int &n_write) {
-            std::vector<double> distance_double(n_write * n_data_item_);
-            for (int i = 0; i < n_write * n_data_item_; i++) {
+        void BuildIndexLoop(const DistancePair *distance_cache) {
+            std::vector<double> distance_double(n_data_item_);
+            for (int i = 0; i < n_data_item_; i++) {
                 distance_double[i] = distance_cache[i].dist_;
             }
-            BuildIndexLoop(distance_double, n_write);
+            BuildIndexLoop(distance_double.data());
         }
 
-        void BuildIndexLoop(const std::vector<double> &distance_cache, const int &n_write) {
+        void BuildIndexLoop(const double *distance_cache) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
-            int64_t offset = (int64_t) n_write * n_data_item_;
-            assert(distance_cache.size() >= n_write * n_data_item_);
+            int64_t offset = (int64_t) n_data_item_;
             offset *= sizeof(double);
-            out_stream_.write((char *) distance_cache.data(), offset);
+            out_stream_.write((char *) distance_cache, offset);
         }
 
         void RetrievalPreprocess() {

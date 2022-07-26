@@ -122,10 +122,9 @@ namespace ReverseMIPS {
             return false;
         }
 
-        void RankBound(const std::vector<double> &queryIP_l, const int &topk,
+        void RankBound(const std::vector<double> &queryIP_l,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l,
-                       std::vector<std::pair<double, double>> &queryIPbound_l,
-                       const std::vector<bool> &prune_l) const {
+                       std::vector<std::pair<double, double>> &queryIPbound_l) const {
             for (int userID = 0; userID < n_user_; userID++) {
                 int lower_rank = rank_lb_l[userID];
                 int upper_rank = rank_ub_l[userID];

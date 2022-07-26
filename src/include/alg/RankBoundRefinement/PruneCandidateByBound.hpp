@@ -5,54 +5,37 @@
 #ifndef REVERSE_K_RANKS_PRUNECANDIDATEBYBOUND_HPP
 #define REVERSE_K_RANKS_PRUNECANDIDATEBYBOUND_HPP
 
+#include "alg/TopkLBHeap.hpp"
+#include "struct/RankBoundElement.hpp"
+
 #include <cassert>
 #include <vector>
 #include <algorithm>
-#include "struct/RankBoundElement.hpp"
 
 namespace ReverseMIPS {
+
     void
     PruneCandidateByBound(const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                          const int &n_user, const int &topk,
-                          std::vector<bool> &prune_l, std::vector<int> &topk_lb_heap) {
+                          const int &n_user,
+                          std::vector<bool> &prune_l, TopkLBHeap &topkLbHeap) {
         assert(rank_lb_l.size() == n_user);
         assert(rank_ub_l.size() == n_user);
         assert(prune_l.size() == n_user);
 
-        int n_cand = 0;
-        int userID = 0;
-        while (n_cand < topk) {
-            if (prune_l[userID]) {
-                userID++;
-                continue;
-            }
-            topk_lb_heap[n_cand] = rank_lb_l[userID];
-            n_cand++;
-            userID++;
-        }
-        std::make_heap(topk_lb_heap.begin(), topk_lb_heap.end(), std::less());
-        int global_lb = topk_lb_heap.front();
-
-        int topk_1 = topk - 1;
-        for (; userID < n_user; userID++) {
+        for (int userID = 0; userID < n_user; userID++) {
+            assert(rank_ub_l[userID] <= rank_lb_l[userID]);
             if (prune_l[userID]) {
                 continue;
             }
-            int tmp_lb = rank_lb_l[userID];
-            if (global_lb > tmp_lb) {
-                std::pop_heap(topk_lb_heap.begin(), topk_lb_heap.end(), std::less());
-                topk_lb_heap[topk_1] = tmp_lb;
-                std::push_heap(topk_lb_heap.begin(), topk_lb_heap.end(), std::less());
-                global_lb = topk_lb_heap.front();
-            }
+            topkLbHeap.Update(rank_lb_l[userID]);
         }
-
-        for (userID = 0; userID < n_user; userID++) {
+        const int min_topk_lb_rank = topkLbHeap.Front();
+        for (int userID = 0; userID < n_user; userID++) {
             if (prune_l[userID]) {
                 continue;
             }
             int tmp_ub = rank_ub_l[userID];
-            if (global_lb < tmp_ub) {
+            if (min_topk_lb_rank < tmp_ub) {
                 prune_l[userID] = true;
             }
         }
@@ -84,7 +67,7 @@ namespace ReverseMIPS {
 
         int topk_1 = topk - 1;
         for (; userID < n_user; userID++) {
-            if(prune_l[userID]){
+            if (prune_l[userID]) {
                 continue;
             }
             int tmp_lb = rank_l[userID];
