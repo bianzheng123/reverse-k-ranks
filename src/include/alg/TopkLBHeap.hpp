@@ -38,6 +38,7 @@ namespace ReverseMIPS {
                     topk_lb_heap_[topk_ - 1] = new_lb_rank;
                     std::push_heap(topk_lb_heap_.begin(), topk_lb_heap_.end(), std::less());
                     heap_lb_rank_ = topk_lb_heap_.front();
+                    assert(topk_lb_heap_[0] == topk_lb_heap_.front());
                 }
             }
             assert(cur_size_ <= topk_);

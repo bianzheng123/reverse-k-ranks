@@ -32,7 +32,7 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST_MODULE OFF)
-set(BUILD_ATTRIBUTION OFF)
+set(BUILD_ATTRIBUTION ON)
 
 set(BUILD_PROGRESS ON)
 
@@ -83,8 +83,8 @@ if (USE_CUDA)
 
     set_source_files_properties(src/app/BatchRunMergeRankByInterval.cpp PROPERTIES LANGUAGE CUDA)
     add_executable(brmrbi src/app/BatchRunMergeRankByInterval.cpp)
-    target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(brmrbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(brmrbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
     set_target_properties(brmrbi PROPERTIES POSITION_INDEPENDENT_CODE ON)
     set_property(TARGET brmrbi PROPERTY CXX_STANDARD "17")
     set_property(TARGET brmrbi PROPERTY CXX_STANDARD_REQUIRED ON)
