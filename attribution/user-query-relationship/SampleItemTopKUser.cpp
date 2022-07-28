@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     user.vectorNormalize();
 
     const int n_sample_item = 1000;
-    const int topk = 10;
+    const int topk = 100;
 
     std::vector<int> shuffle_item_idx_l(n_data_item);
     std::iota(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), 0);
@@ -161,13 +161,27 @@ int main(int argc, char **argv) {
             const int userID = result_rank_l[ID].userID_;
             user_freq_l[userID]++;
         }
-        WriteFrequency(user_freq_l, n_user, dataset_name, "reverse-k-rank-result");
+        WriteFrequency(user_freq_l, n_user, dataset_name, "reverse-k-rank-userID-frequency");
+
+        std::sort(user_freq_l.begin(), user_freq_l.end(), std::less());
+        WriteFrequency(user_freq_l, n_user, dataset_name, "reverse-k-rank-sorted-frequency");
+
+        assert(result_rank_l.size() == n_sample_item * topk);
+
+        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+            std::sort(result_rank_l.begin() + sampleID * topk,
+                      result_rank_l.begin() + (sampleID + 1) * topk,
+                      std::less());
+        }
+        WriteQueryDistribution(result_rank_l, shuffle_item_idx_l,
+                               n_sample_item, topk, dataset_name);
+
     }
 
     {
         std::vector<DistancePair> item_distance_l(n_user);
-        std::vector<int> user_freq_l(n_user);
-        user_freq_l.assign(n_user, 0);
+        std::vector<int> user_topk_freq_l(n_user);
+        user_topk_freq_l.assign(n_user, 0);
 
         const int report_every = 100;
         TimeRecord record;
@@ -188,9 +202,8 @@ int main(int argc, char **argv) {
 
             for (int topID = 0; topID < topk; topID++) {
                 const int userID = item_distance_l[topID].ID_;
-                user_freq_l[userID]++;
+                user_topk_freq_l[userID]++;
             }
-            WriteFrequency(user_freq_l, n_user, dataset_name, "top-k-result");
 
             if (sampleID != 0 && sampleID % report_every == 0) {
                 std::cout << "preprocessed " << sampleID / (0.01 * n_sample_item) << " %, "
@@ -198,8 +211,10 @@ int main(int argc, char **argv) {
                           << get_current_RSS() / 1000000 << " Mb \n";
                 record.reset();
             }
-
         }
+        WriteFrequency(user_topk_freq_l, n_user, dataset_name, "topk-userID-frequency");
+        std::sort(user_topk_freq_l.begin(), user_topk_freq_l.end(), std::less());
+        WriteFrequency(user_topk_freq_l, n_user, dataset_name, "topk-sort-frequency");
 
     }
 

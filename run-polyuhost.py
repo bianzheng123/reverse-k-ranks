@@ -178,7 +178,9 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    run_compress_topt()
+    os.system('cd build/attribution && ./sitku --dataset_name {}'.format('amazon'))
+
+    # run_compress_topt()
 
     # for n_sample in [64, 128, 256, 512]:
     #     for ds in ['goodreads', 'amazon', 'book-crossing']:

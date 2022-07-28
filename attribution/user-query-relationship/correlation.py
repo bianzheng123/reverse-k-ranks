@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 dataset_name = 'netflix-small'
 scatter_x = np.loadtxt(
-    '../../result/attribution/UserQueryRelationship/{}-reverse-k-rank-result.csv'.format(dataset_name),
+    '../../result/attribution/UserQueryRelationship/{}-reverse-k-rank-userID-frequency.csv'.format(dataset_name),
     delimiter='\n')
-scatter_y = np.loadtxt('../../result/attribution/UserQueryRelationship/{}-top-k-result.csv'.format(dataset_name),
+scatter_y = np.loadtxt('../../result/attribution/UserQueryRelationship/{}-topk-userID-frequency.csv'.format(dataset_name),
                        delimiter='\n')
 
 print("corr", np.corrcoef(scatter_x, scatter_y))
