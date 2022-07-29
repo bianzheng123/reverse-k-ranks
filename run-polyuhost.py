@@ -139,7 +139,8 @@ def run_compress_topt():
     index_size_l = [128, 256, 512, 1024]
     n_sample = 128
     # os.system('cd build && ./brtt --dataset_name {}'.format('amazon'))
-    os.system('cd build && ./brqrbb --dataset_name {}'.format('amazon'))
+    # os.system('cd build && ./brqrbb --dataset_name {}'.format('amazon'))
+    os.system('cd build && ./brmrbi --dataset_name {}'.format('amazon'))
     # for index_size in index_size_l:
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
@@ -178,6 +179,7 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
+    os.system('cd build && ./brmrbi --dataset_name {}'.format('amazon'))
     os.system('cd build/attribution && ./sitku --dataset_name {}'.format('amazon'))
 
     # run_compress_topt()

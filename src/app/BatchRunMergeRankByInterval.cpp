@@ -50,20 +50,20 @@ int main(int argc, char **argv) {
     const char *basic_dir = para.basic_dir.c_str();
     spdlog::info("MergeRankByInterval dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
-    {
-        TimeRecord record;
-        record.reset();
-
-        const int index_size_gb = 256;
-        BuildIndex(basic_dir, dataset_name, index_size_gb);
-
-        double build_index_time = record.get_elapsed_time_second();
-        spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
-    }
-
-    {
-        ScoreSampleMeasurePruneRatio::MeasurePruneRatio(dataset_name, basic_dir, 512);
-    }
+//    {
+//        TimeRecord record;
+//        record.reset();
+//
+//        const int index_size_gb = 256;
+//        BuildIndex(basic_dir, dataset_name, index_size_gb);
+//
+//        double build_index_time = record.get_elapsed_time_second();
+//        spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
+//    }
+//
+//    {
+//        ScoreSampleMeasurePruneRatio::MeasurePruneRatio(dataset_name, basic_dir, 512);
+//    }
 
     {
         //measure MergeRankByInterval
@@ -86,24 +86,24 @@ int main(int argc, char **argv) {
 
     }
 
-    {
-        //search on MergeRankByInterval
-        const int memory_n_sample = 512;
-        const uint64_t index_size_gb = 256;
-
-        char bitmap256_path[256];
-        sprintf(bitmap256_path, "../index/%s_MergeRankByInterval%ld.index",
-                dataset_name, index_size_gb);
-        char bitmap256_memory_path[256];
-        sprintf(bitmap256_memory_path, "../index/%s_MergeRankByInterval%ld_memory.index",
-                dataset_name, index_size_gb);
-        char memory_path[256];
-        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, memory_n_sample);
-
-        RunRetrieval(bitmap256_path, bitmap256_memory_path, memory_path,
-                     memory_n_sample, index_size_gb,
-                     basic_dir, dataset_name, "SSMergeRankByIntervalBatchRun");
-    }
+//    {
+//        //search on MergeRankByInterval
+//        const int memory_n_sample = 512;
+//        const uint64_t index_size_gb = 256;
+//
+//        char bitmap256_path[256];
+//        sprintf(bitmap256_path, "../index/%s_MergeRankByInterval%ld.index",
+//                dataset_name, index_size_gb);
+//        char bitmap256_memory_path[256];
+//        sprintf(bitmap256_memory_path, "../index/%s_MergeRankByInterval%ld_memory.index",
+//                dataset_name, index_size_gb);
+//        char memory_path[256];
+//        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, memory_n_sample);
+//
+//        RunRetrieval(bitmap256_path, bitmap256_memory_path, memory_path,
+//                     memory_n_sample, index_size_gb,
+//                     basic_dir, dataset_name, "SSMergeRankByIntervalBatchRun");
+//    }
 
 //    const char *toptID128_path = "../index/Amazon_TopTID128.index";
 //    const char *toptID256_path = "../index/Amazon_TopTID256.index";

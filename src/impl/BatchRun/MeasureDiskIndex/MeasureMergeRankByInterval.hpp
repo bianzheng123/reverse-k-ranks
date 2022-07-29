@@ -273,7 +273,8 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
                 exit(-1);
             }
 
-            const int n_query_item = query_item.n_vector_;
+//            const int n_query_item = query_item.n_vector_;
+            const int n_query_item = 50;
 
             // store queryIP
             TopkLBHeap topkLbHeap(topk);
