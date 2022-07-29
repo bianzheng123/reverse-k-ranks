@@ -6,6 +6,7 @@
 
 #include "ComputeItemIDScoreTable.hpp"
 #include "FileIO.hpp"
+#include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
 #include "util/TimeMemory.hpp"
