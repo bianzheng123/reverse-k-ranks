@@ -170,7 +170,7 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
 
         }
 
-        inline void ReadDisk(const int &labelID) {
+        inline void ReadDisk(const size_t &labelID) {
             uint64_t offset = n_data_item_ * labelID;
             uint64_t offset_byte = offset * sizeof(std::pair<int, int>);
             index_stream_.seekg(offset_byte, std::ios::beg);
@@ -321,8 +321,8 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
             }
             disk_ins_.FinishRetrieval();
 
-            exact_rank_refinement_time_ = disk_ins_.exact_rank_refinement_time_;
-            read_disk_time_ = disk_ins_.read_disk_time_;
+            exact_rank_refinement_time_ = disk_ins_.exact_rank_refinement_time_ / n_query_item;
+            read_disk_time_ = disk_ins_.read_disk_time_ / n_query_item;
 
             n_compute_lower_bound_ = disk_ins_.n_compute_lower_bound_ / n_query_item;
             n_compute_upper_bound_ = disk_ins_.n_compute_upper_bound_ / n_query_item;
@@ -344,9 +344,9 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, memory index search %.3fs\n\trank search prune ratio %.4f\n\tn_compute_lower_bound %ld, n_compute_upper_bound %ld, n_total_compute %ld\n\tn_total_candidate %ld\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, memory index search %.3fs, read disk %.3fs\n\trank search prune ratio %.4f\n\tn_compute_lower_bound %ld, n_compute_upper_bound %ld, n_total_compute %ld\n\tn_total_candidate %ld\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
-                    inner_product_time_, rank_bound_refinement_time_,
+                    inner_product_time_, rank_bound_refinement_time_, read_disk_time_,
                     rank_search_prune_ratio_,
                     n_compute_lower_bound_, n_compute_upper_bound_, n_total_compute_,
                     n_total_candidate_,
