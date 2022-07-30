@@ -68,7 +68,7 @@ namespace ReverseMIPS::BatchMeasureRetrievalTopT {
                     disk_ins,
                     //general retrieval
                     user, data_item);
-        }else{
+        } else {
             spdlog::error("not support measure disk index method name, program exit");
             exit(-1);
         }
@@ -85,7 +85,8 @@ namespace ReverseMIPS::BatchMeasureRetrievalTopT {
     void MeasureTopT(const std::string &method_name,
                      const char *disk_topt_index_path, const char *score_search_index_path,
                      const int &n_sample, const uint64_t &index_size_gb,
-                     const char *basic_dir, const char *dataset_name) {
+                     const char *basic_dir, const char *dataset_name,
+                     const int &n_eval_query) {
         //search on TopTIP
         int n_data_item, n_query_item, n_user, vec_dim;
         std::vector<VectorMatrix> data = readData(basic_dir, dataset_name,
@@ -114,7 +115,7 @@ namespace ReverseMIPS::BatchMeasureRetrievalTopT {
         TimeRecord record;
         for (int topk: topk_l) {
             record.reset();
-            index->Retrieval(query_item, topk);
+            index->Retrieval(query_item, topk, n_eval_query);
 
             double retrieval_time = record.get_elapsed_time_second();
             double ms_per_query = retrieval_time / n_query_item * 1000;
@@ -126,8 +127,7 @@ namespace ReverseMIPS::BatchMeasureRetrievalTopT {
             spdlog::info("{}", performance_str);
         }
 
-        int n_topk = (int) topk_l.size();
-
+        config.AddQueryInfo(n_eval_query);
         config.AddBuildIndexInfo(index->BuildIndexStatistics());
         config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     }

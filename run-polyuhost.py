@@ -181,12 +181,19 @@ if __name__ == '__main__':
 
     dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
 
-    for ds in dataset_l:
-        os.system(
-            'cd build/attribution && ./ppr --dataset_name {}'.format(ds))
+    # for ds in dataset_l:
+    #     os.system(
+    #         'cd build/attribution && ./ppr --dataset_name {}'.format(ds))
+    #
+    # for ds in ['amazon']:
+    #     os.system(
+    #         'cd build/attribution && ./pprnbi --dataset_name {}'.format(ds))
 
-    for ds in ['amazon']:
-        os.system(
-            'cd build/attribution && ./pprnbi --dataset_name {}'.format(ds))
+    os.system(
+        'cd build && ./brtt --dataset_name {}'.format('amazon'))
+    os.system(
+        'cd build && ./brqrbb --dataset_name {}'.format('amazon'))
+    os.system(
+        'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
 
     # run_compress_topt()

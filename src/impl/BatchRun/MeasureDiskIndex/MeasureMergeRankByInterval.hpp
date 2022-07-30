@@ -264,7 +264,7 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
 
         }
 
-        void Retrieval(const VectorMatrix &query_item, const int &topk) override {
+        void Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_eval_query_item) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -273,8 +273,11 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
                 exit(-1);
             }
 
-//            const int n_query_item = query_item.n_vector_;
-            const int n_query_item = 50;
+            if (n_eval_query_item > query_item.n_vector_) {
+                spdlog::info("n_eval_query_item larger than n_query, program exit");
+                exit(-1);
+            }
+            const int n_query_item = n_eval_query_item;
 
             // store queryIP
             TopkLBHeap topkLbHeap(topk);

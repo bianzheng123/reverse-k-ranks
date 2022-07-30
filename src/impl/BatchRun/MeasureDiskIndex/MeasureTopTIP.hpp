@@ -193,7 +193,7 @@ namespace ReverseMIPS::MeasureTopTIP {
 
         }
 
-        void Retrieval(const VectorMatrix &query_item, const int &topk) override {
+        void Retrieval(const VectorMatrix &query_item, const int &topk, const int& n_eval_query_item) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -202,11 +202,11 @@ namespace ReverseMIPS::MeasureTopTIP {
                 exit(-1);
             }
 
-            const int n_query_item = query_item.n_vector_;
-            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
-            for (int qID = 0; qID < n_query_item; qID++) {
-                query_heap_l[qID].resize(topk);
+            if (n_eval_query_item > query_item.n_vector_) {
+                spdlog::info("n_eval_query_item larger than n_query, program exit");
+                exit(-1);
             }
+            const int n_query_item = n_eval_query_item;
 
             // store queryIP
             TopkLBHeap topkLbHeap(topk);

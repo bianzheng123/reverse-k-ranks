@@ -78,7 +78,8 @@ namespace ReverseMIPS::BatchMeasureRetrievalQuadraticRankBoundByBitmap {
                                            const char *memory_index_path,
                                            const int &memory_n_sample, const int &disk_n_sample,
                                            const uint64_t &index_size_gb,
-                                           const char *basic_dir, const char *dataset_name, const char *method_name) {
+                                           const char *basic_dir, const char *dataset_name, const char *method_name,
+                                           const int& n_eval_query) {
         //search on TopTIP
         int n_data_item, n_query_item, n_user, vec_dim;
         std::vector<VectorMatrix> data = readData(basic_dir, dataset_name,
@@ -107,7 +108,7 @@ namespace ReverseMIPS::BatchMeasureRetrievalQuadraticRankBoundByBitmap {
         TimeRecord record;
         for (int topk: topk_l) {
             record.reset();
-            index->Retrieval(query_item, topk);
+            index->Retrieval(query_item, topk, n_eval_query);
 
             double retrieval_time = record.get_elapsed_time_second();
             double ms_per_query = retrieval_time / n_query_item * 1000;
@@ -119,6 +120,7 @@ namespace ReverseMIPS::BatchMeasureRetrievalQuadraticRankBoundByBitmap {
             spdlog::info("{}", performance_str);
         }
 
+        config.AddQueryInfo(n_eval_query);
         config.AddBuildIndexInfo(index->BuildIndexStatistics());
         config.WritePerformance(dataset_name, method_name, parameter_name);
     }

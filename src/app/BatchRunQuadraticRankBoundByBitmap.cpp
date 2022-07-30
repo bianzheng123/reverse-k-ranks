@@ -69,25 +69,32 @@ int main(int argc, char **argv) {
 //    }
 
     {
+        char index_basic_dir[128];
+        sprintf(index_basic_dir, "../index/%s_constructed_index",
+                dataset_name);
+
         //measure QuadraticRankBoundByBitmap
-        const int memory_n_sample = 128;
-        const int disk_n_sample = 2;
-//        const int disk_n_sample = 128;
+        const int memory_n_sample = 512;
+//        const int disk_n_sample = 2;
+        const int disk_n_sample = 128;
         const uint64_t index_size_gb = 256;
+        const int n_eval_query = 100;
 
         char bitmap256_path[256];
-        sprintf(bitmap256_path, "../index/%s_QuadraticRankBoundByBitmap%ld_n_sample_%d.index",
-                dataset_name, index_size_gb, disk_n_sample);
+        sprintf(bitmap256_path, "%s/%s_QuadraticRankBoundByBitmap%ld_n_sample_%d.index",
+                index_basic_dir, dataset_name, index_size_gb, disk_n_sample);
         char bitmap256_memory_path[256];
-        sprintf(bitmap256_memory_path, "../index/%s_QuadraticRankBoundByBitmap%ld_n_sample_%d_memory.index",
-                dataset_name, index_size_gb, disk_n_sample);
+        sprintf(bitmap256_memory_path, "%s/%s_QuadraticRankBoundByBitmap%ld_n_sample_%d_memory.index",
+                index_basic_dir, dataset_name, index_size_gb, disk_n_sample);
         char memory_path[256];
-        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, memory_n_sample);
+        sprintf(memory_path, "%s/%s_ScoreSearch%d.index",
+                index_basic_dir, dataset_name, memory_n_sample);
 
         BatchMeasureRetrievalQuadraticRankBoundByBitmap::MeasureQuadraticRankBoundByBitmap(
                 bitmap256_path, bitmap256_memory_path, memory_path,
                 memory_n_sample, disk_n_sample, index_size_gb,
-                basic_dir, dataset_name, "MeasureScoreSampleQuadraticRankBoundByBitmap");
+                basic_dir, dataset_name, "MeasureScoreSampleQuadraticRankBoundByBitmap",
+                n_eval_query);
 
     }
 

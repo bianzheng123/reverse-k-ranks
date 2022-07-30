@@ -85,6 +85,13 @@ namespace ReverseMIPS {
             this->config_l.emplace_back(str);
         }
 
+        void AddQueryInfo(const int n_eval_query){
+            char buff[128];
+            sprintf(buff, "number of evaluate query %d", n_eval_query);
+            std::string str(buff);
+            this->config_l.emplace_back(str);
+        }
+
         void WritePerformance(const char *dataset_name, const char *method_name,
                               const char *other_name) {
             char resPath[256];

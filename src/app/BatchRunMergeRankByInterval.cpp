@@ -66,23 +66,30 @@ int main(int argc, char **argv) {
 //    }
 
     {
+        char index_basic_dir[128];
+        sprintf(index_basic_dir, "../index/%s_constructed_index",
+                dataset_name);
+
         //measure MergeRankByInterval
         const int memory_n_sample = 512;
         const uint64_t index_size_gb = 256;
+        const int n_eval_query = 100;
 
         char disk_index_path[256];
-        sprintf(disk_index_path, "../index/%s_MergeRankByInterval%ld.index",
-                dataset_name, index_size_gb);
+        sprintf(disk_index_path, "%s/%s_MergeRankByInterval%ld.index",
+                index_basic_dir, dataset_name, index_size_gb);
         char disk_memory_index_path[256];
-        sprintf(disk_memory_index_path, "../index/%s_MergeRankByInterval%ld_memory.index",
-                dataset_name, index_size_gb);
+        sprintf(disk_memory_index_path, "%s/%s_MergeRankByInterval%ld_memory.index",
+                index_basic_dir, dataset_name, index_size_gb);
         char memory_index_path[256];
-        sprintf(memory_index_path, "../index/%s_ScoreSearch%d.index", dataset_name, memory_n_sample);
+        sprintf(memory_index_path, "%s/%s_ScoreSearch%d.index",
+                index_basic_dir, dataset_name, memory_n_sample);
 
         BatchMeasureMergeRankByInterval::MeasureMergeRankByInterval(
                 disk_index_path, disk_memory_index_path, memory_index_path,
                 memory_n_sample, index_size_gb,
-                basic_dir, dataset_name, "MeasureScoreSampleMergeRankByInterval");
+                basic_dir, dataset_name, "MeasureScoreSampleMergeRankByInterval",
+                n_eval_query);
 
     }
 
