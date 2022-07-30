@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-dataset_name = 'netflix-small'
+dataset_name = 'yelp'
 scatter_x = np.loadtxt(
     '../../result/attribution/UserQueryRelationship/{}-reverse-k-rank-userID-frequency.csv'.format(dataset_name),
     delimiter='\n')

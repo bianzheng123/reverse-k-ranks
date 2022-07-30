@@ -150,25 +150,25 @@ def run_compress_topt():
         #         ds, basic_dir, "ScoreSample", n_sample))
         # for ds in dataset_l:
         #     os.system('cd build && ./brtt --dataset_name {}'.format(ds))
-            # compress_method_l = ['CompressTopTIDBruteForce', 'CompressTopTIDIPBruteForce', 'CompressTopTIPBruteForce',
-            #                      'SSMergeIntervalIDByBitmap', 'SSMergeIntervalIDByInterval',
-            #                      'SSMergeQuadraticRankBoundByBitmap',
-            #                      'SSMergeRankByBitmap', 'SSMergeRankByInterval']
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "CompressTopTIDBruteForce", n_sample, index_size))
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "CompressTopTIDIPBruteForce", n_sample, index_size))
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "CompressTopTIPBruteForce", n_sample, index_size))
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "SSMergeQuadraticRankBoundByBitmap", n_sample, index_size))
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
+        # compress_method_l = ['CompressTopTIDBruteForce', 'CompressTopTIDIPBruteForce', 'CompressTopTIPBruteForce',
+        #                      'SSMergeIntervalIDByBitmap', 'SSMergeIntervalIDByInterval',
+        #                      'SSMergeQuadraticRankBoundByBitmap',
+        #                      'SSMergeRankByBitmap', 'SSMergeRankByInterval']
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+        #         ds, basic_dir, "CompressTopTIDBruteForce", n_sample, index_size))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+        #         ds, basic_dir, "CompressTopTIDIPBruteForce", n_sample, index_size))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+        #         ds, basic_dir, "CompressTopTIPBruteForce", n_sample, index_size))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+        #         ds, basic_dir, "SSMergeQuadraticRankBoundByBitmap", n_sample, index_size))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+        #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
 
 
 if __name__ == '__main__':
@@ -179,18 +179,14 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    os.system('cd build && ./brmrbi --dataset_name {}'.format('amazon'))
-    os.system('cd build/attribution && ./sitku --dataset_name {}'.format('amazon'))
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
+
+    for ds in dataset_l:
+        os.system(
+            'cd build/attribution && ./ppr --dataset_name {}'.format(ds))
+
+    for ds in ['amazon']:
+        os.system(
+            'cd build/attribution && ./pprnbi --dataset_name {}'.format(ds))
 
     # run_compress_topt()
-
-    # for n_sample in [64, 128, 256, 512]:
-    #     for ds in ['goodreads', 'amazon', 'book-crossing']:
-    #         os.system(
-    #             'cd build/attribution && ./mpr --dataset_name {} --n_sample {} --basic_dir {}'.format(
-    #                 ds, n_sample, basic_dir))
-    #
-    # for ds in ['movielens-small', 'movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']:
-    #     for topk in [10, 50]:
-    #         os.system(
-    #             'cd build/attribution && ./udd {} {}'.format(ds, topk))

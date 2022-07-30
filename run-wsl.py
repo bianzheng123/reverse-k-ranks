@@ -157,9 +157,11 @@ def run():
 if __name__ == '__main__':
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     dataset_l = ['fake-normal']
-    # dataset_l = ['fakebig']
-    # dataset_l = ['fake-uniform']
-    # dataset_l = ['netflix-small']
-    # dataset_l = ['fake-small', 'fake']
-    # dataset_l = ['fake']
-    run()
+
+    for ds in dataset_l:
+        os.system(
+            'cd build/attribution && ./ppr --dataset_name {}'.format(ds))
+        os.system(
+            'cd build/attribution && ./pprnbi --dataset_name {}'.format(ds))
+
+    # run()

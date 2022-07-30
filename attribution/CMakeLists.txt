@@ -7,7 +7,7 @@
 set(FINISH OFF)
 
 if (FINISH)
-    add_executable(kmrt kmeans/KMeansRunTime.cpp)
+    add_executable(kmrt run-time/KMeansRunTime.cpp)
     target_include_directories(kmrt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(kmrt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
@@ -23,7 +23,7 @@ if (FINISH)
     target_include_directories(npd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(npd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    add_executable(srt run-time/ScoreRunTime.cpp)
+    add_executable(srt run-time/ScoreComputeRunTime.cpp)
     target_include_directories(srt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(srt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
@@ -70,8 +70,27 @@ if (USE_CUDA)
     set_property(TARGET sitku PROPERTY CXX_STANDARD_REQUIRED ON)
     set_property(TARGET sitku PROPERTY CXX_EXTENSIONS OFF)
 
+    set_source_files_properties(print-prune-ratio/PrintPruneRatio.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
+    target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(ppr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+    set_target_properties(ppr PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_property(TARGET ppr PROPERTY CXX_STANDARD "17")
+    set_property(TARGET ppr PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET ppr PROPERTY CXX_EXTENSIONS OFF)
+
 else ()
     add_executable(sitku user-query-relationship/SampleItemTopKUser.cpp)
     target_include_directories(sitku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(sitku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
+    target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(ppr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
 endif ()
+
+add_executable(pprnbi print-prune-ratio/PrintPruneRatioNoBuildIndex.cpp)
+target_include_directories(pprnbi PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(pprnbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+

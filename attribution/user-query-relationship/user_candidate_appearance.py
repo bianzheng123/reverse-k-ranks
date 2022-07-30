@@ -14,7 +14,7 @@ dataset_m = {
 def show_bin_hist(bins, hist, name):
     # 直方图会进行统计各个区间的数值
     fig, ax = plt.subplots()
-    ax.bar(bins, hist, color='#000000')  # alpha设置透明度，0为完全透明
+    ax.bar(bins, hist, color='#828487')  # alpha设置透明度，0为完全透明
 
     # ax.set(xlim=(-5, 10), xticks=np.arange(-5, 10),  # )
     #        ylim=(0, 1e8), yticks=np.arange(10000000, 90000000))
@@ -31,20 +31,10 @@ def show_bin_hist(bins, hist, name):
 
 if __name__ == '__main__':
     # for dataset_name in ['fake-normal']:
-    for dataset_name in ['fake-normal', 'netflix-small']:
-        for topk in [10, 50]:
-            # dataset_name = 'movielens-27m'
-            # topk = 50
-            fname = '../../result/rank/{}-BatchDiskBruteForce-top{}-userID.csv'.format(dataset_name, topk)
-            userID_l = np.genfromtxt(fname, delimiter=',', dtype=np.int32).reshape(-1)
-            user_freq_l = np.zeros(dataset_m[dataset_name][0], dtype=np.int32)
-            for userID in userID_l:
-                user_freq_l[userID] += 1
-
-            np.savetxt('{}-top{}-reverse-k-rank-userID-frequency.txt'.format(dataset_name, topk), user_freq_l, fmt="%d")
-            user_sort_freq_l = np.sort(user_freq_l)
-            np.savetxt('{}-top{}-reverse-k-rank-sorted-frequency.txt'.format(dataset_name, topk), user_sort_freq_l,
-                       fmt="%d")
-            print(user_sort_freq_l)
-            show_bin_hist(np.arange(len(user_sort_freq_l)), user_sort_freq_l,
-                          '{}-top{}-reverse-k-rank-sorted-frequency'.format(dataset_name, topk))
+    for dataset_name in ['movielens-27m']:
+        topk = 100
+        fname = '../../result/attribution/UserQueryRelationship/{}-reverse-k-rank-sorted-frequency.csv'.format(
+            dataset_name)
+        user_sort_freq_l = np.loadtxt(fname, delimiter='\n', dtype=np.int32).reshape(-1)
+        show_bin_hist(np.arange(len(user_sort_freq_l)), user_sort_freq_l,
+                      '{}-top{}-reverse-k-rank-sorted-frequency'.format(dataset_name, topk))
