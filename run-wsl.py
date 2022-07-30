@@ -40,6 +40,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'SSMergeRankByBitmap': 'n_sample_20-index_size_gb_50',
         'SSMergeRankByInterval': 'n_sample_20-index_size_gb_50',
         'SSMergeRankByIntervalBatchRun': 'n_sample_512-index_size_gb_256',
+        'SSQueryAssignFrequent': 'n_sample_20-index_size_gb_50',
 
         'CAGrid': 'codeword_32',
         'CAFullInt': 'scale_100',
@@ -97,10 +98,11 @@ def run():
         # 'ScoreSample',
         # 'SSComputeAll',
 
-        'SSMergeQuadraticRankBoundByBitmap',
+        # 'SSMergeQuadraticRankBoundByBitmap',
         # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
         # 'SSMergeRankByInterval',
         # 'SSMergeRankByIntervalBatchRun',
+        'SSQueryAssignFrequent',
 
         # 'CAGrid',
         # 'CAFullDim',
@@ -134,9 +136,10 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
 
-        os.system(
-            'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSQueryAssignFrequent'))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))
@@ -155,13 +158,7 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal']
 
-    for ds in dataset_l:
-        os.system(
-            'cd build/attribution && ./ppr --dataset_name {}'.format(ds))
-        os.system(
-            'cd build/attribution && ./pprnbi --dataset_name {}'.format(ds))
-
-    # run()
+    run()
