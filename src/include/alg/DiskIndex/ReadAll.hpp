@@ -6,6 +6,7 @@
 #define REVERSE_K_RANKS_READALL_HPP
 
 #include "alg/TopkLBHeap.hpp"
+#include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
 
 #include <memory>

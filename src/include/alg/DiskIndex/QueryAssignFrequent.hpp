@@ -35,8 +35,7 @@ namespace ReverseMIPS {
         }
 
         inline void ReadDisk(const int &user_offset, const int &start_idx, const int &read_count) {
-            int64_t offset = (int64_t) user_offset * n_data_item_ + start_idx;
-            offset *= sizeof(double);
+            int64_t offset = sizeof(double) * user_offset * n_data_item_ + start_idx;
             int64_t read_count_offset = read_count * sizeof(double);
             index_stream_.seekg(offset, std::ios::beg);
             index_stream_.read((char *) disk_cache_.get(), read_count_offset);
