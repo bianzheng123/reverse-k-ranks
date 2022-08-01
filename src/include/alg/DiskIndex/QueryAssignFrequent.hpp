@@ -35,8 +35,8 @@ namespace ReverseMIPS {
         }
 
         inline void ReadDisk(const int &user_offset, const int &start_idx, const int &read_count) {
-            int64_t offset = sizeof(double) * user_offset * n_data_item_ + start_idx;
-            int64_t read_count_offset = read_count * sizeof(double);
+            uint64_t offset = sizeof(double) * (user_offset * n_data_item_ + start_idx);
+            uint64_t read_count_offset = sizeof(double) * read_count;
             index_stream_.seekg(offset, std::ios::beg);
             index_stream_.read((char *) disk_cache_.get(), read_count_offset);
         }
@@ -92,6 +92,7 @@ namespace ReverseMIPS {
                 n_store_user_ = n_user;
 //                n_store_user_ = n_user / 5 * 4;
             }
+            assert(n_store_user_ <= n_user_);
             spdlog::info("n_store_user {}", n_store_user_);
         }
 
@@ -103,7 +104,7 @@ namespace ReverseMIPS {
             if (!index_stream) {
                 spdlog::error("error in writing index");
             }
-            index_stream.read((char *) query_rank_l.data(), n_sample_query * sample_topk * sizeof(UserRankElement));
+            index_stream.read((char *) query_rank_l.data(), sizeof(UserRankElement) * n_sample_query * sample_topk);
             index_stream.close();
 
             std::vector<int> user_freq_l(n_user_);
@@ -157,7 +158,7 @@ namespace ReverseMIPS {
         void BuildIndexLoop(const double *distance_cache, const int &userID) {
             // distance_cache: write_every * n_data_item_, n_write <= write_every
             if (store_user_offset_l_[userID] != -1) {
-                uint64_t offset = n_data_item_ * sizeof(double);
+                uint64_t offset = sizeof(double) * n_data_item_;
                 out_stream_.write((char *) distance_cache, offset);
             }
         }

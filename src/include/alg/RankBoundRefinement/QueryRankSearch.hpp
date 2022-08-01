@@ -8,6 +8,7 @@
 #include "struct/DistancePair.hpp"
 #include <memory>
 #include <spdlog/spdlog.h>
+#include <numeric>
 
 //TODO rewrite query rank search
 /*
@@ -26,7 +27,9 @@ namespace ReverseMIPS {
         inline QueryRankSearch() {}
 
         inline QueryRankSearch(const int &n_sample, const int &n_data_item,
-                          const int &n_user) {
+                               const int &n_user,
+                               const char *query_distribution_path,
+                               const int &n_sample_query, const int &sample_topk) {
             const int sample_every = n_data_item / n_sample;
             this->n_sample_ = n_sample;
             this->sample_every_ = sample_every;
@@ -44,7 +47,7 @@ namespace ReverseMIPS {
             }
             assert(n_sample > 0);
 
-            Preprocess();
+            Preprocess(query_distribution_path, n_sample_query, sample_topk);
 
         }
 
@@ -52,7 +55,8 @@ namespace ReverseMIPS {
             LoadIndex(index_path);
         }
 
-        void Preprocess() {
+        void Preprocess(const char *query_distribution_path,
+                        const int &n_sample_query, const int &sample_topk) {
             for (size_t known_rank_idx = 0, idx = 0;
                  known_rank_idx < n_data_item_ && idx < n_sample_; known_rank_idx += sample_every_, idx++) {
                 known_rank_idx_l_[idx] = known_rank_idx;
@@ -68,6 +72,43 @@ namespace ReverseMIPS {
 
             spdlog::info("rank bound: sample_every {}, n_sample {}, n_max_disk_read {}", sample_every_, n_sample_,
                          n_max_disk_read_);
+            LoadQueryDistribution(query_distribution_path, n_sample_query, sample_topk);
+        }
+
+        void LoadQueryDistribution(const char *query_distribution_path,
+                                   const int &n_sample_query, const int &sample_topk) {
+
+            std::vector<UserRankElement> query_rank_l(n_sample_query * sample_topk);
+            std::ifstream index_stream = std::ifstream(query_distribution_path, std::ios::binary | std::ios::in);
+            if (!index_stream) {
+                spdlog::error("error in writing index");
+            }
+            index_stream.read((char *) query_rank_l.data(), n_sample_query * sample_topk * sizeof(UserRankElement));
+            index_stream.close();
+
+            std::vector<int> topk_rank_freq_l(n_data_item_);
+            topk_rank_freq_l.assign(n_data_item_, 0);
+            for (int sampleID = 0; sampleID < n_sample_query; sampleID++) {
+                const UserRankElement element = query_rank_l[sampleID * sample_topk + sample_topk - 1];
+                topk_rank_freq_l[element.userID_]++;
+            }
+
+//            std::vector<int> freq_userID_l(n_user_);
+//            std::iota(freq_userID_l.data(), freq_userID_l.data() + n_user_, 0);
+//            std::sort(freq_userID_l.data(), freq_userID_l.data() + n_user_,
+//                      [&](int i1, int i2) { return user_freq_l[i1] > user_freq_l[i2]; });
+//
+//            std::sort(freq_userID_l.begin(), freq_userID_l.begin() + n_store_user_, std::less());
+//
+//            store_user_offset_l_.resize(n_user_);
+//            store_user_offset_l_.assign(n_user_, -1);
+//            int store_offset = 0;
+//            for (int freqID = 0; freqID < n_store_user_; freqID++) {
+//                const int userID = freq_userID_l[freqID];
+//                store_user_offset_l_[userID] = store_offset;
+//                store_offset++;
+//            }
+
         }
 
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
