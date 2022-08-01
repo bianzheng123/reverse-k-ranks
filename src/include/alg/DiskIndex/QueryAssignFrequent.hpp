@@ -178,7 +178,7 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                     const VectorMatrix& user, const VectorMatrix& data_item,
+                     const VectorMatrix &user, const VectorMatrix &data_item,
                      std::vector<bool> &prune_l, TopkLBHeap &topk_lb_heap) {
 
             //read disk and fine binary search
@@ -189,7 +189,8 @@ namespace ReverseMIPS {
                 if (prune_l[userID] && rank_lb_l[userID] + 1 <= topk_lb_rank) {
                     continue;
                 }
-                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID, user, data_item);
+                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID, user,
+                                               data_item);
                 topk_lb_heap.Update(rank);
                 prune_l[userID] = true;
             }
@@ -208,14 +209,15 @@ namespace ReverseMIPS {
         }
 
         int GetSingleRank(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
-                          const VectorMatrix& user, const VectorMatrix& data_item) {
+                          const VectorMatrix &user, const VectorMatrix &data_item) {
             const int user_offset = store_user_offset_l_[userID];
             int rank;
             if (user_offset == -1) {
-                const double* user_vecs = user.getVector(userID);
+                const double *user_vecs = user.getVector(userID);
                 rank = exact_rank_ins_.QueryRankByCandidate(user_vecs, userID, data_item, queryIP);
                 rank++;
             } else {
+                assert(0 <= user_offset && user_offset < n_store_user_);
                 int end_idx = rank_lb;
                 int start_idx = rank_ub;
                 assert(0 <= start_idx && start_idx <= end_idx && end_idx <= n_data_item_);

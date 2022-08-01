@@ -194,8 +194,4 @@ if __name__ == '__main__':
     # os.system(
     #     'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
 
-    # for ds in ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads', 'amazon']:
-    for ds in ['amazon']:
-        os.system(
-            'cd build/attribution && ./prb --dataset_name {}'.format(ds))
-    # run_compress_topt()
+    run_compress_topt()
