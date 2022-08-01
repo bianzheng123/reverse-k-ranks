@@ -94,7 +94,6 @@ add_executable(pprnbi print-prune-ratio/PrintPruneRatioNoBuildIndex.cpp)
 target_include_directories(pprnbi PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(pprnbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-add_executable(pn print-norm/PrintNorm.cpp)
-target_include_directories(pn PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(pn PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
+add_executable(prb score-sample-reason/PrintRankBound.cpp)
+target_include_directories(prb PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(prb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})

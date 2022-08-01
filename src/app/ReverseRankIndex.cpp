@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
-    } else if (method_name == "SSMergeRankByInterval") {
+    } else if (method_name == "                                                                          ") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
         spdlog::info("input parameter: n_sample {}, index_size_gb {}",
