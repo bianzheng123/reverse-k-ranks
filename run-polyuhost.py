@@ -187,11 +187,14 @@ if __name__ == '__main__':
     #     os.system(
     #         'cd build/attribution && ./pprnbi --dataset_name {}'.format(ds))
 
-    os.system(
-        'cd build && ./brtt --dataset_name {}'.format('amazon'))
-    os.system(
-        'cd build && ./brqrbb --dataset_name {}'.format('amazon'))
-    os.system(
-        'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
+    # os.system(
+    #     'cd build && ./brtt --dataset_name {}'.format('amazon'))
+    # os.system(
+    #     'cd build && ./brqrbb --dataset_name {}'.format('amazon'))
+    # os.system(
+    #     'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
 
+    for ds in ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads', 'amazon']:
+        os.system(
+            'cd build/attribution && ./pn --dataset_name {}'.format(ds))
     # run_compress_topt()
