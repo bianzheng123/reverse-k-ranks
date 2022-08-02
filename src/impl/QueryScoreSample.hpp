@@ -2,14 +2,14 @@
 // Created by BianZheng on 2022/8/1.
 //
 
-#ifndef REVERSE_KRANKS_QUERYRANKSAMPLE_HPP
-#define REVERSE_KRANKS_QUERYRANKSAMPLE_HPP
+#ifndef REVERSE_KRANKS_QUERYSCORESAMPLE_HPP
+#define REVERSE_KRANKS_QUERYSCORESAMPLE_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkLBHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QueryRankSearch.hpp"
+#include "alg/RankBoundRefinement/QueryScoreSearch.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -27,7 +27,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::QueryRankSample {
+namespace ReverseMIPS::QueryScoreSample {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -39,7 +39,7 @@ namespace ReverseMIPS::QueryRankSample {
         }
 
         //rank search
-        QueryRankSearch rank_ins_;
+        QueryScoreSearch rank_ins_;
         //read disk
         ReadAll disk_ins_;
 
@@ -60,7 +60,7 @@ namespace ReverseMIPS::QueryRankSample {
         std::unique_ptr<double[]> query_cache_;
 
         Index(//rank search
-                QueryRankSearch &rank_ins,
+                QueryScoreSearch &rank_ins,
                 //disk index
                 ReadAll &disk_ins,
                 //general retrieval
@@ -211,7 +211,8 @@ namespace ReverseMIPS::QueryRankSample {
         user.vectorNormalize();
 
         //rank search
-        QueryRankSearch rank_ins(n_sample, n_data_item, n_user);
+        QueryScoreSearch rank_ins(n_sample, n_data_item, n_user,
+                                  query_distribution_path, n_sample_query, sample_topk);
 
         //disk index
         ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);
@@ -243,4 +244,4 @@ namespace ReverseMIPS::QueryRankSample {
     }
 
 }
-#endif //REVERSE_KRANKS_QUERYRANKSAMPLE_HPP
+#endif //REVERSE_KRANKS_QUERYSCORESAMPLE_HPP

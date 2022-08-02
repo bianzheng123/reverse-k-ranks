@@ -11,7 +11,7 @@
 #include "BruteForce/BatchDiskBruteForce.hpp"
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
-#include "QueryRankSample.hpp"
+//#include "QueryScoreSample.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -94,23 +94,23 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: none");
         index = MemoryBruteForce::BuildIndex(data_item, user);
 
-    } else if (method_name == "QueryRankSample") {
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-
-        const int n_sample_query = 1000;
-        const int sample_topk = 100;
-        char query_distribution_path[256];
-        sprintf(query_distribution_path,
-                "../index/sample_query_distribution/%s-query-distribution-n_sample_query_%d-topk_%d.index",
-                dataset_name, n_sample_query, sample_topk);
-
-        index = QueryRankSample::BuildIndex(data_item, user, index_path, n_sample,
-                                            query_distribution_path, n_sample_query, sample_topk);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
-                n_sample, index_size_gb);
+    } else if (method_name == "QueryScoreSample") {
+//        const int n_sample = para.n_sample;
+//        const uint64_t index_size_gb = para.index_size_gb;
+//        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
+//                     n_sample, index_size_gb);
+//
+//        const int n_sample_query = 1000;
+//        const int sample_topk = 100;
+//        char query_distribution_path[256];
+//        sprintf(query_distribution_path,
+//                "../index/sample_query_distribution/%s-query-distribution-n_sample_query_%d-topk_%d.index",
+//                dataset_name, n_sample_query, sample_topk);
+//
+//        index = QueryScoreSample::BuildIndex(data_item, user, index_path, n_sample,
+//                                            query_distribution_path, n_sample_query, sample_topk);
+//        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
+//                n_sample, index_size_gb);
 
     } else {
         spdlog::error("not such method");

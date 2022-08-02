@@ -123,9 +123,9 @@ endif ()
 #set_property(TARGET brtt PROPERTY CXX_EXTENSIONS OFF)
 
 if (BUILD_PROGRESS)
-#    add_executable(progress src/app/Progress.cpp)
-#    target_include_directories(progress PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-#    target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
+    add_executable(progress src/app/Progress.cpp)
+    target_include_directories(progress PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
 endif ()
 
 add_executable(t1 test.cpp)

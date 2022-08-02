@@ -26,6 +26,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'CompressTopTIDBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
 
         'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
+        'RSCompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
         'CompressTopTIPBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
 
         'RankSample': 'n_sample_20',
@@ -90,6 +91,7 @@ def run():
         # 'CompressTopTIPBruteForce',
         # 'CompressTopTIDBruteForceBatchRun',
         # 'CompressTopTIPBruteForceBatchRun',
+        'RSCompressTopTIPBruteForce',
         # 'DiskBruteForce',
         'MemoryBruteForce',
 
@@ -102,7 +104,7 @@ def run():
         # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
         # 'SSMergeRankByInterval',
         # 'SSMergeRankByIntervalBatchRun',
-        'SSQueryAssignFrequent',
+        # 'SSQueryAssignFrequent',
 
         # 'CAGrid',
         # 'CAFullDim',
@@ -124,6 +126,7 @@ def run():
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
         # os.system('cd build && ./brtt --dataset_name {}'.format(ds))
         # os.system('cd build && ./brqrbb --dataset_name {}'.format(ds))
         # os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
@@ -139,7 +142,7 @@ def run():
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSQueryAssignFrequent'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSQueryAssignFrequent'))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))

@@ -2,8 +2,8 @@
 // Created by BianZheng on 2022/8/1.
 //
 
-#ifndef REVERSE_KRANKS_QUERYRANKSEARCH_HPP
-#define REVERSE_KRANKS_QUERYRANKSEARCH_HPP
+#ifndef REVERSE_KRANKS_QUERYSCORESEARCH_HPP
+#define REVERSE_KRANKS_QUERYSCORESEARCH_HPP
 
 #include "struct/DistancePair.hpp"
 #include <memory>
@@ -16,7 +16,7 @@
  */
 namespace ReverseMIPS {
 
-    class QueryRankSearch {
+    class QueryScoreSearch {
 
         size_t n_sample_, sample_every_, n_data_item_, n_user_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
@@ -24,12 +24,12 @@ namespace ReverseMIPS {
     public:
         size_t n_max_disk_read_;
 
-        inline QueryRankSearch() {}
+        inline QueryScoreSearch() {}
 
-        inline QueryRankSearch(const int &n_sample, const int &n_data_item,
-                               const int &n_user,
-                               const char *query_distribution_path,
-                               const int &n_sample_query, const int &sample_topk) {
+        inline QueryScoreSearch(const int &n_sample, const int &n_data_item,
+                                const int &n_user,
+                                const char *query_distribution_path,
+                                const int &n_sample_query, const int &sample_topk) {
             const int sample_every = n_data_item / n_sample;
             this->n_sample_ = n_sample;
             this->sample_every_ = sample_every;
@@ -51,7 +51,7 @@ namespace ReverseMIPS {
 
         }
 
-        inline QueryRankSearch(const char *index_path) {
+        inline QueryScoreSearch(const char *index_path) {
             LoadIndex(index_path);
         }
 
@@ -93,6 +93,22 @@ namespace ReverseMIPS {
                 topk_rank_freq_l[element.rank_ - 1]++;
             }
 
+            int min_topk_idx = -1;
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                if (topk_rank_freq_l[itemID] != 0) {
+                    min_topk_idx = itemID;
+                    break;
+                }
+            }
+            int max_topk_idx = -1;
+            for (int itemID = n_data_item_ - 1; itemID >= 0; itemID--) {
+                if (topk_rank_freq_l[itemID] != 0) {
+                    max_topk_idx = itemID;
+                    break;
+                }
+            }
+            assert(min_topk_idx != -1 && max_topk_idx != -1);
+            assert(0 <= min_topk_idx && min_topk_idx <= max_topk_idx && max_topk_idx < n_data_item_);
 
 
             store_user_offset_l_.resize(n_user_);
@@ -225,4 +241,4 @@ namespace ReverseMIPS {
 
     };
 }
-#endif //REVERSE_KRANKS_QUERYRANKSEARCH_HPP
+#endif //REVERSE_KRANKS_QUERYSCORESEARCH_HPP
