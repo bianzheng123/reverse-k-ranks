@@ -82,10 +82,12 @@ namespace ReverseMIPS {
         }
 
         void ComputeParameter(const int &n_user, const int &n_data_item, const size_t &index_size_gb) {
-            size_t single_user_size = n_data_item * sizeof(double);
-            size_t capacity_size_byte = index_size_gb * 1024 * 1024 * 1024;
-            size_t origin_size_byte = n_user * n_data_item * sizeof(double);
-            size_t n_store_user_big_size = capacity_size_byte / single_user_size;
+            const uint64_t n_data_item_int64 = n_data_item;
+            const uint64_t n_user_int64 = n_user;
+            uint64_t single_user_size = sizeof(double) * n_data_item_int64;
+            uint64_t capacity_size_byte = index_size_gb * 1024 * 1024 * 1024;
+            uint64_t origin_size_byte = sizeof(double) * n_user_int64 * n_data_item_int64;
+            uint64_t n_store_user_big_size = capacity_size_byte / single_user_size;
             n_store_user_ = (int) n_store_user_big_size;
             if (origin_size_byte <= capacity_size_byte) {
                 spdlog::info("index size larger than the whole score table, use whole table setting");

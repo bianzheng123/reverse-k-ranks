@@ -83,31 +83,26 @@ namespace ReverseMIPS {
             if (!index_stream) {
                 spdlog::error("error in writing index");
             }
-            index_stream.read((char *) query_rank_l.data(), n_sample_query * sample_topk * sizeof(UserRankElement));
+            index_stream.read((char *) query_rank_l.data(), sizeof(UserRankElement) * n_sample_query * sample_topk);
             index_stream.close();
 
             std::vector<int> topk_rank_freq_l(n_data_item_);
             topk_rank_freq_l.assign(n_data_item_, 0);
             for (int sampleID = 0; sampleID < n_sample_query; sampleID++) {
                 const UserRankElement element = query_rank_l[sampleID * sample_topk + sample_topk - 1];
-                topk_rank_freq_l[element.userID_]++;
+                topk_rank_freq_l[element.rank_ - 1]++;
             }
 
-//            std::vector<int> freq_userID_l(n_user_);
-//            std::iota(freq_userID_l.data(), freq_userID_l.data() + n_user_, 0);
-//            std::sort(freq_userID_l.data(), freq_userID_l.data() + n_user_,
-//                      [&](int i1, int i2) { return user_freq_l[i1] > user_freq_l[i2]; });
-//
-//            std::sort(freq_userID_l.begin(), freq_userID_l.begin() + n_store_user_, std::less());
-//
-//            store_user_offset_l_.resize(n_user_);
-//            store_user_offset_l_.assign(n_user_, -1);
-//            int store_offset = 0;
-//            for (int freqID = 0; freqID < n_store_user_; freqID++) {
-//                const int userID = freq_userID_l[freqID];
-//                store_user_offset_l_[userID] = store_offset;
-//                store_offset++;
-//            }
+
+
+            store_user_offset_l_.resize(n_user_);
+            store_user_offset_l_.assign(n_user_, -1);
+            int store_offset = 0;
+            for (int freqID = 0; freqID < n_store_user_; freqID++) {
+                const int userID = freq_userID_l[freqID];
+                store_user_offset_l_[userID] = store_offset;
+                store_offset++;
+            }
 
         }
 

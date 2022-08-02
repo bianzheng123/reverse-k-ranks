@@ -269,8 +269,48 @@ namespace ReverseMIPS::MeasureQuadraticRankBoundByBitmap {
             }
             item_cand_l.assign(n_data_item_, false);
 
-            return std::make_pair(0, n_data_item_);
+            const int rank_lb = rank_bound_pair.first;
+            const int rank_ub = rank_bound_pair.second;
+            int bucket_lb = std::floor(std::sqrt(1.0 * (rank_lb + 1) / sample_unit_));
+            int bucket_ub = std::floor(std::sqrt(1.0 * (rank_ub + 1) / sample_unit_));
+            if ((rank_ub + 1) % sample_unit_ == 0 && rank_ub != 0) {
+                bucket_ub--;
+            }
+
+            if (bucket_lb >= n_rank_bound_) {
+                bucket_lb = n_rank_bound_ - 1;
+            }
+            const int read_count = bucket_lb - bucket_ub + 1;
+            assert(0 <= bucket_ub && bucket_ub <= bucket_lb && bucket_lb < n_rank_bound_);
+            disk_cache_.ReadDisk(index_stream_, user_labelID,
+                                 bucket_ub, read_count,
+                                 candidate_bitmap_);
+
+            candidate_bitmap_.AssignVector(n_data_item_, item_cand_l);
+            int n_cand = 0;
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                if (item_cand_l[itemID]) {
+                    n_cand++;
+                }
+            }
+            return std::make_pair(n_cand, n_cand);
         }
+
+//        inline std::pair<size_t, size_t> ReadDisk(const std::pair<int, int> &rank_bound_pair, const int &user_labelID,
+//                                                  std::vector<bool> &item_cand_l) {
+//            assert(0 <= rank_bound_pair.second && rank_bound_pair.second <= rank_bound_pair.first &&
+//                   rank_bound_pair.first <= n_data_item_);
+//            if (rank_bound_pair.first == rank_bound_pair.second) {
+//                return std::make_pair(0, 0);
+//            }
+//            if (rank_bound_pair.first >= topt_) {
+//                item_cand_l.assign(n_data_item_, true);
+//                return std::make_pair(n_data_item_, n_data_item_);
+//            }
+//            item_cand_l.assign(n_data_item_, false);
+//
+//            return std::make_pair(0, n_data_item_);
+//        }
 
         void FinishRetrieval() {
             index_stream_.close();
@@ -361,7 +401,7 @@ namespace ReverseMIPS::MeasureQuadraticRankBoundByBitmap {
 
         }
 
-        void Retrieval(const VectorMatrix &query_item, const int &topk, const int& n_eval_query_item) override {
+        void Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_eval_query_item) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
