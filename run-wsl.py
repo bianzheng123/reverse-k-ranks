@@ -96,7 +96,7 @@ def run():
         'MemoryBruteForce',
 
         # 'GridIndex',
-        # 'RankSample',
+        'RankSample',
         # 'ScoreSample',
         # 'SSComputeAll',
 
@@ -135,7 +135,7 @@ def run():
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
 

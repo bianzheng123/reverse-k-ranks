@@ -133,7 +133,7 @@ target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DI
 target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
 
 if (BUILD_ATTRIBUTION)
-    add_subdirectory(attribution)
+#    add_subdirectory(attribution)
 endif ()
 
 if (BUILD_TEST_MODULE)

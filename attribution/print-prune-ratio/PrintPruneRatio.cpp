@@ -79,8 +79,8 @@ int main(int argc, char **argv) {
         char rs512_path[256];
         sprintf(rs512_path, "%s/%s_RankSearch512.index", index_basic_dir, dataset_name);
 
-        RankSearch rs_128(128, n_data_item, n_user);
-        RankSearch rs_512(512, n_data_item, n_user);
+        RankSearch rs_128(128, n_data_item, n_user, n_data_item);
+        RankSearch rs_512(512, n_data_item, n_user, n_data_item);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);

@@ -209,10 +209,10 @@ namespace ReverseMIPS::RankSample {
         user.vectorNormalize();
 
         //rank search
-        RankSearch rank_ins(n_sample, n_data_item, n_user);
+        RankSearch rank_ins(n_sample, n_data_item, n_user, n_data_item);
 
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path, (int) rank_ins.n_max_disk_read_);
+        ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);
         disk_ins.PreprocessData(user, data_item);
 
         //Compute Score Table

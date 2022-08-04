@@ -6,6 +6,7 @@
 #define REVERSE_KRANKS_RANKSEARCH_HPP
 
 #include "struct/DistancePair.hpp"
+#include <iostream>
 #include <memory>
 #include <spdlog/spdlog.h>
 
@@ -13,21 +14,22 @@ namespace ReverseMIPS {
 
     class RankSearch {
 
-        size_t n_sample_, sample_every_, n_data_item_, n_user_;
+        size_t n_sample_, sample_every_, n_data_item_, n_user_, topt_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
-        size_t n_max_disk_read_;
 
         inline RankSearch() {}
 
         inline RankSearch(const int &n_sample, const int &n_data_item,
-                          const int &n_user) {
-            const int sample_every = n_data_item / n_sample;
+                          const int &n_user, const int &topt) {
+            assert(topt <= n_data_item);
+            const int sample_every = topt / n_sample;
             this->n_sample_ = n_sample;
             this->sample_every_ = sample_every;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
+            this->topt_ = topt;
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
             if (sample_every >= n_data_item) {
@@ -50,43 +52,40 @@ namespace ReverseMIPS {
 
         void Preprocess() {
             for (size_t known_rank_idx = 0, idx = 0;
-                 known_rank_idx < n_data_item_ && idx < n_sample_; known_rank_idx += sample_every_, idx++) {
-                known_rank_idx_l_[idx] = known_rank_idx;
+                 known_rank_idx < topt_ && idx < n_sample_; known_rank_idx += sample_every_, idx++) {
+                known_rank_idx_l_[idx] = (int) known_rank_idx;
                 assert(idx < n_sample_);
             }
 
-//            for (int rankID = 0; rankID < n_sample_; rankID++) {
-//                std::cout << known_rank_idx_l_[rankID] << " ";
-//            }
-//            std::cout << std::endl;
+            for (int rankID = 0; rankID < n_sample_; rankID++) {
+                std::cout << known_rank_idx_l_[rankID] << " ";
+            }
+            std::cout << std::endl;
 
-            n_max_disk_read_ = n_data_item_;
-
-            spdlog::info("rank bound: sample_every {}, n_sample {}, n_max_disk_read {}", sample_every_, n_sample_,
-                         n_max_disk_read_);
+            spdlog::info("rank bound: sample_every {}, n_sample {}", sample_every_, n_sample_);
         }
 
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
             for (int crankID = 0; crankID < n_sample_; crankID++) {
                 unsigned int rankID = known_rank_idx_l_[crankID];
-                bound_distance_table_[userID * n_sample_ + crankID] = distance_ptr[rankID].dist_;
+                bound_distance_table_[n_sample_ * userID + crankID] = distance_ptr[rankID].dist_;
             }
         }
 
         void LoopPreprocess(const double *distance_ptr, const int &userID) {
             for (int crankID = 0; crankID < n_sample_; crankID++) {
                 unsigned int rankID = known_rank_idx_l_[crankID];
-                bound_distance_table_[userID * n_sample_ + crankID] = distance_ptr[rankID];
+                bound_distance_table_[n_sample_ * userID + crankID] = distance_ptr[rankID];
             }
         }
 
-        inline bool
+        inline void
         CoarseBinarySearch(const double &queryIP, const int &userID,
                            int &rank_lb, int &rank_ub, double &IP_lb, double &IP_ub) const {
             double *search_iter = bound_distance_table_.get() + userID * n_sample_;
 
             int bucket_ub = 0;
-            int bucket_lb = n_sample_ - 1;
+            int bucket_lb = (int) n_sample_ - 1;
 
             double *iter_begin = search_iter;
             double *iter_end = search_iter + bucket_lb + 1;
@@ -96,12 +95,8 @@ namespace ReverseMIPS {
                                                   return arrIP > queryIP;
                                               });
             unsigned int bucket_idx = bucket_ub + (lb_ptr - iter_begin);
-            unsigned int tmp_rank_lb = known_rank_idx_l_[bucket_idx];
+            unsigned int tmp_rank_lb = bucket_idx == n_sample_ ? n_data_item_ : known_rank_idx_l_[bucket_idx];
             unsigned int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
-
-            if (tmp_rank_ub <= rank_ub && rank_lb <= tmp_rank_lb) {
-                return false;
-            }
 
             if (lb_ptr == iter_end) {
                 rank_ub = (int) tmp_rank_ub;
@@ -117,9 +112,8 @@ namespace ReverseMIPS {
             }
 
             assert(IP_lb <= queryIP && queryIP <= IP_ub);
-            assert(rank_lb - rank_ub <= n_max_disk_read_);
-
-            return false;
+            assert(rank_lb - rank_ub <=
+                   std::max(known_rank_idx_l_[n_sample_ - 1], (int) n_data_item_ - known_rank_idx_l_[n_sample_ - 1]));
         }
 
         void RankBound(const std::vector<double> &queryIP_l,
@@ -131,8 +125,8 @@ namespace ReverseMIPS {
                 assert(upper_rank <= lower_rank);
                 double queryIP = queryIP_l[userID];
 
-                double IP_lb = queryIPbound_l[userID].first;
-                double IP_ub = queryIPbound_l[userID].second;
+                double &IP_lb = queryIPbound_l[userID].first;
+                double &IP_ub = queryIPbound_l[userID].second;
 
                 CoarseBinarySearch(queryIP, userID,
                                    lower_rank, upper_rank, IP_lb, IP_ub);
@@ -153,7 +147,7 @@ namespace ReverseMIPS {
             out_stream_.write((char *) &sample_every_, sizeof(size_t));
             out_stream_.write((char *) &n_data_item_, sizeof(size_t));
             out_stream_.write((char *) &n_user_, sizeof(size_t));
-            out_stream_.write((char *) &n_max_disk_read_, sizeof(size_t));
+            out_stream_.write((char *) &topt_, sizeof(size_t));
 
             out_stream_.write((char *) known_rank_idx_l_.get(), (int64_t) (n_sample_ * sizeof(int)));
             out_stream_.write((char *) bound_distance_table_.get(), (int64_t) (n_user_ * n_sample_ * sizeof(double)));
@@ -172,7 +166,7 @@ namespace ReverseMIPS {
             index_stream.read((char *) &sample_every_, sizeof(size_t));
             index_stream.read((char *) &n_data_item_, sizeof(size_t));
             index_stream.read((char *) &n_user_, sizeof(size_t));
-            index_stream.read((char *) &n_max_disk_read_, sizeof(size_t));
+            index_stream.read((char *) &topt_, sizeof(size_t));
 
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             index_stream.read((char *) known_rank_idx_l_.get(), (int64_t) (sizeof(int) * n_sample_));

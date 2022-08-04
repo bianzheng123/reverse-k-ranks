@@ -202,7 +202,7 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &n_interval, const uint64_t &index_size_gb) {
+                                      const int &n_sample, const uint64_t &index_size_gb) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -216,14 +216,15 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
         int topt = int(topt_big_size);
         if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
-            topt = n_data_item;
+//            topt = n_data_item;
+            topt = n_data_item / 2;
         }
         TopTIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
         disk_ins.BuildIndexPreprocess();
         disk_ins.PreprocessData(user, data_item);
 
         //hash search
-        RankSearch rank_bound_ins(n_interval, n_data_item, n_user);
+        RankSearch rank_bound_ins(n_sample, n_data_item, n_user, topt);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);
