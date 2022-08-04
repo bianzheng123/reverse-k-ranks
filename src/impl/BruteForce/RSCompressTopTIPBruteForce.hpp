@@ -216,8 +216,8 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
         int topt = int(topt_big_size);
         if (index_size_byte >= predict_index_size_byte) {
             spdlog::info("index size larger than the whole score table, use whole table setting");
-//            topt = n_data_item;
-            topt = n_data_item / 2;
+            topt = n_data_item;
+//            topt = n_data_item / 2;
         }
         TopTIP disk_ins(n_user, n_data_item, vec_dim, index_path, topt);
         disk_ins.BuildIndexPreprocess();
