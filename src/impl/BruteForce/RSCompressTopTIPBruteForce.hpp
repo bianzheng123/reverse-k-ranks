@@ -98,7 +98,8 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                 exit(-1);
             }
 
-            const int n_query_item = query_item.n_vector_;
+//            const int n_query_item = query_item.n_vector_;
+            const int n_query_item = 10;
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
             for (int qID = 0; qID < n_query_item; qID++) {
                 query_heap_l[qID].resize(topk);

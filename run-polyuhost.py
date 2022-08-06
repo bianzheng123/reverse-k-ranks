@@ -134,7 +134,8 @@ def run_compute_all_n_codeword():
 
 
 def run_compress_topt():
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
+    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
+    dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['amazon']
     index_size_l = [256]
     n_sample = 128
