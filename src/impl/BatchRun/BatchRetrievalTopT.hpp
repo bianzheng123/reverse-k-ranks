@@ -89,7 +89,20 @@ namespace ReverseMIPS {
                 n_sample, index_size_gb,
                 user, data_item);
 
-        std::vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
+        std::vector<int> warmup_topk_l{5, 10};
+        for (int topk: warmup_topk_l) {
+            record.reset();
+            index->Retrieval(query_item, topk, 10);
+
+            double retrieval_time = record.get_elapsed_time_second();
+            double ms_per_query = retrieval_time / n_query_item * 1000;
+
+            std::string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
+            spdlog::info("finish warmup top-{}", topk);
+            spdlog::info("{}", performance_str);
+        }
+
+        std::vector<int> topk_l{50, 40, 30, 20, 10};
 //        std::vector<int> topk_l{30, 20, 10};
 
         char parameter_name[256];
@@ -101,7 +114,7 @@ namespace ReverseMIPS {
         for (int topk: topk_l) {
             record.reset();
             printf("before retrieval\n");
-            std::vector<std::vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_query_item);
+            std::vector<std::vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 50);
             printf("after retrieval\n");
 
             double retrieval_time = record.get_elapsed_time_second();
