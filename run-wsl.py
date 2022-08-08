@@ -90,20 +90,20 @@ def run():
         # 'CompressTopTIDBruteForce',
         # 'CompressTopTIPBruteForce',
         # 'CompressTopTIDBruteForceBatchRun',
-        # 'CompressTopTIPBruteForceBatchRun',
-        'RSCompressTopTIPBruteForce',
+        'CompressTopTIPBruteForceBatchRun',
+        # 'RSCompressTopTIPBruteForce',
         # 'DiskBruteForce',
         'MemoryBruteForce',
 
         # 'GridIndex',
-        'RankSample',
+        # 'RankSample',
         # 'ScoreSample',
         # 'SSComputeAll',
 
         # 'SSMergeQuadraticRankBoundByBitmap',
         # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
         # 'SSMergeRankByInterval',
-        # 'SSMergeRankByIntervalBatchRun',
+        'SSMergeRankByIntervalBatchRun',
         # 'SSQueryAssignFrequent',
 
         # 'CAGrid',
@@ -126,16 +126,16 @@ def run():
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
-        # os.system('cd build && ./brtt --dataset_name {}'.format(ds))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
+        os.system('cd build && ./brtt --dataset_name {}'.format(ds))
         # os.system('cd build && ./brqrbb --dataset_name {}'.format(ds))
-        # os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
+        os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
 
@@ -161,7 +161,7 @@ def run():
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    # dataset_l = ['fake-normal']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal']
 
     run()

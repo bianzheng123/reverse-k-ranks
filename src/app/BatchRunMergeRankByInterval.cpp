@@ -60,57 +60,63 @@ int main(int argc, char **argv) {
 //        double build_index_time = record.get_elapsed_time_second();
 //        spdlog::info("finish preprocess and save the index, build index time {}s", build_index_time);
 //    }
-//
+
 //    {
 //        ScoreSampleMeasurePruneRatio::MeasurePruneRatio(dataset_name, basic_dir, 512);
 //    }
 
+//    {
+//        char index_basic_dir[128];
+//        sprintf(index_basic_dir, "../index/%s_constructed_index",
+//                dataset_name);
+//
+//        //measure MergeRankByInterval
+//        const int memory_n_sample = 512;
+//        const uint64_t index_size_gb = 256;
+//        const int n_eval_query = 100;
+//
+//        char disk_index_path[256];
+//        sprintf(disk_index_path, "%s/%s_MergeRankByInterval%ld.index",
+//                index_basic_dir, dataset_name, index_size_gb);
+//        char disk_memory_index_path[256];
+//        sprintf(disk_memory_index_path, "%s/%s_MergeRankByInterval%ld_memory.index",
+//                index_basic_dir, dataset_name, index_size_gb);
+//        char memory_index_path[256];
+//        sprintf(memory_index_path, "%s/%s_ScoreSearch%d.index",
+//                index_basic_dir, dataset_name, memory_n_sample);
+//
+//        BatchMeasureMergeRankByInterval::MeasureMergeRankByInterval(
+//                disk_index_path, disk_memory_index_path, memory_index_path,
+//                memory_n_sample, index_size_gb,
+//                basic_dir, dataset_name, "MeasureScoreSampleMergeRankByInterval",
+//                n_eval_query);
+//
+//    }
+
     {
         char index_basic_dir[128];
+//        sprintf(index_basic_dir, "../index");
         sprintf(index_basic_dir, "../index/%s_constructed_index",
                 dataset_name);
 
-        //measure MergeRankByInterval
+        //search on MergeRankByInterval
         const int memory_n_sample = 512;
         const uint64_t index_size_gb = 256;
-        const int n_eval_query = 100;
 
-        char disk_index_path[256];
-        sprintf(disk_index_path, "%s/%s_MergeRankByInterval%ld.index",
+        char bitmap256_path[256];
+        sprintf(bitmap256_path, "%s/%s_MergeRankByInterval%ld.index",
                 index_basic_dir, dataset_name, index_size_gb);
-        char disk_memory_index_path[256];
-        sprintf(disk_memory_index_path, "%s/%s_MergeRankByInterval%ld_memory.index",
+        char bitmap256_memory_path[256];
+        sprintf(bitmap256_memory_path, "%s/%s_MergeRankByInterval%ld_memory.index",
                 index_basic_dir, dataset_name, index_size_gb);
-        char memory_index_path[256];
-        sprintf(memory_index_path, "%s/%s_ScoreSearch%d.index",
+        char memory_path[256];
+        sprintf(memory_path, "%s/%s_ScoreSearch%d.index",
                 index_basic_dir, dataset_name, memory_n_sample);
 
-        BatchMeasureMergeRankByInterval::MeasureMergeRankByInterval(
-                disk_index_path, disk_memory_index_path, memory_index_path,
-                memory_n_sample, index_size_gb,
-                basic_dir, dataset_name, "MeasureScoreSampleMergeRankByInterval",
-                n_eval_query);
-
+        RunRetrieval(bitmap256_path, bitmap256_memory_path, memory_path,
+                     memory_n_sample, index_size_gb,
+                     basic_dir, dataset_name, "SSMergeRankByIntervalBatchRun");
     }
-
-//    {
-//        //search on MergeRankByInterval
-//        const int memory_n_sample = 512;
-//        const uint64_t index_size_gb = 256;
-//
-//        char bitmap256_path[256];
-//        sprintf(bitmap256_path, "../index/%s_MergeRankByInterval%ld.index",
-//                dataset_name, index_size_gb);
-//        char bitmap256_memory_path[256];
-//        sprintf(bitmap256_memory_path, "../index/%s_MergeRankByInterval%ld_memory.index",
-//                dataset_name, index_size_gb);
-//        char memory_path[256];
-//        sprintf(memory_path, "../index/%s_ScoreSearch%d.index", dataset_name, memory_n_sample);
-//
-//        RunRetrieval(bitmap256_path, bitmap256_memory_path, memory_path,
-//                     memory_n_sample, index_size_gb,
-//                     basic_dir, dataset_name, "SSMergeRankByIntervalBatchRun");
-//    }
 
 //    const char *toptID128_path = "../index/Amazon_TopTID128.index";
 //    const char *toptID256_path = "../index/Amazon_TopTID256.index";
