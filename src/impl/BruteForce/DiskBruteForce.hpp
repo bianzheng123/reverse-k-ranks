@@ -45,7 +45,8 @@ namespace ReverseMIPS::DiskBruteForce {
             this->n_cache = std::min(user_.n_vector_, 10000);
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>>
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query) override {
             TimeRecord query_record;
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
@@ -53,10 +54,17 @@ namespace ReverseMIPS::DiskBruteForce {
                 spdlog::error("error in writing index");
             }
 
+            if (n_execute_query > query_item.n_vector_) {
+                spdlog::error("n_execute_query larger than n_query_item, program exit");
+                exit(-1);
+            }
+
             if (topk > user_.n_vector_) {
                 spdlog::error("top-k is too large, program exit");
                 exit(-1);
             }
+
+            spdlog::info("n_query_item {}", n_execute_query);
 
 //            size_t avail_memory = get_avail_memory();
             size_t a = user_.n_vector_;
@@ -66,7 +74,7 @@ namespace ReverseMIPS::DiskBruteForce {
             n_cache = std::min(a, b);
 //            n_cache = a > b ? b : a;
             std::vector<double> distance_cache(n_cache * n_data_item_);
-            int n_query_item = query_item.n_vector_;
+            int n_query_item = n_execute_query;
             int n_user = user_.n_vector_;
             int n_batch = (int) (n_user / n_cache);
             int n_remain = (int) (n_user % n_cache);

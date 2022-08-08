@@ -62,7 +62,7 @@ namespace ReverseMIPS::RankSampleMeasurePruneRatio {
         }
 
         void AddBuildIndexTime(const double &build_index_time) {
-            char buff[128];
+            char buff[256];
             sprintf(buff, "build index time %.3fs", build_index_time);
             std::string str(buff);
             this->config_l.emplace_back(str);
@@ -70,7 +70,7 @@ namespace ReverseMIPS::RankSampleMeasurePruneRatio {
 
         void WritePerformance(const char *dataset_name, const char *method_name,
                               const char *other_name) {
-            char resPath[256];
+            char resPath[1024];
             if (strcmp(other_name, "") == 0) {
                 std::sprintf(resPath, "../result/vis_performance/%s-%s-config.txt",
                              dataset_name, method_name);

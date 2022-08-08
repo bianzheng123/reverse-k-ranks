@@ -89,21 +89,30 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
 
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>>
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
+
+            if (n_execute_query > query_item.n_vector_) {
+                spdlog::error("n_execute_query larger than n_query_item, program exit");
+                exit(-1);
+            }
 
             if (topk > user_.n_vector_) {
                 spdlog::error("top-k is too large, program exit");
                 exit(-1);
             }
 
-//            const int n_query_item = query_item.n_vector_;
-            const int n_query_item = 200;
+            spdlog::info("n_query_item {}", n_execute_query);
+            const int n_query_item = n_execute_query;
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
             for (int qID = 0; qID < n_query_item; qID++) {
                 query_heap_l[qID].resize(topk);
             }
+
+            const int query_report_every = 50;
+            TimeRecord record;
 
             // store queryIP
             TopkLBHeap topkLbHeap(topk);
@@ -152,6 +161,13 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
                 }
                 assert(query_heap_l[queryID].size() == topk);
+
+                if(queryID != 0 && queryID % query_report_every == 0){
+                    std::cout << "query " << queryID / (0.01 * n_query_item) << " %, "
+                              << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                              << get_current_RSS() / 1000000 << " Mb \n";
+                    record.reset();
+                }
             }
             disk_ins_.FinishRetrieval();
 

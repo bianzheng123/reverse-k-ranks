@@ -53,7 +53,7 @@ namespace ReverseMIPS::PrintPruneRatio {
 
         void WritePerformance(const char *dataset_name, const char *method_name,
                               const char *other_name) {
-            char resPath[256];
+            char resPath[1024];
             if (strcmp(other_name, "") == 0) {
                 std::sprintf(resPath, "../../result/vis_performance/%s-%s-config.txt",
                              dataset_name, method_name);
@@ -97,7 +97,7 @@ namespace ReverseMIPS::PrintPruneRatio {
                              const int &n_query_item, const int &topk,
                              const char *dataset_name, const char *method_name, const char *other_name) {
             assert(prune_ratio_l.size() == n_query_item);
-            char resPath[256];
+            char resPath[1024];
             std::sprintf(resPath, "../../result/attribution/PrintPruneRatio/%s-%s-top%d-%s-config.txt",
                          dataset_name, method_name, topk, other_name);
             std::ofstream file(resPath);

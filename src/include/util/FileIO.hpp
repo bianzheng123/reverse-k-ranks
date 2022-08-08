@@ -85,6 +85,13 @@ namespace ReverseMIPS {
             this->config_l.emplace_back(str);
         }
 
+        void AddExecuteQuery(const int& n_execute_query){
+            char buff[128];
+            sprintf(buff, "number of query item %d", n_execute_query);
+            std::string str(buff);
+            this->config_l.emplace_back(str);
+        }
+
         void AddQueryInfo(const int n_eval_query){
             char buff[128];
             sprintf(buff, "number of evaluate query %d", n_eval_query);

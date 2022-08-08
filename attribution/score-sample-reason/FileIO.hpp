@@ -55,7 +55,7 @@ namespace ReverseMIPS::PrintRankBound {
                              const int &n_user, const int &topk,
                              const char *dataset_name, const char *method_name, const char *other_name) {
             assert(rank_bound_l.size() == n_user);
-            char resPath[256];
+            char resPath[1024];
             std::sprintf(resPath, "../../result/attribution/PrintRankBound/%s-%s-top%d-%s-config.txt",
                          dataset_name, method_name, topk, other_name);
             std::ofstream file(resPath);

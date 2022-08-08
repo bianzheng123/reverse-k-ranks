@@ -101,7 +101,7 @@ namespace ReverseMIPS {
         for (int topk: topk_l) {
             record.reset();
             printf("before retrieval\n");
-            std::vector<std::vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk);
+            std::vector<std::vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_query_item);
             printf("after retrieval\n");
 
             double retrieval_time = record.get_elapsed_time_second();

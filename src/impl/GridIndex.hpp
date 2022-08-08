@@ -68,8 +68,14 @@ namespace ReverseMIPS::GridIndex {
             query_ptr_ = std::make_unique<double[]>(vec_dim_);
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>>
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query) override {
             ResetTimer();
+
+            if (n_execute_query > query_item.n_vector_) {
+                spdlog::error("n_execute_query larger than n_query_item, program exit");
+                exit(-1);
+            }
 
             if (topk > user_.n_vector_) {
                 spdlog::error("top-k is too large, program exit");
@@ -77,7 +83,8 @@ namespace ReverseMIPS::GridIndex {
             }
 
             //coarse binary search
-            const int n_query_item = query_item.n_vector_;
+            spdlog::info("n_query_item {}", n_execute_query);
+            const int n_query_item = n_execute_query;
 
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
