@@ -191,11 +191,11 @@ if __name__ == '__main__':
     #     os.system(
     #         'cd build/attribution && ./pprnbi --dataset_name {}'.format(ds))
 
-    # os.system(
-    #     'cd build && ./brtt --dataset_name {}'.format('amazon'))
+    os.system(
+        'cd build && ./brtt --dataset_name {}'.format('amazon'))
     # os.system(
     #     'cd build && ./brqrbb --dataset_name {}'.format('amazon'))
-    os.system(
-        'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
+    # os.system(
+    #     'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
 
     # run_compress_topt()
