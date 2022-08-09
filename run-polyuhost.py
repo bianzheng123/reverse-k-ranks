@@ -195,7 +195,7 @@ if __name__ == '__main__':
         'cd build && ./brtt --dataset_name {}'.format('amazon'))
     # os.system(
     #     'cd build && ./brqrbb --dataset_name {}'.format('amazon'))
-    # os.system(
-    #     'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
+    os.system(
+        'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
 
     # run_compress_topt()

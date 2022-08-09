@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
 
         //search on TopTIP
         const int index_size_gb = 256;
-        const int n_sample = 128;
+        const int n_sample = 512;
         char disk_path[256];
         sprintf(disk_path, "%s/%s_TopTIP%d.index",
                 index_basic_dir, dataset_name, index_size_gb);

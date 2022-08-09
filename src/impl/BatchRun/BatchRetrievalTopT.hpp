@@ -89,7 +89,7 @@ namespace ReverseMIPS {
                 n_sample, index_size_gb,
                 user, data_item);
 
-        std::vector<int> warmup_topk_l{5, 10};
+        std::vector<int> warmup_topk_l{10, 10};
         for (int topk: warmup_topk_l) {
             record.reset();
             index->Retrieval(query_item, topk, 10);

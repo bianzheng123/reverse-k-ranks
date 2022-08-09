@@ -158,6 +158,12 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
                 }
                 assert(query_heap_l[queryID].size() == topk);
+
+                const double this_prune_ratio = 1.0 * (n_user_ - n_candidate) / n_user_;
+                spdlog::info(
+                        "finish queryID {}, prune_ratio {}, accu time: inner product {}s, memory index search {}s, exact_rank_refinement_time {}s, read_disk_time {}s",
+                        queryID, this_prune_ratio, inner_product_time_, hash_search_time_,
+                        disk_ins_.exact_rank_time_, disk_ins_.read_disk_time_);
             }
             disk_ins_.FinishRetrieval();
 
