@@ -148,9 +148,12 @@ namespace ReverseMIPS::SSComputeAll {
                 }
                 assert(n_candidate >= topk);
                 interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                spdlog::info("finish memory index search n_candidate {} queryID {}", n_candidate, queryID);
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(user_, data_item_, queryIP_l_, prune_l_);
+                size_t n_compute = 0;
+                disk_ins_.GetRank(user_, data_item_, queryIP_l_, prune_l_, n_compute);
+                spdlog::info("finish compute rank n_compute {}, queryID {}", n_compute, queryID);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];

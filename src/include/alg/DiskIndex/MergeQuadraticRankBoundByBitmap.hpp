@@ -308,9 +308,11 @@ namespace ReverseMIPS {
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<std::pair<double, double>> &queryIPbound_l,
-                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
+                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
+                     size_t& n_compute) {
 
             //read disk and fine binary search
+            n_compute = 0;
             n_candidate_ = 0;
             for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID]) {
@@ -319,7 +321,7 @@ namespace ReverseMIPS {
                 const int user_labelID = (int) merge_label_l_[userID];
                 read_disk_record_.reset();
                 std::pair<int, int> rank_bound_pair = std::make_pair(rank_lb_l[userID], rank_ub_l[userID]);
-                ReadDisk(rank_bound_pair, user_labelID, item_cand_l_);
+                ReadDisk(rank_bound_pair, user_labelID, item_cand_l_, n_compute);
                 read_disk_time_ += read_disk_record_.get_elapsed_time_second();
 
                 assert(0 <= rank_ub_l[userID] && rank_ub_l[userID] <= rank_lb_l[userID] &&
@@ -350,7 +352,7 @@ namespace ReverseMIPS {
         }
 
         inline void ReadDisk(const std::pair<int, int> &rank_bound_pair, const int &user_labelID,
-                             std::vector<bool> &item_cand_l) {
+                             std::vector<bool> &item_cand_l, size_t &n_compute) {
             assert(0 <= rank_bound_pair.second && rank_bound_pair.second <= rank_bound_pair.first &&
                    rank_bound_pair.first <= n_data_item_);
             if (rank_bound_pair.first == rank_bound_pair.second) {
@@ -380,10 +382,9 @@ namespace ReverseMIPS {
                                  candidate_bitmap_);
 
             candidate_bitmap_.AssignVector(n_data_item_, item_cand_l);
-            int n_cand = 0;
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 if (item_cand_l[itemID]) {
-                    n_cand++;
+                    n_compute++;
                 }
             }
         }

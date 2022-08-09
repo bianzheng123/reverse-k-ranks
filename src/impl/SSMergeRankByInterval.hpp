@@ -136,7 +136,6 @@ namespace ReverseMIPS::SSMergeRankByInterval {
                     queryIP_l_[userID] = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
                 }
                 this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
-                spdlog::info("finish compute user IP queryID {}", queryID);
 
                 //rank bound refinement
                 rank_bound_refinement_record_.reset();
@@ -154,11 +153,12 @@ namespace ReverseMIPS::SSMergeRankByInterval {
                 }
                 assert(n_candidate >= topk);
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
-                spdlog::info("finish prune user candidate in memory index queryID {}", queryID);
+                spdlog::info("finish memory index search n_candidate {} queryID {}", n_candidate, queryID);
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_);
-                spdlog::info("finish get rank {}", queryID);
+                size_t n_compute = 0;
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_, n_candidate, n_compute);
+                spdlog::info("finish compute rank n_compute {} queryID {}", n_compute, queryID);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];

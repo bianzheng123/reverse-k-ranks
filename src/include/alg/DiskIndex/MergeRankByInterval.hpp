@@ -163,11 +163,15 @@ namespace ReverseMIPS {
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<std::pair<double, double>> &queryIPbound_l,
-                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
+                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
+                     const int &n_total_candidate, size_t &n_compute) {
             is_compute_l_.assign(n_merge_user_, false);
+            n_compute = 0;
 
             //read disk and fine binary search
             n_candidate_ = 0;
+            TimeRecord record;
+            record.reset();
             for (int iter_userID = 0; iter_userID < n_user_; iter_userID++) {
                 if (prune_l[iter_userID]) {
                     continue;
@@ -217,6 +221,7 @@ namespace ReverseMIPS {
                                 continue;
                             }
                             item_cand_l_[itemID] = true;
+                            n_compute++;
                         }
 
                         loc_rk = exact_rank_ins_.QueryRankByCandidate(queryIPbound_l[userID], queryIP,
@@ -228,6 +233,16 @@ namespace ReverseMIPS {
 
                     user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
                     n_candidate_++;
+
+                    if (n_candidate_ % 500 == 0) {
+                        std::cout << "compute rank " << n_candidate_ / (0.01 * n_total_candidate) << " %, "
+                                  << "n_compute " << n_compute << ", "
+                                  << "read_disk_time " << read_disk_time_ << ", "
+                                  << "compute_rank_time " << exact_rank_refinement_time_ << ", "
+                                  << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                                  << get_current_RSS() / 1000000 << " Mb \n";
+                        record.reset();
+                    }
 
                 }
                 is_compute_l_[iter_labelID] = true;

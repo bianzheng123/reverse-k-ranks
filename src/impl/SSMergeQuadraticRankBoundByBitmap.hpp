@@ -93,7 +93,8 @@ namespace ReverseMIPS::SSMergeQuadraticRankBoundByBitmap {
 
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk, const int& n_execute_query) override {
+        std::vector<std::vector<UserRankElement>>
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -152,9 +153,13 @@ namespace ReverseMIPS::SSMergeQuadraticRankBoundByBitmap {
                 }
                 assert(n_candidate >= topk);
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                spdlog::info("finish memory index search n_candidate {} queryID {}", n_candidate, queryID);
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_);
+                size_t n_compute = 0;
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_,
+                                  n_compute);
+                spdlog::info("finish compute rank n_compute {} queryID {}", n_compute, queryID);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];

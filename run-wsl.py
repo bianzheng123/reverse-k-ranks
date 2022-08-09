@@ -88,10 +88,10 @@ def run():
     method_name_l = [
         'BatchDiskBruteForce',
         # 'CompressTopTIDBruteForce',
-        # 'CompressTopTIPBruteForce',
+        'CompressTopTIPBruteForce',
         # 'CompressTopTIDBruteForceBatchRun',
-        'CompressTopTIPBruteForceBatchRun',
-        # 'RSCompressTopTIPBruteForce',
+        # 'CompressTopTIPBruteForceBatchRun',
+        'RSCompressTopTIPBruteForce',
         # 'DiskBruteForce',
         'MemoryBruteForce',
 
@@ -102,8 +102,8 @@ def run():
 
         # 'SSMergeQuadraticRankBoundByBitmap',
         # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
-        # 'SSMergeRankByInterval',
-        'SSMergeRankByIntervalBatchRun',
+        'SSMergeRankByInterval',
+        # 'SSMergeRankByIntervalBatchRun',
         # 'SSQueryAssignFrequent',
 
         # 'CAGrid',
@@ -125,11 +125,11 @@ def run():
     for ds in dataset_l:
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
-        os.system('cd build && ./brtt --dataset_name {}'.format(ds))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
+        # os.system('cd build && ./brtt --dataset_name {}'.format(ds))
         # os.system('cd build && ./brqrbb --dataset_name {}'.format(ds))
-        os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
+        # os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
 
@@ -141,7 +141,7 @@ def run():
 
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSQueryAssignFrequent'))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
@@ -155,13 +155,13 @@ def run():
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAItemPQ'))
 
     type_arr = ['userID', 'IP', 'rank']
-    topk_l = [10, 20, 30, 40, 50, 60, 70]
+    topk_l = [10, 20, 30, 40, 50]
     # topk_l = [10, 20]
     cmp_file_all(method_name_l, type_arr, dataset_l, topk_l)
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal']
 
     run()

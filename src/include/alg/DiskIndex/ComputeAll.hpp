@@ -42,15 +42,18 @@ namespace ReverseMIPS {
 
         void GetRank(const VectorMatrix &user, const VectorMatrix &data_item,
                      const std::vector<double> &queryIP_l,
-                     const std::vector<bool> &prune_l) {
+                     const std::vector<bool> &prune_l,
+                     size_t &n_compute) {
 
             //read disk and fine binary search
+            n_compute = 0;
             int n_candidate = 0;
             exact_rank_refinement_record_.reset();
             for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID]) {
                     continue;
                 }
+                n_compute += n_data_item_;
                 const double queryIP = queryIP_l[userID];
 
                 int base_rank = 1;
