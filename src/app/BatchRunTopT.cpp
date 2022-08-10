@@ -82,27 +82,27 @@ int main(int argc, char **argv) {
 //                                               basic_dir, dataset_name,
 //                                               n_eval_query);
 //    }
-//
-//    {
-//        char index_basic_dir[128];
-//        sprintf(index_basic_dir, "../index/%s_constructed_index",
-//                dataset_name);
-//
-//        //search on TopTIP
-//        const int index_size_gb = 256;
-//        const int memory_n_sample = 512;
-//        const int n_eval_query = 100;
-//
-//        char disk_path[256];
-//        sprintf(disk_path, "%s/%s_TopTIP%d.index", index_basic_dir, dataset_name, index_size_gb);
-//        char memory_path[256];
-//        sprintf(memory_path, "%s/%s_ScoreSearch%d.index", index_basic_dir, dataset_name, memory_n_sample);
-//        BatchMeasureRetrievalTopT::MeasureTopT("MeasureScoreSampleTopTIP",
-//                                               disk_path, memory_path,
-//                                               memory_n_sample, index_size_gb,
-//                                               basic_dir, dataset_name,
-//                                               n_eval_query);
-//    }
+
+    {
+        char index_basic_dir[128];
+        sprintf(index_basic_dir, "../index/%s_constructed_index",
+                dataset_name);
+
+        //search on TopTIP
+        const int index_size_gb = 256;
+        const int memory_n_sample = 512;
+        const int n_eval_query = 1000;
+
+        char disk_path[256];
+        sprintf(disk_path, "%s/%s_TopTIP%d.index", index_basic_dir, dataset_name, index_size_gb);
+        char memory_path[256];
+        sprintf(memory_path, "%s/%s_ScoreSearch%d.index", index_basic_dir, dataset_name, memory_n_sample);
+        BatchMeasureRetrievalTopT::MeasureTopT("MeasureScoreSampleTopTIP",
+                                               disk_path, memory_path,
+                                               memory_n_sample, index_size_gb,
+                                               basic_dir, dataset_name,
+                                               n_eval_query);
+    }
 
 //    {
 //        //search on TopTID
