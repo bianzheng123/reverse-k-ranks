@@ -103,6 +103,7 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
                      const int &n_user_candidate, uint64_t &n_item_candidate) {
             is_compute_l_.assign(n_merge_user_, false);
             n_item_candidate = 0;
+            uint64_t user_candidate = 0;
 
             //read disk and fine binary search
             TimeRecord record;
@@ -174,9 +175,10 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
 
                     n_total_compute_ += n_data_item_;
                     n_total_user_candidate_++;
+                    user_candidate++;
 
-                    if (n_total_user_candidate_ % 2500 == 0) {
-                        std::cout << "compute rank " << (double) n_total_user_candidate_ / (0.01 * n_user_candidate)
+                    if (user_candidate % 2500 == 0) {
+                        std::cout << "compute rank " << (double) user_candidate / (0.01 * n_user_candidate)
                                   << " %, "
                                   << "n_total_item_candidate " << n_item_candidate << ", "
                                   << "read_disk_time " << batch_read_disk_time << ", "

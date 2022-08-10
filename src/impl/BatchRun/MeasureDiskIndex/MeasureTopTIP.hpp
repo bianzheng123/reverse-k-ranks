@@ -92,6 +92,7 @@ namespace ReverseMIPS::MeasureTopTIP {
             assert(n_user_ == prune_l.size());
 
             n_item_candidate = 0;
+            uint64_t user_candidate =0 ;
             TimeRecord record;
             record.reset();
             for (int userID = 0; userID < n_user_; userID++) {
@@ -126,10 +127,11 @@ namespace ReverseMIPS::MeasureTopTIP {
                 }
 
                 n_total_user_candidate_++;
+                user_candidate++;
                 n_total_compute_ += n_data_item_;
 
-                if (n_total_user_candidate_ % 2500 == 0) {
-                    std::cout << "compute rank " << (double) n_total_user_candidate_ / (0.01 * n_user_candidate)
+                if (user_candidate % 2500 == 0) {
+                    std::cout << "compute rank " << (double) user_candidate / (0.01 * n_user_candidate)
                               << " %, "
                               << "n_total_item_candidate " << n_item_candidate << ", "
                               << record.get_elapsed_time_second() << " s/iter" << " Mem: "
