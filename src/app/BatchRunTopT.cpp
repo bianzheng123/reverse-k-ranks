@@ -117,25 +117,25 @@ int main(int argc, char **argv) {
 //                     basic_dir, dataset_name, "CompressTopTIDBruteForceBatchRun");
 //    }
 
-    {
-        char index_basic_dir[128];
-//        sprintf(index_basic_dir, "../index");
-        sprintf(index_basic_dir, "../index/%s_constructed_index",
-                dataset_name);
-
-        //search on TopTIP
-        const int index_size_gb = 256;
-        const int n_sample = 512;
-        char disk_path[256];
-        sprintf(disk_path, "%s/%s_TopTIP%d.index",
-                index_basic_dir, dataset_name, index_size_gb);
-        char memory_path[256];
-        sprintf(memory_path, "%s/%s_ScoreSearch%d.index",
-                index_basic_dir, dataset_name, n_sample);
-        RunRetrieval(disk_path, memory_path,
-                     n_sample, index_size_gb,
-                     basic_dir, dataset_name, "CompressTopTIPBruteForceBatchRun");
-    }
+//    {
+//        char index_basic_dir[128];
+////        sprintf(index_basic_dir, "../index");
+//        sprintf(index_basic_dir, "../index/%s_constructed_index",
+//                dataset_name);
+//
+//        //search on TopTIP
+//        const int index_size_gb = 256;
+//        const int n_sample = 512;
+//        char disk_path[256];
+//        sprintf(disk_path, "%s/%s_TopTIP%d.index",
+//                index_basic_dir, dataset_name, index_size_gb);
+//        char memory_path[256];
+//        sprintf(memory_path, "%s/%s_ScoreSearch%d.index",
+//                index_basic_dir, dataset_name, n_sample);
+//        RunRetrieval(disk_path, memory_path,
+//                     n_sample, index_size_gb,
+//                     basic_dir, dataset_name, "CompressTopTIPBruteForceBatchRun");
+//    }
 
     return 0;
 }

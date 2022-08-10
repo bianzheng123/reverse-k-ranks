@@ -18,9 +18,7 @@
 #include "RankSample.hpp"
 #include "ScoreSample.hpp"
 #include "SSComputeAll.hpp"
-#include "SSMergeQuadraticRankBoundByBitmap.hpp"
 #include "SSMergeRankByInterval.hpp"
-#include "SSQueryAssignFrequent.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -144,16 +142,6 @@ int main(int argc, char **argv) {
         index = SSComputeAll::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    } else if (method_name == "SSMergeQuadraticRankBoundByBitmap") {
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = SSMergeQuadraticRankBoundByBitmap::BuildIndex(data_item, user, index_path,
-                                                              n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
-                n_sample, index_size_gb);
-
     } else if (method_name == "SSMergeRankByInterval") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
@@ -161,25 +149,6 @@ int main(int argc, char **argv) {
                      n_sample, index_size_gb);
         index = SSMergeRankByInterval::BuildIndex(data_item, user, index_path,
                                                   n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
-                n_sample, index_size_gb);
-
-    } else if (method_name == "SSQueryAssignFrequent") {
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-
-        const int n_sample_query = 1000;
-        const int sample_topk = 100;
-        char query_distribution_path[256];
-        sprintf(query_distribution_path,
-                "../index/sample_query_distribution/%s-query-distribution-n_sample_query_%d-topk_%d.index",
-                dataset_name, n_sample_query, sample_topk);
-
-        index = SSQueryAssignFrequent::BuildIndex(data_item, user, index_path,
-                                                  n_sample, index_size_gb,
-                                                  query_distribution_path, n_sample_query, sample_topk);
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 

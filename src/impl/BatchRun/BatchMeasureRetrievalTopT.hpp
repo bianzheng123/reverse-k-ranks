@@ -104,7 +104,7 @@ namespace ReverseMIPS::BatchMeasureRetrievalTopT {
                 index_size_gb,
                 user, data_item);
 
-        std::vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
+//        std::vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
 //        std::vector<int> topk_l{30, 20, 10};
 
         char parameter_name[256];
@@ -113,19 +113,21 @@ namespace ReverseMIPS::BatchMeasureRetrievalTopT {
 
         RetrievalResult config;
         TimeRecord record;
-        for (int topk: topk_l) {
-            record.reset();
-            index->Retrieval(query_item, topk, n_eval_query);
+        const int topk = 10;
+        std::vector<uint64_t> n_item_candidate_l(n_eval_query);
+        record.reset();
+        index->Retrieval(query_item, topk, n_eval_query, n_item_candidate_l.data());
 
-            double retrieval_time = record.get_elapsed_time_second();
-            double ms_per_query = retrieval_time / n_query_item * 1000;
+        double retrieval_time = record.get_elapsed_time_second();
+        double ms_per_query = retrieval_time / n_query_item * 1000;
 
-            std::string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
-            config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
+        std::string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
+        config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
 
-            spdlog::info("finish top-{}", topk);
-            spdlog::info("{}", performance_str);
-        }
+        spdlog::info("finish top-{}", topk);
+        spdlog::info("{}", performance_str);
+
+        WriteItemCandidate(n_item_candidate_l, topk, dataset_name, method_name.c_str(), parameter_name);
 
         config.AddQueryInfo(n_eval_query);
         config.AddBuildIndexInfo(index->BuildIndexStatistics());

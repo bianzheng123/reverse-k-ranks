@@ -85,14 +85,14 @@ namespace ReverseMIPS {
             this->config_l.emplace_back(str);
         }
 
-        void AddExecuteQuery(const int& n_execute_query){
+        void AddExecuteQuery(const int &n_execute_query) {
             char buff[128];
             sprintf(buff, "number of query item %d", n_execute_query);
             std::string str(buff);
             this->config_l.emplace_back(str);
         }
 
-        void AddQueryInfo(const int n_eval_query){
+        void AddQueryInfo(const int n_eval_query) {
             char buff[128];
             sprintf(buff, "number of evaluate query %d", n_eval_query);
             std::string str(buff);
@@ -141,6 +141,30 @@ namespace ReverseMIPS {
             file.close();
         }
     };
+
+    void WriteItemCandidate(const std::vector<uint64_t> &n_item_candidate_l, const int &topk, const char *dataset_name,
+                            const char *method_name, const char *other_name) {
+        int n_query_item = (int) n_item_candidate_l.size();
+
+        char resPath[256];
+        if (strcmp(other_name, "") == 0) {
+            std::sprintf(resPath, "../result/attribution/ItemCandidatesPerQuery/%s-%s-top%d-userID.csv", dataset_name,
+                         method_name, topk);
+        } else {
+            std::sprintf(resPath, "../result/attribution/ItemCandidatesPerQuery/%s-%s-top%d-%s-userID.csv",
+                         dataset_name, method_name, topk, other_name);
+        }
+        std::ofstream file(resPath);
+        if (!file) {
+            spdlog::error("error in write result");
+        }
+
+        for (int i = 0; i < n_query_item; i++) {
+            file << n_item_candidate_l[i] << std::endl;
+        }
+        file.close();
+
+    }
 
     void
     WriteRankResult(const std::vector<std::vector<UserRankElement>> &result, const char *dataset_name,

@@ -13,7 +13,8 @@ namespace ReverseMIPS {
     class BaseMeasureIndex {
     public:
         virtual void
-        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_eval_query_item) = 0;
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_eval_query_item,
+                  uint64_t *n_item_candidate_l) = 0;
 
         virtual std::string
         PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) = 0;

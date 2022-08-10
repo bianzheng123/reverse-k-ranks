@@ -7,7 +7,7 @@
 
 #include "struct/MethodBase.hpp"
 #include "BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
-#include "SSMergeQuadraticRankBoundByBitmap.hpp"
+#include "../QuadraticRankBoundByBitmap/SSMergeQuadraticRankBoundByBitmap.hpp"
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 

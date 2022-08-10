@@ -36,7 +36,7 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
         TimeRecord read_disk_record_, exact_rank_refinement_record_;
         double read_disk_time_, exact_rank_refinement_time_;
         size_t n_compute_lower_bound_, n_compute_upper_bound_, n_total_compute_;
-        size_t n_total_candidate_;
+        size_t n_total_user_candidate_;
 
         //variable in build index
         std::ofstream out_stream_;
@@ -84,7 +84,7 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
             n_compute_lower_bound_ = 0;
             n_compute_upper_bound_ = 0;
             n_total_compute_ = 0;
-            n_total_candidate_ = 0;
+            n_total_user_candidate_ = 0;
 
             index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
@@ -100,12 +100,15 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<std::pair<double, double>> &queryIPbound_l,
                      const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
-                     const int &n_item_candidate) {
+                     const int &n_user_candidate, uint64_t &n_item_candidate) {
             is_compute_l_.assign(n_merge_user_, false);
+            n_item_candidate = 0;
 
             //read disk and fine binary search
             TimeRecord record;
             record.reset();
+            double batch_read_disk_time = 0;
+            double batch_decode_time = 0;
             for (int iter_userID = 0; iter_userID < n_user_; iter_userID++) {
                 if (prune_l[iter_userID]) {
                     continue;
@@ -117,7 +120,9 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
                 }
                 read_disk_record_.reset();
                 ReadDisk(iter_labelID);
-                read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+                const double tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
+                batch_read_disk_time += tmp_read_disk_time;
+                read_disk_time_ += tmp_read_disk_time;
                 for (int userID = iter_userID; userID < n_user_; userID++) {
                     if (prune_l[userID]) {
                         continue;
@@ -159,22 +164,27 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
                             item_cand_l_[itemID] = true;
                             n_compute_lower_bound_++;
                             n_compute_upper_bound_++;
+                            n_item_candidate++;
                         }
 
                     }
-                    int rank = base_rank + loc_rk + 1;
-                    exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
+                    const double tmp_batch_decode_time = exact_rank_refinement_record_.get_elapsed_time_second();
+                    batch_decode_time += tmp_batch_decode_time;
+                    exact_rank_refinement_time_ += tmp_batch_decode_time;
 
                     n_total_compute_ += n_data_item_;
-                    n_total_candidate_++;
+                    n_total_user_candidate_++;
 
-                    if (n_total_candidate_ % 500 == 0) {
-                        std::cout << "compute rank " << (double) n_total_candidate_ / (0.01 * n_item_candidate)<< " %, "
-                                  << "n_compute " << n_compute_upper_bound_ << ", "
-                                  << "read_disk_time " << read_disk_time_ << ", "
-                                  << "decode_time " << exact_rank_refinement_time_ << ", "
+                    if (n_total_user_candidate_ % 2500 == 0) {
+                        std::cout << "compute rank " << (double) n_total_user_candidate_ / (0.01 * n_user_candidate)
+                                  << " %, "
+                                  << "n_total_item_candidate " << n_item_candidate << ", "
+                                  << "read_disk_time " << batch_read_disk_time << ", "
+                                  << "decode_time " << batch_decode_time << ", "
                                   << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                                   << get_current_RSS() / 1000000 << " Mb \n";
+                        batch_read_disk_time = 0;
+                        batch_decode_time = 0;
                         record.reset();
                     }
                 }
@@ -236,7 +246,7 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
         TimeRecord inner_product_record_, rank_bound_refinement_record_;
         double rank_search_prune_ratio_;
         size_t n_compute_lower_bound_, n_compute_upper_bound_, n_total_compute_;
-        size_t n_total_candidate_;
+        size_t n_total_user_candidate_;
 
         //temporary retrieval variable
         std::vector<bool> prune_l_;
@@ -277,7 +287,8 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
 
         }
 
-        void Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_eval_query_item) override {
+        void Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_eval_query_item,
+                       uint64_t *n_item_candidate_l) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -332,10 +343,12 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
+                uint64_t n_compute = 0;
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_,
-                                  n_candidate);
+                                  n_candidate, n_compute);
+                n_item_candidate_l[queryID] = n_compute;
 
-                spdlog::info("finish queryID {}", queryID);
+                spdlog::info("finish queryID {} n_user_candidate {} n_item_candidate {}", queryID, n_candidate, n_compute);
             }
             disk_ins_.FinishRetrieval();
 
@@ -345,7 +358,7 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
             n_compute_lower_bound_ = disk_ins_.n_compute_lower_bound_ / n_query_item;
             n_compute_upper_bound_ = disk_ins_.n_compute_upper_bound_ / n_query_item;
             n_total_compute_ = disk_ins_.n_total_compute_ / n_query_item;
-            n_total_candidate_ = disk_ins_.n_total_candidate_ / n_query_item;
+            n_total_user_candidate_ = disk_ins_.n_total_user_candidate_ / n_query_item;
 
             rank_search_prune_ratio_ /= n_query_item;
         }
@@ -362,12 +375,12 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, memory index search %.3fs, read disk %.3fs\n\trank search prune ratio %.4f\n\tn_compute_lower_bound %ld, n_compute_upper_bound %ld, n_total_compute %ld\n\tn_total_candidate %ld\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, memory index search %.3fs, read disk %.3fs\n\trank search prune ratio %.4f\n\tn_compute_lower_bound %ld, n_compute_upper_bound %ld, n_total_compute %ld\n\tn_total_user_candidate %ld\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, rank_bound_refinement_time_, read_disk_time_,
                     rank_search_prune_ratio_,
                     n_compute_lower_bound_, n_compute_upper_bound_, n_total_compute_,
-                    n_total_candidate_,
+                    n_total_user_candidate_,
                     ms_per_query);
             std::string str(buff);
             return str;

@@ -8,7 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "alg/TopkLBHeap.hpp"
-#include "alg/DiskIndex/MergeQuadraticRankBoundByBitmap.hpp"
+#include "MergeQuadraticRankBoundByBitmap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 

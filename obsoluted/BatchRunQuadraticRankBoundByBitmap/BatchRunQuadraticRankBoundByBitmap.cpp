@@ -2,9 +2,9 @@
 // Created by BianZheng on 2022/7/23.
 //
 
-#include "BatchRun/BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
-#include "BatchRun/BatchMeasureRetrievalQuadraticRankBoundByBitmap.hpp"
-#include "BatchRun/BatchRetrievalQuadraticRankBoundByBitmap.hpp"
+#include "BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
+#include "BatchMeasureRetrievalQuadraticRankBoundByBitmap.hpp"
+#include "BatchRetrievalQuadraticRankBoundByBitmap.hpp"
 #include "BatchRun/RankSampleMeasurePruneRatio.hpp"
 #include "util/TimeMemory.hpp"
 

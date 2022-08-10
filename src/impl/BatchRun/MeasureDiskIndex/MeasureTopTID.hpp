@@ -89,7 +89,8 @@ namespace ReverseMIPS::MeasureTopTID {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
+                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
+                     uint64_t n_item_candidate) {
             assert(n_user_ == queryIP_l.size());
             assert(n_user_ == rank_lb_l.size() && n_user_ == rank_ub_l.size());
             assert(n_user_ == prune_l.size());
@@ -108,16 +109,19 @@ namespace ReverseMIPS::MeasureTopTID {
                     //BelowTopT
                     n_compute_lower_bound_ += rank_lb - rank_ub;
                     n_compute_upper_bound_ += rank_lb - rank_ub;
+                    n_item_candidate += rank_lb - rank_ub;
                     n_below_topt_++;
                 } else if (rank_ub <= topt_ && topt_ <= rank_lb) {
                     //BetweenTopT
                     n_compute_lower_bound_ += topt_ - rank_ub;
                     n_compute_upper_bound_ += n_data_item_ - rank_ub;
+                    n_item_candidate += topt_ - rank_ub;
                     n_between_topt_++;
                 } else if (topt_ < rank_ub) {
                     //AboveTopT
                     n_compute_lower_bound_ += n_data_item_ - topt_;
                     n_compute_upper_bound_ += n_data_item_ - topt_;
+                    n_item_candidate += n_data_item_ - topt_;
                     n_above_topt_++;
                 } else {
                     spdlog::error("have bug in get rank, topt ID IP");
@@ -199,7 +203,8 @@ namespace ReverseMIPS::MeasureTopTID {
 
         }
 
-        void Retrieval(const VectorMatrix &query_item, const int &topk, const int& n_eval_query_item)override {
+        void Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_eval_query_item,
+                       uint64_t *n_item_candidate_l) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -253,7 +258,13 @@ namespace ReverseMIPS::MeasureTopTID {
                 hash_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_);
+                uint64_t n_compute = 0;
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_,
+                                  n_compute);
+                n_item_candidate_l[queryID] = n_compute;
+
+                spdlog::info("finish queryID {} n_user_candidate {} n_item_candidate {}", queryID, n_candidate,
+                             n_compute);
             }
             disk_ins_.FinishRetrieval();
 

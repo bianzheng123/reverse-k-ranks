@@ -30,7 +30,7 @@ namespace ReverseMIPS::MeasureTopTIP {
         //variable in retrieval
         std::ifstream index_stream_;
         size_t n_compute_lower_bound_, n_compute_upper_bound_, n_total_compute_;
-        size_t n_below_topt_, n_between_topt_, n_above_topt_, n_total_candidate_;
+        size_t n_below_topt_, n_between_topt_, n_above_topt_, n_total_user_candidate_;
 
         inline MeasureTopTIP() = default;
 
@@ -75,7 +75,7 @@ namespace ReverseMIPS::MeasureTopTIP {
             n_below_topt_ = 0;
             n_between_topt_ = 0;
             n_above_topt_ = 0;
-            n_total_candidate_ = 0;
+            n_total_user_candidate_ = 0;
 
             index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
             if (!index_stream_) {
@@ -86,11 +86,12 @@ namespace ReverseMIPS::MeasureTopTIP {
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
-                     const int &n_item_candidate) {
+                     const int &n_user_candidate, uint64_t &n_item_candidate) {
             assert(n_user_ == queryIP_l.size());
             assert(n_user_ == rank_lb_l.size() && n_user_ == rank_ub_l.size());
             assert(n_user_ == prune_l.size());
 
+            n_item_candidate = 0;
             TimeRecord record;
             record.reset();
             for (int userID = 0; userID < n_user_; userID++) {
@@ -107,27 +108,30 @@ namespace ReverseMIPS::MeasureTopTIP {
                     //retrieval the top-t like before
                     n_compute_lower_bound_ += 0;
                     n_compute_upper_bound_ += 0;
+                    n_item_candidate += 0;
                     n_below_topt_++;
                 } else if (rank_ub <= topt_ && topt_ <= rank_lb) {
                     n_compute_lower_bound_ += 0;
                     n_compute_upper_bound_ += n_data_item_;
+                    n_item_candidate += 0;
                     n_between_topt_++;
 
                 } else if (topt_ < rank_ub) {
                     n_compute_lower_bound_ += n_data_item_;
                     n_compute_upper_bound_ += n_data_item_;
+                    n_item_candidate += n_data_item_;
                     n_above_topt_++;
                 } else {
                     spdlog::error("have bug in get rank, topt ID IP");
                 }
 
-                n_total_candidate_++;
+                n_total_user_candidate_++;
                 n_total_compute_ += n_data_item_;
 
-                if (n_total_candidate_ % 500 == 0) {
-                    std::cout << "compute rank " << (double) n_total_candidate_ / (0.01 * n_item_candidate)<< " %, "
-                              << "n_compute " << n_compute_upper_bound_ << ", "
-                              << "read_disk_time " << read_disk_time_ << ", "
+                if (n_total_user_candidate_ % 2500 == 0) {
+                    std::cout << "compute rank " << (double) n_total_user_candidate_ / (0.01 * n_user_candidate)
+                              << " %, "
+                              << "n_total_item_candidate " << n_item_candidate << ", "
                               << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
                     record.reset();
@@ -167,7 +171,7 @@ namespace ReverseMIPS::MeasureTopTIP {
         double inner_product_time_, hash_search_time_, read_disk_time_, exact_rank_time_;
         TimeRecord inner_product_record_, hash_search_record_;
         size_t n_compute_lower_bound_, n_compute_upper_bound_, n_total_compute_;
-        size_t n_below_topt_, n_between_topt_, n_above_topt_, n_total_candidate_;
+        size_t n_below_topt_, n_between_topt_, n_above_topt_, n_total_user_candidate_;
         double hash_prune_ratio_;
 
         //temporary retrieval variable
@@ -205,7 +209,8 @@ namespace ReverseMIPS::MeasureTopTIP {
 
         }
 
-        void Retrieval(const VectorMatrix &query_item, const int &topk, const int& n_eval_query_item) override {
+        void Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_eval_query_item,
+                       uint64_t *n_item_candidate_l) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -259,9 +264,13 @@ namespace ReverseMIPS::MeasureTopTIP {
                 hash_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_, n_candidate);
+                uint64_t n_compute = 0;
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_, n_candidate,
+                                  n_compute);
+                n_item_candidate_l[queryID] = n_compute;
 
-                spdlog::info("finish queryID {}", queryID);
+                spdlog::info("finish queryID {} n_user_candidate {} n_item_candidate {}", queryID, n_candidate,
+                             n_compute);
             }
             disk_ins_.FinishRetrieval();
 
@@ -275,7 +284,7 @@ namespace ReverseMIPS::MeasureTopTIP {
             n_below_topt_ = disk_ins_.n_below_topt_ / n_query_item;
             n_between_topt_ = disk_ins_.n_between_topt_ / n_query_item;
             n_above_topt_ = disk_ins_.n_above_topt_ / n_query_item;
-            n_total_candidate_ = disk_ins_.n_total_candidate_ / n_query_item;
+            n_total_user_candidate_ = disk_ins_.n_total_user_candidate_ / n_query_item;
 
             hash_prune_ratio_ /= n_query_item;
         }
@@ -297,7 +306,7 @@ namespace ReverseMIPS::MeasureTopTIP {
                     inner_product_time_, hash_search_time_,
                     hash_prune_ratio_,
                     n_compute_lower_bound_, n_compute_upper_bound_, n_total_compute_,
-                    n_below_topt_, n_between_topt_, n_above_topt_, n_total_candidate_,
+                    n_below_topt_, n_between_topt_, n_above_topt_, n_total_user_candidate_,
                     ms_per_query);
             std::string str(buff);
             return str;

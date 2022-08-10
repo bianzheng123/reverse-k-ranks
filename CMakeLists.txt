@@ -72,15 +72,6 @@ if (USE_CUDA)
     set_property(TARGET brtt PROPERTY CXX_STANDARD_REQUIRED ON)
     set_property(TARGET brtt PROPERTY CXX_EXTENSIONS OFF)
 
-    set_source_files_properties(src/app/BatchRunQuadraticRankBoundByBitmap.cpp PROPERTIES LANGUAGE CUDA)
-    add_executable(brqrbb src/app/BatchRunQuadraticRankBoundByBitmap.cpp)
-    target_include_directories(brqrbb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(brqrbb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
-    set_target_properties(brqrbb PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    set_property(TARGET brqrbb PROPERTY CXX_STANDARD "17")
-    set_property(TARGET brqrbb PROPERTY CXX_STANDARD_REQUIRED ON)
-    set_property(TARGET brqrbb PROPERTY CXX_EXTENSIONS OFF)
-
     set_source_files_properties(src/app/BatchRunMergeRankByInterval.cpp PROPERTIES LANGUAGE CUDA)
     add_executable(brmrbi src/app/BatchRunMergeRankByInterval.cpp)
     target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
@@ -98,10 +89,6 @@ else () # not use cuda
     add_executable(brtt src/app/BatchRunTopT.cpp)
     target_include_directories(brtt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(brtt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(brqrbb src/app/BatchRunQuadraticRankBoundByBitmap.cpp)
-    target_include_directories(brqrbb PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(brqrbb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(brmrbi src/app/BatchRunMergeRankByInterval.cpp)
     target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})

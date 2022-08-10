@@ -7,7 +7,7 @@
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkLBHeap.hpp"
-#include "alg/DiskIndex/QueryAssignFrequent.hpp"
+#include "QueryAssignFrequent.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 

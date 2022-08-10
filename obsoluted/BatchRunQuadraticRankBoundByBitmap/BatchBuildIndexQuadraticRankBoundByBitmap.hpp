@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_BATCHBUILDINDEXQUADRATICRANKBOUNDBYBITMAP_HPP
 #define REVERSE_KRANKS_BATCHBUILDINDEXQUADRATICRANKBOUNDBYBITMAP_HPP
 
-#include "alg/DiskIndex/MergeQuadraticRankBoundByBitmap.hpp"
+#include "../QuadraticRankBoundByBitmap/MergeQuadraticRankBoundByBitmap.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 #include "score_computation/ComputeScoreTable.hpp"
 #include "util/TimeMemory.hpp"

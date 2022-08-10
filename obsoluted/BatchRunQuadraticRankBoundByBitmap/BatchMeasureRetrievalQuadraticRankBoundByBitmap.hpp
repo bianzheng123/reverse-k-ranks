@@ -7,8 +7,8 @@
 
 #include "BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
 #include "BatchRun/MeasureDiskIndex/BaseMeasureIndex.hpp"
-#include "BatchRun/BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
-#include "BatchRun/MeasureDiskIndex/MeasureQuadraticRankBoundByBitmap.hpp"
+#include "BatchBuildIndexQuadraticRankBoundByBitmap.hpp"
+#include "MeasureQuadraticRankBoundByBitmap.hpp"
 
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/ScoreSearch.hpp"
