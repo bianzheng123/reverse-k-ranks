@@ -85,11 +85,14 @@ namespace ReverseMIPS::MeasureTopTIP {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
+                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
+                     const int &n_item_candidate) {
             assert(n_user_ == queryIP_l.size());
             assert(n_user_ == rank_lb_l.size() && n_user_ == rank_ub_l.size());
             assert(n_user_ == prune_l.size());
 
+            TimeRecord record;
+            record.reset();
             for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID]) {
                     continue;
@@ -120,6 +123,15 @@ namespace ReverseMIPS::MeasureTopTIP {
 
                 n_total_candidate_++;
                 n_total_compute_ += n_data_item_;
+
+                if (n_total_candidate_ % 500 == 0) {
+                    std::cout << "compute rank " << (double) n_total_candidate_ / (0.01 * n_item_candidate)<< " %, "
+                              << "n_compute " << n_compute_upper_bound_ << ", "
+                              << "read_disk_time " << read_disk_time_ << ", "
+                              << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                              << get_current_RSS() / 1000000 << " Mb \n";
+                    record.reset();
+                }
             }
 
         };
@@ -247,7 +259,9 @@ namespace ReverseMIPS::MeasureTopTIP {
                 hash_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_, n_candidate);
+
+                spdlog::info("finish queryID {}", queryID);
             }
             disk_ins_.FinishRetrieval();
 

@@ -99,10 +99,13 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<std::pair<double, double>> &queryIPbound_l,
-                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item) {
+                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
+                     const int &n_item_candidate) {
             is_compute_l_.assign(n_merge_user_, false);
 
             //read disk and fine binary search
+            TimeRecord record;
+            record.reset();
             for (int iter_userID = 0; iter_userID < n_user_; iter_userID++) {
                 if (prune_l[iter_userID]) {
                     continue;
@@ -164,6 +167,16 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
 
                     n_total_compute_ += n_data_item_;
                     n_total_candidate_++;
+
+                    if (n_total_candidate_ % 500 == 0) {
+                        std::cout << "compute rank " << (double) n_total_candidate_ / (0.01 * n_item_candidate)<< " %, "
+                                  << "n_compute " << n_compute_upper_bound_ << ", "
+                                  << "read_disk_time " << read_disk_time_ << ", "
+                                  << "decode_time " << exact_rank_refinement_time_ << ", "
+                                  << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                                  << get_current_RSS() / 1000000 << " Mb \n";
+                        record.reset();
+                    }
                 }
                 is_compute_l_[iter_labelID] = true;
             }
@@ -319,8 +332,10 @@ namespace ReverseMIPS::MeasureMergeRankByInterval {
                 rank_search_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_);
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_, prune_l_, user_, data_item_,
+                                  n_candidate);
 
+                spdlog::info("finish queryID {}", queryID);
             }
             disk_ins_.FinishRetrieval();
 

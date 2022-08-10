@@ -61,8 +61,8 @@ if (FINISH)
 endif ()
 
 if (USE_CUDA)
-    set_source_files_properties(user-query-relationship/SampleItemTopKUser.cpp PROPERTIES LANGUAGE CUDA)
-    add_executable(sitku user-query-relationship/SampleItemTopKUser.cpp)
+    set_source_files_properties(query-distribution-index/SampleItemTopKUser.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(sitku query-distribution-index/SampleItemTopKUser.cpp)
     target_include_directories(sitku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
     target_link_libraries(sitku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
     set_target_properties(sitku PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -80,13 +80,17 @@ if (USE_CUDA)
     set_property(TARGET ppr PROPERTY CXX_EXTENSIONS OFF)
 
 else ()
-    add_executable(sitku user-query-relationship/SampleItemTopKUser.cpp)
+    add_executable(sitku query-distribution-index/SampleItemTopKUser.cpp)
     target_include_directories(sitku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(sitku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
     target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(ppr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(sitku query-distribution-index/SampleItemTopKUser.cpp)
+    target_include_directories(sitku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(sitku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 endif ()
 
