@@ -150,8 +150,10 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
 
                 //read disk and fine binary search
                 size_t n_compute = 0;
+                double read_disk_time = 0;
+                double rank_compute_time = 0;
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_,
-                                  n_candidate, n_compute);
+                                  n_candidate, n_compute, read_disk_time, rank_compute_time);
                 spdlog::info("finish compute rank n_compute {} queryID {}", n_compute, queryID);
 
                 for (int candID = 0; candID < topk; candID++) {
@@ -161,7 +163,7 @@ namespace ReverseMIPS::CompressTopTIPBruteForce {
 
                 const double this_prune_ratio = 1.0 * (n_user_ - n_candidate) / n_user_;
                 spdlog::info(
-                        "finish queryID {}, prune_ratio {}, accu time: inner product {}s, memory index search {}s, exact_rank_refinement_time {}s, read_disk_time {}s",
+                        "finish queryID {}, prune_ratio {}, accu time: inner product {:.3f}s, memory index search {:.3f}s, exact_rank_refinement_time {:.3f}s, read_disk_time {:.3f}s",
                         queryID, this_prune_ratio, inner_product_time_, hash_search_time_,
                         disk_ins_.exact_rank_time_, disk_ins_.read_disk_time_);
             }
