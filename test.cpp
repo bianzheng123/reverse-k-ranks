@@ -5,20 +5,15 @@
 
 using namespace std;
 
-void sort_indexes(const int* arr, const size_t size, int* sort_idx) {
+int main() {
+    std::vector<int> arr = {1, 2, 3, 4, 5, 5, 5, 6};
 
-    // initialize original index locations
-    iota(sort_idx, sort_idx + size, 0);
+    const int topk = 5;
 
-    sort(sort_idx, sort_idx + size,
-                [&](int i1, int i2) {return arr[i1] > arr[i2];});
-}
-
-int main(){
-    std::vector<int> arr = {1, 5, 3, 10, 4, 2};
-    sort(arr.begin(), arr.end(), std::less());
-    for(const int idx: arr){
-        printf("%d ", idx);
-    }
-    printf("\n");
+    const int *lb_ptr = std::lower_bound(arr.data(), arr.data() + arr.size(), topk,
+                                         [](const double &arrIP, double queryIP) {
+                                             return arrIP < queryIP;
+                                         });
+    const long itemID = lb_ptr - arr.data();
+    printf("%d\n", itemID);
 }

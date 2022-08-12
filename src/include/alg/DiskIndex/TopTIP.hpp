@@ -252,8 +252,8 @@ namespace ReverseMIPS {
                 if (n_candidate_ % 500 == 0) {
                     std::cout << "compute rank " << n_candidate_ / (0.01 * n_total_candidate) << " %, "
                               << "n_compute " << n_compute << " "
-                              << "read_disk_time " << read_disk_time_ << ", "
-                              << "compute_rank_time " << exact_rank_time_ << ", "
+                              << "read_disk_time " << read_disk_time << ", "
+                              << "rank_compute_time " << rank_compute_time << ", "
                               << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                               << get_current_RSS() / 1000000 << " Mb \n";
                     record.reset();

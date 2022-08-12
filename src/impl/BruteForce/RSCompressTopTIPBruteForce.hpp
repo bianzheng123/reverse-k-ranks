@@ -155,7 +155,6 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                 }
                 assert(n_candidate >= topk);
                 rank_bound_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
-                spdlog::info("finish memory index search n_candidate {} queryID {}", n_candidate, queryID);
 
                 //read disk and fine binary search
                 size_t n_compute = 0;
@@ -175,8 +174,10 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                               << get_current_RSS() / 1000000 << " Mb \n";
                     record.reset();
                 }
-                spdlog::info("finish compute rank n_candidate {}, n_compute {}, queryID {}, inner product time {:.3f}s, memory index search time {:.3f}s, read disk time {:.3f}s, rank compute time {:.3f}s",
-                             n_candidate, n_compute, queryID, tmp_inner_product_time, tmp_memory_index_search_time, read_disk_time, rank_compute_time);
+                spdlog::info(
+                        "finish compute rank queryID {}, n_candidate {}, n_compute_item_candidate {}, inner product time {:.3f}s, memory index search time {:.3f}s, read disk time {:.3f}s, rank compute time {:.3f}s",
+                        queryID, n_candidate, n_compute, tmp_inner_product_time, tmp_memory_index_search_time,
+                        read_disk_time, rank_compute_time);
             }
             disk_ins_.FinishRetrieval();
 

@@ -12,6 +12,8 @@
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 
+#include "QueryRankSample.hpp"
+
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
 #include <iostream>
@@ -92,6 +94,12 @@ int main(int argc, char **argv) {
     } else if (method_name == "MemoryBruteForce") {
         spdlog::info("input parameter: none");
         index = MemoryBruteForce::BuildIndex(data_item, user);
+
+    } else if (method_name == "QueryRankSample") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = QueryRankSample::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else {
         spdlog::error("not such method");
