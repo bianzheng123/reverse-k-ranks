@@ -132,7 +132,14 @@ int main(int argc, char **argv) {
 
         for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
             for (int rank = 1; rank < n_data_item + 1; rank++) {
-                sample_rank_l[sampleID * (n_data_item + 1) + rank] += sample_rank_l[sampleID * (n_data_item + 1) + rank - 1];
+                sample_rank_l[sampleID * (n_data_item + 1) + rank] += sample_rank_l[sampleID * (n_data_item + 1) +
+                                                                                    rank - 1];
+            }
+        }
+        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+            for (int rank = 0; rank < n_data_item + 1; rank++) {
+                assert(0 <= sample_rank_l[sampleID * (n_data_item + 1) + rank] &&
+                       sample_rank_l[sampleID * (n_data_item + 1) + rank] <= n_user);
             }
         }
         for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
@@ -143,7 +150,7 @@ int main(int argc, char **argv) {
         for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
             const int *lb_ptr = std::lower_bound(sample_rank_l.data() + sampleID * (n_data_item + 1),
                                                  sample_rank_l.data() + (sampleID + 1) * (n_data_item + 1), topk,
-                                                 [](const double &arrIP, double queryIP) {
+                                                 [](const int &arrIP, int queryIP) {
                                                      return arrIP < queryIP;
                                                  });
             const long itemID = lb_ptr - (sample_rank_l.data() + sampleID * (n_data_item + 1));

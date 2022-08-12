@@ -209,14 +209,14 @@ namespace ReverseMIPS::QueryRankSample {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &n_sample) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const char* dataset_name, const int &n_sample) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
 
         user.vectorNormalize();
 
         //rank search
-        QueryRankSearch rank_ins(n_sample, n_data_item, n_user, n_data_item);
+        QueryRankSearch rank_ins(n_sample, n_data_item, n_user, dataset_name);
 
         //disk index
         ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);

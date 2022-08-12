@@ -10,12 +10,90 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 
-//TODO finish query rank search
 namespace ReverseMIPS {
+
+    class SampleQueryDistributionBelowTopk {
+        const int n_sample_query_ = 3500;
+        const int topk_ = 100;
+        int n_data_item_;
+        std::unique_ptr<int[]> topk_rank_l_; // n_sample_query
+        std::ifstream rank_below_topk_stream_;
+    public:
+        inline SampleQueryDistributionBelowTopk() = default;
+
+        inline SampleQueryDistributionBelowTopk(const int n_data_item, const char *dataset_name) {
+            n_data_item_ = n_data_item;
+            topk_rank_l_ = std::make_unique<int[]>(n_sample_query_);
+
+            char topk_rank_path[512];
+            sprintf(topk_rank_path,
+                    "../index/sample_query_distribution_below_topk/%s-query-distribution-topk-rank-n_sample_query_%d-topk_%d.index",
+                    dataset_name, n_sample_query_, topk_);
+
+            std::ifstream topk_rank_stream = std::ifstream(topk_rank_path, std::ios::binary | std::ios::in);
+            if (!topk_rank_stream) {
+                spdlog::error("error in reading index");
+                exit(-1);
+            }
+
+            topk_rank_stream.read((char *) topk_rank_l_.get(), sizeof(int) * n_sample_query_);
+            topk_rank_stream.close();
+
+            char rank_below_topk_path[512];
+            sprintf(rank_below_topk_path,
+                    "../index/sample_query_distribution_below_topk/%s-query-distribution-below-topk-n_sample_query_%d-topk_%d.index",
+                    dataset_name, n_sample_query_, topk_);
+
+            rank_below_topk_stream_ = std::ifstream(rank_below_topk_path, std::ios::binary | std::ios::in);
+            if (!rank_below_topk_stream_) {
+                spdlog::error("error in reading index");
+                exit(-1);
+            }
+
+        }
+
+        unsigned int GetUnpruneCandidate(const int &upper_bound, const int &lower_bound) {
+            assert(upper_bound <= lower_bound && lower_bound <= n_data_item_);
+            unsigned int n_unprune_user = 0;
+            for (int queryID = 0; queryID < n_sample_query_; queryID++) {
+                const int topk_rank = topk_rank_l_[queryID];
+                if (not(upper_bound <= topk_rank && topk_rank <= lower_bound)) {
+                    continue;
+                }
+
+                int n_lower = 0;
+                int n_higher = 0;
+                rank_below_topk_stream_.seekg(sizeof(int) * (queryID * (n_data_item_ + 1) + topk_rank), std::ios::beg);
+                rank_below_topk_stream_.read((char *) &n_lower, sizeof(int));
+
+                rank_below_topk_stream_.seekg(sizeof(int) * (queryID * (n_data_item_ + 1) + lower_bound),
+                                              std::ios::beg);
+                rank_below_topk_stream_.read((char *) &n_higher, sizeof(int));
+
+                if (not(n_higher - n_lower >= 0)) {
+                    printf("upper bound %d, topk_rank %d, lower bound %d\n", upper_bound, topk_rank, lower_bound);
+                    printf("n_higher %d, n_lower %d\n", n_higher, n_lower);
+                    rank_below_topk_stream_.seekg(queryID * (n_data_item_ + 1), std::ios::beg);
+                    std::vector<int> below_topk_l(n_data_item_ + 1);
+                    rank_below_topk_stream_.read((char *) below_topk_l.data(), sizeof(int) * (n_data_item_ + 1));
+                    printf("%d %d %d\n", below_topk_l[0], below_topk_l[1], below_topk_l[2]);
+
+                }
+                assert(n_higher - n_lower >= 0);
+                n_unprune_user += n_higher - n_lower;
+            }
+
+            return n_unprune_user;
+        }
+
+        void Finish() {
+            rank_below_topk_stream_.close();
+        }
+    };
 
     class QueryRankSearch {
 
-        size_t n_sample_, sample_every_, n_data_item_, n_user_, topt_;
+        size_t n_sample_, n_data_item_, n_user_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
@@ -23,27 +101,19 @@ namespace ReverseMIPS {
         inline QueryRankSearch() {}
 
         inline QueryRankSearch(const int &n_sample, const int &n_data_item,
-                          const int &n_user, const int &topt) {
-            assert(topt <= n_data_item);
-            const int sample_every = topt / n_sample;
+                               const int &n_user, const char *dataset_name) {
             this->n_sample_ = n_sample;
-            this->sample_every_ = sample_every;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
-            this->topt_ = topt;
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
-            if (sample_every >= n_data_item) {
-                spdlog::error("sample every larger than n_data_item, sample ratio too small, program exit");
-                exit(-1);
-            }
             if (n_sample <= 0 || n_sample >= n_data_item) {
                 spdlog::error("n_sample too small or too large, program exit");
                 exit(-1);
             }
             assert(n_sample > 0);
 
-            Preprocess();
+            Preprocess(dataset_name);
 
         }
 
@@ -51,19 +121,66 @@ namespace ReverseMIPS {
             LoadIndex(index_path);
         }
 
-        void Preprocess() {
-            for (size_t known_rank_idx = 0, idx = 0;
-                 known_rank_idx < topt_ && idx < n_sample_; known_rank_idx += sample_every_, idx++) {
-                known_rank_idx_l_[idx] = (int) known_rank_idx;
-                assert(idx < n_sample_);
+        void Preprocess(const char *dataset_name) {
+            SampleQueryDistributionBelowTopk query_distribution_ins((int) n_data_item_, dataset_name);
+
+            std::vector<unsigned int> optimal_dp(n_data_item_ * n_sample_);
+            std::vector<int> sample_position_dp(n_data_item_ * n_sample_);
+            for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
+                printf("sampleID %d\n", sampleID);
+                for (int rank = 0; rank < n_data_item_; rank++) {
+                    if (sampleID == 0) {
+                        optimal_dp[rank * n_sample_ + sampleID] = query_distribution_ins.GetUnpruneCandidate(0, rank);
+                        sample_position_dp[rank * n_sample_ + sampleID] = rank;
+                    } else {
+                        optimal_dp[rank * n_sample_ + sampleID] = UINT32_MAX;
+                        for (int t = rank - 1; t >= 0; t--) {
+                            const unsigned int unprune_user_candidate = query_distribution_ins.GetUnpruneCandidate(
+                                    t + 1, rank);
+                            assert(unprune_user_candidate >= 0);
+                            assert(optimal_dp[rank * n_sample_ + sampleID] >= 0);
+                            assert(sample_position_dp[rank * n_sample_ + sampleID] >= 0);
+                            if (optimal_dp[rank * n_sample_ + sampleID] > optimal_dp[rank * n_sample_ + sampleID - 1] +
+                                                                          unprune_user_candidate) {
+                                optimal_dp[rank * n_sample_ + sampleID] =
+                                        optimal_dp[rank * n_sample_ + sampleID - 1] + unprune_user_candidate;
+                                sample_position_dp[rank * n_sample_ + sampleID] = t;
+                            } else if (unprune_user_candidate >= optimal_dp[rank * n_sample_ + sampleID]) {
+                                break;
+                            }
+
+                        }
+
+                    }
+                    if(rank % 500 == 0){
+                        printf("rank %d, n_data_item %d\n", rank, n_data_item_);
+                    }
+                }
             }
+
+            unsigned int min_cost = UINT32_MAX;
+            unsigned int min_cost_idx = -1;
+            for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                const unsigned int tmp_cost = optimal_dp[itemID * n_sample_ + n_sample_ - 1];
+                if (tmp_cost < min_cost) {
+                    min_cost_idx = itemID;
+                    min_cost = tmp_cost;
+                }
+            }
+            assert(0 <= min_cost && min_cost < n_data_item_);
+            for (int sampleID = (int) n_sample_ - 1; sampleID >= 0; sampleID--) {
+                known_rank_idx_l_[sampleID] = (int) min_cost_idx;
+                min_cost_idx = sample_position_dp[min_cost_idx * n_sample_ + sampleID];
+            }
+
+            query_distribution_ins.Finish();
 
             for (int rankID = 0; rankID < n_sample_; rankID++) {
                 std::cout << known_rank_idx_l_[rankID] << " ";
             }
             std::cout << std::endl;
 
-            spdlog::info("rank bound: sample_every {}, n_sample {}", sample_every_, n_sample_);
+            spdlog::info("rank bound: n_sample {}", n_sample_);
         }
 
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
@@ -145,10 +262,8 @@ namespace ReverseMIPS {
                 exit(-1);
             }
             out_stream_.write((char *) &n_sample_, sizeof(size_t));
-            out_stream_.write((char *) &sample_every_, sizeof(size_t));
             out_stream_.write((char *) &n_data_item_, sizeof(size_t));
             out_stream_.write((char *) &n_user_, sizeof(size_t));
-            out_stream_.write((char *) &topt_, sizeof(size_t));
 
             out_stream_.write((char *) known_rank_idx_l_.get(), (int64_t) (n_sample_ * sizeof(int)));
             out_stream_.write((char *) bound_distance_table_.get(), (int64_t) (n_user_ * n_sample_ * sizeof(double)));
@@ -164,10 +279,8 @@ namespace ReverseMIPS {
             }
 
             index_stream.read((char *) &n_sample_, sizeof(size_t));
-            index_stream.read((char *) &sample_every_, sizeof(size_t));
             index_stream.read((char *) &n_data_item_, sizeof(size_t));
             index_stream.read((char *) &n_user_, sizeof(size_t));
-            index_stream.read((char *) &topt_, sizeof(size_t));
 
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             index_stream.read((char *) known_rank_idx_l_.get(), (int64_t) (sizeof(int) * n_sample_));
