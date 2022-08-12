@@ -249,7 +249,7 @@ namespace ReverseMIPS {
                     spdlog::error("have bug in get rank, topt ID IP");
                 }
 
-                if (n_candidate_ % 500 == 0) {
+                if (n_candidate_ % 2500 == 0) {
                     std::cout << "compute rank " << n_candidate_ / (0.01 * n_total_candidate) << " %, "
                               << "n_compute " << n_compute << " "
                               << "read_disk_time " << read_disk_time << ", "
