@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
     vector<int> topk_warm_up_l{1};
     for (int topk: topk_warm_up_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 10);
+        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 50);
 
         double retrieval_time = record.get_elapsed_time_second();
         double ms_per_query = retrieval_time / n_query_item * 1000;
