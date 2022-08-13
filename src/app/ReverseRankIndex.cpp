@@ -159,21 +159,21 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-    vector<int> topk_warm_up_l{1};
-    for (int topk: topk_warm_up_l) {
-        record.reset();
-        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 50);
-
-        double retrieval_time = record.get_elapsed_time_second();
-        double ms_per_query = retrieval_time / n_query_item * 1000;
-
-        string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
-        spdlog::info("finish warm up top-{}", topk);
-        spdlog::info("{}", performance_str);
-    }
+//    vector<int> topk_warm_up_l{1};
+//    for (int topk: topk_warm_up_l) {
+//        record.reset();
+//        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 50);
+//
+//        double retrieval_time = record.get_elapsed_time_second();
+//        double ms_per_query = retrieval_time / n_query_item * 1000;
+//
+//        string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
+//        spdlog::info("finish warm up top-{}", topk);
+//        spdlog::info("{}", performance_str);
+//    }
 
 //    vector<int> topk_l{50, 40, 30, 20, 10};
-    vector<int> topk_l{10, 20};
+    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
 //    vector<int> topk_l{20};
     RetrievalResult config;

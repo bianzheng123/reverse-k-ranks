@@ -102,7 +102,7 @@ def run():
 
         # 'SSMergeQuadraticRankBoundByBitmap',
         # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
-        'SSMergeRankByInterval',
+        # 'SSMergeRankByInterval',
         # 'SSMergeRankByIntervalBatchRun',
         # 'SSQueryAssignFrequent',
 
@@ -141,7 +141,7 @@ def run():
 
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSQueryAssignFrequent'))
 
         # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))

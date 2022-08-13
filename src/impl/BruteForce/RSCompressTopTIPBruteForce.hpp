@@ -37,6 +37,8 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
             memory_index_search_time_ = 0;
             read_disk_time_ = 0;
             exact_rank_time_ = 0;
+            total_io_cost_ = 0;
+            total_ip_cost_ = 0;
             rank_bound_prune_ratio_ = 0;
         }
 
@@ -50,6 +52,7 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
         int vec_dim_, n_data_item_, n_user_;
         double inner_product_time_, memory_index_search_time_, read_disk_time_, exact_rank_time_;
         TimeRecord inner_product_record_, memory_index_search_record_;
+        uint64_t total_io_cost_, total_ip_cost_;
         double rank_bound_prune_ratio_;
 
         //temporary retrieval variable
@@ -111,9 +114,6 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                 query_heap_l[qID].resize(topk);
             }
 
-            const int query_report_every = 50;
-            TimeRecord record;
-
             // store queryIP
             TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
@@ -147,36 +147,34 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                                       prune_l_, topkLbHeap);
                 const double tmp_memory_index_search_time = memory_index_search_record_.get_elapsed_time_second();
                 memory_index_search_time_ += tmp_memory_index_search_time;
-                int n_candidate = 0;
+                int n_user_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
                     if (!prune_l_[userID]) {
-                        n_candidate++;
+                        n_user_candidate++;
                     }
                 }
-                assert(n_candidate >= topk);
-                rank_bound_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                assert(n_user_candidate >= topk);
+                rank_bound_prune_ratio_ += 1.0 * (n_user_ - n_user_candidate) / n_user_;
 
                 //read disk and fine binary search
-                size_t n_compute = 0;
+                size_t io_cost = 0;
+                size_t ip_cost = 0;
                 double read_disk_time = 0;
                 double rank_compute_time = 0;
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_,
-                                  n_candidate, n_compute, read_disk_time, rank_compute_time);
+                                  n_user_candidate, io_cost, ip_cost, read_disk_time, rank_compute_time);
+                total_io_cost_ += io_cost;
+                total_ip_cost_ += ip_cost;
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
                 }
                 assert(query_heap_l[queryID].size() == topk);
 
-                if (queryID != 0 && queryID % query_report_every == 0) {
-                    std::cout << "query " << queryID / (0.01 * n_query_item) << " %, "
-                              << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                              << get_current_RSS() / 1000000 << " Mb \n";
-                    record.reset();
-                }
                 spdlog::info(
-                        "finish compute rank queryID {}, n_candidate {}, n_compute_item_candidate {}, inner product time {:.3f}s, memory index search time {:.3f}s, read disk time {:.3f}s, rank compute time {:.3f}s",
-                        queryID, n_candidate, n_compute, tmp_inner_product_time, tmp_memory_index_search_time,
+                        "finish compute rank queryID {}, n_user_candidate {}, io_cost {}, ip_cost {}, inner product time {:.3f}s, memory index search time {:.3f}s, read disk time {:.3f}s, rank compute time {:.3f}s",
+                        queryID, n_user_candidate, io_cost, ip_cost,
+                        tmp_inner_product_time, tmp_memory_index_search_time,
                         read_disk_time, rank_compute_time);
             }
             disk_ins_.FinishRetrieval();
@@ -200,11 +198,11 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, hash search %.3fs\n\tread disk time %.3f, exact rank time %.3fs\n\thash prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, memory index search %.3fs\n\tread disk time %.3f, exact rank time %.3fs\n\tio_cost %ld, ip_cost %ld, user prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, memory_index_search_time_,
                     read_disk_time_, exact_rank_time_,
-                    rank_bound_prune_ratio_,
+                    total_io_cost_, total_ip_cost_, rank_bound_prune_ratio_,
                     ms_per_query);
             std::string str(buff);
             return str;

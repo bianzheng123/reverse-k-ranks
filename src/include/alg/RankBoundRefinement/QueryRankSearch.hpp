@@ -10,6 +10,7 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 
+//TODO
 namespace ReverseMIPS {
 
     class SampleQueryDistributionBelowTopk {
@@ -27,7 +28,7 @@ namespace ReverseMIPS {
 
             char topk_rank_path[512];
             sprintf(topk_rank_path,
-                    "../index/sample_query_distribution_below_topk/%s-query-distribution-topk-rank-n_sample_query_%d-topk_%d.index",
+                    "../index/query_distribution/%s-query-distribution-topk-rank-n_sample_query_%d-topk_%d.index",
                     dataset_name, n_sample_query_, topk_);
 
             std::ifstream topk_rank_stream = std::ifstream(topk_rank_path, std::ios::binary | std::ios::in);
@@ -41,7 +42,7 @@ namespace ReverseMIPS {
 
             char rank_below_topk_path[512];
             sprintf(rank_below_topk_path,
-                    "../index/sample_query_distribution_below_topk/%s-query-distribution-below-topk-n_sample_query_%d-topk_%d.index",
+                    "../index/query_distribution/%s-query-distribution-below-topk-n_sample_query_%d-topk_%d.index",
                     dataset_name, n_sample_query_, topk_);
 
             rank_below_topk_stream_ = std::ifstream(rank_below_topk_path, std::ios::binary | std::ios::in);
@@ -153,7 +154,7 @@ namespace ReverseMIPS {
 
                     }
                     if(rank % 500 == 0){
-                        printf("rank %d, n_data_item %d\n", rank, n_data_item_);
+                        printf("rank %d, n_data_item %ld\n", rank, n_data_item_);
                     }
                 }
             }

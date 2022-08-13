@@ -66,26 +66,15 @@ int main(int argc, char **argv) {
 
     user.vectorNormalize();
 
-    const size_t n_sample_item = 3500;
+    const size_t n_sample_item = 4000;
     assert(n_sample_item <= n_data_item);
     const int topk = 100;
     // every cell stores how many user falls in this rank
-    std::vector<int> sample_rank_l(n_sample_item * (n_data_item + 1));
+    std::vector<int> sample_rank_l(n_sample_item * n_sample_item);
     sample_rank_l.assign(n_sample_item * (n_data_item + 1), 0);
 
     std::vector<int> sample_itemID_l(n_sample_item);
-    {
-        std::vector<int> shuffle_item_idx_l(n_data_item);
-        std::iota(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), 0);
-
-        std::random_device rd;
-        std::mt19937 g(rd());
-        std::shuffle(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), g);
-
-        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-            sample_itemID_l[sampleID] = shuffle_item_idx_l[sampleID];
-        }
-    }
+    ReadSampleItemID((int) n_sample_item, topk, dataset_name, sample_itemID_l);
 
     //compute the reverse k-rank result of each query
     {

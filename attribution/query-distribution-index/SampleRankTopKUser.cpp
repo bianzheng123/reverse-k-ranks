@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     LoadOptions(argc, argv, para);
     const char *dataset_name = para.dataset_name.c_str();
     const char *basic_dir = para.basic_dir.c_str();
-    spdlog::info("SampleItemTopKUser dataset_name {}, basic_dir {}", dataset_name, basic_dir);
+    spdlog::info("SampleRankTopKUser dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     std::vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -66,29 +66,35 @@ int main(int argc, char **argv) {
 
     user.vectorNormalize();
 
-    const int n_sample_item = 1000;
+    const int n_sample_item = 4000;
     const int topk = 100;
 
-    std::vector<int> shuffle_item_idx_l(n_data_item);
-    std::iota(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), 0);
+    std::vector<int> sample_itemID_l(n_sample_item);
+    {
+        std::vector<int> shuffle_item_idx_l(n_data_item);
+        std::iota(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), 0);
 
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), g);
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), g);
 
+        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+            sample_itemID_l[sampleID] = shuffle_item_idx_l[sampleID];
+        }
+    }
 
-    //compute the reverse k-rank result of each query
+    //compute the k-th top rank of each query
     {
         ComputeItemIDScoreTable cst(user, data_item);
         std::vector<double> distance_l(n_data_item);
         std::vector<double> sample_itemIP_l(n_sample_item);
 
-        std::vector<UserRankElement> result_rank_l(n_sample_item * topk);
+        std::vector<priority_queue<int, vector<int>, std::less<int>>> result_rank_l(n_sample_item);
 
         for (int userID = 0; userID < topk; userID++) {
             cst.ComputeItems(userID, distance_l.data());
             for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-                const int sampleItemID = shuffle_item_idx_l[sampleID];
+                const int sampleItemID = sample_itemID_l[sampleID];
                 sample_itemIP_l[sampleID] = distance_l[sampleItemID];
             }
             cst.SortItems(userID, distance_l.data());
@@ -100,14 +106,9 @@ int main(int argc, char **argv) {
                                                         [](const double &arrIP, double queryIP) {
                                                             return arrIP > queryIP;
                                                         });
-                const long rank = (lb_ptr - distance_ptr) + 1;
-                result_rank_l[sampleID * topk + userID] = UserRankElement(userID, (int) rank, itemIP);
+                const long rank = lb_ptr - distance_ptr;
+                result_rank_l[sampleID].push((int) rank);
             }
-        }
-
-        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-            std::make_heap(result_rank_l.begin() + sampleID * topk, result_rank_l.begin() + (sampleID + 1) * topk,
-                           std::less());
         }
 
         const int report_every = 10000;
@@ -117,7 +118,7 @@ int main(int argc, char **argv) {
         for (int userID = topk; userID < n_user; userID++) {
             cst.ComputeItems(userID, distance_l.data());
             for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-                const int sampleItemID = shuffle_item_idx_l[sampleID];
+                const int sampleItemID = sample_itemID_l[sampleID];
                 sample_itemIP_l[sampleID] = distance_l[sampleItemID];
             }
             cst.SortItems(userID, distance_l.data());
@@ -129,17 +130,12 @@ int main(int argc, char **argv) {
                                                         [](const double &arrIP, const double &queryIP) {
                                                             return arrIP > queryIP;
                                                         });
-                const long rank = (lb_ptr - distance_ptr) + 1;
-                const int heap_max_rank = result_rank_l[sampleID * topk].rank_;
+                const long rank = lb_ptr - distance_ptr;
+                const int heap_max_rank = result_rank_l[sampleID].top();
 
                 if (heap_max_rank > rank) {
-                    std::pop_heap(result_rank_l.begin() + sampleID * topk,
-                                  result_rank_l.begin() + (sampleID + 1) * topk,
-                                  std::less());
-                    result_rank_l[sampleID * topk + topk - 1] = UserRankElement(userID, (int) rank, itemIP);
-                    std::push_heap(result_rank_l.begin() + sampleID * topk,
-                                   result_rank_l.begin() + (sampleID + 1) * topk,
-                                   std::less());
+                    result_rank_l[sampleID].pop();
+                    result_rank_l[sampleID].push((int) rank);
                 }
             }
 
@@ -156,69 +152,14 @@ int main(int argc, char **argv) {
             }
         }
 
-        std::vector<int> user_freq_l(n_user);
-        user_freq_l.assign(n_user, 0);
-        for (int ID = 0; ID < n_sample_item * topk; ID++) {
-            const int userID = result_rank_l[ID].userID_;
-            user_freq_l[userID]++;
+        std::vector<int> topk_rank_l(n_sample_item);
+        for(int sampleID=0;sampleID < n_sample_item;sampleID++){
+            topk_rank_l[sampleID] = result_rank_l[sampleID].top();
         }
-        WriteFrequency(user_freq_l, n_user, dataset_name, "reverse-k-rank-userID-frequency");
 
-        std::sort(user_freq_l.begin(), user_freq_l.end(), std::less());
-        WriteFrequency(user_freq_l, n_user, dataset_name, "reverse-k-rank-sorted-frequency");
-
-        assert(result_rank_l.size() == n_sample_item * topk);
-
-        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-            std::sort(result_rank_l.begin() + sampleID * topk,
-                      result_rank_l.begin() + (sampleID + 1) * topk,
-                      std::less());
-        }
-        WriteQueryDistribution(result_rank_l, shuffle_item_idx_l,
+        WriteQueryDistribution(topk_rank_l, sample_itemID_l,
                                n_sample_item, topk, dataset_name);
-
     }
-
-    {
-        std::vector<DistancePair> item_distance_l(n_user);
-        std::vector<int> user_topk_freq_l(n_user);
-        user_topk_freq_l.assign(n_user, 0);
-
-        const int report_every = 100;
-        TimeRecord record;
-        record.reset();
-
-        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-            const int itemID = shuffle_item_idx_l[sampleID];
-            const double *item_vecs = data_item.getVector(itemID);
-
-#pragma omp parallel for default(none) shared(n_user, user, item_vecs, vec_dim, item_distance_l)
-            for (int userID = 0; userID < n_user; userID++) {
-                const double *user_vecs = user.getVector(userID);
-                const double ip = InnerProduct(item_vecs, user_vecs, vec_dim);
-                item_distance_l[userID] = DistancePair(ip, userID);
-            }
-            boost::sort::block_indirect_sort(item_distance_l.data(), item_distance_l.data() + n_user, std::greater(),
-                                             std::thread::hardware_concurrency());
-
-            for (int topID = 0; topID < topk; topID++) {
-                const int userID = item_distance_l[topID].ID_;
-                user_topk_freq_l[userID]++;
-            }
-
-            if (sampleID != 0 && sampleID % report_every == 0) {
-                std::cout << "preprocessed " << sampleID / (0.01 * n_sample_item) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                          << get_current_RSS() / 1000000 << " Mb \n";
-                record.reset();
-            }
-        }
-        WriteFrequency(user_topk_freq_l, n_user, dataset_name, "topk-userID-frequency");
-        std::sort(user_topk_freq_l.begin(), user_topk_freq_l.end(), std::less());
-        WriteFrequency(user_topk_freq_l, n_user, dataset_name, "topk-sort-frequency");
-
-    }
-
 
     return 0;
 }
