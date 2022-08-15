@@ -151,6 +151,9 @@ namespace ReverseMIPS::RankSample {
 
                 //read disk and fine binary search
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, topkLbHeap);
+//                printf("queryID %d, k-th rank %d, n_remain_candidate %d\n",
+//                       queryID,
+//                       disk_ins_.user_topk_cache_l_[topk - 1].rank_, n_candidate - topk);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID].emplace_back(disk_ins_.user_topk_cache_l_[candID]);

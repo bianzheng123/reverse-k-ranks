@@ -35,7 +35,7 @@ namespace ReverseMIPS {
                 continue;
             }
             int tmp_ub = rank_ub_l[userID];
-            if (min_topk_lb_rank < tmp_ub) {
+            if (min_topk_lb_rank <= tmp_ub) {
                 prune_l[userID] = true;
             }
         }

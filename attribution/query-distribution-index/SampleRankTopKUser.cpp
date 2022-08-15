@@ -66,13 +66,15 @@ int main(int argc, char **argv) {
 
     user.vectorNormalize();
 
-    const int n_sample_item = 1000;
-    const int topk = 50;
+    const int n_sample_item = 500;
+    const int topk = 10;
 
     std::vector<int> sample_itemID_l(n_sample_item);
     {
         std::vector<int> shuffle_item_idx_l(n_data_item);
         std::iota(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), 0);
+
+//        std::shuffle(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), std::default_random_engine(100));
 
         std::random_device rd;
         std::mt19937 g(rd());

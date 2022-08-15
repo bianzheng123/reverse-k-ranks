@@ -66,9 +66,9 @@ int main(int argc, char **argv) {
 
     user.vectorNormalize();
 
-    const size_t n_sample_item = 1000;
+    const size_t n_sample_item = 500;
     assert(n_sample_item <= n_data_item);
-    const int topk = 50;
+    const int topk = 10;
     std::vector<int> sample_itemID_l(n_sample_item);
     ReadSampleItemID((int) n_sample_item, topk, dataset_name, sample_itemID_l);
 
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
                                                             return arrIP > queryIP;
                                                         });
                 const long rank = (lb_ptr - distance_ptr);
-                if(rank < topk_rank_l[sampleID]){
+                if (rank < topk_rank_l[sampleID]) {
                     continue;
                 }
 
@@ -116,12 +116,14 @@ int main(int argc, char **argv) {
                                                                    sorted_topk_rank_l.data() + n_sample_item,
                                                                    (int) rank,
                                                                    [](const int &arrIP, int queryIP) {
-                                                                       return arrIP < queryIP;
+                                                                       return arrIP <= queryIP;
                                                                    });
-                const int topk_rank_offset = topk_rank_offset_ptr - sorted_topk_rank_l.data();
-                assert(0 <= topk_rank_offset && topk_rank_offset <= n_sample_item);
-                if (topk_rank_offset == n_sample_item) {
+                int topk_rank_offset = topk_rank_offset_ptr - sorted_topk_rank_l.data();
+                assert(0 < topk_rank_offset && topk_rank_offset <= n_sample_item);
+                if (topk_rank_offset == n_sample_item && sorted_topk_rank_l[topk_rank_offset - 1] < rank) {
                     continue;
+                }else{
+                    topk_rank_offset--;
                 }
                 assert(0 <= rank && rank <= n_data_item);
 

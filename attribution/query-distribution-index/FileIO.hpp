@@ -28,7 +28,7 @@ namespace ReverseMIPS {
         {
             char resPath[256];
             std::sprintf(resPath,
-                         "../../index/query_distribution/%s-query-distribution-kth-rank-n_sample_query_%d-topk_%d.index",
+                         "../../index/query_distribution/%s-kth-rank-n_sample_query_%d-topk_%d.index",
                          dataset_name, n_sample_item, topk);
 
             std::ofstream out_stream = std::ofstream(resPath, std::ios::binary | std::ios::out);
@@ -45,18 +45,17 @@ namespace ReverseMIPS {
 
         {
             char resPath[256];
-            std::sprintf(resPath, "../../index/query_distribution/%s-sample-itemID-n_sample_query_%d-topk_%d.index",
+            std::sprintf(resPath, "../../index/query_distribution/%s-sample-itemID-n_sample_query_%d-topk_%d.txt",
                          dataset_name, n_sample_item, topk);
 
-            std::ofstream out_stream = std::ofstream(resPath, std::ios::binary | std::ios::out);
+            std::ofstream out_stream = std::ofstream(resPath, std::ios::out);
             if (!out_stream) {
                 spdlog::error("error in write result");
                 exit(-1);
             }
-
-            out_stream.write((char *) sample_itemID_l.data(),
-                             (std::streamsize) (n_sample_item * sizeof(int)));
-
+            for (int rank_itemID = 0; rank_itemID < n_sample_item; rank_itemID++) {
+                out_stream << sample_itemID_l[rank_itemID] << std::endl;
+            }
             out_stream.close();
         }
     }
@@ -65,26 +64,30 @@ namespace ReverseMIPS {
                           std::vector<int> &sample_itemID_l) {
         assert(sample_itemID_l.size() == n_sample_item);
         char resPath[256];
-        std::sprintf(resPath, "../../index/query_distribution/%s-sample-itemID-n_sample_query_%d-topk_%d.index",
+        std::sprintf(resPath, "../../index/query_distribution/%s-sample-itemID-n_sample_query_%d-topk_%d.txt",
                      dataset_name, n_sample_item, topk);
 
-        std::ifstream in_stream = std::ifstream(resPath, std::ios::binary | std::ios::in);
+        std::ifstream in_stream = std::ifstream(resPath, std::ios::in);
         if (!in_stream.is_open()) {
             spdlog::error("error in open file");
             exit(-1);
         }
 
-        in_stream.read((char *) sample_itemID_l.data(), sizeof(int) * n_sample_item);
+        for (int rank_itemID = 0; rank_itemID < n_sample_item; rank_itemID++) {
+            in_stream >> sample_itemID_l[rank_itemID];
+        }
+
+        in_stream.close();
     }
 
-    void ReadKthRank(const int &n_sample_item, const int& topk, const char* dataset_name,
-                     std::vector<int>& topk_rank_l){
+    void ReadKthRank(const int &n_sample_item, const int &topk, const char *dataset_name,
+                     std::vector<int> &topk_rank_l) {
 
         assert(topk_rank_l.size() == n_sample_item);
 
         char resPath[256];
         std::sprintf(resPath,
-                     "../../index/query_distribution/%s-query-distribution-kth-rank-n_sample_query_%d-topk_%d.index",
+                     "../../index/query_distribution/%s-kth-rank-n_sample_query_%d-topk_%d.index",
                      dataset_name, n_sample_item, topk);
 
         std::ifstream in_stream = std::ifstream(resPath, std::ios::binary | std::ios::in);
@@ -103,7 +106,8 @@ namespace ReverseMIPS {
 
         {
             char resPath[256];
-            std::sprintf(resPath, "../../index/query_distribution/%s-query-distribution-below-topk-n_sample_query_%d-topk_%d.index",
+            std::sprintf(resPath,
+                         "../../index/query_distribution/%s-below-topk-n_sample_query_%d-topk_%d.index",
                          dataset_name, n_sample_item, topk);
 
             std::ofstream out_stream = std::ofstream(resPath, std::ios::binary | std::ios::out);

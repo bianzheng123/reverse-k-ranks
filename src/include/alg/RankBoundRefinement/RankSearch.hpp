@@ -51,10 +51,11 @@ namespace ReverseMIPS {
         }
 
         void Preprocess() {
-            for (size_t known_rank_idx = 0, idx = 0;
+            for (size_t known_rank_idx = sample_every_ - 1, idx = 0;
                  known_rank_idx < topt_ && idx < n_sample_; known_rank_idx += sample_every_, idx++) {
                 known_rank_idx_l_[idx] = (int) known_rank_idx;
                 assert(idx < n_sample_);
+                assert(known_rank_idx < topt_);
             }
 
             for (int rankID = 0; rankID < n_sample_; rankID++) {
@@ -112,8 +113,9 @@ namespace ReverseMIPS {
             }
 
             assert(IP_lb <= queryIP && queryIP <= IP_ub);
-            assert(rank_lb - rank_ub <=
-                   std::max(known_rank_idx_l_[n_sample_ - 1], (int) n_data_item_ - known_rank_idx_l_[n_sample_ - 1]));
+            assert(0 <= rank_lb - rank_ub &&
+                   rank_lb - rank_ub <= std::max(known_rank_idx_l_[n_sample_ - 1],
+                                                 (int) n_data_item_ - known_rank_idx_l_[n_sample_ - 1]));
         }
 
         void RankBound(const std::vector<double> &queryIP_l,

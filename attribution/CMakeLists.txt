@@ -101,12 +101,3 @@ target_link_libraries(pprnbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenM
 add_executable(prb score-sample-reason/PrintRankBound.cpp)
 target_include_directories(prb PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(prb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-
-add_executable(qdbt test-query-rank-search/QueryDistributionBelowTopk.cpp)
-target_include_directories(qdbt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(qdbt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-add_executable(qsrtku test-query-rank-search/QuerySampleRankTopKUser.cpp)
-target_include_directories(qsrtku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(qsrtku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
