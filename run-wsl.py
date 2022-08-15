@@ -32,6 +32,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'RankSample': 'n_sample_20',
         'ScoreSample': 'n_sample_20',
         'SSComputeAll': 'n_sample_20',
+        'QueryRankSample': 'n_sample_20',
 
         'SSMergeIntervalIDByBitmap': 'n_sample_20-index_size_gb_50',
         'SSMergeQuadraticRankBoundByBitmapBatchRun': 'n_sample_128-index_size_gb_256',
@@ -88,17 +89,18 @@ def run():
     method_name_l = [
         'BatchDiskBruteForce',
         # 'CompressTopTIDBruteForce',
-        'CompressTopTIPBruteForce',
+        # 'CompressTopTIPBruteForce',
         # 'CompressTopTIDBruteForceBatchRun',
         # 'CompressTopTIPBruteForceBatchRun',
-        'RSCompressTopTIPBruteForce',
+        # 'RSCompressTopTIPBruteForce',
         # 'DiskBruteForce',
         'MemoryBruteForce',
 
         # 'GridIndex',
-        # 'RankSample',
+        'RankSample',
         # 'ScoreSample',
         # 'SSComputeAll',
+        'QueryRankSample',
 
         # 'SSMergeQuadraticRankBoundByBitmap',
         # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
@@ -120,24 +122,31 @@ def run():
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     # os.system('cd build && ./{} {}'.format('bbfdi', ds))
 
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    # dataset_l = ['fake-small', 'fake']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     for ds in dataset_l:
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
         # os.system('cd build && ./brtt --dataset_name {}'.format(ds))
         # os.system('cd build && ./brqrbb --dataset_name {}'.format(ds))
         # os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
+
+        # os.system('cd build/attribution && ./qsrtku --dataset_name {}'.format(ds))
+        # os.system('cd build/attribution && ./qdbt --dataset_name {}'.format(ds))
+        os.system('cd build && ./progress --method_name {} --dataset_name {}'.format('QueryRankSample', ds))
+
+        # os.system('cd build/attribution && ./srtku --dataset_name {}'.format(ds))
+        # os.system('cd build/attribution && ./dbt --dataset_name {}'.format(ds))
+        # os.system('cd build && ./progress --method_name {} --dataset_name {}'.format('QueryRankSample', ds))
 
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))

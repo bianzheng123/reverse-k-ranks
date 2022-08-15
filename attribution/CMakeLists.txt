@@ -80,13 +80,13 @@ if (USE_CUDA)
     set_property(TARGET ppr PROPERTY CXX_EXTENSIONS OFF)
 
 else ()
-    add_executable(srtku query-distribution-index/SampleRankTopKUser.cpp)
-    target_include_directories(srtku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(srtku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
     add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
     target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(ppr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(srtku query-distribution-index/SampleRankTopKUser.cpp)
+    target_include_directories(srtku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(srtku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(dbt query-distribution-index/DistributionBelowTopk.cpp)
     target_include_directories(dbt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
@@ -101,3 +101,12 @@ target_link_libraries(pprnbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenM
 add_executable(prb score-sample-reason/PrintRankBound.cpp)
 target_include_directories(prb PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(prb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+
+add_executable(qdbt test-query-rank-search/QueryDistributionBelowTopk.cpp)
+target_include_directories(qdbt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(qdbt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+add_executable(qsrtku test-query-rank-search/QuerySampleRankTopKUser.cpp)
+target_include_directories(qsrtku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(qsrtku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
