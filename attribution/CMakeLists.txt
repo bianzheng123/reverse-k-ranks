@@ -7,7 +7,7 @@
 set(FINISH OFF)
 
 if (FINISH)
-    add_executable(kmrt run-time/KMeansRunTime.cpp)
+    add_executable(kmrt ../obsoluted/run-time/KMeansRunTime.cpp)
     target_include_directories(kmrt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(kmrt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
@@ -19,11 +19,11 @@ if (FINISH)
     target_include_directories(usd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(usd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    add_executable(npd norm-popularity-distribution/NormPopularityDistribution.cpp)
+    add_executable(npd ../obsoluted/norm-popularity-distribution/NormPopularityDistribution.cpp)
     target_include_directories(npd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(npd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
-    add_executable(srt run-time/ScoreComputeRunTime.cpp)
+    add_executable(srt ../obsoluted/run-time/ScoreComputeRunTime.cpp)
     target_include_directories(srt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(srt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
@@ -61,6 +61,15 @@ if (FINISH)
 endif ()
 
 if (USE_CUDA)
+    set_source_files_properties(performance-metric-relationship/PrintBaselinePerformanceMetric.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(pbpm performance-metric-relationship/PrintBaselinePerformanceMetric.cpp)
+    target_include_directories(pbpm PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(pbpm PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+    set_target_properties(pbpm PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_property(TARGET pbpm PROPERTY CXX_STANDARD "17")
+    set_property(TARGET pbpm PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET pbpm PROPERTY CXX_EXTENSIONS OFF)
+
     set_source_files_properties(query-distribution-index/SampleRankTopKUser.cpp PROPERTIES LANGUAGE CUDA)
     add_executable(srtku query-distribution-index/SampleRankTopKUser.cpp)
     target_include_directories(srtku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
@@ -80,6 +89,10 @@ if (USE_CUDA)
     set_property(TARGET ppr PROPERTY CXX_EXTENSIONS OFF)
 
 else ()
+    add_executable(pbpm performance-metric-relationship/PrintBaselinePerformanceMetric.cpp)
+    target_include_directories(pbpm PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(pbpm PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
     add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
     target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(ppr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})

@@ -172,4 +172,9 @@ if __name__ == '__main__':
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
-    run()
+    for ds in dataset_l:
+        os.system(
+            'cd build/attribution && ./pbpm --dataset_name {} --n_sample {} --index_size_gb {}'.format(
+                ds, 2048, 256))
+
+    # run()
