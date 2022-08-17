@@ -25,3 +25,4 @@ cmake-build-release/
 /attribution/disk-index-compression/*.txt
 /attribution/user-query-relationship/*.jpg
 /attribution/user-query-relationship/*.txt
+/attribution/performance-metric-relationship/*.jpg

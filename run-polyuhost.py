@@ -142,32 +142,22 @@ def run_compress_topt():
     # os.system('cd build && ./brtt --dataset_name {}'.format('amazon'))
     # os.system('cd build && ./brqrbb --dataset_name {}'.format('amazon'))
     # os.system('cd build && ./brmrbi --dataset_name {}'.format('amazon'))
-    os.system(
-        'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            'yahoomusic_big', basic_dir, "RSCompressTopTIPBruteForce", 2300, 256))
-    os.system(
-        'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            'yelp', basic_dir, "RSCompressTopTIPBruteForce", 1900, 256))
-    os.system(
-        'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            'goodreads', basic_dir, "RSCompressTopTIPBruteForce", 4800, 256))
-    # for index_size in index_size_l:
-    # os.system(
-    #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-    #         ds, basic_dir, "SSComputeAll", n_sample))
-    # os.system(
-    #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-    #         ds, basic_dir, "ScoreSample", n_sample))
-    # for ds in dataset_l:
-    #     os.system(
-    #         'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-    #             ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
-    # os.system(
-    #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-    #         ds, basic_dir, "CompressTopTIPBruteForce", n_sample, index_size))
-    # os.system(
-    #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-    #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
+    for index_size in index_size_l:
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+        #         ds, basic_dir, "SSComputeAll", n_sample))
+        for ds in dataset_l:
+            os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 5000, 50))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
+                    ds, basic_dir, 'QRSCompressTopTIPBruteForce', n_sample, index_size,
+                    5000, 50))
+            # os.system(
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+            #         ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
+            # os.system(
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+            #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
 
 
 if __name__ == '__main__':
@@ -184,18 +174,5 @@ if __name__ == '__main__':
     #     'cd build && ./brtt --dataset_name {}'.format('amazon'))
     # os.system(
     #     'cd build && ./brqrbb --dataset_name {}'.format('amazon'))
-
-    os.system(
-        'cd build/attribution && ./pbpm --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-            'movielens-27m', basic_dir, 2048, 256))
-    os.system(
-        'cd build/attribution && ./pbpm --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-            'netflix', basic_dir, 2048, 256))
-    os.system(
-        'cd build/attribution && ./pbpm --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-            'yahoomusic_big', basic_dir, 2048, 256))
-    os.system(
-        'cd build/attribution && ./rri --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-            'yelp', basic_dir, 2048, 256))
 
     # run_compress_topt()

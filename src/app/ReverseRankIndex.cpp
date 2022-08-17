@@ -10,11 +10,13 @@
 
 #include "BruteForce/CompressTopTIDBruteForce.hpp"
 #include "BruteForce/CompressTopTIPBruteForce.hpp"
-#include "BruteForce/RSCompressTopTIPBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
+#include "BruteForce/RSCompressTopTIPBruteForce.hpp"
+#include "BruteForce/QRSCompressTopTIPBruteForce.hpp"
 
 #include "GridIndex.hpp"
 
+#include "QueryRankSample.hpp"
 #include "RankSample.hpp"
 #include "ScoreSample.hpp"
 #include "SSComputeAll.hpp"
@@ -29,7 +31,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int n_sample;
+    int n_sample, n_sample_query, sample_topk;
     uint64_t index_size_gb;
 };
 
@@ -50,7 +52,11 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "the numer of sample")
             ("index_size_gb, tt", po::value<uint64_t>(&para.index_size_gb)->default_value(50),
-             "index size, in unit of GB");
+             "index size, in unit of GB")
+            ("n_sample_query, nsq", po::value<int>(&para.n_sample_query)->default_value(150),
+             "the numer of sample query in training query distribution")
+            ("sample_topk, st", po::value<int>(&para.sample_topk)->default_value(50),
+             "topk in training query distribution");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -109,6 +115,18 @@ int main(int argc, char **argv) {
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
+    } else if (method_name == "QRSCompressTopTIPBruteForce") {
+        const int n_sample = para.n_sample;
+        const uint64_t index_size_gb = para.index_size_gb;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QRSCompressTopTIPBruteForce::BuildIndex(data_item, user, index_path,
+                                                        n_sample, index_size_gb,
+                                                        dataset_name, n_sample_query, sample_topk);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
     } else if (method_name == "RSCompressTopTIPBruteForce") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
@@ -123,6 +141,16 @@ int main(int argc, char **argv) {
         ///Online
         spdlog::info("input parameter: none");
         index = GridIndex::BuildIndex(data_item, user);
+
+    } else if (method_name == "QueryRankSample") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSample::BuildIndex(data_item, user, index_path, dataset_name,
+                                            n_sample, n_sample_query, sample_topk);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else if (method_name == "RankSample") {
         const int n_sample = para.n_sample;
@@ -172,8 +200,8 @@ int main(int argc, char **argv) {
 //        spdlog::info("{}", performance_str);
 //    }
 
-//    vector<int> topk_l{50, 40, 30, 20, 10};
-    vector<int> topk_l{10};
+    vector<int> topk_l{50, 40, 30, 20, 10};
+//    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
 //    vector<int> topk_l{20};
     RetrievalResult config;

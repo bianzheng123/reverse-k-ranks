@@ -70,15 +70,6 @@ if (USE_CUDA)
     set_property(TARGET pbpm PROPERTY CXX_STANDARD_REQUIRED ON)
     set_property(TARGET pbpm PROPERTY CXX_EXTENSIONS OFF)
 
-    set_source_files_properties(query-distribution-index/SampleRankTopKUser.cpp PROPERTIES LANGUAGE CUDA)
-    add_executable(srtku query-distribution-index/SampleRankTopKUser.cpp)
-    target_include_directories(srtku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(srtku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
-    set_target_properties(srtku PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    set_property(TARGET srtku PROPERTY CXX_STANDARD "17")
-    set_property(TARGET srtku PROPERTY CXX_STANDARD_REQUIRED ON)
-    set_property(TARGET srtku PROPERTY CXX_EXTENSIONS OFF)
-
     set_source_files_properties(print-prune-ratio/PrintPruneRatio.cpp PROPERTIES LANGUAGE CUDA)
     add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
     target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
@@ -96,14 +87,6 @@ else ()
     add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
     target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(ppr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(srtku query-distribution-index/SampleRankTopKUser.cpp)
-    target_include_directories(srtku PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(srtku PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(dbt query-distribution-index/DistributionBelowTopk.cpp)
-    target_include_directories(dbt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(dbt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 endif ()
 

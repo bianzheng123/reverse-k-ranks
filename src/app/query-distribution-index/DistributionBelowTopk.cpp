@@ -6,6 +6,7 @@
 
 #include "ComputeItemIDScoreTable.hpp"
 #include "FileIO.hpp"
+#include "KthUserRank.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"
@@ -21,6 +22,8 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name;
+    int n_sample_item;
+    int sample_topk;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -33,7 +36,12 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
              "basic directory")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
-             "dataset_name");
+             "dataset_name")
+
+            ("n_sample_item, ns", po::value<int>(&para.n_sample_item)->default_value(500),
+             "number of sample of a rank bound")
+            ("sample_topk, ns", po::value<int>(&para.sample_topk)->default_value(10),
+             "number of sample of a rank bound");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -66,18 +74,21 @@ int main(int argc, char **argv) {
 
     user.vectorNormalize();
 
-    const size_t n_sample_item = 500;
+    const int n_sample_item = para.n_sample_item;
     assert(n_sample_item <= n_data_item);
-    const int topk = 10;
+    const int sample_topk = para.sample_topk;
+    spdlog::info("n_sample_item {}, sample_topk {}", n_sample_item, sample_topk);
+
     std::vector<int> sample_itemID_l(n_sample_item);
-    ReadSampleItemID((int) n_sample_item, topk, dataset_name, sample_itemID_l);
+    SampleItem(n_data_item, n_sample_item, sample_itemID_l);
 
-    std::vector<int> topk_rank_l(n_sample_item);
-    ReadKthRank(n_sample_item, topk, dataset_name, topk_rank_l);
-
-    std::vector<int> sorted_topk_rank_l(n_sample_item);
-    sorted_topk_rank_l.assign(topk_rank_l.begin(), topk_rank_l.end());
-    assert(std::is_sorted(sorted_topk_rank_l.begin(), sorted_topk_rank_l.end()));
+    //sort the rank in ascending sort, should also influence sample_itemID_l
+    std::vector<int> sort_kth_rank_l(n_sample_item);
+    std::vector<int> sort_sample_itemID_l(n_sample_item);
+    ComputeKthRank(user, data_item,
+                   n_sample_item, sample_topk,
+                   sample_itemID_l,
+                   sort_kth_rank_l, sort_sample_itemID_l);
 
     // every cell stores how many user falls in this rank
     std::vector<int> sample_rank_l(n_sample_item * n_sample_item);
@@ -95,7 +106,7 @@ int main(int argc, char **argv) {
         for (int userID = 0; userID < n_user; userID++) {
             cst.ComputeItems(userID, distance_l.data());
             for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-                const int sampleItemID = sample_itemID_l[sampleID];
+                const int sampleItemID = sort_sample_itemID_l[sampleID];
                 sample_itemIP_l[sampleID] = distance_l[sampleItemID];
             }
             cst.SortItems(userID, distance_l.data());
@@ -108,21 +119,21 @@ int main(int argc, char **argv) {
                                                             return arrIP > queryIP;
                                                         });
                 const long rank = (lb_ptr - distance_ptr);
-                if (rank < topk_rank_l[sampleID]) {
+                if (rank < sort_kth_rank_l[sampleID]) {
                     continue;
                 }
 
-                const int *topk_rank_offset_ptr = std::lower_bound(sorted_topk_rank_l.data(),
-                                                                   sorted_topk_rank_l.data() + n_sample_item,
+                const int *topk_rank_offset_ptr = std::lower_bound(sort_kth_rank_l.data(),
+                                                                   sort_kth_rank_l.data() + n_sample_item,
                                                                    (int) rank,
                                                                    [](const int &arrIP, int queryIP) {
                                                                        return arrIP <= queryIP;
                                                                    });
-                int topk_rank_offset = topk_rank_offset_ptr - sorted_topk_rank_l.data();
+                int topk_rank_offset = topk_rank_offset_ptr - sort_kth_rank_l.data();
                 assert(0 < topk_rank_offset && topk_rank_offset <= n_sample_item);
-                if (topk_rank_offset == n_sample_item && sorted_topk_rank_l[topk_rank_offset - 1] < rank) {
+                if (topk_rank_offset == n_sample_item && sort_kth_rank_l[topk_rank_offset - 1] < rank) {
                     continue;
-                }else{
+                } else {
                     topk_rank_offset--;
                 }
                 assert(0 <= rank && rank <= n_data_item);
@@ -159,8 +170,8 @@ int main(int argc, char **argv) {
             }
         }
 
-        WriteDistributionBelowTopk(sample_rank_l,
-                                   n_sample_item, topk, dataset_name);
+        WriteDistributionBelowTopk(sample_rank_l, sort_kth_rank_l, sort_sample_itemID_l,
+                                   n_sample_item, sample_topk, dataset_name);
 
     }
 

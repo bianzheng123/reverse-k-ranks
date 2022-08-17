@@ -32,7 +32,7 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST_MODULE OFF)
-set(BUILD_ATTRIBUTION ON)
+set(BUILD_ATTRIBUTION OFF)
 
 set(BUILD_PROGRESS ON)
 
@@ -81,6 +81,15 @@ if (USE_CUDA)
     set_property(TARGET brmrbi PROPERTY CXX_STANDARD_REQUIRED ON)
     set_property(TARGET brmrbi PROPERTY CXX_EXTENSIONS OFF)
 
+    set_source_files_properties(src/app/query-distribution-index/DistributionBelowTopk.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(dbt src/app/query-distribution-index/DistributionBelowTopk.cpp)
+    target_include_directories(dbt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(dbt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+    set_target_properties(dbt PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    set_property(TARGET dbt PROPERTY CXX_STANDARD "17")
+    set_property(TARGET dbt PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET dbt PROPERTY CXX_EXTENSIONS OFF)
+
 else () # not use cuda
     add_executable(rri src/app/ReverseRankIndex.cpp)
     target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
@@ -93,6 +102,10 @@ else () # not use cuda
     add_executable(brmrbi src/app/BatchRunMergeRankByInterval.cpp)
     target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(brmrbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+    add_executable(dbt src/app/query-distribution-index/DistributionBelowTopk.cpp)
+    target_include_directories(dbt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(dbt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
 ##set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)

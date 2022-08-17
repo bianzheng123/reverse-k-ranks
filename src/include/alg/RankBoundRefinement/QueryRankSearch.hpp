@@ -17,21 +17,25 @@ namespace ReverseMIPS {
         std::unique_ptr<int[]> topk_rank_l_; // n_sample_query
         std::unique_ptr<int[]> sample_rank_l_; // n_sample_query * n_sample_query, stores the number of un-pruned user in the rank of sampled query
     public:
-        const int n_sample_query_ = 500;
-        const int topk_ = 10;
+        int n_sample_query_;
+        int sample_topk_;
 
         inline SampleQueryDistributionBelowTopk() = default;
 
-        inline SampleQueryDistributionBelowTopk(const int n_data_item, const char *dataset_name) {
+        inline SampleQueryDistributionBelowTopk(const int &n_data_item, const char *dataset_name,
+                                                const int &n_sample_query, const int &sample_topk) {
             n_data_item_ = n_data_item;
+            this->n_sample_query_ = n_sample_query;
+            this->sample_topk_ = sample_topk;
             topk_rank_l_ = std::make_unique<int[]>(n_sample_query_);
             sample_rank_l_ = std::make_unique<int[]>(n_sample_query_ * n_sample_query_);
+            spdlog::info("n_sample_query {}, sample_topk {}", n_sample_query_, sample_topk_);
 
             {
                 char topk_rank_path[512];
                 sprintf(topk_rank_path,
-                        "../index/query_distribution/%s-kth-rank-n_sample_query_%d-topk_%d.index",
-                        dataset_name, n_sample_query_, topk_);
+                        "../index/query_distribution/%s-kth-rank-n_sample_query_%d-sample_topk_%d.index",
+                        dataset_name, n_sample_query_, sample_topk_);
 
                 std::ifstream topk_rank_stream = std::ifstream(topk_rank_path, std::ios::binary | std::ios::in);
                 if (!topk_rank_stream) {
@@ -46,8 +50,8 @@ namespace ReverseMIPS {
             {
                 char rank_below_topk_path[512];
                 sprintf(rank_below_topk_path,
-                        "../index/query_distribution/%s-below-topk-n_sample_query_%d-topk_%d.index",
-                        dataset_name, n_sample_query_, topk_);
+                        "../index/query_distribution/%s-below-topk-n_sample_query_%d-sample_topk_%d.index",
+                        dataset_name, n_sample_query_, sample_topk_);
 
                 std::ifstream rank_below_topk_stream = std::ifstream(rank_below_topk_path,
                                                                      std::ios::binary | std::ios::in);
@@ -65,8 +69,8 @@ namespace ReverseMIPS {
 //                std::vector<int> sample_queryID_l(n_sample_query_);
 //                assert(sample_queryID_l.size() == n_sample_query_);
 //                char resPath[256];
-//                std::sprintf(resPath, "../index/query_distribution/%s-sample-itemID-n_sample_query_%d-topk_%d.txt",
-//                             dataset_name, n_sample_query_, topk_);
+//                std::sprintf(resPath, "../index/query_distribution/%s-sample-itemID-n_sample_query_%d-sample_topk_%d.txt",
+//                             dataset_name, n_sample_query_, sample_topk_);
 //
 //                std::ifstream in_stream = std::ifstream(resPath, std::ios::binary | std::ios::in);
 //                if (!in_stream.is_open()) {
@@ -145,7 +149,8 @@ namespace ReverseMIPS {
         inline QueryRankSearch() {}
 
         inline QueryRankSearch(const int &n_sample, const int &n_data_item,
-                               const int &n_user, const char *dataset_name) {
+                               const int &n_user, const char *dataset_name,
+                               const int &n_sample_query, const int &sample_topk) {
             this->n_sample_ = n_sample;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
@@ -157,7 +162,7 @@ namespace ReverseMIPS {
             }
             assert(n_sample > 0);
 
-            Preprocess(dataset_name);
+            Preprocess(dataset_name, n_sample_query, sample_topk);
 
         }
 
@@ -165,10 +170,10 @@ namespace ReverseMIPS {
             LoadIndex(index_path);
         }
 
-        void Preprocess(const char *dataset_name) {
-            SampleQueryDistributionBelowTopk query_distribution_ins((int) n_data_item_, dataset_name);
+        void Preprocess(const char *dataset_name, const int &n_sample_query, const int &sample_topk) {
+            SampleQueryDistributionBelowTopk query_distribution_ins((int) n_data_item_, dataset_name,
+                                                                    n_sample_query, sample_topk);
 
-            const int n_sample_query = query_distribution_ins.n_sample_query_;
             if (n_sample_query < n_sample_) {
                 spdlog::error("n_sample_query too small, program exit\n");
                 exit(-1);
@@ -177,12 +182,13 @@ namespace ReverseMIPS {
             std::vector<uint64_t> optimal_dp(n_sample_query * n_sample_);
             std::vector<int> position_dp(n_sample_query * n_sample_);
             for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
-                std::cout << "sampleID " << sampleID;
+                spdlog::info("sampleID {}", sampleID);
                 for (int sample_rankID = 0; sample_rankID < n_sample_query; sample_rankID++) {
                     if (sampleID == 0) {
                         optimal_dp[sample_rankID * n_sample_ + sampleID] =
                                 query_distribution_ins.GetUnpruneCandidate(0, sample_rankID) +
-                                (n_sample_query - sample_rankID - 1) * (n_data_item_ - query_distribution_ins.topk_);
+                                (n_sample_query - sample_rankID - 1) *
+                                (n_data_item_ - query_distribution_ins.sample_topk_);
 
                         position_dp[sample_rankID * n_sample_ + sampleID] = sample_rankID;
                     } else {
@@ -190,7 +196,7 @@ namespace ReverseMIPS {
                         for (int t = sample_rankID - 1; t >= 0; t--) {
                             const int64_t unprune_user_candidate =
                                     query_distribution_ins.GetUnpruneCandidate(t + 1, sample_rankID) -
-                                    (sample_rankID - t) * (n_data_item_ - query_distribution_ins.topk_);
+                                    (sample_rankID - t) * (n_data_item_ - query_distribution_ins.sample_topk_);
                             assert(unprune_user_candidate <= 0);
                             assert(optimal_dp[sample_rankID * n_sample_ + sampleID] >= 0);
                             assert(position_dp[sample_rankID * n_sample_ + sampleID] >= 0);

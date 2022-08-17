@@ -20,14 +20,16 @@ def cmp_file(file1, file2):
 
 
 def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
+    flag = True
     suffix_m = {
 
         'CompressTopTIDBruteForce': 'n_sample_20-index_size_gb_50',
         'CompressTopTIDBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
 
         'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
-        'RSCompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
         'CompressTopTIPBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
+        'RSCompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
+        'QRSCompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
 
         'RankSample': 'n_sample_20',
         'ScoreSample': 'n_sample_20',
@@ -51,7 +53,6 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'CAUserItemPQ': 'n_codebook_8-n_codeword_32',
         'CAItemPQ': 'n_codebook_8-n_codeword_32'
     }
-    flag = True
     for ds in dataset_l:
         for topk in topk_l:
             for _type in type_arr:
@@ -140,11 +141,17 @@ def run():
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'QueryRankSample'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QueryRankSample'))
 
-        # os.system('cd build/attribution && ./srtku --dataset_name {}'.format(ds))
-        # os.system('cd build/attribution && ./dbt --dataset_name {}'.format(ds))
-        # os.system('cd build && ./progress --method_name {} --dataset_name {} --n_sample {}'.format('QueryRankSample', ds, 5))
+        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 150, 50))
+        # os.system(
+        #     'cd build && ./rri --method_name {} --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         'QueryRankSample', ds,
+        #         150, 50))
+        os.system(
+            'cd build && ./rri --method_name {} --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
+                'QRSCompressTopTIPBruteForce', ds,
+                150, 50))
 
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
@@ -172,9 +179,9 @@ if __name__ == '__main__':
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
-    for ds in dataset_l:
-        os.system(
-            'cd build/attribution && ./pbpm --dataset_name {} --n_sample {} --index_size_gb {}'.format(
-                ds, 2048, 256))
+    # for ds in dataset_l:
+    #     os.system(
+    #         'cd build/attribution && ./pbpm --dataset_name {} --n_sample {} --index_size_gb {}'.format(
+    #             ds, 2048, 256))
 
-    # run()
+    run()

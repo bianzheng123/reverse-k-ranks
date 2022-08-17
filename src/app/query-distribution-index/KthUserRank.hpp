@@ -1,76 +1,19 @@
 //
-// Created by BianZheng on 2022/7/27.
+// Created by BianZheng on 2022/8/17.
 //
 
-//对item进行采样, 计算每一个item, 返回reverse k-rank结果所在的userID, 以及返回这个item的topk userID
+#ifndef REVERSE_K_RANKS_KTHUSERRANK_HPP
+#define REVERSE_K_RANKS_KTHUSERRANK_HPP
 
-#include "ComputeItemIDScoreTable.hpp"
-#include "FileIO.hpp"
-#include "alg/SpaceInnerProduct.hpp"
-#include "struct/VectorMatrix.hpp"
-#include "struct/UserRankElement.hpp"
-#include "util/TimeMemory.hpp"
-#include "util/VectorIO.hpp"
-
-#include <spdlog/spdlog.h>
-#include <boost/program_options.hpp>
-#include <iostream>
-#include <string>
+#include <vector>
 #include <random>
+#include <algorithm>
+#include <cassert>
+#include <queue>
 
-class Parameter {
-public:
-    std::string basic_dir, dataset_name;
-};
-
-void LoadOptions(int argc, char **argv, Parameter &para) {
-    namespace po = boost::program_options;
-
-    po::options_description opts("Allowed options");
-    opts.add_options()
-            ("help,h", "help info")
-            ("basic_dir,bd",
-             po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
-             "basic directory")
-            ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
-             "dataset_name");
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, opts), vm);
-    po::notify(vm);
-
-    if (vm.count("help")) {
-        std::cout << opts << std::endl;
-        exit(0);
-    }
-}
-
-using namespace std;
-using namespace ReverseMIPS;
-
-int main(int argc, char **argv) {
-    Parameter para;
-    LoadOptions(argc, argv, para);
-    const char *dataset_name = para.dataset_name.c_str();
-    const char *basic_dir = para.basic_dir.c_str();
-    spdlog::info("SampleRankTopKUser dataset_name {}, basic_dir {}", dataset_name, basic_dir);
-
-    int n_data_item, n_query_item, n_user, vec_dim;
-    std::vector<VectorMatrix> data = readData(basic_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                              vec_dim);
-    VectorMatrix &user = data[0];
-    VectorMatrix &data_item = data[1];
-    VectorMatrix &query_item = data[2];
-    spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user,
-                 vec_dim);
-
-    user.vectorNormalize();
-
-    const int n_sample_item = 500;
-    const int topk = 10;
-
-    std::vector<int> sample_itemID_l(n_sample_item);
-    {
+namespace ReverseMIPS {
+    void SampleItem(const int &n_data_item, const int &n_sample_item, std::vector<int> &sample_itemID_l) {
+        assert(sample_itemID_l.size() == n_sample_item);
         std::vector<int> shuffle_item_idx_l(n_data_item);
         std::iota(shuffle_item_idx_l.begin(), shuffle_item_idx_l.end(), 0);
 
@@ -85,15 +28,24 @@ int main(int argc, char **argv) {
         }
     }
 
-    //compute the k-th top rank of each query
-    {
+    void ComputeKthRank(const VectorMatrix &user, const VectorMatrix &data_item,
+                        const int &n_sample_item, const int &sample_topk,
+                        const std::vector<int> &sample_itemID_l,
+                        std::vector<int> &sort_kth_rank_l,
+                        std::vector<int> &sort_sample_itemID_l) {
+
+        assert(sort_kth_rank_l.size() == n_sample_item);
+        assert(sort_sample_itemID_l.size() == n_sample_item);
+
+        const int n_data_item = data_item.n_vector_;
+        const int n_user = user.n_vector_;
         ComputeItemIDScoreTable cst(user, data_item);
         std::vector<double> distance_l(n_data_item);
         std::vector<double> sample_itemIP_l(n_sample_item);
 
-        std::vector<priority_queue<int, vector<int>, std::less<int>>> result_rank_l(n_sample_item);
+        std::vector<std::priority_queue<int, std::vector<int>, std::less<int>>> result_rank_l(n_sample_item);
 
-        for (int userID = 0; userID < topk; userID++) {
+        for (int userID = 0; userID < sample_topk; userID++) {
             cst.ComputeItems(userID, distance_l.data());
             for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
                 const int sampleItemID = sample_itemID_l[sampleID];
@@ -117,7 +69,7 @@ int main(int argc, char **argv) {
         TimeRecord record;
         record.reset();
 
-        for (int userID = topk; userID < n_user; userID++) {
+        for (int userID = sample_topk; userID < n_user; userID++) {
             cst.ComputeItems(userID, distance_l.data());
             for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
                 const int sampleItemID = sample_itemID_l[sampleID];
@@ -156,7 +108,7 @@ int main(int argc, char **argv) {
 
         std::vector<int> topk_rank_l(n_sample_item);
         for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-            assert(result_rank_l[sampleID].size() == topk);
+            assert(result_rank_l[sampleID].size() == sample_topk);
             topk_rank_l[sampleID] = result_rank_l[sampleID].top();
         }
 
@@ -165,20 +117,15 @@ int main(int argc, char **argv) {
         std::sort(topk_rank_idx_l.begin(), topk_rank_idx_l.end(),
                   [&topk_rank_l](int i1, int i2) { return topk_rank_l[i1] < topk_rank_l[i2]; });
 
-        std::vector<int> sort_topk_rank_l(n_sample_item);
         for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
-            sort_topk_rank_l[sampleID] = topk_rank_l[topk_rank_idx_l[sampleID]];
+            sort_kth_rank_l[sampleID] = topk_rank_l[topk_rank_idx_l[sampleID]];
         }
-        assert(std::is_sorted(sort_topk_rank_l.begin(), sort_topk_rank_l.end()));
+        assert(std::is_sorted(sort_kth_rank_l.begin(), sort_kth_rank_l.end()));
 
-        std::vector<int> sort_sample_itemID_l(n_sample_item);
         for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
             sort_sample_itemID_l[sampleID] = sample_itemID_l[topk_rank_idx_l[sampleID]];
         }
-
-        WriteQueryDistribution(sort_topk_rank_l, sort_sample_itemID_l,
-                               n_sample_item, topk, dataset_name);
     }
 
-    return 0;
 }
+#endif //REVERSE_K_RANKS_KTHUSERRANK_HPP
