@@ -23,11 +23,9 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
     flag = True
     suffix_m = {
 
-        'CompressTopTIDBruteForce': 'n_sample_20-index_size_gb_50',
-        'CompressTopTIDBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
-
         'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
         'CompressTopTIPBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
+        'RSCompressTopTIPBruteForceBatchRun': 'n_sample_512-index_size_gb_256',
         'RSCompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
         'QRSCompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
 
@@ -91,17 +89,16 @@ def run():
         'BatchDiskBruteForce',
         # 'CompressTopTIDBruteForce',
         # 'CompressTopTIPBruteForce',
-        # 'CompressTopTIDBruteForceBatchRun',
-        # 'CompressTopTIPBruteForceBatchRun',
+        'RSCompressTopTIPBruteForceBatchRun',
         # 'RSCompressTopTIPBruteForce',
         # 'DiskBruteForce',
         'MemoryBruteForce',
 
         # 'GridIndex',
-        'RankSample',
+        # 'RankSample',
         # 'ScoreSample',
         # 'SSComputeAll',
-        'QueryRankSample',
+        # 'QueryRankSample',
 
         # 'SSMergeQuadraticRankBoundByBitmap',
         # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
@@ -123,13 +120,13 @@ def run():
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     # os.system('cd build && ./{} {}'.format('bbfdi', ds))
 
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     for ds in dataset_l:
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIDBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'CompressTopTIPBruteForce'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
-        # os.system('cd build && ./brtt --dataset_name {}'.format(ds))
+        os.system('cd build && ./brrstt --dataset_name {}'.format(ds))
         # os.system('cd build && ./brqrbb --dataset_name {}'.format(ds))
         # os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
@@ -138,35 +135,25 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample {}'.format(ds, 'RankSample', 20))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'ScoreSample'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSComputeAll'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'QueryRankSample'))
 
-        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 150, 50))
+        # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 150, 50))
         # os.system(
         #     'cd build && ./rri --method_name {} --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
         #         'QueryRankSample', ds,
         #         150, 50))
-        os.system(
-            'cd build && ./rri --method_name {} --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
-                'QRSCompressTopTIPBruteForce', ds,
-                150, 50))
+        # os.system(
+        #     'cd build && ./rri --method_name {} --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         'QRSCompressTopTIPBruteForce', ds,
+        #         150, 50))
 
         # os.system(
         #     'cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeQuadraticRankBoundByBitmap'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSMergeRankByInterval'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'SSQueryAssignFrequent'))
-
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAGrid'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullDim'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullNorm'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAFullInt'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartDimPartInt'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartDimPartNorm'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAPartIntPartNorm'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAUserItemPQ'))
-        # os.system('cd build && ./ca --dataset_name {} --bound_name {}'.format(ds, 'CAItemPQ'))
 
     type_arr = ['userID', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50]

@@ -6,6 +6,12 @@
 #define REVERSE_KRANKS_TOPIP_HPP
 
 #include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"
+#include "struct/UserRankElement.hpp"
+#include "struct/DistancePair.hpp"
+#include "util/TimeMemory.hpp"
+
+#include <fstream>
+#include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
     class TopTIP {

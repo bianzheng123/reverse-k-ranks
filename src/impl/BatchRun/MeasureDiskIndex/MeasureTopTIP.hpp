@@ -164,7 +164,7 @@ namespace ReverseMIPS::MeasureTopTIP {
 
     public:
         //for hash search, store in memory
-        ScoreSearch rank_bound_ins_;
+        RankSearch rank_bound_ins_;
         //read all instance
         MeasureTopTIP disk_ins_;
 
@@ -177,6 +177,7 @@ namespace ReverseMIPS::MeasureTopTIP {
         double hash_prune_ratio_;
 
         //temporary retrieval variable
+        std::vector<std::pair<double, double>> IPbound_l_;
         std::vector<bool> prune_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
@@ -185,7 +186,7 @@ namespace ReverseMIPS::MeasureTopTIP {
 
         Index(
                 // hash search
-                ScoreSearch &rank_bound_ins,
+                RankSearch &rank_bound_ins,
                 //disk index
                 MeasureTopTIP &disk_ins,
                 //general retrieval
@@ -203,6 +204,7 @@ namespace ReverseMIPS::MeasureTopTIP {
             assert(0 < this->user_.vec_dim_);
 
             //retrieval variable
+            this->IPbound_l_.resize(n_user_);
             this->prune_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
@@ -233,6 +235,8 @@ namespace ReverseMIPS::MeasureTopTIP {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
+                IPbound_l_.assign(n_user_, std::pair<double, double>(-std::numeric_limits<double>::max(),
+                                                                     std::numeric_limits<double>::max()));
                 topkLbHeap.Reset();
 
                 const double *tmp_query_vecs = query_item.getVector(queryID);
@@ -251,7 +255,7 @@ namespace ReverseMIPS::MeasureTopTIP {
 
                 //coarse binary search
                 hash_search_record_.reset();
-                rank_bound_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
+                rank_bound_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_, IPbound_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_,
                                       prune_l_, topkLbHeap);

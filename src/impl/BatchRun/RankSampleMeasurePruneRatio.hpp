@@ -276,11 +276,11 @@ namespace ReverseMIPS::RankSampleMeasurePruneRatio {
         user.vectorNormalize();
 
         char memory_path[256];
-        sprintf(memory_path, "../index/%s_RankSearch%d.index", dataset_name, n_sample);
+        sprintf(memory_path, "../index/%s_RankSearch%d_TopT.index", dataset_name, n_sample);
         std::unique_ptr<RankSampleMeasurePruneRatio::Index> index =
                 RankSampleMeasurePruneRatio::BuildIndex(data_item, user, memory_path);
 
-        std::string method_name = "RankSampleMeasurePruneRatio";
+        std::string method_name = "RSTopTMeasurePruneRatio";
         char parameter_name[256];
         sprintf(parameter_name, "n_sample_%d", n_sample);
 

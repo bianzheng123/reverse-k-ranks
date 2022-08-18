@@ -6,8 +6,7 @@
 #define REVERSE_K_RANKS_BATCHRETRIEVALTOPT_HPP
 
 #include "struct/MethodBase.hpp"
-#include "BruteForce/CompressTopTIDBruteForce.hpp"
-#include "BruteForce/CompressTopTIPBruteForce.hpp"
+#include "BruteForce/RSCompressTopTIPBruteForce.hpp"
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 
@@ -18,7 +17,7 @@ namespace ReverseMIPS {
     std::unique_ptr<BaseIndex> BuildIndex(
             const std::string &method_name,
             const char *disk_topt_index_path, const char *score_search_index_path,
-            const int &n_interval, const uint64_t &index_size_gb,
+            const int &n_sample, const uint64_t &index_size_gb,
             VectorMatrix &user, VectorMatrix &data_item) {
 
         const int n_user = user.n_vector_;
@@ -28,47 +27,30 @@ namespace ReverseMIPS {
         std::unique_ptr<BaseIndex> index;
 
         //rank search
-        ScoreSearch rank_bound_ins(score_search_index_path);
+        RankSearch rank_bound_ins(score_search_index_path);
 
         int topt;
-        if (method_name == "CompressTopTIDBruteForceBatchRun") {
-            TopTIDParameter(n_data_item, n_user, index_size_gb, topt);
-            //disk index
-            TopTID disk_ins(n_user, n_data_item, vec_dim, disk_topt_index_path, topt);
+        TopTIPParameter(n_data_item, n_user, index_size_gb, topt);
+        //disk index
+        TopTIP disk_ins(n_user, n_data_item, vec_dim, disk_topt_index_path, topt);
 
-            index = std::make_unique<CompressTopTIDBruteForce::Index>(
-                    //score search
-                    rank_bound_ins,
-                    //disk index
-                    disk_ins,
-                    //general retrieval
-                    user, data_item);
-        } else if (method_name == "CompressTopTIPBruteForceBatchRun") {
-            TopTIPParameter(n_data_item, n_user, index_size_gb, topt);
-            //disk index
-            TopTIP disk_ins(n_user, n_data_item, vec_dim, disk_topt_index_path, topt);
-
-            index = std::make_unique<CompressTopTIPBruteForce::Index>(
-                    //score search
-                    rank_bound_ins,
-                    //disk index
-                    disk_ins,
-                    //general retrieval
-                    user, data_item);
-        } else {
-            spdlog::error("not support batch retrieval topt method name, program exit");
-            exit(-1);
-        }
+        index = std::make_unique<RSCompressTopTIPBruteForce::Index>(
+                //score search
+                rank_bound_ins,
+                //disk index
+                disk_ins,
+                //general retrieval
+                user, data_item);
 
         return index;
     }
 
     void RunRetrieval(
             //index storage info
-            const char *disk_topt_index_path, const char *memory_score_search_index_path,
+            const char *disk_index_path, const char *memory_index_path,
             const int &n_sample, const int &index_size_gb,
             //index result info
-            const char *basic_dir, const std::string &dataset_name, const std::string &method_name) {
+            const char *basic_dir, const std::string &dataset_name) {
 
         //search on TopTIP
         int n_data_item, n_query_item, n_user, vec_dim;
@@ -79,13 +61,15 @@ namespace ReverseMIPS {
         VectorMatrix &query_item = data[2];
         user.vectorNormalize();
 
+        const std::string method_name = "RSCompressTopTIPBruteForceBatchRun";
+
         spdlog::info("{} dataset_name {} start", method_name, dataset_name);
 
         TimeRecord record;
 
         std::unique_ptr<BaseIndex> index = BuildIndex(
                 method_name,
-                disk_topt_index_path, memory_score_search_index_path,
+                disk_index_path, memory_index_path,
                 n_sample, index_size_gb,
                 user, data_item);
 
@@ -102,8 +86,10 @@ namespace ReverseMIPS {
 //            spdlog::info("{}", performance_str);
 //        }
 
-//        std::vector<int> topk_l{50, 40, 30, 20, 10};
-        std::vector<int> topk_l{10};
+        std::vector<int> topk_l{50, 40, 30, 20, 10};
+//        std::vector<int> topk_l{10};
+
+        const int n_eval_query = query_item.n_vector_;
 
         char parameter_name[256];
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%d",
@@ -113,9 +99,7 @@ namespace ReverseMIPS {
         std::vector<std::vector<std::vector<UserRankElement>>> result_rank_l;
         for (int topk: topk_l) {
             record.reset();
-            printf("before retrieval\n");
-            std::vector<std::vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 10);
-            printf("after retrieval\n");
+            std::vector<std::vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_eval_query);
 
             double retrieval_time = record.get_elapsed_time_second();
             double ms_per_query = retrieval_time / n_query_item * 1000;
@@ -131,10 +115,12 @@ namespace ReverseMIPS {
         int n_topk = (int) topk_l.size();
 
         for (int i = 0; i < n_topk; i++) {
+            std::cout << config.GetConfig(i) << std::endl;
             WriteRankResult(result_rank_l[i], dataset_name.c_str(), method_name.c_str(), parameter_name);
         }
 
         config.AddBuildIndexInfo(index->BuildIndexStatistics());
+        config.AddExecuteQuery(n_eval_query);
         config.WritePerformance(dataset_name.c_str(), method_name.c_str(), parameter_name);
     }
 }

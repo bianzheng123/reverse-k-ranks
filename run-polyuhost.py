@@ -134,8 +134,8 @@ def run_compute_all_n_codeword():
 
 
 def run_compress_topt():
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
-    dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['amazon']
     index_size_l = [256]
     n_sample = 128
@@ -147,11 +147,11 @@ def run_compress_topt():
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "SSComputeAll", n_sample))
         for ds in dataset_l:
-            os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 5000, 50))
+            os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 500, 50))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
                     ds, basic_dir, 'QRSCompressTopTIPBruteForce', n_sample, index_size,
-                    5000, 50))
+                    500, 50))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
@@ -168,11 +168,8 @@ if __name__ == '__main__':
 
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
 
-    # os.system(
-    #     'cd build && ./brmrbi --dataset_name {}'.format('amazon'))
-    # os.system(
-    #     'cd build && ./brtt --dataset_name {}'.format('amazon'))
-    # os.system(
-    #     'cd build && ./brqrbb --dataset_name {}'.format('amazon'))
-
     run_compress_topt()
+
+    # TODO run
+    # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format('amazon', 5000, 50))
+    # os.system('cd build && ./brrstt --dataset_name {}'.format('amazon'))
