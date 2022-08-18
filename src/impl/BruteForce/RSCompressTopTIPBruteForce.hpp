@@ -163,6 +163,7 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                 double rank_compute_time = 0;
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_,
                                   n_user_candidate, io_cost, ip_cost, read_disk_time, rank_compute_time);
+                ip_cost += n_user_;
                 total_io_cost_ += io_cost;
                 total_ip_cost_ += ip_cost;
 
