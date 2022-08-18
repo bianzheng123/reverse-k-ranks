@@ -1,13 +1,14 @@
 //
-// Created by BianZheng on 2022/7/16.
+// Created by BianZheng on 2022/8/18.
 //
 
-#ifndef REVERSE_K_RANKS_SCORESAMPLEMEASUREPRUNERATIO_HPP
-#define REVERSE_K_RANKS_SCORESAMPLEMEASUREPRUNERATIO_HPP
+#ifndef REVERSE_KRANKS_QUERYRANKSAMPLEPRUNERATIO_HPP
+#define REVERSE_KRANKS_QUERYRANKSAMPLEPRUNERATIO_HPP
 
+#include "FileIO.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkLBHeap.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "alg/RankBoundRefinement/QueryRankSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 
 #include "struct/VectorMatrix.hpp"
@@ -25,7 +26,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
+namespace ReverseMIPS::QueryRankSamplePrintPruneRatio {
 
     class Index {
         void ResetTimer() {
@@ -38,7 +39,7 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
 
     public:
         //for interval search, store in memory
-        ScoreSearch interval_ins_;
+        QueryRankSearch memory_index_ins_;
 
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
@@ -51,14 +52,15 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
+        std::vector<std::pair<double, double>> queryIPbound_l_;
 
         Index(
                 //interval search
-                ScoreSearch &interval_ins,
+                QueryRankSearch &memory_index_ins,
                 //general retrieval
                 VectorMatrix &user, const int &n_data_item) {
             //interval search
-            this->interval_ins_ = std::move(interval_ins);
+            this->memory_index_ins_ = std::move(memory_index_ins);
             //general retrieval
             this->n_user_ = user.n_vector_;
             this->vec_dim_ = user.vec_dim_;
@@ -71,6 +73,7 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
+            this->queryIPbound_l_.resize(n_user_);
 
         }
 
@@ -94,6 +97,8 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
+                queryIPbound_l_.assign(n_user_, std::pair<double, double>(-std::numeric_limits<double>::max(),
+                                                                          std::numeric_limits<double>::max()));
                 topkLbHeap.Reset();
 
                 const double *query_vecs = query_item.getVector(queryID);
@@ -110,7 +115,7 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
 
                 interval_search_record_.reset();
                 //count rank bound
-                interval_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
+                memory_index_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_);
                 //prune the bound
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_,
@@ -126,7 +131,7 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
                 assert(n_candidate >= topk);
                 const double tmp_prune_ratio = 1.0 * (n_user_ - n_candidate) / n_user_;
                 prune_ratio_l[queryID] = tmp_prune_ratio;
-                interval_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                interval_prune_ratio_ += tmp_prune_ratio;
 
             }
             interval_prune_ratio_ /= n_query_item;
@@ -165,21 +170,22 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *score_search_index_path) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *rank_sample_index_path) {
         const int n_data_item = data_item.n_vector_;
 
-        //interval search
-        ScoreSearch interval_ins(score_search_index_path);
+        //rank search
+        QueryRankSearch memory_index_ins(rank_sample_index_path);
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 //interval search
-                interval_ins,
+                memory_index_ins,
                 //general retrieval
                 user, n_data_item);
         return index_ptr;
     }
 
-    void MeasurePruneRatio(const char *dataset_name, const char *basic_dir, const char* memory_index_path, const int &n_sample) {
+    void MeasurePruneRatio(const char *dataset_name, const char *basic_dir, const char *memory_index_path,
+                           const int &n_sample) {
         //measure prune ratio
         int n_data_item, n_query_item, n_user, vec_dim;
         std::vector<VectorMatrix> data = readData(basic_dir, dataset_name,
@@ -189,10 +195,10 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
         VectorMatrix &query_item = data[2];
         user.vectorNormalize();
 
-        std::unique_ptr<ScoreSamplePrintPruneRatio::Index> index =
-                ScoreSamplePrintPruneRatio::BuildIndex(data_item, user, memory_index_path);
+        std::unique_ptr<QueryRankSamplePrintPruneRatio::Index> index =
+                QueryRankSamplePrintPruneRatio::BuildIndex(data_item, user, memory_index_path);
 
-        std::string method_name = "ScoreSamplePrintPruneRatio";
+        std::string method_name = "QueryRankSamplePrintPruneRatio";
         char parameter_name[256];
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
@@ -215,5 +221,7 @@ namespace ReverseMIPS::ScoreSamplePrintPruneRatio {
         config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     }
 
+
 }
-#endif //REVERSE_K_RANKS_SCORESAMPLEMEASUREPRUNERATIO_HPP
+
+#endif //REVERSE_KRANKS_QUERYRANKSAMPLEPRUNERATIO_HPP

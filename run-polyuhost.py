@@ -166,10 +166,16 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads', 'amazon']
 
-    run_compress_topt()
+    for ds in dataset_l:
+        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 5000, 10))
+        os.system(
+            'cd build/attribution && ./ppr --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 5000, 10))
 
     # TODO run
+    # run_compress_topt()
+
     # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format('amazon', 5000, 50))
     # os.system('cd build && ./brrstt --dataset_name {}'.format('amazon'))

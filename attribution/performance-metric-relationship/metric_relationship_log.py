@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot(data_x, data_y, x_axis_name, y_axis_name, title_name, file_name):
+def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
     print("corr", np.corrcoef(data_x, data_y))
 
     # plot
@@ -12,6 +12,9 @@ def plot(data_x, data_y, x_axis_name, y_axis_name, title_name, file_name):
 
     # ax.scatter(x, y, s=sizes, c=colors, vmin=0, vmax=100)
     # ax.scatter(x, y, vmin=0, vmax=n_data_item)
+
+    ax.plot(data_x, (data_x ** para[0]) * (10 ** para[1]), color='#ff0000')
+    # ax.plot(data_x, (data_x * para[0]) + para[1])
     ax.scatter(data_x, data_y, s=2)
 
     # ax.set(xlim=(0, n_data_item),
@@ -27,6 +30,23 @@ def plot(data_x, data_y, x_axis_name, y_axis_name, title_name, file_name):
 
     plt.savefig('{}.jpg'.format(file_name), dpi=600, bbox_inches='tight')
     plt.close()
+
+
+def least_square_parameter(x, y):
+    # log_x = x
+    # log_y = y
+    log_x = np.log10(x)
+    log_y = np.log10(y)
+    # assemble matrix A
+    A = np.vstack([log_x, np.ones(len(log_x))]).T
+
+    # turn log_y into a column vector
+    log_y = np.array(log_y)
+    log_y = log_y[:, np.newaxis]
+    # Direct least square regression
+    alpha = np.dot((np.dot(np.linalg.inv(np.dot(A.T, A)), A.T)), log_y)
+    print(alpha)
+    return alpha
 
 
 def read_log(filename):
@@ -53,10 +73,12 @@ def read_log(filename):
 
 if __name__ == '__main__':
     dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
+    # dataset_m = {'yahoomusic_big': 'Yahoomusic'}
     for ds in dataset_m.keys():
         basic_dir = "../../result"
         fname = "{}-RSCompressTopTIP-top10.log".format(ds)
         running_time_l, user_candidate_l = read_log(os.path.join(basic_dir, fname))
+        para = least_square_parameter(user_candidate_l, running_time_l)
 
-        plot(user_candidate_l, running_time_l, "Number of Refinement", 'Total Running Time (second)',
+        plot(user_candidate_l, running_time_l, para, "Number of Refinement", 'Total Running Time (second)',
              '# Refinement vs Total Running Time in {}'.format(dataset_m[ds]), '{}-Refinement-RunTime'.format(ds))

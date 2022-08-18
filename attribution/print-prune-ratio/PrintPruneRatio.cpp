@@ -3,7 +3,7 @@
 //
 
 #include "RankSamplePrintPruneRatio.hpp"
-#include "ScoreSamplePrintPruneRatio.hpp"
+#include "QueryRankSamplePrintPruneRatio.hpp"
 #include "score_computation/ComputeScoreTable.hpp"
 
 #include <spdlog/spdlog.h>
@@ -11,9 +11,25 @@
 #include <iostream>
 #include <string>
 
+void TopTIPParameter(const int &n_data_item, const int &n_user, const uint64_t &index_size_gb,
+                     int &topt) {
+    //disk index
+    const uint64_t index_size_byte = (uint64_t) index_size_gb * 1024 * 1024 * 1024;
+    const uint64_t predict_index_size_byte = (uint64_t) sizeof(double) * n_data_item * n_user;
+    const uint64_t topt_big_size = index_size_byte / sizeof(double) / n_user;
+    topt = int(topt_big_size);
+    spdlog::info("TopTIP index size byte: {}, predict index size byte: {}", index_size_byte,
+                 predict_index_size_byte);
+    if (index_size_byte >= predict_index_size_byte) {
+        spdlog::info("index size larger than the whole score table, use whole table setting");
+        topt = n_data_item;
+    }
+}
+
 class Parameter {
 public:
     std::string basic_dir, dataset_name;
+    int n_sample_query, sample_topk;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -26,7 +42,12 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              po::value<std::string>(&para.basic_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
              "basic directory")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
-             "dataset_name");
+             "dataset_name")
+
+            ("n_sample_query, nsq", po::value<int>(&para.n_sample_query)->default_value(150),
+             "the numer of sample query in training query distribution")
+            ("sample_topk, st", po::value<int>(&para.sample_topk)->default_value(50),
+             "topk in training query distribution");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -46,6 +67,8 @@ int main(int argc, char **argv) {
     LoadOptions(argc, argv, para);
     const char *dataset_name = para.dataset_name.c_str();
     const char *basic_dir = para.basic_dir.c_str();
+    const int n_sample_query = para.n_sample_query;
+    const int sample_topk = para.sample_topk;
     spdlog::info("PrintPruneRatio dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     char index_basic_dir[128];
@@ -63,24 +86,30 @@ int main(int argc, char **argv) {
 
         user.vectorNormalize();
 
-        char ss128_path[256];
-        sprintf(ss128_path, "%s/%s_ScoreSearch128.index", index_basic_dir, dataset_name);
-        char ss512_path[256];
-        sprintf(ss512_path, "%s/%s_ScoreSearch512.index", index_basic_dir, dataset_name);
-        char ss1024_path[256];
-        sprintf(ss1024_path, "%s/%s_ScoreSearch1024.index", index_basic_dir, dataset_name);
+        char qrs128_path[256];
+        sprintf(qrs128_path, "%s/%s_QueryRankSearch128.index", index_basic_dir, dataset_name);
+        char qrs512_path[256];
+        sprintf(qrs512_path, "%s/%s_QueryRankSearch512.index", index_basic_dir, dataset_name);
 
-        ScoreSearch ss_128(128, n_user, n_data_item);
-        ScoreSearch ss_512(512, n_user, n_data_item);
-        ScoreSearch ss_1024(1024, n_user, n_data_item);
+        QueryRankSearch qrs_128(128, n_data_item, n_user,
+                                dataset_name, n_sample_query, sample_topk, "../..");
+        QueryRankSearch qrs_512(512, n_data_item, n_user,
+                                dataset_name, n_sample_query, sample_topk, "../..");
+
+        const int index_size_gb = 256;
 
         char rs128_path[256];
-        sprintf(rs128_path, "%s/%s_RankSearch128.index", index_basic_dir, dataset_name);
+        sprintf(rs128_path, "%s/%s_RankSearch128-TopT-index_size_gb_%d.index", index_basic_dir, dataset_name,
+                index_size_gb);
         char rs512_path[256];
-        sprintf(rs512_path, "%s/%s_RankSearch512.index", index_basic_dir, dataset_name);
+        sprintf(rs512_path, "%s/%s_RankSearch512-TopT-index_size_gb_%d.index", index_basic_dir, dataset_name,
+                index_size_gb);
 
-        RankSearch rs_128(128, n_data_item, n_user, n_data_item);
-        RankSearch rs_512(512, n_data_item, n_user, n_data_item);
+        int topt;
+        TopTIPParameter(n_data_item, n_user, index_size_gb, topt);
+
+        RankSearch rs_128(128, n_data_item, n_user, topt);
+        RankSearch rs_512(512, n_data_item, n_user, topt);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);
@@ -90,17 +119,16 @@ int main(int argc, char **argv) {
         record.reset();
         TimeRecord component_record;
 
-        double score_search_time = 0;
+        double query_rank_search_time = 0;
         double rank_search_time = 0;
 
         for (int userID = 0; userID < n_user; userID++) {
             cst.ComputeSortItems(userID, distance_pair_l.data());
 
             component_record.reset();
-            ss_128.LoopPreprocess(distance_pair_l.data(), userID);
-            ss_512.LoopPreprocess(distance_pair_l.data(), userID);
-            ss_1024.LoopPreprocess(distance_pair_l.data(), userID);
-            score_search_time += component_record.get_elapsed_time_second();
+            qrs_128.LoopPreprocess(distance_pair_l.data(), userID);
+            qrs_512.LoopPreprocess(distance_pair_l.data(), userID);
+            query_rank_search_time += component_record.get_elapsed_time_second();
 
             component_record.reset();
             rs_128.LoopPreprocess(distance_pair_l.data(), userID);
@@ -112,46 +140,44 @@ int main(int argc, char **argv) {
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
                 spdlog::info(
-                        "Compute Score Time {}s, Sort Score Time {}s, Score Search Time {}s, Rank Search Time {}s",
-                        cst.compute_time_, cst.sort_time_, score_search_time, rank_search_time);
+                        "Compute Score Time {}s, Sort Score Time {}s, Query Rank Search Time {}s, Rank Search Time {}s",
+                        cst.compute_time_, cst.sort_time_, query_rank_search_time, rank_search_time);
                 cst.compute_time_ = 0;
                 cst.sort_time_ = 0;
-                score_search_time = 0;
+                query_rank_search_time = 0;
                 rank_search_time = 0;
                 record.reset();
             }
         }
         cst.FinishCompute();
-        ss_128.SaveIndex(ss128_path);
-        ss_512.SaveIndex(ss512_path);
-        ss_1024.SaveIndex(ss1024_path);
+        qrs_128.SaveIndex(qrs128_path);
+        qrs_512.SaveIndex(qrs512_path);
 
         rs_128.SaveIndex(rs128_path);
         rs_512.SaveIndex(rs512_path);
     }
 
     {
+        const int index_size_gb = 256;
         char rank_sample_128_path[256];
-        sprintf(rank_sample_128_path, "%s/%s_RankSearch%d.index", index_basic_dir, dataset_name, 128);
+        sprintf(rank_sample_128_path, "%s/%s_RankSearch%d-TopT-index_size_gb_%d.index", index_basic_dir, dataset_name,
+                128, index_size_gb);
         RankSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, rank_sample_128_path, 128);
 
         char rank_sample_512_path[256];
-        sprintf(rank_sample_512_path, "%s/%s_RankSearch%d.index", index_basic_dir, dataset_name, 512);
+        sprintf(rank_sample_512_path, "%s/%s_RankSearch%d-TopT-index_size_gb_%d.index", index_basic_dir, dataset_name,
+                512, index_size_gb);
         RankSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, rank_sample_512_path, 512);
     }
 
     {
-        char score_sample_128_path[256];
-        sprintf(score_sample_128_path, "%s/%s_ScoreSearch%d.index", index_basic_dir, dataset_name, 128);
-        ScoreSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, score_sample_128_path, 128);
+        char query_rank_search_128_path[256];
+        sprintf(query_rank_search_128_path, "%s/%s_QueryRankSearch%d.index", index_basic_dir, dataset_name, 128);
+        QueryRankSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, query_rank_search_128_path, 128);
 
-        char score_sample_512_path[256];
-        sprintf(score_sample_512_path, "%s/%s_ScoreSearch%d.index", index_basic_dir, dataset_name, 512);
-        ScoreSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, score_sample_512_path, 512);
-
-        char score_sample_1024_path[256];
-        sprintf(score_sample_1024_path, "%s/%s_ScoreSearch%d.index", index_basic_dir, dataset_name, 1024);
-        ScoreSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, score_sample_1024_path, 1024);
+        char query_rank_search_512_path[256];
+        sprintf(query_rank_search_512_path, "%s/%s_QueryRankSearch%d.index", index_basic_dir, dataset_name, 512);
+        QueryRankSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, query_rank_search_512_path, 512);
     }
 
     return 0;

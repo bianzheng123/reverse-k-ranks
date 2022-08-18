@@ -163,12 +163,17 @@ def run():
 
 if __name__ == '__main__':
     dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
-    # for ds in dataset_l:
-    #     os.system(
-    #         'cd build/attribution && ./pbpm --dataset_name {} --n_sample {} --index_size_gb {}'.format(
-    #             ds, 2048, 256))
+    for ds in dataset_l:
+        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 150, 10))
+        os.system(
+            'cd build/attribution && ./ppr --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 150, 10))
+        os.system(
+            'cd build/attribution && ./pprnbi --dataset_name {}'.format(
+                ds))
 
-    run()
+    # run()

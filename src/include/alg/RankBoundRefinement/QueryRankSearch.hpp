@@ -23,7 +23,8 @@ namespace ReverseMIPS {
         inline SampleQueryDistributionBelowTopk() = default;
 
         inline SampleQueryDistributionBelowTopk(const int &n_data_item, const char *dataset_name,
-                                                const int &n_sample_query, const int &sample_topk) {
+                                                const int &n_sample_query, const int &sample_topk,
+                                                const char *index_basic_dir) {
             n_data_item_ = n_data_item;
             this->n_sample_query_ = n_sample_query;
             this->sample_topk_ = sample_topk;
@@ -34,8 +35,8 @@ namespace ReverseMIPS {
             {
                 char topk_rank_path[512];
                 sprintf(topk_rank_path,
-                        "../index/query_distribution/%s-kth-rank-n_sample_query_%ld-sample_topk_%ld.index",
-                        dataset_name, n_sample_query_, sample_topk_);
+                        "%s/index/query_distribution/%s-kth-rank-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample_query_, sample_topk_);
 
                 std::ifstream topk_rank_stream = std::ifstream(topk_rank_path, std::ios::binary | std::ios::in);
                 if (!topk_rank_stream) {
@@ -50,8 +51,8 @@ namespace ReverseMIPS {
             {
                 char rank_below_topk_path[512];
                 sprintf(rank_below_topk_path,
-                        "../index/query_distribution/%s-below-topk-n_sample_query_%ld-sample_topk_%ld.index",
-                        dataset_name, n_sample_query_, sample_topk_);
+                        "%s/index/query_distribution/%s-below-topk-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample_query_, sample_topk_);
 
                 std::ifstream rank_below_topk_stream = std::ifstream(rank_below_topk_path,
                                                                      std::ios::binary | std::ios::in);
@@ -69,8 +70,8 @@ namespace ReverseMIPS {
 //                std::vector<int> sample_queryID_l(n_sample_query_);
 //                assert(sample_queryID_l.size() == n_sample_query_);
 //                char resPath[256];
-//                std::sprintf(resPath, "../index/query_distribution/%s-sample-itemID-n_sample_query_%d-sample_topk_%d.txt",
-//                             dataset_name, n_sample_query_, sample_topk_);
+//                std::sprintf(resPath, "%s/index/query_distribution/%s-sample-itemID-n_sample_query_%ld-sample_topk_%ld.txt",
+//                             index_basic_dir, dataset_name, n_sample_query_, sample_topk_);
 //
 //                std::ifstream in_stream = std::ifstream(resPath, std::ios::binary | std::ios::in);
 //                if (!in_stream.is_open()) {
@@ -150,7 +151,8 @@ namespace ReverseMIPS {
 
         inline QueryRankSearch(const int &n_sample, const int &n_data_item,
                                const int &n_user, const char *dataset_name,
-                               const int &n_sample_query, const int &sample_topk) {
+                               const int &n_sample_query, const int &sample_topk,
+                               const char *index_size_basic_dir = "..") {
             this->n_sample_ = n_sample;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
@@ -162,7 +164,7 @@ namespace ReverseMIPS {
             }
             assert(n_sample > 0);
 
-            Preprocess(dataset_name, n_sample_query, sample_topk);
+            Preprocess(dataset_name, n_sample_query, sample_topk, index_size_basic_dir);
 
         }
 
@@ -170,14 +172,10 @@ namespace ReverseMIPS {
             LoadIndex(index_path);
         }
 
-        void Preprocess(const char *dataset_name, const int &n_sample_query, const int &sample_topk) {
+        void Preprocess(const char *dataset_name, const int &n_sample_query, const int &sample_topk,
+                        const char *index_size_basic_dir) {
             SampleQueryDistributionBelowTopk query_distribution_ins((int) n_data_item_, dataset_name,
-                                                                    n_sample_query, sample_topk);
-
-            if (n_sample_query < n_sample_) {
-                spdlog::error("n_sample_query too small, program exit\n");
-                exit(-1);
-            }
+                                                                    n_sample_query, sample_topk, index_size_basic_dir);
 
             std::vector<int64_t> optimal_dp(n_sample_query * n_sample_);
             std::vector<int> position_dp(n_sample_query * n_sample_);
@@ -215,7 +213,7 @@ namespace ReverseMIPS {
                         assert(optimal_dp[sample_rankID * n_sample_ + sampleID] >= 0);
                         assert(position_dp[sample_rankID * n_sample_ + sampleID] >= 0);
                     }
-                    if (sample_rankID % 1000 == 0) {
+                    if (sample_rankID != 0 && sample_rankID % 1000 == 0) {
                         std::cout << "sample_rankID " << sample_rankID << ", n_sample_query " << n_sample_query
                                   << std::endl;
                     }

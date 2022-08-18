@@ -30,10 +30,10 @@ def plot(data_x, data_y, x_axis_name, y_axis_name, title_name, file_name):
 
 
 if __name__ == '__main__':
-    # dataset_m = {'movielens-27m': 'Movielens', 'netflix': 'Netflix', 'yahoomusic_big': 'Yahoomusic'}
-    dataset_m = {'yahoomusic_big': 'Yahoomusic'}
+    dataset_m = {'movielens-27m': 'Movielens', 'netflix': 'Netflix', 'yahoomusic_big': 'Yahoomusic'}
+    # dataset_m = {'yahoomusic_big': 'Yahoomusic'}
+    dataset_info_m = {'movielens-27m': [283228, 53889], 'netflix': [480189, 17770], 'yahoomusic_big': [1823179, 135736]}
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big']
-    # dataset_l = ['movielens-27m']
     for ds in dataset_m.keys():
         basic_dir = "../../result/attribution/PerformanceMetricRelationship"
         fname = "{}-RSCompressTopTIPBruteForce-top10-n_sample_2048-index_size_gb_256.txt".format(ds)
@@ -46,7 +46,7 @@ if __name__ == '__main__':
              "Number of Refinement", 'IO cost',
              '{} vs {} in {}'.format('# Refinement', 'IO cost', dataset_m[ds]),
              '{}-PruneRatio-IOCost'.format(ds))
-        plot(prune_ratio, ip_cost + 1,
+        plot(prune_ratio, ip_cost + dataset_info_m[ds][0],
              "Number of Refinement", "IP cost",
              '{} vs {} in {}'.format('# Refinement', 'IP cost', dataset_m[ds]),
              '{}-PruneRatio-IPCost'.format(ds))

@@ -6,7 +6,7 @@
 //
 
 #include "RankSamplePrintPruneRatio.hpp"
-#include "ScoreSamplePrintPruneRatio.hpp"
+#include "QueryRankSamplePrintPruneRatio.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -51,30 +51,31 @@ int main(int argc, char **argv) {
     spdlog::info("PrintPruneRatioNoBuildIndex dataset_name {}, basic_dir {}", dataset_name, basic_dir);
 
     char index_basic_dir[128];
-    sprintf(index_basic_dir, "../../index/%s_constructed_index", dataset_name);
+//    sprintf(index_basic_dir, "../../index/%s_constructed_index", dataset_name);
+    sprintf(index_basic_dir, "../../index");
 
     {
+        const int index_size_gb = 256;
+
         char rank_sample_128_path[256];
-        sprintf(rank_sample_128_path, "%s/%s_RankSearch%d.index", index_basic_dir, dataset_name, 128);
+        sprintf(rank_sample_128_path, "%s/%s_RankSearch%d-TopT-index_size_gb_%d.index", index_basic_dir, dataset_name,
+                128, index_size_gb);
         RankSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, rank_sample_128_path, 128);
 
         char rank_sample_512_path[256];
-        sprintf(rank_sample_512_path, "%s/%s_RankSearch%d.index", index_basic_dir, dataset_name, 512);
+        sprintf(rank_sample_512_path, "%s/%s_RankSearch%d-TopT-index_size_gb_%d.index", index_basic_dir, dataset_name,
+                512, index_size_gb);
         RankSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, rank_sample_512_path, 512);
     }
 
     {
-        char score_sample_128_path[256];
-        sprintf(score_sample_128_path, "%s/%s_ScoreSearch%d.index", index_basic_dir, dataset_name, 128);
-        ScoreSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, score_sample_128_path, 128);
+        char query_rank_sample_128_path[256];
+        sprintf(query_rank_sample_128_path, "%s/%s_QueryRankSearch%d.index", index_basic_dir, dataset_name, 128);
+        QueryRankSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, query_rank_sample_128_path, 128);
 
-        char score_sample_512_path[256];
-        sprintf(score_sample_512_path, "%s/%s_ScoreSearch%d.index", index_basic_dir, dataset_name, 512);
-        ScoreSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, score_sample_512_path, 512);
-
-        char score_sample_1024_path[256];
-        sprintf(score_sample_1024_path, "%s/%s_ScoreSearch%d.index", index_basic_dir, dataset_name, 1024);
-        ScoreSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, score_sample_1024_path, 1024);
+        char query_rank_sample_512_path[256];
+        sprintf(query_rank_sample_512_path, "%s/%s_QueryRankSearch%d.index", index_basic_dir, dataset_name, 512);
+        QueryRankSamplePrintPruneRatio::MeasurePruneRatio(dataset_name, basic_dir, query_rank_sample_512_path, 512);
     }
 
     return 0;
