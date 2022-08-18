@@ -147,14 +147,14 @@ def run_compress_topt():
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "SSComputeAll", n_sample))
         for ds in dataset_l:
-            os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 500, 50))
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
-                    ds, basic_dir, 'QRSCompressTopTIPBruteForce', n_sample, index_size,
-                    500, 50))
+            # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 500, 50))
             # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
+            #         ds, basic_dir, 'QRSCompressTopTIPBruteForce', n_sample, index_size,
+            #         500, 50))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
@@ -166,16 +166,15 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads', 'amazon']
-
-    for ds in dataset_l:
-        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 5000, 10))
-        os.system(
-            'cd build/attribution && ./ppr --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 5000, 10))
+    run_compress_topt()
 
     # TODO run
-    # run_compress_topt()
+    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads', 'amazon']
+    # for ds in dataset_l:
+    #     os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 5000, 10))
+    #     os.system(
+    #         'cd build/attribution && ./ppr --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
+    #             ds, 5000, 10))
 
     # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format('amazon', 5000, 50))
     # os.system('cd build && ./brrstt --dataset_name {}'.format('amazon'))

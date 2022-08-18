@@ -172,10 +172,10 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                 assert(query_heap_l[queryID].size() == topk);
 
                 spdlog::info(
-                        "finish compute rank queryID {}, n_user_candidate {}, io_cost {}, ip_cost {}, inner product time {:.3f}s, memory index search time {:.3f}s, read disk time {:.3f}s, rank compute time {:.3f}s",
+                        "finish queryID {}, n_user_candidate {}, io_cost {}, ip_cost {}, IP time {:.3f}s, IO time {:.3f}s, other time {:.3f}s",
                         queryID, n_user_candidate, io_cost, ip_cost,
-                        tmp_inner_product_time, tmp_memory_index_search_time,
-                        read_disk_time, rank_compute_time);
+                        tmp_inner_product_time + rank_compute_time, read_disk_time,
+                        tmp_memory_index_search_time);
             }
             disk_ins_.FinishRetrieval();
 

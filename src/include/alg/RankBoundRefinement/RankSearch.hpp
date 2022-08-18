@@ -25,6 +25,7 @@ namespace ReverseMIPS {
                           const int &n_user, const int &topt) {
             assert(topt <= n_data_item);
             const int sample_every = topt / n_sample;
+            const int last_n_element = topt % n_sample;
             this->n_sample_ = n_sample;
             this->sample_every_ = sample_every;
             this->n_data_item_ = n_data_item;
@@ -51,11 +52,16 @@ namespace ReverseMIPS {
         }
 
         void Preprocess() {
-            for (size_t known_rank_idx = sample_every_ - 1, idx = 0;
-                 known_rank_idx < topt_ && idx < n_sample_; known_rank_idx += sample_every_, idx++) {
-                known_rank_idx_l_[idx] = (int) known_rank_idx;
-                assert(idx < n_sample_);
-                assert(known_rank_idx < topt_);
+            for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
+                if (sampleID == n_sample_ - 1) {
+                    known_rank_idx_l_[sampleID] = (int) topt_ - 1;
+                } else {
+                    known_rank_idx_l_[sampleID] = sample_every_ - 1 + sampleID * sample_every_;
+                    assert(known_rank_idx_l_[sampleID] < topt_);
+                }
+            }
+            for (int sampleID = 1; sampleID < n_sample_; sampleID++) {
+                assert(known_rank_idx_l_[sampleID - 1] <= known_rank_idx_l_[sampleID]);
             }
 
             for (int rankID = 0; rankID < n_sample_; rankID++) {

@@ -68,7 +68,6 @@ namespace ReverseMIPS {
             exact_rank_record_.reset();
             int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
             const double tmp_rank_compute_time = exact_rank_record_.get_elapsed_time_second();
-            rank_compute_time += tmp_rank_compute_time;
             exact_rank_time_ += tmp_rank_compute_time;
             ip_cost += 0;
 
@@ -101,7 +100,6 @@ namespace ReverseMIPS {
             exact_rank_record_.reset();
             int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
             const double tmp_rank_compute_time = exact_rank_record_.get_elapsed_time_second();
-            rank_compute_time += tmp_rank_compute_time;
             exact_rank_time_ += tmp_rank_compute_time;
             ip_cost += 0;
 
