@@ -163,7 +163,6 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                 double rank_compute_time = 0;
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_,
                                   n_user_candidate, io_cost, ip_cost, read_disk_time, rank_compute_time);
-                ip_cost += n_user_;
                 total_io_cost_ += io_cost;
                 total_ip_cost_ += ip_cost;
 
@@ -173,10 +172,10 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                 assert(query_heap_l[queryID].size() == topk);
 
                 spdlog::info(
-                        "finish queryID {}, n_user_candidate {}, io_cost {}, ip_cost {}, IP time {:.3f}s, IO time {:.3f}s, other time {:.3f}s",
+                        "finish queryID {}, n_user_candidate {}, io_cost {}, ip_cost {}, Total Time {:.3f}s, IP time {:.3f}s, IO time {:.3f}s",
                         queryID, n_user_candidate, io_cost, ip_cost,
-                        tmp_inner_product_time + rank_compute_time, read_disk_time,
-                        tmp_memory_index_search_time);
+                        tmp_inner_product_time + tmp_memory_index_search_time + read_disk_time + rank_compute_time,
+                        rank_compute_time, read_disk_time);
             }
             disk_ins_.FinishRetrieval();
 

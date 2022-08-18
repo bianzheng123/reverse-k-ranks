@@ -26,3 +26,4 @@ cmake-build-release/
 /attribution/user-query-relationship/*.jpg
 /attribution/user-query-relationship/*.txt
 /attribution/performance-metric-relationship/*.jpg
+/attribution/performance-metric-relationship/*.csv
