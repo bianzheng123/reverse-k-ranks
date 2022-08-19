@@ -24,8 +24,7 @@ namespace ReverseMIPS {
         inline RankSearch(const int &n_sample, const int &n_data_item,
                           const int &n_user, const int &topt) {
             assert(topt <= n_data_item);
-            const int sample_every = topt / n_sample;
-            const int last_n_element = topt % n_sample;
+            const int sample_every = topt / (n_sample - 1);
             this->n_sample_ = n_sample;
             this->sample_every_ = sample_every;
             this->n_data_item_ = n_data_item;
@@ -62,6 +61,7 @@ namespace ReverseMIPS {
             }
             for (int sampleID = 1; sampleID < n_sample_; sampleID++) {
                 assert(known_rank_idx_l_[sampleID - 1] <= known_rank_idx_l_[sampleID]);
+                assert(known_rank_idx_l_[sampleID] - known_rank_idx_l_[sampleID - 1] <= sample_every_);
             }
 
             for (int rankID = 0; rankID < n_sample_; rankID++) {

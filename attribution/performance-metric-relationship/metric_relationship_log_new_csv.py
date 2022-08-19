@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
-    print("corr", np.corrcoef(data_x, data_y))
+    print("corr", np.corrcoef(np.log10(data_x), np.log10(data_y)))
 
     # plot
     fig, ax = plt.subplots()
@@ -63,29 +63,27 @@ def read_log(filename):
             if line == '':
                 break
             split_l = line.split(' ')
-            queryID = int(split_l[-24][:-1])
+            queryID = int(split_l[-16][:-1])
             queryID_l.append(queryID)
 
-            n_refine = int(split_l[-22][:-1])
+            n_refine = int(split_l[-14][:-1])
             n_refine_l.append(n_refine)
 
-            io_cost = int(split_l[-20][:-1])
+            io_cost = int(split_l[-12][:-1])
             io_cost_l.append(io_cost)
 
-            ip_cost = int(split_l[-18][:-1])
+            ip_cost = int(split_l[-10][:-1])
             ip_cost_l.append(ip_cost)
 
-            inner_product_time = float(split_l[-14][:-2])
-            rank_compute_time = float(split_l[-1][:-1])
-            read_disk_time = float(split_l[-5][:-2])
-            memory_index_search_time = float(split_l[-9][:-2])
-            running_time = rank_compute_time + read_disk_time + memory_index_search_time + inner_product_time
-            total_running_time_l.append(running_time)
+            total_time = float(split_l[-7][:-2])
+            total_running_time_l.append(total_time)
 
-            io_time_perc = read_disk_time / running_time
+            io_time = float(split_l[-1][:-1])
+            io_time_perc = io_time / total_time
             io_time_perc_l.append(io_time_perc)
 
-            ip_time_perc = rank_compute_time / running_time
+            ip_time = float(split_l[-4][:-2])
+            ip_time_perc = ip_time / total_time
             ip_time_perc_l.append(ip_time_perc)
 
             # print(rank_compute_time, read_disk_time, memory_index_search_time, inner_product_time, n_user_candidate)
@@ -103,7 +101,7 @@ if __name__ == '__main__':
     dataset_m = {'yahoomusic_big': 'Yahoomusic'}
     for ds in dataset_m.keys():
         basic_dir = "../../result"
-        fname = "{}-RSCompressTopTIP-top10.log".format(ds)
+        fname = "{}-RSCompressTopTIP-top10-n_sample_128.log".format(ds)
         df = read_log(os.path.join(basic_dir, fname))
 
         user_candidate_l = df['n_refine']

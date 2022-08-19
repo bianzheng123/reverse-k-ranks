@@ -154,7 +154,7 @@ def run_compress_topt():
             #         500, 50))
             os.system(
                 'cd build && nocache ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
+                    ds, basic_dir, "RSCompressTopTIPBruteForce", 2000, index_size))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
