@@ -134,7 +134,7 @@ def run_compute_all_n_codeword():
 
 
 def run_compress_topt():
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
+    dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['amazon']
     index_size_l = [256]
@@ -153,7 +153,7 @@ def run_compress_topt():
             #         ds, basic_dir, 'QRSCompressTopTIPBruteForce', n_sample, index_size,
             #         500, 50))
             os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                'cd build && nocache ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
                     ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
