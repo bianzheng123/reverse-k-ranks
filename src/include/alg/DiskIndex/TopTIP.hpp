@@ -16,7 +16,7 @@
 namespace ReverseMIPS {
     class TopTIP {
 
-        inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
+        inline double ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
             system("# sync; echo 3 > /proc/sys/vm/drop_caches");
             assert(0 <= start_idx + read_count && start_idx + read_count <= topt_);
             int64_t offset = (int64_t) userID * topt_ + start_idx;
@@ -26,7 +26,10 @@ namespace ReverseMIPS {
 
             assert(0 <= offset + read_count_byte && offset + read_count_byte <= n_user_ * topt_ * sizeof(double));
 
+            read_disk_record_.reset();
             index_stream_.read((char *) disk_cache_.get(), read_count_byte);
+            const double tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
+            return tmp_read_disk_time;
         }
 
         inline int FineBinarySearch(const double &queryIP, const int &userID,
@@ -59,9 +62,7 @@ namespace ReverseMIPS {
 
             assert(0 <= start_idx + read_count && start_idx + read_count <= topt_);
 
-            read_disk_record_.reset();
-            ReadDisk(userID, start_idx, read_count);
-            const double tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
+            const double tmp_read_disk_time = ReadDisk(userID, start_idx, read_count);
             io_cost += read_count;
             read_disk_time += tmp_read_disk_time;
             read_disk_time_ += tmp_read_disk_time;
@@ -91,9 +92,7 @@ namespace ReverseMIPS {
 
             assert(0 <= read_count && read_count <= topt_);
 
-            read_disk_record_.reset();
-            ReadDisk(userID, start_idx, read_count);
-            const double tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
+            const double tmp_read_disk_time = ReadDisk(userID, start_idx, read_count);
             read_disk_time += tmp_read_disk_time;
             read_disk_time_ += tmp_read_disk_time;
             io_cost += read_count;
@@ -250,7 +249,7 @@ namespace ReverseMIPS {
                 const int rank_ub = rank_ub_l[userID];
                 const double queryIP = queryIP_l[userID];
                 assert(rank_ub <= rank_lb);
-                if (rank_lb <= topt_) {
+                if (rank_lb < topt_) {
                     //retrieval the top-t like before
                     BelowTopt(queryIP, rank_lb, rank_ub, userID,
                               io_cost, ip_cost,

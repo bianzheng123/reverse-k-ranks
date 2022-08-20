@@ -187,18 +187,18 @@ int main(int argc, char **argv) {
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
-//    vector<int> topk_warm_up_l{1};
-//    for (int topk: topk_warm_up_l) {
-//        record.reset();
-//        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 50);
-//
-//        double retrieval_time = record.get_elapsed_time_second();
-//        double ms_per_query = retrieval_time / n_query_item * 1000;
-//
-//        string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
-//        spdlog::info("finish warm up top-{}", topk);
-//        spdlog::info("{}", performance_str);
-//    }
+    vector<int> topk_warm_up_l{1};
+    for (int topk: topk_warm_up_l) {
+        record.reset();
+        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 50);
+
+        double retrieval_time = record.get_elapsed_time_second();
+        double ms_per_query = retrieval_time / n_query_item * 1000;
+
+        string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
+        spdlog::info("finish warm up top-{}", topk);
+        spdlog::info("{}", performance_str);
+    }
 
 //    vector<int> topk_l{50, 40, 30, 20, 10};
     vector<int> topk_l{10};
@@ -206,9 +206,10 @@ int main(int argc, char **argv) {
 //    vector<int> topk_l{20};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
+    const int n_execute_query = 100;
     for (int topk: topk_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, 100);
+        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query);
 //        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_query_item);
 
         double retrieval_time = record.get_elapsed_time_second();
@@ -232,7 +233,7 @@ int main(int argc, char **argv) {
 
     config.AddBuildIndexInfo(index->BuildIndexStatistics());
     config.AddBuildIndexTime(build_index_time);
-    config.AddExecuteQuery(n_query_item);
+    config.AddExecuteQuery(n_execute_query);
     config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     return 0;
 }

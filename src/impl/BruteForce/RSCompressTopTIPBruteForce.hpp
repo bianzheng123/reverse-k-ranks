@@ -117,9 +117,6 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
             // store queryIP
             TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-                if(queryID == 46){
-                    continue;
-                }
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
