@@ -57,6 +57,10 @@ def read_log(filename):
     total_running_time_l = []
     io_time_perc_l = []
     ip_time_perc_l = []
+
+    io_time_l = []
+    ip_time_l = []
+    memory_index_time_l = []
     with open(filename, 'r') as f:
         lines = f.read().split('\n')
         for line in lines:
@@ -88,6 +92,11 @@ def read_log(filename):
             ip_time_perc = rank_compute_time / running_time
             ip_time_perc_l.append(ip_time_perc)
 
+            io_time_l.append(read_disk_time)
+            ip_time_l.append(rank_compute_time)
+            memory_index_time_l.append(memory_index_search_time + inner_product_time)
+
+    print("{} io_time {}s, ip_time {}s, memory_index_time {}s".format(filename, np.average(io_time_l), np.average(ip_time_l), np.average(memory_index_time_l)))
             # print(rank_compute_time, read_disk_time, memory_index_search_time, inner_product_time, n_user_candidate)
     assert len(queryID_l) == len(n_refine_l) == len(io_cost_l) == len(ip_cost_l) == len(io_time_perc_l) == len(
         ip_time_perc_l) == len(total_running_time_l)
@@ -99,32 +108,32 @@ def read_log(filename):
 
 
 if __name__ == '__main__':
-    # dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
-    dataset_m = {'yahoomusic_big': 'Yahoomusic'}
+    dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
+    # dataset_m = {'yahoomusic_big': 'Yahoomusic'}
     for ds in dataset_m.keys():
         basic_dir = "../../result"
         fname = "{}-RSCompressTopTIP-top10.log".format(ds)
         df = read_log(os.path.join(basic_dir, fname))
 
-        user_candidate_l = df['n_refine']
-        running_time_l = df['total_running_time']
-        para = least_square_parameter(user_candidate_l, running_time_l)
-        plot(user_candidate_l, running_time_l, para, "Number of Refinement", 'Total Running Time (second)',
-             '# Refinement vs Total Running Time in {}'.format(dataset_m[ds]), '{}-Refinement-RunTime'.format(ds))
-
-        io_cost_l = df['io_cost']
-        para = least_square_parameter(user_candidate_l, io_cost_l)
-        plot(user_candidate_l, io_cost_l, para,
-             "Number of Refinement", 'IO cost',
-             '{} vs {} in {}'.format('# Refinement', 'IO cost', dataset_m[ds]),
-             '{}-Refinement-IOCost'.format(ds))
-
-        ip_cost_l = df['ip_cost']
-        para = least_square_parameter(user_candidate_l, ip_cost_l)
-        plot(user_candidate_l, ip_cost_l, para,
-             "Number of Refinement", "IP cost",
-             '{} vs {} in {}'.format('# Refinement', 'IP cost', dataset_m[ds]),
-             '{}-Refinement-IPCost'.format(ds))
-
-        df.rename({'total_running_time': 'total_running_time(second)'}, inplace=True)
-        df.to_csv('{}-top-10.csv'.format(ds), float_format="%.2f", index=False)
+        # user_candidate_l = df['n_refine']
+        # running_time_l = df['total_running_time']
+        # para = least_square_parameter(user_candidate_l, running_time_l)
+        # plot(user_candidate_l, running_time_l, para, "Number of Refinement", 'Total Running Time (second)',
+        #      '# Refinement vs Total Running Time in {}'.format(dataset_m[ds]), '{}-Refinement-RunTime'.format(ds))
+        #
+        # io_cost_l = df['io_cost']
+        # para = least_square_parameter(user_candidate_l, io_cost_l)
+        # plot(user_candidate_l, io_cost_l, para,
+        #      "Number of Refinement", 'IO cost',
+        #      '{} vs {} in {}'.format('# Refinement', 'IO cost', dataset_m[ds]),
+        #      '{}-Refinement-IOCost'.format(ds))
+        #
+        # ip_cost_l = df['ip_cost']
+        # para = least_square_parameter(user_candidate_l, ip_cost_l)
+        # plot(user_candidate_l, ip_cost_l, para,
+        #      "Number of Refinement", "IP cost",
+        #      '{} vs {} in {}'.format('# Refinement', 'IP cost', dataset_m[ds]),
+        #      '{}-Refinement-IPCost'.format(ds))
+        #
+        # df.rename({'total_running_time': 'total_running_time(second)'}, inplace=True)
+        # df.to_csv('{}-top-10.csv'.format(ds), float_format="%.2f", index=False)
