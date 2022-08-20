@@ -78,13 +78,13 @@ def read_log(filename):
             total_time = float(split_l[-7][:-2])
             total_running_time_l.append(total_time)
 
-            io_time = float(split_l[-1][:-1])
-            io_time_perc = io_time / total_time
-            io_time_perc_l.append(io_time_perc)
-
             ip_time = float(split_l[-4][:-2])
             ip_time_perc = ip_time / total_time
             ip_time_perc_l.append(ip_time_perc)
+
+            io_time = float(split_l[-1][:-1])
+            io_time_perc = io_time / total_time
+            io_time_perc_l.append(io_time_perc)
 
             # print(rank_compute_time, read_disk_time, memory_index_search_time, inner_product_time, n_user_candidate)
     assert len(queryID_l) == len(n_refine_l) == len(io_cost_l) == len(ip_cost_l) == len(io_time_perc_l) == len(
@@ -98,10 +98,12 @@ def read_log(filename):
 
 if __name__ == '__main__':
     # dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
-    dataset_m = {'yahoomusic_big': 'Yahoomusic'}
+    # dataset_m = {'yahoomusic_big': 'Yahoomusic'}
+    dataset_m = {'fakebig': 'fakebig'}
     for ds in dataset_m.keys():
         basic_dir = "../../result"
-        fname = "{}-RSCompressTopTIP-top10-n_sample_128.log".format(ds)
+        fname = "{}-RSCompressTopTIP-top10.log".format(ds)
+        # fname = "{}-RSCompressTopTIP-top10-n_sample_128.log".format(ds)
         df = read_log(os.path.join(basic_dir, fname))
 
         user_candidate_l = df['n_refine']

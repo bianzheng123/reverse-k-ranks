@@ -1,15 +1,15 @@
-#include <random>
-#include <algorithm>
-#include <iterator>
-#include <iostream>
+#include <stdio.h>
 #include <vector>
+#include "util/FileReader.hpp"
 
-int main()
-{
-    std::vector<int> v = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-
-    std::shuffle(v.begin(), v.end(), std::default_random_engine(0));
-
-    std::copy(v.begin(), v.end(), std::ostream_iterator<int>(std::cout, " "));
-    std::cout << "\n";
+int main() {
+    FileReader fileReader{};
+    fileReader = FileReader("../index/fake-normal_QueryRankSearch128.index");
+//    std::vector<double> vecs_l(10);
+    double* data = fileReader.read<double>(0, sizeof(double) * 10);
+    for(int i=0;i<10;i++){
+        printf("%.3f ", data[i]);
+    }
+    printf("\n");
+    return 0;
 }

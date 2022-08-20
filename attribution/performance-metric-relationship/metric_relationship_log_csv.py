@@ -108,7 +108,8 @@ def read_log(filename):
 
 
 if __name__ == '__main__':
-    dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
+    # dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp', 'fakebig': 'fakebig'}
+    dataset_m = {'fakebig': 'fakebig'}
     # dataset_m = {'yahoomusic_big': 'Yahoomusic'}
     for ds in dataset_m.keys():
         basic_dir = "../../result"

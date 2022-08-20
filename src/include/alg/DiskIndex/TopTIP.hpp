@@ -17,6 +17,7 @@ namespace ReverseMIPS {
     class TopTIP {
 
         inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
+            system("# sync; echo 3 > /proc/sys/vm/drop_caches");
             assert(0 <= start_idx + read_count && start_idx + read_count <= topt_);
             int64_t offset = (int64_t) userID * topt_ + start_idx;
             offset *= sizeof(double);
