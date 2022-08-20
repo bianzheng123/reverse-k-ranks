@@ -171,10 +171,10 @@ if __name__ == '__main__':
     # TODO run
     dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads', 'amazon']
     for ds in dataset_l:
-        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 5000, 10))
+        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 1000, 10))
         os.system(
             'cd build/attribution && ./ppr --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 5000, 10))
+                ds, 1000, 10))
 
     # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format('amazon', 5000, 50))
     # os.system('cd build && ./brrstt --dataset_name {}'.format('amazon'))
