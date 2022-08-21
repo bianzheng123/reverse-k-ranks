@@ -102,7 +102,7 @@ if __name__ == '__main__':
     # dataset_m = {'fakebig': 'fakebig'}
     for ds in dataset_m.keys():
         basic_dir = "../../result"
-        fname = "{}-RSCompressTopTIP-top1-flush.log".format(ds)
+        fname = "{}-RSCompressTopTIP-top10-flush-intopt.log".format(ds)
         # fname = "{}-RSCompressTopTIP-top10-n_sample_128.log".format(ds)
         df = read_log(os.path.join(basic_dir, fname))
 
