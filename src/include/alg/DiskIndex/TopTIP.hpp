@@ -17,7 +17,7 @@ namespace ReverseMIPS {
     class TopTIP {
 
         inline double ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
-            system("# sync; echo 3 > /proc/sys/vm/drop_caches");
+            system("# sync; echo 1 > /proc/sys/vm/drop_caches");
             assert(0 <= start_idx + read_count && start_idx + read_count <= topt_);
             int64_t offset = (int64_t) userID * topt_ + start_idx;
             offset *= sizeof(double);
@@ -254,16 +254,10 @@ namespace ReverseMIPS {
                     BelowTopt(queryIP, rank_lb, rank_ub, userID,
                               io_cost, ip_cost,
                               read_disk_time, rank_compute_time);
-                } else if (rank_ub <= topt_ && topt_ <= rank_lb) {
-                    BetweenTopt(queryIP, rank_lb, rank_ub, userID, user_vecs, item,
-                                io_cost, ip_cost,
-                                read_disk_time, rank_compute_time);
-                } else if (topt_ < rank_ub) {
+                } else {//topt_ < rank_ub
                     AboveTopt(queryIP, userID, user_vecs, item,
                               io_cost, ip_cost,
                               read_disk_time, rank_compute_time);
-                } else {
-                    spdlog::error("have bug in get rank, topt ID IP");
                 }
 
                 if (n_user_candidate_ % 2500 == 0) {
