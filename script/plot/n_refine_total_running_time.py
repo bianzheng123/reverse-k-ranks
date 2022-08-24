@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
+def plotfig(data_x, data_y, para, x_axis_name, y_axis_name, dataset_name):
     print("corr", np.corrcoef(np.log10(data_x), np.log10(data_y)))
 
     # plot
@@ -13,9 +13,11 @@ def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
     # ax.scatter(x, y, s=sizes, c=colors, vmin=0, vmax=100)
     # ax.scatter(x, y, vmin=0, vmax=n_data_item)
 
-    ax.plot(data_x, (data_x ** para[0]) * (10 ** para[1]), color='#ff0000')
+    line_x_l = np.linspace(min(data_x), max(data_x), 100)
+
+    ax.plot(line_x_l, (line_x_l ** para[0]) * (10 ** para[1]), linestyle='dotted', color='#828487')
     # ax.plot(data_x, (data_x * para[0]) + para[1])
-    ax.scatter(data_x, data_y, s=2)
+    ax.scatter(data_x, data_y, s=2, color='#080604')
 
     # ax.set(xlim=(0, n_data_item),
     #        ylim=(0, n_data_item))
@@ -26,9 +28,9 @@ def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
     ax.set_ylabel(y_axis_name)
     ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.set_title(title_name)
 
-    plt.savefig('{}.jpg'.format(file_name), dpi=600, bbox_inches='tight')
+    # plt.savefig('n_refine_total_running_time-{}.jpg'.format(dataset_name), dpi=600, bbox_inches='tight')
+    plt.savefig('n_refine_total_running_time-{}.pdf'.format(dataset_name), bbox_inches='tight')
     plt.close()
 
 
@@ -97,11 +99,10 @@ def read_log(filename):
 
 
 if __name__ == '__main__':
-    # dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
-    dataset_m = {'yahoomusic_big': 'Yahoomusic'}
-    # dataset_m = {'fakebig': 'fakebig'}
+    dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
+    # dataset_m = {'yahoomusic_big': 'Yahoomusic'}
     for ds in dataset_m.keys():
-        basic_dir = "../../result"
+        basic_dir = "data"
         fname = "{}-RSCompressTopTIP-top10.log".format(ds)
         # fname = "{}-RSCompressTopTIP-top10-n_sample_128.log".format(ds)
         df = read_log(os.path.join(basic_dir, fname))
@@ -109,22 +110,22 @@ if __name__ == '__main__':
         user_candidate_l = df['n_refine']
         running_time_l = df['total_running_time']
         para = least_square_parameter(user_candidate_l, running_time_l)
-        plot(user_candidate_l, running_time_l, para, "Number of Refinement", 'Total Running Time (second)',
-             '# Refinement vs Total Running Time in {}'.format(dataset_m[ds]), '{}-Refinement-RunTime'.format(ds))
+        plotfig(user_candidate_l, running_time_l, para, "Number of Refinement", 'Total Running Time (second)',
+                ds)
 
         # io_cost_l = df['io_cost']
         # para = least_square_parameter(user_candidate_l, io_cost_l)
-        # plot(user_candidate_l, io_cost_l, para,
+        # plotfig(user_candidate_l, io_cost_l, para,
         #      "Number of Refinement", 'IO cost',
         #      '{} vs {} in {}'.format('# Refinement', 'IO cost', dataset_m[ds]),
         #      '{}-Refinement-IOCost'.format(ds))
         #
         # ip_cost_l = df['ip_cost']
         # para = least_square_parameter(user_candidate_l, ip_cost_l)
-        # plot(user_candidate_l, ip_cost_l, para,
+        # plotfig(user_candidate_l, ip_cost_l, para,
         #      "Number of Refinement", "IP cost",
         #      '{} vs {} in {}'.format('# Refinement', 'IP cost', dataset_m[ds]),
         #      '{}-Refinement-IPCost'.format(ds))
 
-        df.rename({'total_running_time': 'total_running_time(second)'}, inplace=True)
-        df.to_csv('{}-top-10.csv'.format(ds), float_format="%.2f", index=False)
+        # df.rename({'total_running_time': 'total_running_time(second)'}, inplace=True)
+        # df.to_csv('{}-top-10.csv'.format(ds), float_format="%.2f", index=False)
