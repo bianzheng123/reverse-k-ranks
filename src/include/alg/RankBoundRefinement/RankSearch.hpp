@@ -14,7 +14,7 @@ namespace ReverseMIPS {
 
     class RankSearch {
 
-        size_t n_sample_, sample_every_, n_data_item_, n_user_, topt_;
+        size_t n_sample_, sample_every_, n_data_item_, n_user_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
@@ -22,14 +22,12 @@ namespace ReverseMIPS {
         inline RankSearch() {}
 
         inline RankSearch(const int &n_sample, const int &n_data_item,
-                          const int &n_user, const int &topt) {
-            assert(topt <= n_data_item);
-            const int sample_every = topt / (n_sample - 1);
+                          const int &n_user) {
+            const int sample_every = n_data_item / (n_sample - 1);
             this->n_sample_ = n_sample;
             this->sample_every_ = sample_every;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
-            this->topt_ = topt;
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
             if (sample_every >= n_data_item) {
@@ -53,10 +51,10 @@ namespace ReverseMIPS {
         void Preprocess() {
             for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
                 if (sampleID == n_sample_ - 1) {
-                    known_rank_idx_l_[sampleID] = (int) topt_ - 1;
+                    known_rank_idx_l_[sampleID] = (int) n_data_item_ - 1;
                 } else {
                     known_rank_idx_l_[sampleID] = sample_every_ - 1 + sampleID * sample_every_;
-                    assert(known_rank_idx_l_[sampleID] < topt_);
+                    assert(known_rank_idx_l_[sampleID] < n_data_item_);
                 }
             }
             for (int sampleID = 1; sampleID < n_sample_; sampleID++) {
@@ -155,7 +153,6 @@ namespace ReverseMIPS {
             out_stream_.write((char *) &sample_every_, sizeof(size_t));
             out_stream_.write((char *) &n_data_item_, sizeof(size_t));
             out_stream_.write((char *) &n_user_, sizeof(size_t));
-            out_stream_.write((char *) &topt_, sizeof(size_t));
 
             out_stream_.write((char *) known_rank_idx_l_.get(), (int64_t) (n_sample_ * sizeof(int)));
             out_stream_.write((char *) bound_distance_table_.get(), (int64_t) (n_user_ * n_sample_ * sizeof(double)));
@@ -174,7 +171,6 @@ namespace ReverseMIPS {
             index_stream.read((char *) &sample_every_, sizeof(size_t));
             index_stream.read((char *) &n_data_item_, sizeof(size_t));
             index_stream.read((char *) &n_user_, sizeof(size_t));
-            index_stream.read((char *) &topt_, sizeof(size_t));
 
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             index_stream.read((char *) known_rank_idx_l_.get(), (int64_t) (sizeof(int) * n_sample_));

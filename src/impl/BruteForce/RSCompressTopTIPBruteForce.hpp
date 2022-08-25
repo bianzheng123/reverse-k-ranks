@@ -249,7 +249,7 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
         disk_ins.PreprocessData(user, data_item);
 
         //hash search
-        RankSearch rank_bound_ins(n_sample, n_data_item, n_user, topt);
+        RankSearch rank_bound_ins(n_sample, n_data_item, n_user);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);

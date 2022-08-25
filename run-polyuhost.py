@@ -138,7 +138,7 @@ def run_compress_topt():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['amazon']
     index_size_l = [256]
-    n_sample = 512
+    n_sample = 1500
     # os.system('cd build && ./brtt --dataset_name {}'.format('amazon'))
     # os.system('cd build && ./brqrbb --dataset_name {}'.format('amazon'))
     # os.system('cd build && ./brmrbi --dataset_name {}'.format('amazon'))
@@ -152,9 +152,9 @@ def run_compress_topt():
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
                     ds, basic_dir, 'QRSCompressTopTIPBruteForce', n_sample, index_size,
                     1000, 50))
-            # os.system(
-            #     'cd build && nocache ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "RSCompressTopTIPBruteForce", 37, index_size))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))

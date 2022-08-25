@@ -108,8 +108,8 @@ int main(int argc, char **argv) {
         int topt;
         TopTIPParameter(n_data_item, n_user, index_size_gb, topt);
 
-        RankSearch rs_128(128, n_data_item, n_user, topt);
-        RankSearch rs_512(512, n_data_item, n_user, topt);
+        RankSearch rs_128(128, n_data_item, n_user);
+        RankSearch rs_512(512, n_data_item, n_user);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);

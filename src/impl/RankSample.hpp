@@ -219,7 +219,7 @@ namespace ReverseMIPS::RankSample {
         user.vectorNormalize();
 
         //rank search
-        RankSearch rank_ins(n_sample, n_data_item, n_user, n_data_item);
+        RankSearch rank_ins(n_sample, n_data_item, n_user);
 
         //disk index
         ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);

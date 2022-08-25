@@ -210,7 +210,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
      */
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
-                                      const int &n_interval, const uint64_t &index_size_gb) {
+                                      const uint64_t &memory_capacity_gb, const uint64_t &disk_capacity_gb) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -218,7 +218,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         user.vectorNormalize();
 
         //disk index
-        const uint64_t index_size_byte = (uint64_t) index_size_gb * 1024 * 1024 * 1024;
+        const uint64_t index_size_byte = (uint64_t) disk_capacity_gb * 1024 * 1024 * 1024;
         const uint64_t predict_index_size_byte = (uint64_t) sizeof(int) * n_data_item * n_user;
         const uint64_t topt_big_size = index_size_byte / sizeof(int) / n_user;
         int topt = int(topt_big_size);
@@ -232,7 +232,7 @@ namespace ReverseMIPS::CompressTopTIDBruteForce {
         disk_ins.PreprocessData(user, data_item);
 
         //rank search
-        ScoreSearch rank_bound_ins(n_interval, n_user, n_data_item);
+        ScoreSearch rank_bound_ins(memory_capacity_gb, n_user, n_data_item);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);

@@ -68,8 +68,8 @@ namespace ReverseMIPS {
         sprintf(rs512_path, "../index/%s_RankSearch512_TopT.index", dataset_name);
 
         //rank search
-        RankSearch rs_128(n_sample_128, n_data_item, n_user, toptIP256);
-        RankSearch rs_512(n_sample_512, n_data_item, n_user, toptIP256);
+        RankSearch rs_128(n_sample_128, n_data_item, n_user);
+        RankSearch rs_512(n_sample_512, n_data_item, n_user);
 
         //Compute Score Table
         ComputeScoreTable cst(user, data_item);

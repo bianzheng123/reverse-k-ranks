@@ -15,6 +15,8 @@ namespace ReverseMIPS {
     class SampleQueryDistributionBelowTopk {
         int n_data_item_;
         std::unique_ptr<int[]> topk_rank_l_; // n_sample_query
+        std::vector<int> topk_min_rank_idx_l_;//n_sample_query, points to the minimum index of the same rank
+        std::vector<int> topk_max_rank_idx_l_;//n_sample_query, points to the maximum index of the same rank
         std::unique_ptr<int[]> sample_rank_l_; // n_sample_query * n_sample_query, stores the number of un-pruned user in the rank of sampled query
     public:
         uint64_t n_sample_query_;
@@ -30,6 +32,11 @@ namespace ReverseMIPS {
             this->sample_topk_ = sample_topk;
             topk_rank_l_ = std::make_unique<int[]>(n_sample_query_);
             sample_rank_l_ = std::make_unique<int[]>(n_sample_query_ * n_sample_query_);
+
+            topk_min_rank_idx_l_.resize(n_sample_query_);
+            topk_max_rank_idx_l_.resize(n_sample_query_);
+            topk_min_rank_idx_l_.assign(n_sample_query_, -1);
+            topk_max_rank_idx_l_.assign(n_sample_query_, -1);
             spdlog::info("n_sample_query {}, sample_topk {}", n_sample_query_, sample_topk_);
 
             {
@@ -46,6 +53,27 @@ namespace ReverseMIPS {
 
                 topk_rank_stream.read((char *) topk_rank_l_.get(), sizeof(int) * n_sample_query_);
                 topk_rank_stream.close();
+            }
+
+            for (int sampleID = 0; sampleID < n_sample_query_; sampleID++) {
+                int *min_idx_ptr = std::lower_bound(topk_rank_l_.get(), topk_rank_l_.get() + n_sample_query_,
+                                                    topk_rank_l_[sampleID], [](const int &info, const int &value) {
+                            return info < value;
+                        });
+
+                int *max_idx_ptr = std::lower_bound(topk_rank_l_.get(), topk_rank_l_.get() + n_sample_query_,
+                                                    topk_rank_l_[sampleID], [](const int &info, const int &value) {
+                            return info <= value;
+                        });
+                const long min_idx = min_idx_ptr - topk_rank_l_.get();
+                const long max_idx = max_idx_ptr - topk_rank_l_.get();
+                assert(min_idx < max_idx);
+                assert(0 <= min_idx && min_idx < n_sample_query_);
+                assert(1 <= max_idx && max_idx <= n_sample_query_);
+                topk_min_rank_idx_l_[sampleID] = (int) min_idx;
+                topk_max_rank_idx_l_[sampleID] = (int) max_idx - 1;
+                assert(topk_min_rank_idx_l_[sampleID] >= 0);
+                assert(topk_max_rank_idx_l_[sampleID] >= 0);
             }
 
             {
@@ -122,13 +150,26 @@ namespace ReverseMIPS {
 
         int64_t GetUnpruneCandidate(const int &sample_rank_ub, const int &sample_rank_lb) {
             assert(sample_rank_ub <= sample_rank_lb && sample_rank_lb < n_sample_query_);
-            if (sample_rank_ub == sample_rank_lb) {
+            if (topk_rank_l_[sample_rank_ub] == topk_rank_l_[sample_rank_lb]) {
                 return 0;
             }
             int64_t n_unprune_user = 0;
-            for (int queryID = sample_rank_ub; queryID <= sample_rank_lb; queryID++) {
+            const int &sample_rank_ub_min_idx = topk_min_rank_idx_l_[sample_rank_ub];
+            const int &sample_rank_lb_max_idx = topk_max_rank_idx_l_[sample_rank_lb];
+            for (int queryID = sample_rank_ub_min_idx; queryID <= sample_rank_lb_max_idx; queryID++) {
                 n_unprune_user += sample_rank_l_[queryID * n_sample_query_ + sample_rank_lb];
             }
+
+            return n_unprune_user;
+        }
+
+        int64_t GetUnpruneCandidate(const int &sample_rank_ub) {
+            assert(sample_rank_ub <= n_sample_query_);
+            if(sample_rank_ub == n_sample_query_){
+                return 0;
+            }
+            const int &sample_rank_ub_min_idx = topk_max_rank_idx_l_[sample_rank_ub];
+            int64_t n_unprune_user = (int64_t) (n_data_item_ - sample_topk_) * (n_sample_query_ - sample_rank_ub_min_idx);
 
             return n_unprune_user;
         }
@@ -181,6 +222,7 @@ namespace ReverseMIPS {
             std::vector<int> position_dp(n_sample_query * n_sample_);
             for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
                 spdlog::info("sampleID {}", sampleID);
+#pragma omp parallel for default(none) shared(n_sample_query, sampleID, optimal_dp, query_distribution_ins, position_dp, std::cout)
                 for (int sample_rankID = 0; sample_rankID < n_sample_query; sample_rankID++) {
                     if (sampleID == 0) {
                         optimal_dp[sample_rankID * n_sample_ + sampleID] =
@@ -196,8 +238,9 @@ namespace ReverseMIPS {
                                 position_dp[sample_rankID * n_sample_ + sampleID - 1];
                         for (int t = sample_rankID - 1; t >= 0; t--) {
                             const int64_t unprune_user_candidate =
-                                    query_distribution_ins.GetUnpruneCandidate(t + 1, sample_rankID) -
-                                    (n_data_item_ - query_distribution_ins.sample_topk_) * (sample_rankID - t);
+                                    -query_distribution_ins.GetUnpruneCandidate(t + 1) +
+                                    query_distribution_ins.GetUnpruneCandidate(t + 1, sample_rankID) +
+                                    query_distribution_ins.GetUnpruneCandidate(sample_rankID + 1);
                             assert(unprune_user_candidate <= 0);
                             if (optimal_dp[sample_rankID * n_sample_ + sampleID] >
                                 optimal_dp[t * n_sample_ + sampleID - 1] + unprune_user_candidate) {

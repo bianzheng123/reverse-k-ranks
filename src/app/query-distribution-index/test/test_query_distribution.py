@@ -6,7 +6,7 @@ if __name__ == '__main__':
             'fakebig': 'fakebig-query-distribution', 'netflix-small': 'netflix-small-query-distribution'}
     basic_dir = '/home/bianzheng/Dataset/ReverseMIPS'
     # basic_dir = os.path.join('/run', 'media', 'hdd', 'ReverseMIPS')
-    n_sample_item = 1500
+    n_sample_item = 150
     sample_topk = 10
 
     for ds in ds_m.keys():
@@ -22,6 +22,6 @@ if __name__ == '__main__':
             'cd /home/bianzheng/reverse-k-ranks/build && ./rri --dataset_name {} --method_name {} --n_sample {}'.format(
                 ds, 'RankSample', 20))
         os.system(
-            'cd /home/bianzheng/reverse-k-ranks/build && ./progress --method_name {} --dataset_name {} --n_sample {}'.format(
+            'cd /home/bianzheng/reverse-k-ranks/build && ./rri --method_name {} --dataset_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
                 'QueryRankSample',
-                ds, 20))
+                ds, 20, n_sample_item, sample_topk))
