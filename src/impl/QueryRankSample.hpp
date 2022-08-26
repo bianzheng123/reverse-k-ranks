@@ -47,6 +47,7 @@ namespace ReverseMIPS::QueryRankSample {
         int vec_dim_, n_data_item_, n_user_;
         double inner_product_time_, coarse_binary_search_time_, read_disk_time_, fine_binary_search_time_;
         TimeRecord inner_product_record_, coarse_binary_search_record_;
+        TimeRecord query_record_;
         double rank_prune_ratio_;
     public:
 
@@ -113,6 +114,7 @@ namespace ReverseMIPS::QueryRankSample {
             // for binary search, check the number
             TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
+                query_record_.reset();
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
@@ -166,10 +168,13 @@ namespace ReverseMIPS::QueryRankSample {
                 assert(query_heap_l[queryID].size() == topk);
 
                 const double &total_time =
-                        tmp_inner_product_time + tmp_memory_index_time + read_disk_time + rank_compute_time;
+                        query_record_.get_elapsed_time_second();
+                const double &memory_index_time = tmp_memory_index_time + tmp_inner_product_time;
                 query_performance_l[queryID] = SingleQueryPerformance(queryID, n_user_candidate,
                                                                       io_cost, ip_cost,
-                                                                      total_time, read_disk_time, rank_compute_time);
+                                                                      total_time,
+                                                                      memory_index_time, read_disk_time,
+                                                                      rank_compute_time);
             }
             disk_ins_.FinishRetrieval();
 

@@ -150,11 +150,11 @@ def run_compress_topt():
             os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 1000, 50))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
-                    ds, basic_dir, 'QRSCompressTopTIPBruteForce', n_sample, index_size,
+                    ds, basic_dir, 'QRSTopTIP', n_sample, index_size,
                     1000, 50))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "RSCompressTopTIPBruteForce", n_sample, index_size))
+                    ds, basic_dir, "RSTopTIP", n_sample, index_size))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))

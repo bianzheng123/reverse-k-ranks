@@ -26,23 +26,13 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
         'CompressTopTIPBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
         'RSCompressTopTIPBruteForceBatchRun': 'n_sample_512-index_size_gb_256',
-        'RSCompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
-        'QRSCompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
+        'QRSTopTIP': 'n_sample_20-index_size_gb_50',
+        'RSTopTIP': 'n_sample_20-index_size_gb_50',
 
         'RankSample': 'n_sample_20',
         'ScoreSample': 'n_sample_20',
         'SSComputeAll': 'n_sample_20',
         'QueryRankSample': 'n_sample_20',
-
-        'SSMergeIntervalIDByBitmap': 'n_sample_20-index_size_gb_50',
-        'SSMergeQuadraticRankBoundByBitmapBatchRun': 'n_sample_128-index_size_gb_256',
-
-        'SSMergeIntervalIDByInterval': 'n_sample_20-index_size_gb_50',
-        'SSMergeQuadraticRankBoundByBitmap': 'n_sample_20-index_size_gb_50',
-        'SSMergeRankByBitmap': 'n_sample_20-index_size_gb_50',
-        'SSMergeRankByInterval': 'n_sample_20-index_size_gb_50',
-        'SSMergeRankByIntervalBatchRun': 'n_sample_512-index_size_gb_256',
-        'SSQueryAssignFrequent': 'n_sample_20-index_size_gb_50',
 
         'CAGrid': 'codeword_32',
         'CAFullInt': 'scale_100',
@@ -88,14 +78,14 @@ def run():
     method_name_l = [
         'BatchDiskBruteForce',
         # 'RSCompressTopTIPBruteForceBatchRun',
-        'DiskBruteForce',
+        # 'DiskBruteForce',
         'MemoryBruteForce',
-        'QRSCompressTopTIPBruteForce',
-        'RSCompressTopTIPBruteForce',
+        'QRSTopTIP',
+        'RSTopTIP',
 
         # 'GridIndex',
-        'RankSample',
-        'QueryRankSample',
+        # 'RankSample',
+        # 'QueryRankSample',
 
         # 'SSMergeQuadraticRankBoundByBitmap',
         # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
@@ -120,24 +110,24 @@ def run():
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     for ds in dataset_l:
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         os.system(
             'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {}'.format(
                 ds, 150, 50,
-                ds, 'QRSCompressTopTIPBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSCompressTopTIPBruteForce'))
+                ds, 'QRSTopTIP'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
         # os.system('cd build && ./brrstt --dataset_name {}'.format(ds))
         # os.system('cd build && ./brqrbb --dataset_name {}'.format(ds))
         # os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {}'.format(
-                ds, 150, 50,
-                ds, 'QueryRankSample'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        # os.system(
+        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {}'.format(
+        #         ds, 150, 50,
+        #         ds, 'QueryRankSample'))
 
     type_arr = ['userID', 'IP', 'rank']
     topk_l = [10, 20, 30, 40, 50]
@@ -146,8 +136,8 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 

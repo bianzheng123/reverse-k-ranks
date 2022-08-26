@@ -29,7 +29,7 @@
 #include <spdlog/spdlog.h>
 #include <filesystem>
 
-namespace ReverseMIPS::RSCompressTopTIPBruteForce {
+namespace ReverseMIPS::RSTopTIP {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -52,6 +52,7 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
         int vec_dim_, n_data_item_, n_user_;
         double inner_product_time_, memory_index_search_time_, read_disk_time_, exact_rank_time_;
         TimeRecord inner_product_record_, memory_index_search_record_;
+        TimeRecord query_record_;
         uint64_t total_io_cost_, total_ip_cost_;
         double rank_bound_prune_ratio_;
 
@@ -118,6 +119,7 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
             // store queryIP
             TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
+                query_record_.reset();
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
@@ -173,10 +175,13 @@ namespace ReverseMIPS::RSCompressTopTIPBruteForce {
                 assert(query_heap_l[queryID].size() == topk);
 
                 const double &total_time =
-                        tmp_inner_product_time + tmp_memory_index_search_time + read_disk_time + rank_compute_time;
+                        query_record_.get_elapsed_time_second();
+                const double &memory_index_time = tmp_memory_index_search_time + tmp_inner_product_time;
                 query_performance_l[queryID] = SingleQueryPerformance(queryID, n_user_candidate,
                                                                       io_cost, ip_cost,
-                                                                      total_time, read_disk_time, rank_compute_time);
+                                                                      total_time,
+                                                                      memory_index_time, read_disk_time,
+                                                                      rank_compute_time);
             }
             disk_ins_.FinishRetrieval();
 

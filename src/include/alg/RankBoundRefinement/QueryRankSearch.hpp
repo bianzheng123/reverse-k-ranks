@@ -165,13 +165,19 @@ namespace ReverseMIPS {
 
         int64_t GetUnpruneCandidate(const int &sample_rank_ub) {
             assert(sample_rank_ub <= n_sample_query_);
-            if(sample_rank_ub == n_sample_query_){
+            if (sample_rank_ub == n_sample_query_) {
                 return 0;
             }
-            const int &sample_rank_ub_min_idx = topk_max_rank_idx_l_[sample_rank_ub];
-            int64_t n_unprune_user = (int64_t) (n_data_item_ - sample_topk_) * (n_sample_query_ - sample_rank_ub_min_idx);
+            const int &sample_rank_ub_max_idx = topk_max_rank_idx_l_[sample_rank_ub];
+            int64_t n_unprune_user =
+                    (int64_t) (n_data_item_ - sample_topk_) * (n_sample_query_ - sample_rank_ub_max_idx);
 
             return n_unprune_user;
+        }
+
+        int GetSampleRankID(const int &sample_rank) {
+            const int &sample_rank_max_idx = topk_max_rank_idx_l_[sample_rank];
+            return sample_rank_max_idx;
         }
 
         unsigned int GetRank(const unsigned int &sample_rank) {
@@ -221,21 +227,25 @@ namespace ReverseMIPS {
             std::vector<int64_t> optimal_dp(n_sample_query * n_sample_);
             std::vector<int> position_dp(n_sample_query * n_sample_);
             for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
-                spdlog::info("sampleID {}", sampleID);
+                if (sampleID != 0 && sampleID % 100 == 0) {
+                    spdlog::info("sampleID {}, n_sample {}, progress {:.3f}",
+                                 sampleID, n_sample_, sampleID / n_sample_);
+                }
 #pragma omp parallel for default(none) shared(n_sample_query, sampleID, optimal_dp, query_distribution_ins, position_dp, std::cout)
                 for (int sample_rankID = 0; sample_rankID < n_sample_query; sample_rankID++) {
                     if (sampleID == 0) {
                         optimal_dp[sample_rankID * n_sample_ + sampleID] =
                                 query_distribution_ins.GetUnpruneCandidate(0, sample_rankID) +
-                                (n_sample_query - sample_rankID - 1) *
-                                (n_data_item_ - query_distribution_ins.sample_topk_);
+                                query_distribution_ins.GetUnpruneCandidate(sample_rankID + 1);
 
-                        position_dp[sample_rankID * n_sample_ + sampleID] = sample_rankID;
+                        position_dp[sample_rankID * n_sample_ + sampleID] = query_distribution_ins.GetSampleRankID(
+                                sample_rankID);
                     } else {
                         optimal_dp[sample_rankID * n_sample_ + sampleID] =
                                 optimal_dp[sample_rankID * n_sample_ + sampleID - 1];
                         position_dp[sample_rankID * n_sample_ + sampleID] =
-                                position_dp[sample_rankID * n_sample_ + sampleID - 1];
+                                query_distribution_ins.GetSampleRankID(
+                                        position_dp[sample_rankID * n_sample_ + sampleID - 1]);
                         for (int t = sample_rankID - 1; t >= 0; t--) {
                             const int64_t unprune_user_candidate =
                                     -query_distribution_ins.GetUnpruneCandidate(t + 1) +
@@ -248,7 +258,8 @@ namespace ReverseMIPS {
                                 optimal_dp[sample_rankID * n_sample_ + sampleID] =
                                         optimal_dp[t * n_sample_ + sampleID - 1] + unprune_user_candidate;
 
-                                position_dp[sample_rankID * n_sample_ + sampleID] = t;
+                                position_dp[sample_rankID * n_sample_ +
+                                            sampleID] = query_distribution_ins.GetSampleRankID(t);
                             }
                             assert(optimal_dp[sample_rankID * n_sample_ + sampleID] >= 0);
                             assert(position_dp[sample_rankID * n_sample_ + sampleID] >= 0);
@@ -256,7 +267,7 @@ namespace ReverseMIPS {
                         assert(optimal_dp[sample_rankID * n_sample_ + sampleID] >= 0);
                         assert(position_dp[sample_rankID * n_sample_ + sampleID] >= 0);
                     }
-                    if (sample_rankID != 0 && sample_rankID % 1000 == 0) {
+                    if (sample_rankID != 0 && sample_rankID % 5000 == 0) {
                         std::cout << "sample_rankID " << sample_rankID << ", n_sample_query " << n_sample_query
                                   << std::endl;
                     }

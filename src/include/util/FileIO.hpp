@@ -236,18 +236,20 @@ namespace ReverseMIPS {
     public:
         int queryID_, n_user_candidate_;
         size_t io_cost_, ip_cost_;
-        double total_time_, ip_time_, io_time_;
+        double total_time_, memory_index_time_, ip_time_, io_time_;
 
         inline SingleQueryPerformance() = default;
 
         inline SingleQueryPerformance(const int &queryID, const int &n_user_candidate,
                                       const size_t &io_cost, const size_t &ip_cost,
-                                      const double &total_time, const double &io_time, const double &ip_time) {
+                                      const double &total_time,
+                                      const double &memory_index_time, const double &io_time, const double &ip_time) {
             this->queryID_ = queryID;
             this->n_user_candidate_ = n_user_candidate;
             this->io_cost_ = io_cost;
             this->ip_cost_ = ip_cost;
             this->total_time_ = total_time;
+            this->memory_index_time_ = memory_index_time;
             this->io_time_ = io_time;
             this->ip_time_ = ip_time;
         }
@@ -279,10 +281,10 @@ namespace ReverseMIPS {
         file << str << std::endl;
         for (int i = 0; i < n_query_item; i++) {
             const SingleQueryPerformance &sqp = query_performance_l[i];
-            sprintf(buff, "%10d,%10d,%10ld,%10ld,%10.2f,%10.2f,%10.2f",
+            sprintf(buff, "%10d,%10d,%10ld,%10ld,%10.2f,%10.2f,%10.2f,%10.2f",
                     sqp.queryID_, sqp.n_user_candidate_,
                     sqp.io_cost_, sqp.ip_cost_,
-                    sqp.total_time_, sqp.io_time_, sqp.ip_time_);
+                    sqp.total_time_, sqp.memory_index_time_, sqp.io_time_, sqp.ip_time_);
             str = std::string(buff);
 
             file << str << std::endl;
