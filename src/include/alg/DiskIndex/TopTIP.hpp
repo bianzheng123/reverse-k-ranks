@@ -249,7 +249,7 @@ namespace ReverseMIPS {
                 const int rank_ub = rank_ub_l[userID];
                 const double queryIP = queryIP_l[userID];
                 assert(rank_ub <= rank_lb);
-                if (rank_lb < topt_) {
+                if (rank_lb <= topt_) {
                     //retrieval the top-t like before
                     BelowTopt(queryIP, rank_lb, rank_ub, userID,
                               io_cost, ip_cost,

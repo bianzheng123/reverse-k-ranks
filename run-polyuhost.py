@@ -147,11 +147,10 @@ def run_compress_topt():
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "SSComputeAll", n_sample))
         for ds in dataset_l:
-            os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 1000, 50))
             os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
-                    ds, basic_dir, 'QRSTopTIP', n_sample, index_size,
-                    1000, 50))
+                'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
+                    ds, 2000, 50,
+                    ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 2000, 50))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
                     ds, basic_dir, "RSTopTIP", n_sample, index_size))
