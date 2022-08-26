@@ -7,7 +7,7 @@
 
 #include "struct/MethodBase.hpp"
 #include "BatchBuildIndexMergeRankByInterval.hpp"
-#include "SSMergeRankByInterval.hpp"
+#include "../../../obsoluted/ScoreSample/SSMergeRankByInterval.hpp"
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 

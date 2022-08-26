@@ -104,15 +104,20 @@ int main(int argc, char **argv) {
 //    vector<int> topk_l{10};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
+    vector<vector<SingleQueryPerformance>> query_performance_topk_l;
     for (int topk: topk_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_query_item);
+        vector<SingleQueryPerformance> query_performance_l(n_query_item);
+        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_query_item,
+                                                                     query_performance_l);
 
         double retrieval_time = record.get_elapsed_time_second();
         double ms_per_query = retrieval_time / n_query_item * 1000;
 
         string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
         config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
+
+        query_performance_topk_l.emplace_back(query_performance_l);
 
         result_rank_l.emplace_back(result_rk);
         spdlog::info("finish top-{}", topk);
@@ -124,6 +129,8 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n_topk; i++) {
         cout << config.GetConfig(i) << endl;
         WriteRankResult(result_rank_l[i], dataset_name, method_name.c_str(), parameter_name);
+        WriteQueryPerformance(query_performance_topk_l[i], dataset_name, method_name.c_str(), topk_l[i],
+                              parameter_name);
     }
 
     config.AddBuildIndexInfo(index->BuildIndexStatistics());

@@ -46,7 +46,8 @@ namespace ReverseMIPS::BatchDiskBruteForce {
         }
 
         std::vector<std::vector<UserRankElement>>
-        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query) override {
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query,
+                  std::vector<SingleQueryPerformance> &query_performance_l) override {
             TimeRecord record, batch_report_record;
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);

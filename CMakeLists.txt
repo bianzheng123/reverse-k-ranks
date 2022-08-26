@@ -95,13 +95,13 @@ else () # not use cuda
     target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
-    add_executable(brrstt src/app/BatchRunRSTopTIP.cpp)
-    target_include_directories(brrstt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(brrstt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(brmrbi src/app/BatchRunMergeRankByInterval.cpp)
-    target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(brmrbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+#    add_executable(brrstt src/app/BatchRunRSTopTIP.cpp)
+#    target_include_directories(brrstt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+#    target_link_libraries(brrstt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+#
+#    add_executable(brmrbi src/app/BatchRunMergeRankByInterval.cpp)
+#    target_include_directories(brmrbi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+#    target_link_libraries(brmrbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(dbt src/app/query-distribution-index/DistributionBelowTopk.cpp)
     target_include_directories(dbt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})

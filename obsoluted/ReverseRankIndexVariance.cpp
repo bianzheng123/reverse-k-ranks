@@ -10,7 +10,7 @@
 
 #include "BruteForce/BatchDiskBruteForce.hpp"
 #include "DiskIndexCompress/CompressTopTIDIPBruteForce.hpp"
-#include "BruteForce/CompressTopTIPBruteForce.hpp"
+#include "ScoreSample/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/DiskBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "OnlineBruteForce.hpp"
@@ -18,8 +18,8 @@
 #include "GridIndex.hpp"
 
 #include "BPlusTree/BPlusTree.hpp"
-#include "SSMergeRankByInterval.hpp"
-#include "ScoreSample.hpp"
+#include "ScoreSample/SSMergeRankByInterval.hpp"
+#include "ScoreSample/ScoreSample.hpp"
 #include "RankSample.hpp"
 
 #include <spdlog/spdlog.h>

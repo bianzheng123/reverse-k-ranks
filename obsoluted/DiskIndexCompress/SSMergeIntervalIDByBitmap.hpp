@@ -7,7 +7,7 @@
 
 #include "MergeIntervalIDByBitmap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "../ScoreSample/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 #include "score_computation/ComputeScoreTable.hpp"

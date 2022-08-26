@@ -8,7 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkLBHeap.hpp"
 #include "QueryAssignFrequent.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "../ScoreSample/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"

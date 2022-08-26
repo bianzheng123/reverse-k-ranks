@@ -93,7 +93,8 @@ namespace ReverseMIPS::QRSCompressTopTIPBruteForce {
         }
 
         std::vector<std::vector<UserRankElement>>
-        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query) override {
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query,
+                  std::vector<SingleQueryPerformance> &query_performance_l) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -171,11 +172,11 @@ namespace ReverseMIPS::QRSCompressTopTIPBruteForce {
                 }
                 assert(query_heap_l[queryID].size() == topk);
 
-                spdlog::info(
-                        "finish compute rank queryID {}, n_user_candidate {}, io_cost {}, ip_cost {}, inner product time {:.3f}s, memory index search time {:.3f}s, read disk time {:.3f}s, rank compute time {:.3f}s",
-                        queryID, n_user_candidate, io_cost, ip_cost,
-                        tmp_inner_product_time, tmp_memory_index_search_time,
-                        read_disk_time, rank_compute_time);
+                const double total_time =
+                        tmp_inner_product_time + tmp_memory_index_search_time + read_disk_time + rank_compute_time;
+                query_performance_l[queryID] = SingleQueryPerformance(queryID, n_user_candidate,
+                                                                      io_cost, ip_cost,
+                                                                      total_time, read_disk_time, rank_compute_time);
             }
             disk_ins_.FinishRetrieval();
 

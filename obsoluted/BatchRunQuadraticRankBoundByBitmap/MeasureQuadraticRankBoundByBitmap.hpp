@@ -10,7 +10,7 @@
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
 #include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "../ScoreSample/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"

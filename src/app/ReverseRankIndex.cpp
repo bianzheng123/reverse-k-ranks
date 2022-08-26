@@ -8,7 +8,6 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "BruteForce/CompressTopTIPBruteForce.hpp"
 #include "BruteForce/MemoryBruteForce.hpp"
 #include "BruteForce/RSCompressTopTIPBruteForce.hpp"
 #include "BruteForce/QRSCompressTopTIPBruteForce.hpp"
@@ -17,9 +16,6 @@
 
 #include "QueryRankSample.hpp"
 #include "RankSample.hpp"
-#include "ScoreSample.hpp"
-#include "SSComputeAll.hpp"
-#include "SSMergeRankByInterval.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -94,17 +90,7 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
-    if (method_name == "CompressTopTIPBruteForce") {
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = CompressTopTIPBruteForce::BuildIndex(data_item, user, index_path,
-                                                     n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
-                n_sample, index_size_gb);
-
-    } else if (method_name == "QRSCompressTopTIPBruteForce") {
+    if (method_name == "QRSCompressTopTIPBruteForce") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
         const int n_sample_query = para.n_sample_query;
@@ -147,28 +133,6 @@ int main(int argc, char **argv) {
         index = RankSample::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    } else if (method_name == "ScoreSample") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = ScoreSample::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
-    } else if (method_name == "SSComputeAll") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = SSComputeAll::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
-    } else if (method_name == "SSMergeRankByInterval") {
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = SSMergeRankByInterval::BuildIndex(data_item, user, index_path,
-                                                  n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
-                n_sample, index_size_gb);
-
     } else {
         spdlog::error("not such method");
     }
@@ -192,13 +156,15 @@ int main(int argc, char **argv) {
     vector<int> topk_l{70, 60, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
-//    vector<int> topk_l{20};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
-    const int n_execute_query = 100;
+    vector<vector<SingleQueryPerformance>> query_performance_topk_l;
+    const int n_execute_query = n_query_item;
     for (int topk: topk_l) {
         record.reset();
-        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query);
+        vector<SingleQueryPerformance> query_performance_l(n_execute_query);
+        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,
+                                                                     query_performance_l);
 //        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_query_item);
 
         double retrieval_time = record.get_elapsed_time_second();
@@ -208,6 +174,7 @@ int main(int argc, char **argv) {
         config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
 
         result_rank_l.emplace_back(result_rk);
+        query_performance_topk_l.emplace_back(query_performance_l);
         spdlog::info("finish top-{}", topk);
         spdlog::info("{}", performance_str);
     }
@@ -218,6 +185,8 @@ int main(int argc, char **argv) {
     for (int i = 0; i < n_topk; i++) {
         cout << config.GetConfig(i) << endl;
         WriteRankResult(result_rank_l[i], dataset_name, method_name.c_str(), parameter_name);
+        WriteQueryPerformance(query_performance_topk_l[i], dataset_name, method_name.c_str(), topk_l[i],
+                              parameter_name);
     }
 
     config.AddBuildIndexInfo(index->BuildIndexStatistics());

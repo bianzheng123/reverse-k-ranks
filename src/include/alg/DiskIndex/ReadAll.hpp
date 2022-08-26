@@ -114,7 +114,13 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                     std::vector<bool> &prune_l, TopkLBHeap &topk_lb_heap) {
+                     std::vector<bool> &prune_l, TopkLBHeap &topk_lb_heap,
+                     size_t &io_cost, size_t &ip_cost,
+                     double &read_disk_time, double &rank_computation_time) {
+            io_cost = 0;
+            ip_cost = 0;
+            read_disk_time = 0;
+            rank_computation_time = 0;
 
             //read disk and fine binary search
             n_candidate_ = 0;
@@ -124,7 +130,8 @@ namespace ReverseMIPS {
                 if (prune_l[userID] && rank_lb_l[userID] + 1 <= topk_lb_rank) {
                     continue;
                 }
-                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID);
+                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
+                                               io_cost, ip_cost, read_disk_time, rank_computation_time);
                 topk_lb_heap.Update(rank);
                 prune_l[userID] = true;
             }
@@ -135,14 +142,17 @@ namespace ReverseMIPS {
                 if (prune_l[userID] || rank_ub_l[userID] > topk_lb_rank) {
                     continue;
                 }
-                GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID);
+                GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
+                              io_cost, ip_cost, read_disk_time, rank_computation_time);
             }
 
             std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_candidate_,
                       std::less());
         }
 
-        int GetSingleRank(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID) {
+        int GetSingleRank(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
+                          size_t &io_cost, size_t &ip_cost,
+                          double &read_disk_time, double &rank_computation_time) {
             int end_idx = rank_lb;
             int start_idx = rank_ub;
             assert(0 <= start_idx && start_idx <= end_idx && end_idx <= n_data_item_);
@@ -154,7 +164,10 @@ namespace ReverseMIPS {
 
             read_disk_record_.reset();
             ReadDisk(userID, start_idx, read_count);
-            read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+            const double tmp_read_disk = read_disk_record_.get_elapsed_time_second();
+            io_cost += read_count;
+            read_disk_time += tmp_read_disk;
+            read_disk_time_ += tmp_read_disk;
             exact_rank_refinement_record_.reset();
             int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
             exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();

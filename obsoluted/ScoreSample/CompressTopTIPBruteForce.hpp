@@ -9,7 +9,7 @@
 #include "alg/TopkLBHeap.hpp"
 #include "alg/DiskIndex/TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "ScoreSearch.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"

@@ -9,7 +9,7 @@
 #include "BatchRun/MeasureDiskIndex/MeasureTopTIP.hpp"
 
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "../../../obsoluted/ScoreSample/ScoreSearch.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "struct/VectorMatrix.hpp"
 #include "struct/UserRankElement.hpp"

@@ -86,7 +86,8 @@ namespace ReverseMIPS::QueryRankSample {
         }
 
         std::vector<std::vector<UserRankElement>>
-        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query) override {
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query,
+                  std::vector<SingleQueryPerformance> &query_performance_l) override {
             ResetTimer();
             disk_ins_.RetrievalPreprocess();
 
@@ -130,7 +131,8 @@ namespace ReverseMIPS::QueryRankSample {
                     double queryIP = InnerProduct(query_vecs, user_vec, vec_dim_);
                     queryIP_l_[userID] = queryIP;
                 }
-                this->inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+                const double tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
+                this->inner_product_time_ += tmp_inner_product_time;
 
                 //rank search
                 coarse_binary_search_record_.reset();
@@ -138,24 +140,36 @@ namespace ReverseMIPS::QueryRankSample {
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_,
                                       prune_l_, topkLbHeap);
-                coarse_binary_search_time_ += coarse_binary_search_record_.get_elapsed_time_second();
+                const double tmp_memory_index_time = coarse_binary_search_record_.get_elapsed_time_second();
+                coarse_binary_search_time_ += tmp_memory_index_time;
 
-                int n_candidate = 0;
+                int n_user_candidate = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
                     if (!prune_l_[userID]) {
-                        n_candidate++;
+                        n_user_candidate++;
                     }
                 }
-                assert(n_candidate >= topk);
-                rank_prune_ratio_ += 1.0 * (n_user_ - n_candidate) / n_user_;
+                assert(n_user_candidate >= topk);
+                rank_prune_ratio_ += 1.0 * (n_user_ - n_user_candidate) / n_user_;
 
                 //read disk and fine binary search
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, topkLbHeap);
+                size_t io_cost = 0;
+                size_t ip_cost = 0;
+                double read_disk_time = 0;
+                double rank_compute_time = 0;
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, topkLbHeap,
+                                  io_cost, ip_cost, read_disk_time, rank_compute_time);
 
                 for (int candID = 0; candID < topk; candID++) {
                     query_heap_l[queryID].emplace_back(disk_ins_.user_topk_cache_l_[candID]);
                 }
                 assert(query_heap_l[queryID].size() == topk);
+
+                const double &total_time =
+                        tmp_inner_product_time + tmp_memory_index_time + read_disk_time + rank_compute_time;
+                query_performance_l[queryID] = SingleQueryPerformance(queryID, n_user_candidate,
+                                                                      io_cost, ip_cost,
+                                                                      total_time, read_disk_time, rank_compute_time);
             }
             disk_ins_.FinishRetrieval();
 

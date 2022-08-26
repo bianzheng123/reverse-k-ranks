@@ -10,7 +10,7 @@
 #include "alg/TopkLBHeap.hpp"
 #include "MergeQuadraticRankBoundByBitmap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "../../ScoreSample/ScoreSearch.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"

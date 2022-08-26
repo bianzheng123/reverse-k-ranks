@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_BATCHBUILDINDEXMERGERANKBYINTERVAL_HPP
 
 #include "alg/DiskIndex/MergeRankByInterval.hpp"
-#include "alg/RankBoundRefinement/ScoreSearch.hpp"
+#include "../../../obsoluted/ScoreSample/ScoreSearch.hpp"
 #include "score_computation/ComputeScoreTable.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/VectorIO.hpp"
