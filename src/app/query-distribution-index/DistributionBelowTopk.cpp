@@ -100,7 +100,6 @@ int main(int argc, char **argv) {
         std::vector<double> distance_l(n_data_item);
         std::vector<double> sample_itemIP_l(n_sample_item);
 
-        const int report_every = 10000;
         TimeRecord record;
         record.reset();
         for (int userID = 0; userID < n_user; userID++) {
@@ -141,12 +140,10 @@ int main(int argc, char **argv) {
                 sample_rank_l[sampleID * n_sample_item + topk_rank_offset]++;
             }
 
-            if (userID % report_every == 0) {
-                std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                          << get_current_RSS() / 1000000 << " Mb \n";
+            if (userID % cst.report_every_ == 0 && userID != 0) {
                 spdlog::info(
-                        "Compute Score Time {}s, Sort Score Time {}s",
+                        "Preprocessed {:.2f}%, {:.2f} s/iter, Mem: {} Mb, Compute Score Time {}s, Sort Score Time {}s",
+                        userID / (0.01 * n_user), record.get_elapsed_time_second(), get_current_RSS() / 1000000,
                         cst.compute_time_, cst.sort_time_);
                 cst.compute_time_ = 0;
                 cst.sort_time_ = 0;

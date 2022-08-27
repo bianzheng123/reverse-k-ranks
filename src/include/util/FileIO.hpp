@@ -276,7 +276,7 @@ namespace ReverseMIPS {
         }
 
         char buff[256];
-        sprintf(buff, "queryID,n_user_candidate,io_cost,ip_cost,total_time,io_time,ip_time");
+        sprintf(buff, "queryID,n_user_candidate,io_cost,ip_cost,total_time,memory_index_time,io_time,ip_time");
         std::string str(buff);
         file << str << std::endl;
         for (int i = 0; i < n_query_item; i++) {

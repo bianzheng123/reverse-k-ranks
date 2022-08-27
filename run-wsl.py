@@ -130,8 +130,8 @@ def run():
         #         ds, 'QueryRankSample'))
 
     type_arr = ['userID', 'IP', 'rank']
-    topk_l = [10, 20, 30, 40, 50]
-    # topk_l = [10, 20]
+    # topk_l = [10, 20, 30, 40, 50]
+    topk_l = [10, 20, 30]
     cmp_file_all(method_name_l, type_arr, dataset_l, topk_l)
 
 

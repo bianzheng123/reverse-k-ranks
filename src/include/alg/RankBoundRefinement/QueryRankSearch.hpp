@@ -227,7 +227,7 @@ namespace ReverseMIPS {
             std::vector<int64_t> optimal_dp(n_sample_query * n_sample_);
             std::vector<int> position_dp(n_sample_query * n_sample_);
             for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
-                if (sampleID != 0 && sampleID % 1 == 0) {
+                if (sampleID != 0 && sampleID % 100 == 0) {
                     spdlog::info("sampleID {}, n_sample {}, progress {:.3f}",
                                  sampleID, n_sample_, (double) sampleID / (double) n_sample_);
                 }
@@ -266,10 +266,6 @@ namespace ReverseMIPS {
                         }
                         assert(optimal_dp[sample_rankID * n_sample_ + sampleID] >= 0);
                         assert(position_dp[sample_rankID * n_sample_ + sampleID] >= 0);
-                    }
-                    if (sample_rankID != 0 && sample_rankID % 5000 == 0) {
-                        std::cout << "sample_rankID " << sample_rankID << ", n_sample_query " << n_sample_query
-                                  << std::endl;
                     }
                 }
             }
