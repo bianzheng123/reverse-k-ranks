@@ -41,6 +41,7 @@ namespace ReverseMIPS {
             offset *= sizeof(double);
             int64_t read_count_offset = read_count * sizeof(double);
             index_stream_.seekg(offset, std::ios::beg);
+            system("# sync; echo 3 > /proc/sys/vm/drop_caches");
             index_stream_.read((char *) disk_cache_.get(), read_count_offset);
         }
 
@@ -127,7 +128,7 @@ namespace ReverseMIPS {
             int topk_lb_rank = topk_lb_heap.Front();
             topk_lb_heap.Reset();
             for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID] && rank_lb_l[userID] + 1 <= topk_lb_rank) {
+                if (prune_l[userID] || rank_lb_l[userID] >= topk_lb_rank) {
                     continue;
                 }
                 const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
@@ -135,15 +136,14 @@ namespace ReverseMIPS {
                 topk_lb_heap.Update(rank);
                 prune_l[userID] = true;
             }
-            assert(topk_lb_heap.Front() != -1);
-            topk_lb_rank = topk_lb_heap.Front();
 
             for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID] || rank_ub_l[userID] > topk_lb_rank) {
+                if (prune_l[userID] || (topk_lb_heap.Front() != -1 && rank_ub_l[userID] > topk_lb_heap.Front())) {
                     continue;
                 }
-                GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
-                              io_cost, ip_cost, read_disk_time, rank_computation_time);
+                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
+                                               io_cost, ip_cost, read_disk_time, rank_computation_time);
+                topk_lb_heap.Update(rank);
             }
 
             std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_candidate_,

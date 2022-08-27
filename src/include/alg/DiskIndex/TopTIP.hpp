@@ -17,6 +17,7 @@ namespace ReverseMIPS {
     class TopTIP {
 
         inline double ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
+            read_disk_record_.reset();
             assert(0 <= start_idx + read_count && start_idx + read_count <= topt_);
             int64_t offset = (int64_t) userID * topt_ + start_idx;
             offset *= sizeof(double);
@@ -25,7 +26,7 @@ namespace ReverseMIPS {
 
             assert(0 <= offset + read_count_byte && offset + read_count_byte <= n_user_ * topt_ * sizeof(double));
 
-            read_disk_record_.reset();
+
             system("# sync; echo 3 > /proc/sys/vm/drop_caches");
             index_stream_.read((char *) disk_cache_.get(), read_count_byte);
             const double tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
@@ -49,9 +50,9 @@ namespace ReverseMIPS {
             return (int) (lb_ptr - iter_begin) + base_rank + 1;
         }
 
-        void BelowTopt(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
-                       size_t &io_cost, size_t &ip_cost,
-                       double &read_disk_time, double &rank_compute_time) {
+        int BelowTopt(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
+                      size_t &io_cost, size_t &ip_cost,
+                      double &read_disk_time, double &rank_compute_time) {
 
             int end_idx = rank_lb;
             int start_idx = rank_ub;
@@ -75,6 +76,7 @@ namespace ReverseMIPS {
 
             user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
             n_user_candidate_++;
+            return rank;
         }
 
         void BetweenTopt(const double &queryIP,
@@ -117,11 +119,10 @@ namespace ReverseMIPS {
             n_user_candidate_++;
         }
 
-        void
-        AboveTopt(const double &queryIP,
-                  const int &userID, const double *user_vecs, const VectorMatrix &item,
-                  size_t &io_cost, size_t &ip_cost,
-                  double &read_disk_time, double &rank_compute_time) {
+        int AboveTopt(const double &queryIP,
+                      const int &userID, const double *user_vecs, const VectorMatrix &item,
+                      size_t &io_cost, size_t &ip_cost,
+                      double &read_disk_time, double &rank_compute_time) {
 
             exact_rank_record_.reset();
             int rank = exact_rank_ins_.QueryRankByCandidate(user_vecs, userID, item, queryIP);
@@ -134,6 +135,7 @@ namespace ReverseMIPS {
 
             user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
             n_user_candidate_++;
+            return rank;
         }
 
     public:
@@ -243,22 +245,10 @@ namespace ReverseMIPS {
                 if (prune_l[userID]) {
                     continue;
                 }
-                const double *user_vecs = user.getVector(userID);
 
-                const int rank_lb = rank_lb_l[userID];
-                const int rank_ub = rank_ub_l[userID];
-                const double queryIP = queryIP_l[userID];
-                assert(rank_ub <= rank_lb);
-                if (rank_lb <= topt_) {
-                    //retrieval the top-t like before
-                    BelowTopt(queryIP, rank_lb, rank_ub, userID,
-                              io_cost, ip_cost,
-                              read_disk_time, rank_compute_time);
-                } else {//topt_ < rank_ub
-                    AboveTopt(queryIP, userID, user_vecs, item,
-                              io_cost, ip_cost,
-                              read_disk_time, rank_compute_time);
-                }
+                GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
+                              user, item,
+                              io_cost, ip_cost, read_disk_time, rank_compute_time);
 
                 if (n_user_candidate_ % 2500 == 0) {
                     const double progress = n_user_candidate_ / (0.01 * n_total_user_candidate);
@@ -275,6 +265,85 @@ namespace ReverseMIPS {
                       std::less());
 
         };
+
+        void GetRank(const std::vector<double> &queryIP_l,
+                     const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
+                     const VectorMatrix &user, const VectorMatrix &item,
+                     std::vector<bool> &prune_l, TopkLBHeap &topk_lb_heap,
+                     const int &n_total_user_candidate,
+                     size_t &io_cost, size_t &ip_cost,
+                     double &read_disk_time, double &rank_compute_time) {
+            assert(n_user_ == queryIP_l.size());
+            assert(n_user_ == rank_lb_l.size() && n_user_ == rank_ub_l.size());
+            assert(n_user_ == prune_l.size());
+
+            int n_actual_user_candidate = 0;
+            //read disk and fine binary search
+            n_user_candidate_ = 0;
+            io_cost = 0;
+            ip_cost = 0;
+            read_disk_time = 0;
+            rank_compute_time = 0;
+            int topk_lb_rank = topk_lb_heap.Front();
+            topk_lb_heap.Reset();
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID] || rank_lb_l[userID] >= topk_lb_rank) {
+                    continue;
+                }
+                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
+                                               user, item,
+                                               io_cost, ip_cost, read_disk_time, rank_compute_time);
+                n_actual_user_candidate++;
+                topk_lb_heap.Update(rank);
+                prune_l[userID] = true;
+            }
+
+            TimeRecord record;
+            record.reset();
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID] || (topk_lb_heap.Front() != -1 && rank_ub_l[userID] > topk_lb_heap.Front())) {
+                    continue;
+                }
+                GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
+                              user, item,
+                              io_cost, ip_cost, read_disk_time, rank_compute_time);
+                n_actual_user_candidate++;
+
+                if (n_user_candidate_ % 2500 == 0) {
+                    const double progress = n_user_candidate_ / (0.01 * n_total_user_candidate);
+                    spdlog::info(
+                            "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",
+                            progress, io_cost, ip_cost, read_disk_time, rank_compute_time,
+                            record.get_elapsed_time_second(), get_current_RSS() / 1000000);
+                    record.reset();
+                }
+            }
+
+            assert(n_actual_user_candidate == n_total_user_candidate);
+
+            assert(0 <= n_user_candidate_ && n_user_candidate_ <= n_user_);
+            std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_user_candidate_,
+                      std::less());
+        }
+
+        int GetSingleRank(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
+                          const VectorMatrix &user, const VectorMatrix &item,
+                          size_t &io_cost, size_t &ip_cost, double &read_disk_time, double &rank_compute_time) {
+            assert(rank_ub <= rank_lb);
+            int rank;
+            if (rank_lb <= topt_) {
+                //retrieval the top-t like before
+                rank = BelowTopt(queryIP, rank_lb, rank_ub, userID,
+                                 io_cost, ip_cost,
+                                 read_disk_time, rank_compute_time);
+            } else {//topt_ < rank_ub
+                const double *user_vecs = user.getVector(userID);
+                rank = AboveTopt(queryIP, userID, user_vecs, item,
+                                 io_cost, ip_cost,
+                                 read_disk_time, rank_compute_time);
+            }
+            return rank;
+        }
 
         void FinishRetrieval() {
             index_stream_.close();

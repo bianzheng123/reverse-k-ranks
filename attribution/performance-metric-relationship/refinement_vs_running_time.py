@@ -2,6 +2,18 @@ import pandas as pd
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+
+params = {
+    'axes.labelsize': 8,
+    'font.size': 8,
+    'legend.fontsize': 10,
+    'xtick.labelsize': 10,
+    'ytick.labelsize': 10,
+    'text.usetex': False,
+    'figure.figsize': [4.5, 4.5]
+}
+matplotlib.RcParams.update(params)
 
 
 def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
@@ -11,9 +23,11 @@ def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
     # ax.scatter(x, y, s=sizes, c=colors, vmin=0, vmax=100)
     # ax.scatter(x, y, vmin=0, vmax=n_data_item)
 
-    # ax.plot(data_x, data_x * para[0] + para[1], color='#ff0000', linestyle='dotted')
+    arr = np.linspace(0, max(data_x), 100)
+
+    ax.plot(arr, arr * para[0] + para[1], color='#828487', linestyle='dotted')
     # ax.plot(data_x, (data_x * para[0]) + para[1])
-    ax.scatter(data_x, data_y, s=2)
+    ax.scatter(data_x, data_y, s=2, color='#000000')
 
     # ax.set(xlim=(0, n_data_item),
     #        ylim=(0, n_data_item))
@@ -26,7 +40,8 @@ def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
     # ax.set_yscale('log')
     ax.set_title(title_name)
 
-    plt.savefig('{}.jpg'.format(file_name), dpi=600, bbox_inches='tight')
+    # plt.savefig('{}.jpg'.format(file_name), dpi=600, bbox_inches='tight')
+    plt.savefig('{}.pdf'.format(file_name), bbox_inches='tight')
     plt.close()
 
 
@@ -53,7 +68,8 @@ if __name__ == '__main__':
     dataset_info_m = {'movielens-27m': [283228, 53889], 'netflix': [480189, 17770], 'yahoomusic_big': [1823179, 135736]}
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big']
     for ds in dataset_m.keys():
-        for method in ['RSTopTIP', 'QRSTopTIP']:
+        # for method in ['RSTopTIP', 'QRSTopTIP']:
+        for method in ['RSTopTIP']:
             basic_dir = "../../result/laptop_single_query_performance"
             fname = "{}-{}-top10-n_sample_1500-index_size_gb_256-userID.csv".format(ds, method)
             df = pd.read_csv(os.path.join(basic_dir, fname),

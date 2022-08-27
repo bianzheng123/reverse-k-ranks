@@ -110,47 +110,39 @@ namespace ReverseMIPS {
             }
              */
 
-//            for (int sample_queryID = 0; sample_queryID < n_sample_query_; sample_queryID++) {
+//            const int n_print = 10; //n_print <= n_sample_query_
+//            for (int sample_queryID = 0; sample_queryID < n_print; sample_queryID++) {
+//                printf("%4d ", sample_queryID);
+//            }
+//            printf("\n------------------\n");
+//            for (int sample_queryID = 0; sample_queryID < n_print; sample_queryID++) {
 //                printf("%4d ", topk_rank_l_[sample_queryID]);
 //            }
 //            printf("\n------------------\n");
-
-            const int n_print = 10; //n_print < n_sample_query_
-
-            for (int sample_queryID = 0; sample_queryID < n_print; sample_queryID++) {
-                printf("%4d ", sample_queryID);
-            }
-            printf("\n------------------\n");
-            for (int sample_queryID = 0; sample_queryID < n_print; sample_queryID++) {
-                printf("%4d ", topk_rank_l_[sample_queryID]);
-            }
-            printf("\n------------------\n");
-            for (int sample_queryID = 0; sample_queryID < n_print; sample_queryID++) {
-                for (int sample_queryID2 = 0; sample_queryID2 < n_print; sample_queryID2++) {
-//            for (int sample_queryID = 0; sample_queryID < n_sample_query_; sample_queryID++) {
-//                for (int sample_queryID2 = 0; sample_queryID2 < n_sample_query_; sample_queryID2++) {
-                    int print_thing;
+//            for (int sample_queryID = 0; sample_queryID < n_print; sample_queryID++) {
+//                for (int sample_queryID2 = 0; sample_queryID2 < n_print; sample_queryID2++) {
+//                    int print_thing;
 //                    if (sample_queryID2 == 0) {
-                    print_thing = sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2];
+//                    print_thing = sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2];
 //                    } else {
 //                        print_thing = sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2] -
 //                                      sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2 - 1];
 //                    }
-                    if (sample_queryID > sample_queryID2) {
-                        assert(sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2] == 0);
-                    }
-
-                    if (sample_queryID == sample_queryID2) {
-                        printf("\033[0;31m"); //Set the text to the color red
-                        printf("%4d ", print_thing);
-                        printf("\033[0m"); //Resets the text to default color
-
-                    } else {
-                        printf("%4d ", print_thing);
-                    }
-                }
-                printf("\n");
-            }
+//                    if (sample_queryID > sample_queryID2) {
+//                        assert(sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2] == 0);
+//                    }
+//
+//                    if (sample_queryID == sample_queryID2) {
+//                        printf("\033[0;31m"); //Set the text to the color red
+//                        printf("%4d ", print_thing);
+//                        printf("\033[0m"); //Resets the text to default color
+//
+//                    } else {
+//                        printf("%4d ", print_thing);
+//                    }
+//                }
+//                printf("\n");
+//            }
 
         }
 
@@ -284,13 +276,6 @@ namespace ReverseMIPS {
                                     query_distribution_ins.GetUnpruneCandidate(prev_rankID + 1, rankID) +
                                     query_distribution_ins.GetUnpruneCandidate(rankID + 1);
                             assert(unprune_user_candidate <= 0);
-                            if (sampleID == 2 && rankID == 1) {
-                                printf("sampleID %d, rankID %d, prev_rankID %d, this_optimal_dp %ld, prev_optimal_dp %ld, unprune increase %ld\n",
-                                       sampleID, rankID, prev_rankID,
-                                       optimal_dp[rankID * n_sample_ + sampleID],
-                                       optimal_dp[prev_rankID * n_sample_ + sampleID - 1],
-                                       unprune_user_candidate);
-                            }
 
                             if (optimal_dp[rankID * n_sample_ + sampleID] >
                                 optimal_dp[prev_rankID * n_sample_ + sampleID - 1] + unprune_user_candidate) {

@@ -2,6 +2,18 @@ import pandas as pd
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+
+params = {
+    'axes.labelsize': 8,
+    'font.size': 8,
+    'legend.fontsize': 10,
+    'xtick.labelsize': 10,
+    'ytick.labelsize': 10,
+    'text.usetex': False,
+    'figure.figsize': [4.5, 4.5]
+}
+matplotlib.RcParams.update(params)
 
 
 def plot(data_x, data_y, x_axis_name, y_axis_name, title_name, file_name):
@@ -15,22 +27,23 @@ def plot(data_x, data_y, x_axis_name, y_axis_name, title_name, file_name):
     max_num = max(max(data_x), max(data_y))
 
     arr = np.linspace(0, max_num, 100)
-    ax.plot(arr, arr, color='#ff0000', linestyle='dotted')
-    ax.scatter(data_x, data_y, s=2)
+    ax.plot(arr, arr, color='#828487', linestyle='dotted')
+    ax.scatter(data_x, data_y, s=2, color='#000000')
 
     # ax.set(xlim=(0, n_data_item),
     #        ylim=(0, n_data_item))
     # ax.set(xlim=(0, 5000),
     #        ylim=(0, 5000))
 
-    plt.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+    plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
     ax.set_xlabel(x_axis_name)
     ax.set_ylabel(y_axis_name)
     # ax.set_xscale('log')
     # ax.set_yscale('log')
     ax.set_title(title_name)
 
-    plt.savefig('{}.jpg'.format(file_name), dpi=600, bbox_inches='tight')
+    # plt.savefig('{}.jpg'.format(file_name), dpi=600, bbox_inches='tight')
+    plt.savefig('{}.pdf'.format(file_name), bbox_inches='tight')
     plt.close()
 
 
