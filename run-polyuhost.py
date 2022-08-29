@@ -168,7 +168,14 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    run_compress_topt()
+    # run_compress_topt()
+
+    os.system(
+        'cd build/attribution && ./qdur --dataset_name {} --basic_dir {} --n_sample_item {}'.format(
+            'yahoomusic_big', basic_dir, 5000))
+    os.system(
+        'cd build/attribution && ./bfcs --dataset_name {} --basic_dir {} --n_sample_item {} --n_sample_rank {} --topk {}'.format(
+            'yahoomusic_big', basic_dir, 5000, 1500, 30))
 
     # TODO run
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads', 'amazon']

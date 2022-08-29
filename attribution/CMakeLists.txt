@@ -84,3 +84,11 @@ target_link_libraries(pprnbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenM
 add_executable(prb score-sample-reason/PrintRankBound.cpp)
 target_include_directories(prb PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(prb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+add_executable(qdur memory-index-time-compare/QueryDistributionUserRank.cpp)
+target_include_directories(qdur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(qdur PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
+add_executable(bfcs memory-index-time-compare/BruteForceChooseSample.cpp)
+target_include_directories(bfcs PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(bfcs PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})

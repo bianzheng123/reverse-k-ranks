@@ -1,31 +1,21 @@
-#include <vector>
-#include <iostream>
-#include <iterator>
 #include <algorithm>
-
-using namespace std;
+#include <iostream>
+#include <vector>
 
 int main() {
+    const std::vector<int> data = {1, 2, 4, 5, 5, 6};
+    for (int i = 0; i < 8; ++i) {
+        // Search for first element x such that i ≤ x
+        auto lower = std::lower_bound(data.begin(), data.end(), i,
+                                      [](const int &info, int value) {
+                                          return info <= value;
+                                      });
 
-    int n = 5, k = 3;
+        std::cout << i << " ≤ ";
+        lower != data.end()
+        ? std::cout << *lower << " at index " << std::distance(data.begin(), lower)
+        : std::cout << "not found";
+        std::cout << '\n';
+    }
 
-    // vector<vector<int> > combinations;
-    vector<int> selected(k);
-    vector<int> selector(n);
-    std::fill(selector.begin(), selector.begin() + k, 1);
-    do {
-        int size = 0;
-        for (int i = 0; i < n; i++) {
-            if (selector[i]) {
-                selected[size] = i;
-                size++;
-            }
-        }
-        //     combinations.push_back(selected);
-//        do_sth(selected);
-        copy(selected.begin(), selected.end(), ostream_iterator<int>(cout, " "));
-        cout << endl;
-    } while (prev_permutation(selector.begin(), selector.end()));
-
-    return 0;
 }
