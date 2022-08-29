@@ -13,7 +13,7 @@ int main() {
 
     char resPath[256];
     std::sprintf(resPath,
-                 "../index/query_distribution/%s-below-topk-n_sample_query_%d-sample_topk_%d.index",
+                 "../index/query_distribution/%s-kth-rank-n_sample_query_%d-sample_topk_%d.index",
                  dataset_name, n_sample_item, sample_topk);
 
     std::ifstream out_stream = std::ifstream(resPath, std::ios::binary);
