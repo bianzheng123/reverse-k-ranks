@@ -309,7 +309,7 @@ namespace ReverseMIPS {
                               io_cost, ip_cost, read_disk_time, rank_compute_time);
                 n_actual_user_candidate++;
 
-                if (n_user_candidate_ % 2500 == 0) {
+                if (n_user_candidate_ % 7500 == 0) {
                     const double progress = n_user_candidate_ / (0.01 * n_total_user_candidate);
                     spdlog::info(
                             "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",

@@ -45,6 +45,9 @@ namespace ReverseMIPS {
 
         std::vector<std::priority_queue<int, std::vector<int>, std::less<int>>> result_rank_l(n_sample_item);
 
+        TimeRecord record;
+        record.reset();
+
         for (int userID = 0; userID < sample_topk; userID++) {
             cst.ComputeItems(userID, distance_l.data());
             for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
@@ -64,10 +67,6 @@ namespace ReverseMIPS {
                 result_rank_l[sampleID].push((int) rank);
             }
         }
-
-        const int report_every = 10000;
-        TimeRecord record;
-        record.reset();
 
         for (int userID = sample_topk; userID < n_user; userID++) {
             cst.ComputeItems(userID, distance_l.data());
@@ -93,12 +92,10 @@ namespace ReverseMIPS {
                 }
             }
 
-            if (userID % report_every == 0) {
-                std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                          << get_current_RSS() / 1000000 << " Mb \n";
+            if (userID % cst.report_every_ == 0 && userID != 0) {
                 spdlog::info(
-                        "Compute Score Time {}s, Sort Score Time {}s",
+                        "Compute second score table {:.2f}%, {:.2f} s/iter, Mem: {} Mb, Compute Score Time {}s, Sort Score Time {}s",
+                        userID / (0.01 * n_user), record.get_elapsed_time_second(), get_current_RSS() / (1024 * 1024),
                         cst.compute_time_, cst.sort_time_);
                 cst.compute_time_ = 0;
                 cst.sort_time_ = 0;

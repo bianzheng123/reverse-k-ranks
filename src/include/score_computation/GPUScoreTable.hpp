@@ -40,7 +40,7 @@ namespace ReverseMIPS {
 
     class GPUScoreTable {
 
-        int n_user_, n_data_item_, vec_dim_;
+        uint64_t n_user_, n_data_item_, vec_dim_;
         const double *user_cpu_ptr_;
         double *user_vecs_gpu_ptr_;
         double *data_item_gpu_ptr_;
@@ -51,7 +51,7 @@ namespace ReverseMIPS {
         GPUScoreTable() = default;
 
         inline GPUScoreTable(const double *user, const double *data_item,
-                             const int n_user, const int n_data_item, const int vec_dim) {
+                             const uint64_t n_user, const uint64_t n_data_item, const uint64_t vec_dim) {
             this->user_cpu_ptr_ = user;
             n_user_ = n_user;
             n_data_item_ = n_data_item;
@@ -82,7 +82,7 @@ namespace ReverseMIPS {
 
         }
 
-        void ComputeList(const int &userID, double *distance_l) {
+        void ComputeList(const uint64_t &userID, double *distance_l) {
             const double *tmp_user_vecs_cpu_ptr = user_cpu_ptr_ + userID * vec_dim_;
 
             cublasCheckErrors(

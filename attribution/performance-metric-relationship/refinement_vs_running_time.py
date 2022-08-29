@@ -70,7 +70,7 @@ if __name__ == '__main__':
     for ds in dataset_m.keys():
         # for method in ['RSTopTIP', 'QRSTopTIP']:
         for method in ['RSTopTIP']:
-            basic_dir = "../../result/laptop_single_query_performance"
+            basic_dir = "../../result/laptop/single_query_performance"
             fname = "{}-{}-top10-n_sample_1500-index_size_gb_256-userID.csv".format(ds, method)
             df = pd.read_csv(os.path.join(basic_dir, fname),
                              dtype={'queryID': np.int64, "n_user_candidate": np.int64, "io_cost": np.int64,

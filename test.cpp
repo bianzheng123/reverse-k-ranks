@@ -1,20 +1,31 @@
-#include <stdio.h>
 #include <vector>
+#include <iostream>
+#include <iterator>
 #include <algorithm>
 
+using namespace std;
+
 int main() {
-    const std::vector<int> data = {1, 2, 4, 5, 5, 6};
 
-    auto ptr1 = std::lower_bound(data.begin(), data.end(), 5,
-                                  [](const int &info, const int& value) {
-                                      return info < value;
-                                  });
+    int n = 5, k = 3;
 
-    auto ptr2 = std::lower_bound(data.begin(), data.end(), 1,
-                                     [](const int &info, const int& value) {
-                                         return info <= value;
-                                     });
-    printf("%d %d\n", ptr1 - data.begin(), ptr2 - data.begin());
+    // vector<vector<int> > combinations;
+    vector<int> selected(k);
+    vector<int> selector(n);
+    std::fill(selector.begin(), selector.begin() + k, 1);
+    do {
+        int size = 0;
+        for (int i = 0; i < n; i++) {
+            if (selector[i]) {
+                selected[size] = i;
+                size++;
+            }
+        }
+        //     combinations.push_back(selected);
+//        do_sth(selected);
+        copy(selected.begin(), selected.end(), ostream_iterator<int>(cout, " "));
+        cout << endl;
+    } while (prev_permutation(selector.begin(), selector.end()));
 
     return 0;
 }

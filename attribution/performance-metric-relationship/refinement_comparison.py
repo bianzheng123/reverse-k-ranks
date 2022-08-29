@@ -70,7 +70,7 @@ if __name__ == '__main__':
     dataset_info_m = {'movielens-27m': [283228, 53889], 'netflix': [480189, 17770], 'yahoomusic_big': [1823179, 135736]}
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big']
     for ds in dataset_m.keys():
-        basic_dir = "../../result/laptop_single_query_performance"
+        basic_dir = "../../result/laptop/single_query_performance"
         fname = "{}-RSTopTIP-top10-n_sample_1500-index_size_gb_256-userID.csv".format(ds)
         df_rstoptip = pd.read_csv(os.path.join(basic_dir, fname),
                                   dtype={'queryID': np.int64, "n_user_candidate": np.int64, "io_cost": np.int64,

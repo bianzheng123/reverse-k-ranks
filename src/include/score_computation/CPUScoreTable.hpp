@@ -12,7 +12,7 @@ namespace ReverseMIPS {
 
     class CPUScoreTable {
 
-        int n_user_, n_data_item_, vec_dim_;
+        uint64_t n_user_, n_data_item_, vec_dim_;
 
         const double *user_vecs_;
         const double *data_item_vecs_;
@@ -21,7 +21,7 @@ namespace ReverseMIPS {
         CPUScoreTable() = default;
 
         inline CPUScoreTable(const double *user_vecs, const double *data_item_vecs,
-                             const int n_user, const int n_data_item, const int vec_dim) {
+                             const uint64_t n_user, const uint64_t n_data_item, const uint64_t vec_dim) {
             this->user_vecs_ = user_vecs;
             this->data_item_vecs_ = data_item_vecs;
             this->n_user_ = n_user;
@@ -35,7 +35,7 @@ namespace ReverseMIPS {
 #pragma omp parallel for default(none) shared(tmp_user_vecs, distance_l, n_data_item_)
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 const double *tmp_data_item_vecs = data_item_vecs_ + itemID * vec_dim_;
-                const double ip = InnerProduct(tmp_user_vecs, tmp_data_item_vecs, vec_dim_);
+                const double ip = InnerProduct(tmp_user_vecs, tmp_data_item_vecs, (int) vec_dim_);
                 distance_l[itemID] = ip;
             }
         }

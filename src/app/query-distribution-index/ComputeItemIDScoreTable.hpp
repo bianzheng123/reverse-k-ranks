@@ -31,7 +31,7 @@
 namespace ReverseMIPS {
     class ComputeItemIDScoreTable {
         TimeRecord record_;
-        int n_data_item_;
+        uint64_t n_data_item_;
         std::vector<double> ip_cache_l_;
 
 #ifdef USE_GPU
@@ -50,9 +50,9 @@ namespace ReverseMIPS {
         inline ComputeItemIDScoreTable(const VectorMatrix &user, const VectorMatrix &data_item) {
             const double *user_vecs = user.getRawData();
             const double *item_vecs = data_item.getRawData();
-            const int n_user = user.n_vector_;
-            const int n_data_item = data_item.n_vector_;
-            const int vec_dim = user.vec_dim_;
+            const uint64_t n_user = user.n_vector_;
+            const uint64_t n_data_item = data_item.n_vector_;
+            const uint64_t vec_dim = user.vec_dim_;
             assert(user.vec_dim_ == data_item.vec_dim_);
             this->n_data_item_ = n_data_item;
             this->ip_cache_l_.resize(n_data_item);
@@ -65,7 +65,7 @@ namespace ReverseMIPS {
 
         }
 
-        void ComputeItems(const int& userID, double* distance_l){
+        void ComputeItems(const int &userID, double *distance_l) {
             record_.reset();
 #ifdef USE_GPU
             gpu.ComputeList(userID, distance_l);

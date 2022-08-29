@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
                                                                    [](const int &arrIP, int queryIP) {
                                                                        return arrIP <= queryIP;
                                                                    });
-                int topk_rank_offset = topk_rank_offset_ptr - sort_kth_rank_l.data();
+                long topk_rank_offset = topk_rank_offset_ptr - sort_kth_rank_l.data();
                 assert(0 < topk_rank_offset && topk_rank_offset <= n_sample_item);
                 if (topk_rank_offset == n_sample_item && sort_kth_rank_l[topk_rank_offset - 1] < rank) {
                     continue;
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 
             if (userID % cst.report_every_ == 0 && userID != 0) {
                 spdlog::info(
-                        "Preprocessed {:.2f}%, {:.2f} s/iter, Mem: {} Mb, Compute Score Time {}s, Sort Score Time {}s",
+                        "Compute second score table {:.2f}%, {:.2f} s/iter, Mem: {} Mb, Compute Score Time {}s, Sort Score Time {}s",
                         userID / (0.01 * n_user), record.get_elapsed_time_second(), get_current_RSS() / 1000000,
                         cst.compute_time_, cst.sort_time_);
                 cst.compute_time_ = 0;
