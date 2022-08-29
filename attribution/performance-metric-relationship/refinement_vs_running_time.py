@@ -40,8 +40,8 @@ def plot(data_x, data_y, para, x_axis_name, y_axis_name, title_name, file_name):
     # ax.set_yscale('log')
     ax.set_title(title_name)
 
-    # plt.savefig('{}.jpg'.format(file_name), dpi=600, bbox_inches='tight')
-    plt.savefig('{}.pdf'.format(file_name), bbox_inches='tight')
+    plt.savefig('{}.jpg'.format(file_name), dpi=600, bbox_inches='tight')
+    # plt.savefig('{}.pdf'.format(file_name), bbox_inches='tight')
     plt.close()
 
 
@@ -64,7 +64,7 @@ def least_square_parameter(x, y):
 
 if __name__ == '__main__':
     # dataset_m = {'movielens-27m': 'Movielens', 'netflix': 'Netflix', 'yahoomusic_big': 'Yahoomusic'}
-    dataset_m = {'yahoomusic_big': 'Yahoomusic'}
+    dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
     dataset_info_m = {'movielens-27m': [283228, 53889], 'netflix': [480189, 17770], 'yahoomusic_big': [1823179, 135736]}
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big']
     for ds in dataset_m.keys():
