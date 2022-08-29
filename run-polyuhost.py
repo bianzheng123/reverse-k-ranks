@@ -134,8 +134,8 @@ def run_compute_all_n_codeword():
 
 
 def run_compress_topt():
-    # dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
-    dataset_l = ['goodreads']
+    dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
+    # dataset_l = ['goodreads']
     # dataset_l = ['amazon']
     index_size_l = [256]
     n_sample = 1500
@@ -147,19 +147,19 @@ def run_compress_topt():
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "SSComputeAll", n_sample))
         for ds in dataset_l:
-            os.system(
-                'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
-                    ds, 5000, 30,
-                    ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 30))
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "RSTopTIP", n_sample, index_size))
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
+            # os.system(
+            #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
+            #         ds, 5000, 30,
+            #         ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 30))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "SSMergeRankByInterval", n_sample, index_size))
+            #         ds, basic_dir, "RSTopTIP", n_sample, index_size))
+            # os.system(
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+            #         ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
+            os.system(
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, "RSMergeInterval", n_sample, index_size))
 
 
 if __name__ == '__main__':
@@ -168,7 +168,7 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    # run_compress_topt()
+    run_compress_topt()
 
     os.system(
         'cd build/attribution && ./qdur --dataset_name {} --basic_dir {} --n_sample_item {}'.format(

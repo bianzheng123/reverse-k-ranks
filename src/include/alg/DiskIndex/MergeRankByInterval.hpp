@@ -162,11 +162,13 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
+                     const std::vector<bool> &prune_l,
                      const std::vector<std::pair<double, double>> &queryIPbound_l,
-                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
-                     const int &n_total_candidate, size_t &n_compute) {
+                     const VectorMatrix &user, const VectorMatrix &item,
+                     const int &n_total_user_candidate,
+                     size_t &io_cost, size_t &ip_cost,
+                     double &read_disk_time, double &rank_compute_time) {
             is_compute_l_.assign(n_merge_user_, false);
-            n_compute = 0;
 
             //read disk and fine binary search
             n_candidate_ = 0;
@@ -183,7 +185,11 @@ namespace ReverseMIPS {
                 }
                 read_disk_record_.reset();
                 ReadDisk(iter_labelID);
-                read_disk_time_ += read_disk_record_.get_elapsed_time_second();
+                const double tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
+                read_disk_time += tmp_read_disk_time;
+                read_disk_time_ += tmp_read_disk_time;
+                io_cost += n_data_item_;
+
                 for (int userID = iter_userID; userID < n_user_; userID++) {
                     if (prune_l[userID]) {
                         continue;
@@ -195,10 +201,11 @@ namespace ReverseMIPS {
                     }
                     assert(0 <= rank_ub_l[userID] && rank_ub_l[userID] <= rank_lb_l[userID] &&
                            rank_lb_l[userID] <= n_data_item_);
+
+                    int n_compute = 0;
                     exact_rank_refinement_record_.reset();
                     const double queryIP = queryIP_l[userID];
                     const int base_rank = rank_ub_l[userID];
-
                     int loc_rk;
                     if (rank_lb_l[userID] == rank_ub_l[userID]) {
                         loc_rk = 0;
@@ -229,18 +236,20 @@ namespace ReverseMIPS {
                                                                       item, item_cand_l_);
                     }
                     int rank = base_rank + loc_rk + 1;
-                    exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
+                    const double tmp_rank_compute_time = exact_rank_refinement_record_.get_elapsed_time_second();
+                    rank_compute_time += tmp_rank_compute_time;
+                    exact_rank_refinement_time_ += tmp_rank_compute_time;
+                    ip_cost += n_compute;
 
                     user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
                     n_candidate_++;
 
-                    if (n_candidate_ % 500 == 0) {
-                        std::cout << "compute rank " << n_candidate_ / (0.01 * n_total_candidate) << " %, "
-                                  << "n_compute " << n_compute << ", "
-                                  << "read_disk_time " << read_disk_time_ << ", "
-                                  << "compute_rank_time " << exact_rank_refinement_time_ << ", "
-                                  << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                                  << get_current_RSS() / 1000000 << " Mb \n";
+                    if (n_candidate_ % 7500 == 0) {
+                        const double progress = n_candidate_ / (0.01 * n_total_user_candidate);
+                        spdlog::info(
+                                "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",
+                                progress, io_cost, ip_cost, read_disk_time, rank_compute_time,
+                                record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                         record.reset();
                     }
 

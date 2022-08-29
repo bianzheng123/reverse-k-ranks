@@ -27,6 +27,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'CompressTopTIPBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
         'RSCompressTopTIPBruteForceBatchRun': 'n_sample_512-index_size_gb_256',
         'QRSTopTIP': 'n_sample_20-index_size_gb_50',
+        'RSMergeInterval': 'n_sample_20-index_size_gb_50',
         'RSTopTIP': 'n_sample_20-index_size_gb_50',
         'RSTopTIPRefineOrder': 'n_sample_20-index_size_gb_50',
 
@@ -81,7 +82,8 @@ def run():
         # 'RSCompressTopTIPBruteForceBatchRun',
         # 'DiskBruteForce',
         'MemoryBruteForce',
-        'QRSTopTIP',
+        # 'QRSTopTIP',
+        'RSMergeInterval',
         # 'RSTopTIP',
         # 'RSTopTIPRefineOrder',
 
@@ -114,10 +116,13 @@ def run():
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
+        # os.system(
+        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 150, 30,
+        #         ds, 'QRSTopTIP', 150, 30))
         os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 30,
-                ds, 'QRSTopTIP', 150, 30))
+            'cd build && ./rri --dataset_name {} --method_name {}'.format(
+                ds, 'RSMergeInterval'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIPRefineOrder'))
         # os.system('cd build && ./brrstt --dataset_name {}'.format(ds))
@@ -144,10 +149,4 @@ if __name__ == '__main__':
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
-    os.system(
-        'cd build/attribution && ./qdur --dataset_name {} --n_sample_item {}'.format(
-            'fake-normal', 500))
-    os.system(
-        'cd build/attribution && ./bfcs --dataset_name {} --n_sample_item {} --n_sample_rank {} --topk {}'.format(
-            'fake-normal', 500, 20, 30))
-    # run()
+    run()

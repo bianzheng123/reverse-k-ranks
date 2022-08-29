@@ -9,8 +9,9 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "BruteForce/MemoryBruteForce.hpp"
-#include "BruteForce/RSTopTIP.hpp"
 #include "BruteForce/QRSTopTIP.hpp"
+#include "BruteForce/RSMergeInterval.hpp"
+#include "BruteForce/RSTopTIP.hpp"
 #include "BruteForce/RSTopTIPRefineOrder.hpp"
 
 #include "GridIndex.hpp"
@@ -102,6 +103,15 @@ int main(int argc, char **argv) {
                                       n_sample, index_size_gb,
                                       dataset_name, n_sample_query, sample_topk);
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu", n_sample, index_size_gb);
+
+    } else if (method_name == "RSMergeInterval") {
+        const int n_sample = para.n_sample;
+        const uint64_t index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {} index_size_gb {}", n_sample, index_size_gb);
+        index = RSMergeInterval::BuildIndex(data_item, user, index_path,
+                                            n_sample, index_size_gb);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
+                n_sample, index_size_gb);
 
     } else if (method_name == "RSTopTIP") {
         const int n_sample = para.n_sample;
