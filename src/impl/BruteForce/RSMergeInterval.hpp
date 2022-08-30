@@ -189,6 +189,9 @@ namespace ReverseMIPS::RSMergeInterval {
                                                                       total_time,
                                                                       memory_index_time, read_disk_time,
                                                                       rank_compute_time);
+                spdlog::info(
+                        "finish queryID {}, n_user_candidate {}, io_cost {}, ip_cost {}, total_time {:.2f}s, io_time {:.2f}s, ip_time {:.2f}s",
+                        queryID, n_user_candidate, io_cost, ip_cost, total_time, read_disk_time, rank_compute_time);
             }
             disk_ins_.FinishRetrieval();
 
@@ -211,11 +214,11 @@ namespace ReverseMIPS::RSMergeInterval {
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, coarse binary search %.3fs\n\tread disk time %.3fs, exact rank refinement %.3fs\n\trank search prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, memory index search %.3fs\n\tread disk time %.3fs, exact rank time %.3fs\n\tio_cost %lu, ip_cost %lu, rank search prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, rank_bound_refinement_time_,
                     read_disk_time_, exact_rank_refinement_time_,
-                    rank_search_prune_ratio_,
+                    total_io_cost_, total_ip_cost_, rank_search_prune_ratio_,
                     ms_per_query);
             std::string str(buff);
             return str;

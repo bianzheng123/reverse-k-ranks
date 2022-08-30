@@ -266,6 +266,7 @@ namespace ReverseMIPS {
             uint64_t offset = n_data_item_ * labelID;
             uint64_t offset_byte = offset * sizeof(std::pair<int, int>);
             index_stream_.seekg(offset_byte, std::ios::beg);
+            system("# sync; echo 3 > /proc/sys/vm/drop_caches");
             index_stream_.read((char *) disk_retrieval_cache_l_.data(),
                                (std::streamsize) (n_data_item_ * sizeof(std::pair<int, int>)));
         }

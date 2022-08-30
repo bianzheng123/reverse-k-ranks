@@ -60,7 +60,7 @@ namespace ReverseMIPS {
                 const double *distance_ptr = distance_l.data();
 
                 const double *lb_ptr = std::lower_bound(distance_ptr, distance_ptr + n_data_item, itemIP,
-                                                        [](const double &arrIP, double queryIP) {
+                                                        [](const double &arrIP, const double& queryIP) {
                                                             return arrIP > queryIP;
                                                         });
                 const long rank = lb_ptr - distance_ptr;
