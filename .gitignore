@@ -28,3 +28,5 @@ cmake-build-release/
 /attribution/performance-metric-relationship/*.jpg
 /attribution/performance-metric-relationship/*.csv
 /attribution/performance-metric-relationship/*.pdf
+/script/plot/*.jpg
+/script/plot/*.pdf
