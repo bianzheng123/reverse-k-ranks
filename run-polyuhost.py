@@ -23,7 +23,7 @@ def compute_n_sample(dataset_name, memory_capacity):
             CMDcolors.WARNING + "Warning: required memory capacity {}GB > the required memory capacity {}GB, change n_sample to 32".format(
                 require_memory_capacity, memory_capacity) + CMDcolors.ENDC)
         n_sample = 32
-    return n_sample
+    return int(n_sample)
 
 
 def delete_file_if_exist(dire):
