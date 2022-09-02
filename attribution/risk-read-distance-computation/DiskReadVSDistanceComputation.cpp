@@ -3,7 +3,6 @@
 //
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/DiskIndex/RankFromCandidate/GridIndex.hpp"
 #include "util/TimeMemory.hpp"
 #include <iostream>
 #include <vector>
@@ -121,39 +120,11 @@ int main(int argc, char **argv) {
             }
         }
 
-        //use grid index
-        VectorMatrix user, data_item;
-        user.init(vecs1, n_eval, dimension);
-        data_item.init(vecs2, n_eval, dimension);
-
-        GridIndex gridIndex;
-        gridIndex.Preprocess(user, data_item, 2);
-        std::vector<int> item_cand_l(n_eval);
-        for (int itemID = 0; itemID < n_eval; itemID++) {
-            item_cand_l[itemID] = itemID;
-        }
-        std::vector<std::pair<double, double>> IPbound_l(n_eval);
-
-        double grid_lb = 0;
-        double grid_ub = 0;
-        record.reset();
-        for (int userID = 0; userID < n_eval; userID++) {
-            gridIndex.CalcIPBound(item_cand_l, userID, IPbound_l);
-//            for (int itemID = 0; itemID < n_eval; itemID++) {
-//                grid_lb += IPbound_l[itemID].first;
-//                grid_ub += IPbound_l[itemID].second;
-//            }
-        }
-        double grid_time = record.get_elapsed_time_second();
-        grid_lb /= (n_eval * n_eval);
-        grid_ub /= (n_eval * n_eval);
-
-
         spdlog::info(
-                "dimension {}, computation time {}s, read disk time {}s, grid time {}s",
-                dimension, comp_time, read_disk_time, grid_time);
-        spdlog::info("compute res {}, disk read res {}, grid lb res {}, grid ub res {}",
-                     comp_res, disk_res, grid_lb, grid_ub);
+                "dimension {}, computation time {}s, read disk time {}s",
+                dimension, comp_time, read_disk_time);
+        spdlog::info("compute res {}, disk read res {}",
+                     comp_res, disk_res);
 //        assert(grid_lb <= comp_res && comp_res <= grid_ub);
         result_l.emplace_back(comp_time, read_disk_time);
     }

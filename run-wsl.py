@@ -1,8 +1,18 @@
 import os
 import filecmp
 import numpy as np
-from script.data_convert import vecs_io
 
+
+class CMDcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def delete_file_if_exist(dire):
     if os.path.exists(dire):
@@ -91,12 +101,6 @@ def run():
         # 'RankSample',
         # 'QueryRankSample',
 
-        # 'SSMergeQuadraticRankBoundByBitmap',
-        # 'SSMergeQuadraticRankBoundByBitmapBatchRun',
-        # 'SSMergeRankByInterval',
-        # 'SSMergeRankByIntervalBatchRun',
-        # 'SSQueryAssignFrequent',
-
         # 'CAGrid',
         # 'CAFullDim',
         # 'CAFullNorm',
@@ -116,14 +120,14 @@ def run():
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 30,
-        #         ds, 'QRSTopTIP', 150, 30))
         os.system(
-            'cd build && ./rri --dataset_name {} --method_name {}'.format(
-                ds, 'RSMergeInterval'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
+            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 150, 30,
+                ds, 'QRSTopTIP', 150, 30))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(
+        #         ds, 'RSMergeInterval'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIPRefineOrder'))
         # os.system('cd build && ./brrstt --dataset_name {}'.format(ds))
         # os.system('cd build && ./brqrbb --dataset_name {}'.format(ds))

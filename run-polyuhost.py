@@ -4,6 +4,28 @@ import numpy as np
 from script.data_convert import vecs_io
 
 
+def compute_n_sample(dataset_name, memory_capacity):
+    dataset_m = {'movielens-27m': [52889, 1000, 283228],
+                 'netflix': [16770, 1000, 480189],
+                 'yahoomusic_big': [135736, 1000, 1823179],
+                 'yelp': [159585, 1000, 2189457]}
+    size_element = 8
+    disk_page = 4096
+    n_element_per_block = disk_page / size_element
+    n_data_item = dataset_m[dataset_name][0]
+    n_user = dataset_m[dataset_name][2]
+    require_n_sample = np.ceil(n_data_item / n_element_per_block)
+    require_memory_capacity = require_n_sample * n_user * size_element / 1024 / 1024 / 1024
+
+    n_sample = require_n_sample
+    if require_memory_capacity > memory_capacity:
+        print(
+            CMDcolors.WARNING + "Warning: required memory capacity {}GB > the required memory capacity {}GB, change n_sample to 32".format(
+                require_memory_capacity, memory_capacity) + CMDcolors.ENDC)
+        n_sample = 32
+    return n_sample
+
+
 def delete_file_if_exist(dire):
     if os.path.exists(dire):
         command = 'rm -rf %s' % dire
@@ -134,24 +156,20 @@ def run_compute_all_n_codeword():
 
 
 def run_compress_topt():
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
     # dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
-    # dataset_l = ['yahoomusic_big']
-    dataset_l = ['goodreads']
     # dataset_l = ['amazon']
     index_size_l = [256]
-    n_sample = 1500
-    # os.system('cd build && ./brtt --dataset_name {}'.format('amazon'))
-    # os.system('cd build && ./brqrbb --dataset_name {}'.format('amazon'))
-    # os.system('cd build && ./brmrbi --dataset_name {}'.format('amazon'))
     for index_size in index_size_l:
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "SSComputeAll", n_sample))
         for ds in dataset_l:
-            # os.system(
-            #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
-            #         ds, 5000, 30,
-            #         ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 30))
+            n_sample = compute_n_sample(ds, 32)
+            os.system(
+                'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
+                    ds, 5000, 30,
+                    ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 30))
             os.system(
                 'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
                     ds, basic_dir, "RSTopTIP", n_sample, index_size))

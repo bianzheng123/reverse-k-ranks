@@ -1,3 +1,5 @@
+import os.path
+
 import numpy as np
 import struct
 
@@ -98,10 +100,15 @@ def bvecs_write(filename, vecs):
 
 
 if __name__ == '__main__':
-    item_l, d = dvecs_read(
-        '/home/bianzheng/Dataset/ReverseMIPS/yahoomusic/yahoomusic_data_item.dvecs')
-    user_l, d = dvecs_read(
-        '/home/bianzheng/Dataset/ReverseMIPS/yahoomusic/yahoomusic_user.dvecs')
-    print(item_l)
-    print(user_l)
-    print(item_l.shape, user_l.shape)
+    basic_dir = '/home/bianzheng/Dataset/ReverseMIPS'
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    for ds in dataset_l:
+        item_l, d = dvecs_read(
+            os.path.join(basic_dir, ds, "{}_data_item.dvecs".format(ds)))
+        query_l, d = dvecs_read(
+            os.path.join(basic_dir, ds, "{}_query_item.dvecs".format(ds)))
+        user_l, d = dvecs_read(
+            os.path.join(basic_dir, ds, "{}_user.dvecs".format(ds)))
+        print("{} item".format(ds), item_l.shape)
+        print("{} query".format(ds), query_l.shape)
+        print("{} user".format(ds), user_l.shape)
