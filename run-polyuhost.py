@@ -22,7 +22,7 @@ def compute_n_sample(dataset_name, memory_capacity):
         print(
             CMDcolors.WARNING + "Warning: required memory capacity {}GB > the required memory capacity {}GB, change n_sample to 32".format(
                 require_memory_capacity, memory_capacity) + CMDcolors.ENDC)
-        n_sample = 32
+        n_sample = memory_capacity * 1024 * 1024 * 1024 / size_element / n_user
     return int(n_sample)
 
 
@@ -156,23 +156,23 @@ def run_compute_all_n_codeword():
 
 
 def run_compress_topt():
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
+    dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
-    # dataset_l = ['amazon']
-    index_size_l = [256]
+    index_size_l = [1024]
     for index_size in index_size_l:
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
         #         ds, basic_dir, "SSComputeAll", n_sample))
         for ds in dataset_l:
-            n_sample = compute_n_sample(ds, 32)
+            n_sample = compute_n_sample(ds, 16)
             os.system(
                 'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
                     ds, 5000, 30,
                     ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 30))
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "RSTopTIP", n_sample, index_size))
+            # os.system(
+            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+            #         ds, basic_dir, "RSTopTIP", n_sample, index_size))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    # run_compress_topt()
+    run_compress_topt()
 
     dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
     index_size_l = [1024]
