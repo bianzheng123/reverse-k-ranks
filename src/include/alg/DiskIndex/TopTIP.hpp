@@ -26,7 +26,6 @@ namespace ReverseMIPS {
 
             assert(0 <= offset + read_count_byte && offset + read_count_byte <= n_user_ * topt_ * sizeof(double));
 
-
             system("# sync; echo 3 > /proc/sys/vm/drop_caches");
             index_stream_.read((char *) disk_cache_.get(), read_count_byte);
             const double tmp_read_disk_time = read_disk_record_.get_elapsed_time_second();
@@ -250,7 +249,7 @@ namespace ReverseMIPS {
                               user, item,
                               io_cost, ip_cost, read_disk_time, rank_compute_time);
 
-                if (n_user_candidate_ % 2500 == 0) {
+                if (n_user_candidate_ % 7500 == 0) {
                     const double progress = n_user_candidate_ / (0.01 * n_total_user_candidate);
                     spdlog::info(
                             "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",

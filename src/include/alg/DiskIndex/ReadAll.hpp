@@ -8,6 +8,7 @@
 #include "alg/TopkLBHeap.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"
+#include "util/TimeMemory.hpp"
 
 #include <memory>
 #include <spdlog/spdlog.h>
@@ -98,6 +99,10 @@ namespace ReverseMIPS {
             int64_t offset = (int64_t) n_data_item_;
             offset *= sizeof(double);
             out_stream_.write((char *) distance_cache, offset);
+        }
+
+        void FinishBuildIndex(){
+            out_stream_.close();
         }
 
         void RetrievalPreprocess() {
