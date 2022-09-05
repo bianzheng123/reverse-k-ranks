@@ -21,7 +21,8 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int n_sample, index_size_gb;
+    int n_sample, n_sample_query, sample_topk;
+    uint64_t index_size_gb;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -40,8 +41,12 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "number of sample of a rank bound")
-            ("index_size_gb, tt", po::value<int>(&para.index_size_gb)->default_value(50),
-             "index size, in unit of GB");
+            ("index_size_gb, tt", po::value<uint64_t>(&para.index_size_gb)->default_value(50),
+             "index size, in unit of GB")
+            ("n_sample_query, nsq", po::value<int>(&para.n_sample_query)->default_value(150),
+             "the numer of sample query in training query distribution")
+            ("sample_topk, st", po::value<int>(&para.sample_topk)->default_value(50),
+             "topk in training query distribution");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);

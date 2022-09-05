@@ -262,6 +262,7 @@ namespace ReverseMIPS::RankSample {
             }
         }
         cst.FinishCompute();
+        disk_ins.FinishBuildIndex();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;
