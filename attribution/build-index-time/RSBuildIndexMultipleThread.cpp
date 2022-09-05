@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     LoadOptions(argc, argv, para);
     const char *dataset_name = para.dataset_name.c_str();
     const char *basic_dir = para.basic_dir.c_str();
-    const string method_name = "RankSampleBuildIndex";
+    const string method_name = "RankSampleTopTBuildIndex";
     spdlog::info("{} dataset_name {}, basic_dir {}", method_name, dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
