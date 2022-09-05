@@ -94,11 +94,10 @@ def run():
         # 'RSCompressTopTIPBruteForceBatchRun',
         # 'DiskBruteForce',
         'MemoryBruteForce',
-        # 'QRSTopTIP',
-        # 'QRSTopTIPRefineOrder',
-        # 'RSMergeInterval',
-        # 'RSTopTIP',
-        # 'RSTopTIPRefineOrder',
+        'QRSTopTIP',
+        'QRSTopTIPRefineOrder',
+        'RSTopTIP',
+        'RSTopTIPRefineOrder',
 
         # 'GridIndex',
         'RankSample',
@@ -123,22 +122,16 @@ def run():
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 30,
-        #         ds, 'QRSTopTIP', 150, 30))
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 30,
-        #         ds, 'QRSTopTIPRefineOrder', 150, 30))
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {}'.format(
-        #         ds, 'RSMergeInterval'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIPRefineOrder'))
-        # os.system('cd build && ./brrstt --dataset_name {}'.format(ds))
-        # os.system('cd build && ./brqrbb --dataset_name {}'.format(ds))
-        # os.system('cd build && ./brmrbi --dataset_name {}'.format(ds))
+        os.system(
+            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 150, 30,
+                ds, 'QRSTopTIP', 150, 30))
+        os.system(
+            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 150, 30,
+                ds, 'QRSTopTIPRefineOrder', 150, 30))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIPRefineOrder'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
@@ -155,8 +148,8 @@ def run():
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    # dataset_l = ['fake-normal', 'fake-uniform']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal', 'fake-uniform']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 

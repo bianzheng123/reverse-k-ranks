@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_BATCHBUILDINDEXMERGERANKBYINTERVAL_HPP
 #define REVERSE_KRANKS_BATCHBUILDINDEXMERGERANKBYINTERVAL_HPP
 
-#include "alg/DiskIndex/MergeRankByInterval.hpp"
+#include "../MergeIntervalDiskCompression/MergeRankByInterval.hpp"
 #include "../ScoreSample/ScoreSearch.hpp"
 #include "score_computation/ComputeScoreTable.hpp"
 #include "util/TimeMemory.hpp"

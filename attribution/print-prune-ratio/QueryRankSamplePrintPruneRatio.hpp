@@ -115,7 +115,7 @@ namespace ReverseMIPS::QueryRankSamplePrintPruneRatio {
 
                 interval_search_record_.reset();
                 //count rank bound
-                memory_index_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_, queryIPbound_l_);
+                memory_index_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
                 //prune the bound
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_,

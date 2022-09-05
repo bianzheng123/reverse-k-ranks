@@ -145,7 +145,7 @@ namespace ReverseMIPS::BuildRankSample {
 
                 //coarse binary search
                 memory_index_search_record_.reset();
-                rank_bound_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_, IPbound_l_);
+                rank_bound_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_,
                                       prune_l_, topkLbHeap);

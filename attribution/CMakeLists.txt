@@ -7,21 +7,9 @@
 set(FINISH OFF)
 
 if (FINISH)
-    add_executable(kmrt ../obsoluted/run-time/KMeansRunTime.cpp)
-    target_include_directories(kmrt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(kmrt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
     add_executable(usd score-rank-distribution/UserScoreDistribution.cpp)
     target_include_directories(usd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(usd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
-    add_executable(npd ../obsoluted/norm-popularity-distribution/NormPopularityDistribution.cpp)
-    target_include_directories(npd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(npd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
-    add_executable(srt ../obsoluted/run-time/ScoreComputeRunTime.cpp)
-    target_include_directories(srt PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(srt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
     add_executable(sd score-distribution/ScoreDistribution.cpp)
     target_include_directories(sd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
@@ -46,10 +34,6 @@ if (FINISH)
     add_executable(pc print-candidates/PrintCandidates.cpp)
     target_include_directories(pc PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(pc PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-    add_executable(pur score-sample-advantage/print-user-rank/PrintUserRank.cpp)
-    target_include_directories(pur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(pur PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
 
     add_executable(mpr disk-index-compression/measure-prune-ratio/MeasurePruneRatio.cpp)
     target_include_directories(mpr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
@@ -80,10 +64,6 @@ target_link_libraries(dvd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::
 add_executable(pprnbi print-prune-ratio/PrintPruneRatioNoBuildIndex.cpp)
 target_include_directories(pprnbi PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(pprnbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-add_executable(prb score-sample-reason/PrintRankBound.cpp)
-target_include_directories(prb PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(prb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 add_executable(qdur memory-index-time-compare/QueryDistributionUserRank.cpp)
 target_include_directories(qdur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})

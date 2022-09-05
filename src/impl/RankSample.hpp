@@ -53,7 +53,6 @@ namespace ReverseMIPS::RankSample {
 
         //temporary retrieval variable
         // store queryIP
-        std::vector<std::pair<double, double>> IPbound_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
@@ -78,7 +77,6 @@ namespace ReverseMIPS::RankSample {
             this->n_data_item_ = n_data_item;
 
             //retrieval variable
-            IPbound_l_.resize(n_user_);
             queryIP_l_.resize(n_user_);
             rank_lb_l_.resize(n_user_);
             rank_ub_l_.resize(n_user_);
@@ -118,8 +116,6 @@ namespace ReverseMIPS::RankSample {
                 prune_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
-                IPbound_l_.assign(n_user_, std::pair<double, double>(-std::numeric_limits<double>::max(),
-                                                                     std::numeric_limits<double>::max()));
                 topkLbHeap.Reset();
 
                 const double *query_item_vec = query_item.getVector(queryID);
@@ -138,7 +134,7 @@ namespace ReverseMIPS::RankSample {
 
                 //rank search
                 coarse_binary_search_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_, IPbound_l_);
+                rank_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_,
                                       prune_l_, topkLbHeap);

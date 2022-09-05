@@ -8,7 +8,7 @@
 #include "FileIO.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkLBHeap.hpp"
-#include "../../obsoluted/ScoreSample/ScoreSearch.hpp"
+#include "../ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 
 #include "struct/VectorMatrix.hpp"
