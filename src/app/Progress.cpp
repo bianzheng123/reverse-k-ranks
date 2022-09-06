@@ -21,7 +21,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int n_sample, n_sample_query, sample_topk;
+    int n_sample, n_sample_score_distribution, n_sample_query, sample_topk;
     uint64_t index_size_gb;
 };
 
@@ -41,6 +41,8 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "number of sample of a rank bound")
+            ("n_sample_score_distribution, nssd", po::value<int>(&para.n_sample_score_distribution)->default_value(8),
+             "number of sample of the score distribution in a rank bound")
             ("index_size_gb, tt", po::value<uint64_t>(&para.index_size_gb)->default_value(50),
              "index size, in unit of GB")
             ("n_sample_query, nsq", po::value<int>(&para.n_sample_query)->default_value(150),
@@ -106,7 +108,7 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l{30, 20, 10};
-//    vector<int> topk_l{10};
+//    vector<int> topk_l{20};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     vector<vector<SingleQueryPerformance>> query_performance_topk_l;

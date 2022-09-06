@@ -8,6 +8,7 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
+#include "BruteForce/QRSSDTopTIPRefineOrder.hpp"
 #include "BruteForce/QRSTopTIP.hpp"
 #include "BruteForce/QRSTopTIPRefineOrder.hpp"
 #include "BruteForce/RSTopTIP.hpp"
@@ -15,6 +16,7 @@
 
 #include "GridIndex.hpp"
 
+#include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSample.hpp"
 #include "RankSample.hpp"
 
@@ -27,7 +29,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, method_name;
-    int n_sample, n_sample_query, sample_topk;
+    int n_sample, n_sample_score_distribution, n_sample_query, sample_topk;
     uint64_t index_size_gb;
 };
 
@@ -46,7 +48,9 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "method_name")
 
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
-             "the numer of sample")
+             "number of sample of a rank bound")
+            ("n_sample_score_distribution, nssd", po::value<int>(&para.n_sample_score_distribution)->default_value(8),
+             "number of sample of the score distribution in a rank bound")
             ("index_size_gb, tt", po::value<uint64_t>(&para.index_size_gb)->default_value(50),
              "index size, in unit of GB")
             ("n_sample_query, nsq", po::value<int>(&para.n_sample_query)->default_value(150),
@@ -91,7 +95,23 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
-    if (method_name == "QRSTopTIP") {
+    if (method_name == "QRSSDTopTIPRefineOrder") {
+        const int n_sample = para.n_sample;
+        const int n_sample_score_distribution = para.n_sample_score_distribution;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        const uint64_t index_size_gb = para.index_size_gb;
+        spdlog::info("input parameter: n_sample {} index_size_gb {} n_sample_score_distribution {} n_sample_query {} sample_topk {}",
+                     n_sample, index_size_gb, n_sample_score_distribution, n_sample_query, sample_topk);
+        index = QRSSDTopTIPRefineOrder::BuildIndex(data_item, user,
+                                                 index_path, dataset_name,
+                                                 n_sample, n_sample_score_distribution,
+                                                 index_size_gb,
+                                                 n_sample_query, sample_topk);
+        sprintf(parameter_name, "n_sample_%d-index_size_gb_%ld-n_sample_score_distribution_%d",
+                n_sample, index_size_gb, n_sample_score_distribution);
+
+    } else if (method_name == "QRSTopTIP") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
         const int n_sample_query = para.n_sample_query;
@@ -150,6 +170,18 @@ int main(int argc, char **argv) {
                                             n_sample, n_sample_query, sample_topk);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
+    } else if (method_name == "QueryRankSampleScoreDistribution") {
+        const int n_sample = para.n_sample;
+        const int n_sample_score_distribution = para.n_sample_score_distribution;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_score_distribution {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_score_distribution, n_sample_query, sample_topk);
+        index = QueryRankSampleScoreDistribution::BuildIndex(data_item, user, index_path, dataset_name,
+                                                             n_sample, n_sample_score_distribution,
+                                                             n_sample_query, sample_topk);
+        sprintf(parameter_name, "n_sample_%d-n_sample_score_distribution_%d", n_sample, n_sample_score_distribution);
+
     } else if (method_name == "RankSample") {
         const int n_sample = para.n_sample;
         spdlog::info("input parameter: n_sample {}", n_sample);
@@ -177,8 +209,8 @@ int main(int argc, char **argv) {
 //    }
 
 //    vector<int> topk_l{500, 400, 300, 200, 100, 50, 40, 30, 30, 20, 10};
-    vector<int> topk_l{50, 40, 30, 30, 20, 10};
-//    vector<int> topk_l{10};
+//    vector<int> topk_l{50, 40, 30, 30, 20, 10};
+    vector<int> topk_l{30, 20, 10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;

@@ -101,7 +101,7 @@ namespace ReverseMIPS {
             out_stream_.write((char *) distance_cache, offset);
         }
 
-        void FinishBuildIndex(){
+        void FinishBuildIndex() {
             out_stream_.close();
         }
 
@@ -158,6 +158,12 @@ namespace ReverseMIPS {
         int GetSingleRank(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
                           size_t &io_cost, size_t &ip_cost,
                           double &read_disk_time, double &rank_computation_time) {
+            if (rank_lb == rank_ub) {
+                int rank = rank_lb;
+                user_topk_cache_l_[n_candidate_] = UserRankElement(userID, rank, queryIP);
+                n_candidate_++;
+                return rank;
+            }
             int end_idx = rank_lb;
             int start_idx = rank_ub;
             assert(0 <= start_idx && start_idx <= end_idx && end_idx <= n_data_item_);

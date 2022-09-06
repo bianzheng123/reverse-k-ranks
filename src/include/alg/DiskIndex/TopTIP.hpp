@@ -52,7 +52,12 @@ namespace ReverseMIPS {
         int BelowTopt(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
                       size_t &io_cost, size_t &ip_cost,
                       double &read_disk_time, double &rank_compute_time) {
-
+            if (rank_lb == rank_ub) {
+                int rank = rank_lb;
+                user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
+                n_user_candidate_++;
+                return rank;
+            }
             int end_idx = rank_lb;
             int start_idx = rank_ub;
             assert(0 <= start_idx && start_idx <= end_idx && end_idx <= topt_);
@@ -330,6 +335,12 @@ namespace ReverseMIPS {
                           size_t &io_cost, size_t &ip_cost, double &read_disk_time, double &rank_compute_time) {
             assert(rank_ub <= rank_lb);
             int rank;
+            if (rank_ub == rank_lb) {
+                rank = rank_ub;
+                user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
+                n_user_candidate_++;
+                return rank;
+            }
             if (rank_lb <= topt_) {
                 //retrieval the top-t like before
                 rank = BelowTopt(queryIP, rank_lb, rank_ub, userID,
