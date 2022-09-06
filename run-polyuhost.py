@@ -180,14 +180,17 @@ def run_compress_topt():
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "RSMergeInterval", n_sample, index_size))
+            os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
+                ds, 5000, 500,
+            ))
             os.system(
-                'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                    ds, 5000, 500,
-                    ds, 'QueryRankSample', 5000, 500))
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --n_sample_score_distribution {} --n_sample_query {} --sample_topk {}'.format(
+                    ds, basic_dir, 'QueryRankSampleScoreDistribution', n_sample, 8, 5000, 500))
             os.system(
-                'cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                    ds, 'QueryRankSampleScoreDistribution', 5000, 500))
-            os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+                    ds, basic_dir, 'QueryRankSample', n_sample, 5000, 500))
+            os.system('cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+                ds, basic_dir, 'RankSample', n_sample))
 
 
 if __name__ == '__main__':
