@@ -19,6 +19,7 @@
 #include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSample.hpp"
 #include "RankSample.hpp"
+#include "RankSampleStoreID.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -189,6 +190,12 @@ int main(int argc, char **argv) {
         index = RankSample::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
+    } else if (method_name == "RankSampleStoreID") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = RankSampleStoreID::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
     } else {
         spdlog::error("not such method");
     }
@@ -209,9 +216,9 @@ int main(int argc, char **argv) {
 //        spdlog::info("{}", performance_str);
 //    }
 
-    vector<int> topk_l{500, 400, 300, 200, 100, 50, 40, 30, 30, 20, 10};
+//    vector<int> topk_l{500, 400, 300, 200, 100, 50, 40, 30, 30, 20, 10};
 //    vector<int> topk_l{50, 40, 30, 30, 20, 10};
-//    vector<int> topk_l{30, 20, 10};
+    vector<int> topk_l{30, 20, 10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;

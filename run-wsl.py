@@ -46,13 +46,7 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         'QueryRankSample': 'n_sample_20',
         'QueryRankSampleScoreDistribution': 'n_sample_20-n_sample_score_distribution_8',
         'RankSample': 'n_sample_20',
-
-        'CAGrid': 'codeword_32',
-        'CAFullInt': 'scale_100',
-        'CAPartDimPartInt': 'scale_100',
-        'CAPartIntPartNorm': 'scale_100',
-        'CAUserItemPQ': 'n_codebook_8-n_codeword_32',
-        'CAItemPQ': 'n_codebook_8-n_codeword_32'
+        'RankSampleStoreID': 'n_sample_20',
     }
     for ds in dataset_l:
         for topk in topk_l:
@@ -100,9 +94,10 @@ def run():
         # 'RSTopTIPRefineOrder',
 
         # 'GridIndex',
-        'QueryRankSample',
-        'QueryRankSampleScoreDistribution',
+        # 'QueryRankSample',
+        # 'QueryRankSampleScoreDistribution',
         # 'RankSample',
+        'RankSampleStoreID',
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
@@ -130,18 +125,19 @@ def run():
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 50,
-                ds, 'QueryRankSample', 150, 50))
-        os.system(
-            'cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 'QueryRankSampleScoreDistribution', 150, 50))
+        # os.system(
+        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 150, 50,
+        #         ds, 'QueryRankSample', 150, 50))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 'QueryRankSampleScoreDistribution', 150, 50))
         # os.system(
         #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #         ds, 150, 30,
         #         ds, 'QueryRankSampleScoreDistribution', 150, 30))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleStoreID'))
 
     type_arr = ['userID', 'IP', 'rank']
     # topk_l = [10, 20, 30, 40, 50]

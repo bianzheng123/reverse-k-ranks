@@ -191,6 +191,8 @@ def run_compress_topt():
                     ds, basic_dir, 'QueryRankSample', n_sample, 5000, 500))
             os.system('cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
                 ds, basic_dir, 'RankSample', n_sample))
+            os.system('cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+                ds, basic_dir, 'RankSampleStoreID', n_sample))
 
 
 if __name__ == '__main__':

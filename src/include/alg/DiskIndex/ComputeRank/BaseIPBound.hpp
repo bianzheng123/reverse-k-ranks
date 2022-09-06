@@ -80,6 +80,22 @@ namespace ReverseMIPS {
             return rank;
         };
 
+        int
+        QueryRankByCandidate(const double *user_vecs, const int *itemID_l, const VectorMatrix &item,
+                             const int &n_candidate_item,
+                             const double &queryIP, const int &base_rank) {
+            int rank = base_rank;
+            for (int candID = 0; candID < n_candidate_item; candID++) {
+                const int itemID = itemID_l[candID];
+                double ip = InnerProduct(item.getVector(itemID), user_vecs, vec_dim_);
+                if (ip >= queryIP) {
+                    rank++;
+                }
+            }
+
+            return rank;
+        }
+
     };
 }
 #endif //REVERSE_KRANKS_BASEIPBOUND_HPP
