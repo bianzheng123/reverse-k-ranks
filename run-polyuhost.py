@@ -167,10 +167,10 @@ def run_compress_topt():
         #         ds, basic_dir, "SSComputeAll", n_sample))
         for ds in dataset_l:
             n_sample = compute_n_sample(ds, 16)
-            os.system(
-                'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
-                    ds, 5000, 500,
-                    ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 500))
+            # os.system(
+            #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
+            #         ds, 5000, 500,
+            #         ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 500))
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "RSTopTIP", n_sample, index_size))
@@ -198,18 +198,18 @@ if __name__ == '__main__':
 
     run_compress_topt()
 
-    dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
-    index_size_l = [1024]
-    for index_size in index_size_l:
-        for ds in dataset_l:
-            n_sample = compute_n_sample(ds, 16)
-            if ds == 'movielens-27m':
-                os.system(
-                    'cd build/attribution && ./rsbist --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-                        ds, basic_dir, n_sample, index_size))
-            os.system(
-                'cd build/attribution && ./rsbimt --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, n_sample, index_size))
+    # dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
+    # index_size_l = [1024]
+    # for index_size in index_size_l:
+    #     for ds in dataset_l:
+    #         n_sample = compute_n_sample(ds, 16)
+    #         if ds == 'movielens-27m':
+    #             os.system(
+    #                 'cd build/attribution && ./rsbist --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
+    #                     ds, basic_dir, n_sample, index_size))
+    #         os.system(
+    #             'cd build/attribution && ./rsbimt --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
+    #                 ds, basic_dir, n_sample, index_size))
 
     # os.system(
     #     'cd build/attribution && ./qdur --dataset_name {} --basic_dir {} --n_sample_item {}'.format(
