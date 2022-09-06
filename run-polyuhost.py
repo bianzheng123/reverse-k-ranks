@@ -157,9 +157,10 @@ def run_compute_all_n_codeword():
 
 def run_compress_topt():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
-    dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
+    # dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
+    dataset_l = ['movielens-27m', 'yahoomusic']
     # dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
-    index_size_l = [1024]
+    index_size_l = [1536]
     for index_size in index_size_l:
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
@@ -179,6 +180,14 @@ def run_compress_topt():
             # os.system(
             #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
             #         ds, basic_dir, "RSMergeInterval", n_sample, index_size))
+            os.system(
+                'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                    ds, 5000, 500,
+                    ds, 'QueryRankSample', 5000, 500))
+            os.system(
+                'cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                    ds, 'QueryRankSampleScoreDistribution', 5000, 500))
+            os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
 
 
 if __name__ == '__main__':
@@ -187,7 +196,7 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    # run_compress_topt()
+    run_compress_topt()
 
     dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
     index_size_l = [1024]

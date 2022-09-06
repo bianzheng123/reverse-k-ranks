@@ -101,13 +101,14 @@ int main(int argc, char **argv) {
         const int n_sample_query = para.n_sample_query;
         const int sample_topk = para.sample_topk;
         const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {} index_size_gb {} n_sample_score_distribution {} n_sample_query {} sample_topk {}",
-                     n_sample, index_size_gb, n_sample_score_distribution, n_sample_query, sample_topk);
+        spdlog::info(
+                "input parameter: n_sample {} index_size_gb {} n_sample_score_distribution {} n_sample_query {} sample_topk {}",
+                n_sample, index_size_gb, n_sample_score_distribution, n_sample_query, sample_topk);
         index = QRSSDTopTIPRefineOrder::BuildIndex(data_item, user,
-                                                 index_path, dataset_name,
-                                                 n_sample, n_sample_score_distribution,
-                                                 index_size_gb,
-                                                 n_sample_query, sample_topk);
+                                                   index_path, dataset_name,
+                                                   n_sample, n_sample_score_distribution,
+                                                   index_size_gb,
+                                                   n_sample_query, sample_topk);
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%ld-n_sample_score_distribution_%d",
                 n_sample, index_size_gb, n_sample_score_distribution);
 
@@ -208,9 +209,9 @@ int main(int argc, char **argv) {
 //        spdlog::info("{}", performance_str);
 //    }
 
-//    vector<int> topk_l{500, 400, 300, 200, 100, 50, 40, 30, 30, 20, 10};
+    vector<int> topk_l{500, 400, 300, 200, 100, 50, 40, 30, 30, 20, 10};
 //    vector<int> topk_l{50, 40, 30, 30, 20, 10};
-    vector<int> topk_l{30, 20, 10};
+//    vector<int> topk_l{30, 20, 10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;

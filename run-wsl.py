@@ -93,26 +93,16 @@ def run():
         # 'RSCompressTopTIPBruteForceBatchRun',
         # 'DiskBruteForce',
         'MemoryBruteForce',
-        'QRSSDTopTIPRefineOrder',
+        # 'QRSSDTopTIPRefineOrder',
         # 'QRSTopTIP',
         # 'QRSTopTIPRefineOrder',
         # 'RSTopTIP',
         # 'RSTopTIPRefineOrder',
 
         # 'GridIndex',
-        # 'QueryRankSample',
+        'QueryRankSample',
         'QueryRankSampleScoreDistribution',
         # 'RankSample',
-
-        # 'CAGrid',
-        # 'CAFullDim',
-        # 'CAFullNorm',
-        # 'CAFullInt',
-        # 'CAPartDimPartInt',
-        # 'CAPartDimPartNorm',
-        # 'CAPartIntPartNorm',
-        # 'CAUserItemPQ',
-        # 'CAItemPQ',
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
@@ -123,10 +113,10 @@ def run():
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 30,
-                ds, 'QRSSDTopTIPRefineOrder', 150, 30))
+        # os.system(
+        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 150, 30,
+        #         ds, 'QRSSDTopTIPRefineOrder', 150, 30))
         # os.system(
         #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #         ds, 150, 30,
@@ -140,13 +130,13 @@ def run():
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 50,
-        #         ds, 'QueryRankSample', 150, 30))
+        os.system(
+            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 150, 50,
+                ds, 'QueryRankSample', 150, 50))
         os.system(
             'cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 'QueryRankSampleScoreDistribution', 150, 30))
+                ds, 'QueryRankSampleScoreDistribution', 150, 50))
         # os.system(
         #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #         ds, 150, 30,
