@@ -5,17 +5,6 @@
 #ifndef REVERSE_KRANKS_COMPUTEALL_HPP
 #define REVERSE_KRANKS_COMPUTEALL_HPP
 
-#include "ComputeAllIPBound/BaseIPBound.hpp"
-#include "ComputeAllIPBound/FullDim.hpp"
-#include "ComputeAllIPBound/FullInt.hpp"
-#include "ComputeAllIPBound/FullNorm.hpp"
-#include "ComputeAllIPBound/Grid.hpp"
-#include "ComputeAllIPBound/ItemPQ.hpp"
-#include "ComputeAllIPBound/PartDimPartInt.hpp"
-#include "ComputeAllIPBound/PartDimPartNorm.hpp"
-#include "ComputeAllIPBound/PartIntPartNorm.hpp"
-#include "ComputeAllIPBound/UserItemPQ.hpp"
-
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
 
@@ -35,7 +24,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::ComputeAll {
+namespace ReverseMIPS::BuildIndexIPBound {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -81,7 +70,9 @@ namespace ReverseMIPS::ComputeAll {
             IPbound_l_ = std::make_unique<std::pair<double, double>[]>(n_data_item_);
         }
 
-        std::vector<std::vector<UserRankElement>> Retrieval(const VectorMatrix &query_item, const int &topk) override {
+        std::vector<std::vector<UserRankElement>>
+        Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query,
+                  std::vector<SingleQueryPerformance> &query_performance_l) override {
             ResetTimer();
 
             if (topk > user_.n_vector_) {
@@ -209,68 +200,75 @@ namespace ReverseMIPS::ComputeAll {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const std::string &bound_name,
-               const int &scale, const int &n_codebook, const int &n_codeword, char *parameter_name) {
-        user.vectorNormalize();
-        assert(user.vec_dim_ == data_item.vec_dim_);
-
-        std::unique_ptr<BaseIPBound> IPbound_ptr;
-
-        int n_user = user.n_vector_;
-        int n_data_item = data_item.n_vector_;
-        int vec_dim = user.vec_dim_;
-
-        if (bound_name == "CAGrid") {
-            const int min_codeword = std::floor(std::sqrt(1.0 * 80 * std::sqrt(3 * user.vec_dim_)));
-            int n_cur_codeword = 1;
-            while (n_cur_codeword < min_codeword) {
-                n_cur_codeword = n_cur_codeword << 1;
-            }
-            spdlog::info("CAGrid min_codeword {}, codeword {}", min_codeword, n_cur_codeword);
-            IPbound_ptr = std::make_unique<Grid>(n_user, n_data_item, vec_dim, n_cur_codeword);
-            sprintf(parameter_name, "codeword_%d", n_cur_codeword);
-
-        } else if (bound_name == "CAFullDim") {
-            IPbound_ptr = std::make_unique<FullDim>(n_user, n_data_item, vec_dim);
-
-        } else if (bound_name == "CAFullNorm") {
-            IPbound_ptr = std::make_unique<FullNorm>(n_user, n_data_item, vec_dim);
-
-        } else if (bound_name == "CAFullInt") {
-            spdlog::info("CAFullInt scale {}", scale);
-            IPbound_ptr = std::make_unique<FullInt>(n_user, n_data_item, vec_dim, scale);
-            sprintf(parameter_name, "scale_%d", scale);
-
-        } else if (bound_name == "CAPartDimPartInt") {
-            spdlog::info("CAPartDimPartInt scale {}", scale);
-            IPbound_ptr = std::make_unique<PartDimPartInt>(n_user, n_data_item, vec_dim, scale);
-            sprintf(parameter_name, "scale_%d", scale);
-
-        } else if (bound_name == "CAPartDimPartNorm") {
-            IPbound_ptr = std::make_unique<PartDimPartNorm>(n_user, n_data_item, vec_dim);
-
-        } else if (bound_name == "CAPartIntPartNorm") {
-            spdlog::info("CAPartIntPartNorm scale {}", scale);
-            IPbound_ptr = std::make_unique<PartIntPartNorm>(n_user, n_data_item, vec_dim, scale);
-            sprintf(parameter_name, "scale_%d", scale);
-
-        } else if (bound_name == "CAUserItemPQ") {
-            spdlog::info("CAUserItemPQ n_codebook {}, n_codeword {}", n_codebook, n_codeword);
-            IPbound_ptr = std::make_unique<CAUserItemPQ>(n_user, n_data_item, vec_dim, n_codebook, n_codeword);
-            sprintf(parameter_name, "n_codebook_%d-n_codeword_%d", n_codebook, n_codeword);
-
-        } else if (bound_name == "CAItemPQ") {
-            spdlog::info("CAItemPQ n_codebook {}, n_codeword {}", n_codebook, n_codeword);
-            IPbound_ptr = std::make_unique<CAItemPQ>(n_user, n_data_item, vec_dim, n_codebook, n_codeword);
-            sprintf(parameter_name, "n_codebook_%d-n_codeword_%d", n_codebook, n_codeword);
-
-        } else {
-            spdlog::error("not found IPBound name, program exit");
-            exit(-1);
-        }
-
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, std::unique_ptr<BaseIPBound> &IPbound_ptr,
+               std::uint64_t &bucket_size_var) {
         IPbound_ptr->Preprocess(user, data_item);
 
+        const int n_user = user.n_vector_;
+        const int n_data_item = data_item.n_vector_;
+        const int vec_dim = user.vec_dim_;
+
+        const int n_bucket = 20;
+
+        std::vector<std::pair<double, double>> ip_bound_l(n_data_item);
+        std::vector<int> bucketID_l(n_data_item);
+        std::vector<int> bucket_n_item_l(n_bucket);
+
+        uint64_t bucket_size_var_sum = 0;
+
+        double avg_bucket_size = 1.0 * n_data_item / n_bucket;
+
+        for (int userID = 0; userID < n_user; userID++) {
+            const double *user_vecs = user.getVector(userID);
+
+            double max_val = -DBL_MAX;
+            double min_val = DBL_MAX;
+#pragma omp parallel for default(none) shared(n_data_item, data_item, IPbound_ptr, user_vecs, userID, ip_bound_l, min_val, max_val)
+            for (int itemID = 0; itemID < n_data_item; itemID++) {
+                const double *item_vecs = data_item.getVector(itemID);
+                std::pair<double, double> ip_bound_pair = IPbound_ptr->IPBound(user_vecs, userID, item_vecs, itemID);
+                ip_bound_l[itemID] = ip_bound_pair;
+#pragma omp critical
+                {
+                    min_val = std::min(min_val, ip_bound_pair.first);
+                    max_val = std::max(max_val, ip_bound_pair.second);
+                }
+            }
+            min_val -= 0.01;
+            max_val += 0.01;
+
+            bucket_n_item_l.assign(n_bucket, 0);
+
+            const double itv_distance = (max_val - min_val) / n_bucket;
+#pragma omp parallel for default(none) shared(n_data_item, ip_bound_l, min_val, itv_distance, bucketID_l, bucket_n_item_l, data_item, user_vecs, vec_dim)
+            for (int itemID = 0; itemID < n_data_item; itemID++) {
+                std::pair<double, double> ip_bound_pair = ip_bound_l[itemID];
+                const int lb_bktID = std::floor((ip_bound_pair.first - min_val) / itv_distance);
+                const int ub_bktID = std::floor((ip_bound_pair.second - min_val) / itv_distance);
+                assert(0 <= lb_bktID && lb_bktID <= ub_bktID && ub_bktID < n_bucket);
+                if (lb_bktID == ub_bktID) {
+                    bucketID_l[itemID] = lb_bktID;
+#pragma omp critical
+                    bucket_n_item_l[lb_bktID]++;
+                } else { //lb_bktID != ub_bktID
+                    const double *item_vecs = data_item.getVector(itemID);
+                    const double queryIP = InnerProduct(user_vecs, item_vecs, vec_dim);
+                    const int bktID = std::floor((queryIP - min_val) / itv_distance);
+                    assert(0 <= bktID && bktID < n_bucket);
+                    bucketID_l[itemID] = bktID;
+#pragma omp critical
+                    bucket_n_item_l[bktID]++;
+                }
+            }
+
+            for (int bucketID = 0; bucketID < n_bucket; bucketID++) {
+                bucket_size_var_sum +=
+                        (bucket_n_item_l[bucketID] - avg_bucket_size) * (bucket_n_item_l[bucketID] - avg_bucket_size);
+            }
+
+        }
+
+        bucket_size_var = bucket_size_var_sum / n_user / n_bucket;
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(IPbound_ptr, data_item, user);
         return index_ptr;
     }
