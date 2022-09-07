@@ -40,10 +40,7 @@ ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1, decimals=0))
 ax.bar(label_l, memory_index_time_perc_l, width, color='#080604', edgecolor='#000000',
        hatch='//', label='Memory Index Time')
 ax.bar(label_l, io_time_perc_l, width, bottom=memory_index_time_perc_l, color='#ffffff', edgecolor='#000000',
-       hatch='\\\\', label='Disk Index IO Time')
-ax.bar(label_l, ip_time_perc_l, width, bottom=memory_index_time_perc_l + io_time_perc_l, color='#ffffff',
-       edgecolor='#000000',
-       hatch='', label='Disk Index IP Time')
+       hatch='', label='Disk Index IO Time')
 
 # ax.set_yscale('log')
 
