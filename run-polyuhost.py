@@ -4,6 +4,18 @@ import numpy as np
 from script.data_convert import vecs_io
 
 
+class CMDcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 def compute_n_sample(dataset_name, memory_capacity):
     dataset_m = {'movielens-27m': [52889, 1000, 283228],
                  'netflix': [16770, 1000, 480189],
@@ -210,7 +222,7 @@ if __name__ == '__main__':
     index_size_l = [1536]
     for index_size in index_size_l:
         for ds in dataset_l:
-            n_sample = compute_n_sample(ds, 16)
+            n_sample = compute_n_sample(ds, 32)
             # if ds == 'movielens-27m':
             #     os.system(
             #         'cd build/attribution && ./rsbist --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
