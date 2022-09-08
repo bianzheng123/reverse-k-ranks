@@ -203,20 +203,21 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    run_compress_topt()
-
     # dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
-    # index_size_l = [1024]
-    # for index_size in index_size_l:
-    #     for ds in dataset_l:
-    #         n_sample = compute_n_sample(ds, 16)
-    #         if ds == 'movielens-27m':
-    #             os.system(
-    #                 'cd build/attribution && ./rsbist --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-    #                     ds, basic_dir, n_sample, index_size))
-    #         os.system(
-    #             'cd build/attribution && ./rsbimt --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-    #                 ds, basic_dir, n_sample, index_size))
+    dataset_l = ['goodreads']
+    index_size_l = [1536]
+    for index_size in index_size_l:
+        for ds in dataset_l:
+            n_sample = compute_n_sample(ds, 16)
+            # if ds == 'movielens-27m':
+            #     os.system(
+            #         'cd build/attribution && ./rsbist --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
+            #             ds, basic_dir, n_sample, index_size))
+            os.system(
+                'cd build/attribution && ./rsbimt --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, n_sample, index_size))
+
+    # run_compress_topt()
 
     # os.system(
     #     'cd build/attribution && ./qdur --dataset_name {} --basic_dir {} --n_sample_item {}'.format(

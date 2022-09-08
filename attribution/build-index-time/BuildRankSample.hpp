@@ -271,6 +271,9 @@ namespace ReverseMIPS::BuildRankSample {
         TimeRecord report_every_record;
         report_every_record.reset();
         TimeRecord record;
+        double batch_compute_time = 0;
+        double batch_sort_time = 0;
+        double batch_process_index_time = 0;
         std::vector<DistancePair> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
             double compute_time = 0;
@@ -279,18 +282,26 @@ namespace ReverseMIPS::BuildRankSample {
             total_compute_time += compute_time;
             total_sort_time += sort_time;
 
+            batch_compute_time += compute_time;
+            batch_sort_time += sort_time;
+
             record.reset();
             rank_ins.LoopPreprocess(distance_l.data(), userID);
             disk_ins.BuildIndexLoop(distance_l.data());
             const double tmp_process_index_time = record.get_elapsed_time_second();
+
             process_index_time += tmp_process_index_time;
+            batch_process_index_time += tmp_process_index_time;
 
             if (userID % cst.report_every_ == 0 && userID != 0) {
                 spdlog::info(
                         "Build Index Multiple Thread {:.2f}%, Compute Time {}s, Sort Time {}s, Process Index Time {}s {} s/iter, Mem: {}Mb",
-                        userID / (0.01 * n_user), compute_time, sort_time, tmp_process_index_time,
+                        userID / (0.01 * n_user), batch_compute_time, batch_sort_time, batch_process_index_time,
                         report_every_record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                 report_every_record.reset();
+                batch_compute_time = 0;
+                batch_sort_time = 0;
+                batch_process_index_time = 0;
             }
         }
         disk_ins.FinishBuildIndex();
@@ -336,6 +347,9 @@ namespace ReverseMIPS::BuildRankSample {
         TimeRecord report_every_record;
         report_every_record.reset();
         TimeRecord record;
+        double batch_compute_time = 0;
+        double batch_sort_time = 0;
+        double batch_process_index_time = 0;
         std::vector<DistancePair> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
             double compute_time = 0;
@@ -343,12 +357,15 @@ namespace ReverseMIPS::BuildRankSample {
             cst.ComputeSortItems(userID, distance_l.data(), compute_time, sort_time);
             total_compute_time += compute_time;
             total_sort_time += sort_time;
+            batch_compute_time += compute_time;
+            batch_sort_time += sort_time;
 
             record.reset();
             rank_ins.LoopPreprocess(distance_l.data(), userID);
             disk_ins.BuildIndexLoop(distance_l.data());
             const double tmp_process_index_time = record.get_elapsed_time_second();
             process_index_time += tmp_process_index_time;
+            batch_process_index_time += tmp_process_index_time;
 
             if (userID % cst.report_every_ == 0 && userID != 0) {
                 spdlog::info(
@@ -356,6 +373,9 @@ namespace ReverseMIPS::BuildRankSample {
                         userID / (0.01 * n_user), compute_time, sort_time, tmp_process_index_time,
                         report_every_record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                 report_every_record.reset();
+                batch_compute_time = 0;
+                batch_sort_time = 0;
+                batch_process_index_time = 0;
             }
         }
         disk_ins.FinishBuildIndex();

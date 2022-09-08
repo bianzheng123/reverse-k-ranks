@@ -150,9 +150,15 @@ if __name__ == '__main__':
     dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
-    for ds in dataset_l:
-        for bound_name in ['Grid', 'FullDim', 'FullNorm', 'FullInt', 'PartDimPartInt', 'PartDimPartNorm',
-                           'PartIntPartNorm']:
-            os.system(
-                'cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, bound_name))
+
+    # for ds in dataset_l:
+    #     for bound_name in ['Grid', 'FullDim', 'FullNorm', 'FullInt', 'PartDimPartInt', 'PartDimPartNorm',
+    #                        'PartIntPartNorm']:
+    #         os.system(
+    #             'cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, bound_name))
+
+    os.system(
+        'cd build/attribution && ./rsbimt')
+    os.system(
+        'cd build/attribution && ./rsbist')
     # run()
