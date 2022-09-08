@@ -81,6 +81,6 @@ add_executable(rsbist build-index-time/RSBuildIndexSingleThread.cpp)
 target_include_directories(rsbist PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(rsbist PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
 
-add_executable(rsbimt build-index-time/RSBuildIndexMultipleThread.cpp
-        target_include_directories (rsbimt PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-        target_link_libraries (rsbimt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
+add_executable(rsbimt build-index-time/RSBuildIndexMultipleThread.cpp)
+target_include_directories(rsbimt PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(rsbimt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
