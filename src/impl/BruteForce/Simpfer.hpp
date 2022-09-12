@@ -114,35 +114,6 @@ namespace ReverseMIPS::Simpfer {
                                                   n_block_prune, n_sample_prune, n_norm_prune, ip_count, result_size,
                                                   queryID);
 
-                    if (queryID == 11 && rtk_topk == 32) {
-                        const int userID = 833;
-                        if (find(result_userID_l.begin(), result_userID_l.end(), userID) == result_userID_l.end()) {
-                            printf("not find queryID %d, rtk_topk %d, userID %d\n",
-                                   queryID, rtk_topk, userID);
-                        }else{
-                            printf("find queryID %d, rtk_topk %d, userID %d\n",
-                                   queryID, rtk_topk, userID);
-                        }
-                    }
-                    if (queryID == 11) {
-                        const int userID = 833;
-                        std::vector<std::pair<double, int>> ip_l(n_data_item_);
-                        for (int itemID = 0; itemID < n_data_item_; itemID++) {
-                            const double ip = InnerProduct(data_item_.getVector(itemID), user_.getVector(userID),
-                                                           vec_dim_);
-                            ip_l[itemID] = std::make_pair(ip, itemID);
-                        }
-                        const double queryIP = InnerProduct(query_item.getVector(queryID), user_.getVector(userID),
-                                                            vec_dim_);
-                        std::sort(ip_l.begin(), ip_l.end(), std::greater());
-                        assert(ip_l[0].first >= ip_l[1].first);
-                        auto ptr = std::lower_bound(ip_l.begin(), ip_l.end(), queryIP,
-                                                    [](const std::pair<double, int> &arrIP, double queryIP) {
-                                                        return arrIP.first > queryIP;
-                                                    });
-                        printf("queryID %d, userID %d, rank %d\n", queryID, userID, (int) (ptr - ip_l.begin()));
-                    }
-
                     if (result_size >= topk) {
                         break;
                     } else {

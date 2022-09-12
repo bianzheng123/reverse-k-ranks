@@ -84,59 +84,17 @@ namespace ReverseMIPS {
             double query_norm = InnerProduct(query_item.vec_.data(), query_item.vec_.data(), (int) vec_dim_);
             query_norm = std::sqrt(query_norm);
 
-            if (queryID == 11) {
-                for (int sample_userID = 0; sample_userID < n_user_; sample_userID++) {
-                    if (user_sd_l_[sample_userID].ID_ == 833) {
-                        printf("queryID %d, userID %d, blockID %d\n",
-                               queryID, user_sd_l_[sample_userID].ID_, user_sd_l_[sample_userID].block_id);
-                    }
-                }
-                bool is_find = false;
-                for (unsigned int blockID = 0; blockID < block_l_.size(); ++blockID) {
-                    const SimpferBlock block = block_l_[blockID];
-                    for (const int sample_userID: block.userID_l) {
-                        if(user_sd_l_[sample_userID].ID_ == 833){
-                            printf("appear userID %d, blockID %d\n", 833, blockID);
-                        }
-                    }
-                }
-                printf("n_block %ld\n", block_l_.size());
-            }
-
-
             for (unsigned int blockID = 0; blockID < block_l_.size(); ++blockID) {
                 // compute upper-bound in this block
                 const SimpferBlock block = block_l_[blockID];
                 double upperbound = user_sd_l_[block.userID_l[0]].norm_ * query_norm;
                 assert(user_sd_l_[block.userID_l[0]].norm_ >= user_sd_l_[block.userID_l[1]].norm_);
                 const int n_user_member = (int) block.userID_l.size();
-                if (queryID == 11) {
-                    for (const int sample_userID: block.userID_l) {
-                        if (user_sd_l_[sample_userID].ID_ == 833) {
-                            int is_prune_next = upperbound > block_l_[blockID].lowerbound_array[rtk_topk - 1];
-                            printf("queryID %d, userID %d, blockID %d, is_prune_next %d\n",
-                                   queryID, 833, block.identifier, is_prune_next);
-                            break;
-                        }
-                    }
-                    if (block.identifier == 52) {
-                        printf("queryID %d, block ID %d, user size %ld: userID ", queryID, blockID,
-                               block_l_[blockID].userID_l.size());
-                        for (const int sample_userID: block_l_[blockID].userID_l) {
-                            printf("%d ", user_sd_l_[sample_userID].ID_);
-                        }
-                        printf("\n");
-                        std::fflush(stdout);
-                    }
-                }
                 // block-level filtering
                 if (upperbound > block_l_[blockID].lowerbound_array[rtk_topk - 1]) {
                     for (unsigned int memberID = 0; memberID < n_user_member; ++memberID) {
                         // get user-vec
                         SimpferData user = user_sd_l_[block.userID_l[memberID]];
-                        if (queryID == 11 && user.ID_ == 833) {
-                            printf("queryID %d, userID %d, contains", queryID, user.ID_);
-                        }
                         // compute ip
                         const double ip = InnerProduct(query_item.vec_.data(), user.vec_.data(), (int) vec_dim_);
                         ++ip_count;

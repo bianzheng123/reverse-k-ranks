@@ -87,9 +87,6 @@ namespace ReverseMIPS {
             user_sd_l[userID].block_id = blk.identifier;
             // insert into block
             blk.userID_l.push_back((int) userID);
-            if (user_sd_l[userID].ID_ == 833) {
-                printf("userID %d, blockID %d\n", user_sd_l[userID].ID_, blk.identifier);
-            }
             // init blk
             if (blk.userID_l.size() == block_size || userID == n_user - 1) {
                 // update lower-bound array
