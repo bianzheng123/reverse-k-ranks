@@ -39,13 +39,6 @@ namespace ReverseMIPS::Simpfer {
 
     class Index : public BaseIndex {
         void ResetTimer() {
-            inner_product_time_ = 0;
-            memory_index_search_time_ = 0;
-            read_disk_time_ = 0;
-            exact_rank_time_ = 0;
-            total_io_cost_ = 0;
-            total_ip_cost_ = 0;
-            rank_bound_prune_ratio_ = 0;
         }
 
     public:
@@ -54,11 +47,7 @@ namespace ReverseMIPS::Simpfer {
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
-        double inner_product_time_, memory_index_search_time_, read_disk_time_, exact_rank_time_;
-        TimeRecord inner_product_record_, memory_index_search_record_;
         TimeRecord query_record_;
-        uint64_t total_io_cost_, total_ip_cost_;
-        double rank_bound_prune_ratio_;
 
         Index(
                 SimpferIndex &&simpfer_index, Matrix &&user_matrix,
@@ -122,7 +111,9 @@ namespace ReverseMIPS::Simpfer {
 
                 }
 
-                spdlog::info("queryID {}, result_size {}, rtk_topk {}", queryID, result_size, rtk_topk);
+                const double single_query_time = query_record_.get_elapsed_time_second();
+                spdlog::info("queryID {}, result_size {}, rtk_topk {}, single_query_time {:.2f}s",
+                             queryID, result_size, rtk_topk, single_query_time);
                 assert(result_userID_l.size() == result_size);
 
                 for (int resultID = 0; resultID < result_size; resultID++) {
@@ -131,7 +122,6 @@ namespace ReverseMIPS::Simpfer {
                 }
             }
 
-            rank_bound_prune_ratio_ /= n_query_item;
             return query_heap_l;
         }
 
@@ -150,12 +140,8 @@ namespace ReverseMIPS::Simpfer {
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, memory index search %.3fs\n\tread disk time %.3f, exact rank time %.3fs\n\tio_cost %ld, ip_cost %ld, user prune ratio %.4f\n\tmillion second per query %.3fms",
-                    topk, retrieval_time,
-                    inner_product_time_, memory_index_search_time_,
-                    read_disk_time_, exact_rank_time_,
-                    total_io_cost_, total_ip_cost_, rank_bound_prune_ratio_,
-                    ms_per_query);
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tmillion second per query %.3fms",
+                    topk, retrieval_time, ms_per_query);
             std::string str(buff);
             return str;
         }
