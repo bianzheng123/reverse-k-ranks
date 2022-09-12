@@ -16,19 +16,16 @@ hatch = ['--', '+', 'x', '\\']
 color_l = ['#3D0DFF', '#6BFF00', '#00E8E2', '#EB0225', '#FF9E03']
 matplotlib.RcParams.update(params)
 
-label_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
-label_l = ['Yahoomusic', 'Yelp']
-ip_time_l = [6.396, 8.771]
-io_time_l = [1573.561, 1297.826]
-memory_index_time_l = [510.75, 564.963]
+label_m = {'movielens-27m': 'Movielens', 'netflix': 'Netflix', 'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
+label_l = ['movielens-27m', 'netflix']
+io_time_l = [4899.685, 21183.491]
+memory_index_time_l = [48.105, 70.649]
 
-ip_time_l = np.array(ip_time_l)
 io_time_l = np.array(io_time_l)
 memory_index_time_l = np.array(memory_index_time_l)
 
-total_time_l = ip_time_l + io_time_l + memory_index_time_l
+total_time_l = io_time_l + memory_index_time_l
 
-ip_time_perc_l = ip_time_l / total_time_l
 io_time_perc_l = io_time_l / total_time_l
 memory_index_time_perc_l = memory_index_time_l / total_time_l
 
@@ -36,6 +33,7 @@ width = 0.35  # the width of the bars: can also be len(x) sequence
 
 fig, ax = plt.subplots()
 ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1, decimals=0))
+# ax.set_yscale('log')
 
 ax.bar(label_l, memory_index_time_perc_l, width, color='#080604', edgecolor='#000000',
        hatch='//', label='Memory Index Time')

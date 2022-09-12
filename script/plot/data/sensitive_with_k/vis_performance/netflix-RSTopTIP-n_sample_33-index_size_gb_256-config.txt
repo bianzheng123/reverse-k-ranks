@@ -1,0 +1,22 @@
+number of query item 1000
+build index time 453.002s
+Build Index Info: index size 59.998 GB
+Exact rank name: Exact rank method_name: BaseIPBound
+top10 retrieval time:
+	total 21261.001s
+	inner product 57.559s, memory index search 13.090s
+	read disk time 21183.491, exact rank time 1.699s
+	io_cost 7824092850, ip_cost 0, user prune ratio 0.9688
+	million second per query 21261.001ms
+top20 retrieval time:
+	total 21274.858s
+	inner product 57.653s, memory index search 13.153s
+	read disk time 21197.177, exact rank time 1.699s
+	io_cost 7831889970, ip_cost 0, user prune ratio 0.9688
+	million second per query 21274.858ms
+top30 retrieval time:
+	total 21938.256s
+	inner product 57.673s, memory index search 13.092s
+	read disk time 21860.552, exact rank time 1.712s
+	io_cost 7839292518, ip_cost 0, user prune ratio 0.9688
+	million second per query 21938.256ms

@@ -167,11 +167,9 @@ namespace ReverseMIPS {
     }
 
     void
-    WriteRankResult(const std::vector<std::vector<UserRankElement>> &result, const char *dataset_name,
-                    const char *method_name,
-                    const char *other_name) {
+    WriteRankResult(const std::vector<std::vector<UserRankElement>> &result,
+                    const int &topk, const char *dataset_name, const char *method_name, const char *other_name) {
         int n_query_item = (int) result.size();
-        int topk = (int) result[0].size();
 
         char resPath[256];
         if (strcmp(other_name, "") == 0) {
@@ -186,10 +184,16 @@ namespace ReverseMIPS {
         }
 
         for (int i = 0; i < n_query_item; i++) {
-            for (int j = 0; j < topk - 1; j++) {
-                file << result[i][j].userID_ << ",";
+            const unsigned int result_size = result[i].size();
+            if (result_size != 0) {
+                for (int j = 0; j < result_size - 1; j++) {
+                    file << result[i][j].userID_ << ",";
+                }
+                file << result[i][result_size - 1].userID_ << std::endl;
+            } else {
+                file << std::endl;
             }
-            file << result[i][topk - 1].userID_ << std::endl;
+
         }
         file.close();
 
@@ -205,10 +209,16 @@ namespace ReverseMIPS {
         }
 
         for (int i = 0; i < n_query_item; i++) {
-            for (int j = 0; j < topk - 1; j++) {
-                file << result[i][j].rank_ << ",";
+            const unsigned int result_size = result[i].size();
+            if (result_size != 0) {
+                for (int j = 0; j < result_size - 1; j++) {
+                    file << result[i][j].rank_ << ",";
+                }
+                file << result[i][result_size - 1].rank_ << std::endl;
+            } else {
+                file << std::endl;
             }
-            file << result[i][topk - 1].rank_ << std::endl;
+
         }
         file.close();
 
@@ -224,10 +234,16 @@ namespace ReverseMIPS {
         }
 
         for (int i = 0; i < n_query_item; i++) {
-            for (int j = 0; j < topk - 1; j++) {
-                file << result[i][j].queryIP_ << ",";
+            const unsigned int result_size = result[i].size();
+            if (result_size != 0) {
+                for (int j = 0; j < result_size - 1; j++) {
+                    file << result[i][j].queryIP_ << ",";
+                }
+                file << result[i][result_size - 1].queryIP_ << std::endl;
+            } else {
+                file << std::endl;
             }
-            file << result[i][topk - 1].queryIP_ << std::endl;
+
         }
         file.close();
     }

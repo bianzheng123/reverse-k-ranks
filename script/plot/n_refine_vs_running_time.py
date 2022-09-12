@@ -64,14 +64,15 @@ def least_square_parameter(x, y):
 
 if __name__ == '__main__':
     # dataset_m = {'movielens-27m': 'Movielens', 'netflix': 'Netflix', 'yahoomusic_big': 'Yahoomusic'}
-    dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
+    # dataset_m = {'yahoomusic_big': 'Yahoomusic', 'yelp': 'Yelp'}
+    dataset_m = {'movielens-27m': 'Movielens'}
     dataset_info_m = {'movielens-27m': [283228, 53889], 'netflix': [480189, 17770], 'yahoomusic_big': [1823179, 135736]}
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big']
     for ds in dataset_m.keys():
         # for method in ['RSTopTIP', 'QRSTopTIP']:
-        for method in ['RSTopTIP']:
-            basic_dir = "data"
-            fname = "{}-{}-top10-n_sample_1500-index_size_gb_256-userID.csv".format(ds, method)
+        for method in ['RankSample']:
+            basic_dir = "data/single_query_performance"
+            fname = "{}-{}-top10-n_sample_104-userID.csv".format(ds, method)
             df = pd.read_csv(os.path.join(basic_dir, fname),
                              dtype={'queryID': np.int64, "n_user_candidate": np.int64, "io_cost": np.int64,
                                     "ip_cost": np.int64,

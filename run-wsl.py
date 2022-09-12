@@ -52,7 +52,6 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
         for topk in topk_l:
             for _type in type_arr:
                 for method_idx in range(1, len(method_name_l), 1):
-                    # bfon = os.path.join('result', 'rank', '{}-{}-top10-{}.csv'.format(ds, 'OnlineBruteForce', _type))
                     baseline_method = method_name_l[0]
                     cmp_method = method_name_l[method_idx]
                     if baseline_method in suffix_m:
@@ -146,8 +145,8 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
@@ -157,8 +156,4 @@ if __name__ == '__main__':
     #         os.system(
     #             'cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, bound_name))
 
-    os.system(
-        'cd build/attribution && ./rsbimt')
-    os.system(
-        'cd build/attribution && ./rsbist')
-    # run()
+    run()

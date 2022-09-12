@@ -13,6 +13,7 @@
 #include "BruteForce/QRSTopTIPRefineOrder.hpp"
 #include "BruteForce/RSTopTIP.hpp"
 #include "BruteForce/RSTopTIPRefineOrder.hpp"
+#include "BruteForce/Simpfer.hpp"
 
 #include "GridIndex.hpp"
 
@@ -32,6 +33,7 @@ public:
     std::string basic_dir, dataset_name, method_name;
     int n_sample, n_sample_score_distribution, n_sample_query, sample_topk;
     uint64_t index_size_gb;
+    int simpfer_k_max;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -57,7 +59,10 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("n_sample_query, nsq", po::value<int>(&para.n_sample_query)->default_value(150),
              "the numer of sample query in training query distribution")
             ("sample_topk, st", po::value<int>(&para.sample_topk)->default_value(50),
-             "topk in training query distribution");
+             "topk in training query distribution")
+
+            ("simpfer_k_max, skm", po::value<int>(&para.simpfer_k_max)->default_value(25),
+             "k_max in simpfer");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -196,6 +201,13 @@ int main(int argc, char **argv) {
         index = RankSampleStoreID::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
+    } else if (method_name == "Simpfer") {
+        const int simpfer_k_max = para.simpfer_k_max;
+        spdlog::info("input parameter: simpfer_k_max {}",
+                     simpfer_k_max);
+        index = Simpfer::BuildIndex(data_item, user, simpfer_k_max);
+        sprintf(parameter_name, "simpfer_k_max_%d", simpfer_k_max);
+
     } else {
         spdlog::error("not such method");
     }
@@ -219,7 +231,7 @@ int main(int argc, char **argv) {
 //    vector<int> topk_l{500, 400, 300, 200, 100, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{50, 40, 30, 30, 20, 10};
 //    vector<int> topk_l{30, 20, 10};
-    vector<int> topk_l{20, 10};
+    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
@@ -249,7 +261,8 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < n_topk; i++) {
         cout << config.GetConfig(i) << endl;
-        WriteRankResult(result_rank_l[i], dataset_name, method_name.c_str(), parameter_name);
+        const int topk = topk_l[i];
+        WriteRankResult(result_rank_l[i], topk, dataset_name, method_name.c_str(), parameter_name);
         WriteQueryPerformance(query_performance_topk_l[i], dataset_name, method_name.c_str(), topk_l[i],
                               parameter_name);
     }

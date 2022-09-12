@@ -25,6 +25,10 @@ namespace ReverseMIPS {
             this->queryIP_ = queryIP;
         }
 
+        UserRankElement(const int &userID) {
+            this->userID_ = userID;
+        }
+
         UserRankElement() {
             userID_ = -1;
             rank_ = -1;

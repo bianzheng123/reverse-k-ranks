@@ -38,13 +38,32 @@ set(BUILD_PROGRESS ON)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-#target_include_directories(TestArmadilloOpenMP PRIVATE ${armadillo_SOURCE_DIR}/include)
-#target_include_directories(TestArmadillo PRIVATE ${armadillo_SOURCE_DIR}/include)
-#
-#target_link_libraries(TestArmadilloOpenMP PRIVATE armadillo openblas_static pthread gfortran OpenMP::OpenMP_CXX)
-#target_link_libraries(TestArmadillo PRIVATE armadillo openblas_static pthread gfortran)
+set(fexipro
+        src/include/fexipro/alg/Naive.h
+        src/include/fexipro/alg/SVDIntUpperBoundIncrPrune2.h
 
-#set(CMAKE_CUDA_ARCHITECTURES 10)
+        src/include/fexipro/structs/ExtendMatrix.h
+        src/include/fexipro/structs/ExtendMatrixRow.h
+        src/include/fexipro/structs/FastHeap.h
+        src/include/fexipro/structs/IntMatrixRow.h
+        src/include/fexipro/structs/Matrix.h
+        src/include/fexipro/structs/SIRMatrixRow.h
+        src/include/fexipro/structs/SVDIntMatrixRow.h
+        src/include/fexipro/structs/VectorElement.h
+
+        src/include/fexipro/util/Base.h
+        src/include/fexipro/util/Calculator.h
+        src/include/fexipro/util/Conf.h
+        src/include/fexipro/util/FileUtil.h
+        src/include/fexipro/util/Logger.h
+        src/include/fexipro/util/Monitor.h
+        src/include/fexipro/util/SVDUtil.h
+        src/include/fexipro/util/TransformUtil.h)
+
+add_library(fexiprolib SHARED ${fexipro})
+set_target_properties(fexiprolib PROPERTIES LINKER_LANGUAGE CXX)
+target_link_directories(fexiprolib PRIVATE armadillo pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+target_include_directories(fexiprolib PRIVATE ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
 set(USE_CUDA OFF)
 
@@ -57,7 +76,7 @@ if (USE_CUDA)
     set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
     add_executable(rri src/app/ReverseRankIndex.cpp)
     target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas fexiprolib)
     set_target_properties(rri PROPERTIES POSITION_INDEPENDENT_CODE ON)
     set_property(TARGET rri PROPERTY CXX_STANDARD "17")
     set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
@@ -75,11 +94,11 @@ if (USE_CUDA)
 else () # not use cuda
     add_executable(rri src/app/ReverseRankIndex.cpp)
     target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    target_link_libraries(rri PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
     add_executable(dbt src/app/query-distribution-index/DistributionBelowTopk.cpp)
     target_include_directories(dbt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(dbt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+    target_link_libraries(dbt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 endif ()
 
 ##set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
@@ -99,12 +118,12 @@ endif ()
 if (BUILD_PROGRESS)
     add_executable(progress src/app/Progress.cpp)
     target_include_directories(progress PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} Eigen3::Eigen)
+    target_link_libraries(progress PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 endif ()
 
 add_executable(t1 test.cpp)
 target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
+target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} fexiprolib)
 
 if (BUILD_ATTRIBUTION)
     add_subdirectory(attribution)

@@ -131,79 +131,56 @@ def run_interval_sample_rate():
                     'IntervalBound', ds, basic_dir, n_interval))
 
 
-def run_compute_all_scale():
-    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    scale_l = [25, 50, 100, 200, 400, 800, 1000]
-    for ds in dataset_l:
-        for scale in scale_l:
+def run_build_index():
+    dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
+    dataset_l = ['goodreads']
+    index_size_l = [1536]
+    for index_size in index_size_l:
+        for ds in dataset_l:
+            n_sample = compute_n_sample(ds, 32)
+            # if ds == 'movielens-27m':
+            #     os.system(
+            #         'cd build/attribution && ./rsbist --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
+            #             ds, basic_dir, n_sample, index_size))
             os.system(
-                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --scale {}'.format(
-                    'CAPartIntPartNorm', ds, basic_dir, scale))
+                'cd build/attribution && ./rsbimt --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
+                    ds, basic_dir, n_sample, index_size))
 
 
-def run_compute_all_n_codebook():
-    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    n_codebook_l = [2, 4, 8, 16]
-    n_codeword = 128
-    for ds in dataset_l:
-        for n_codebook in n_codebook_l:
-            os.system(
-                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --n_codebook {} --n_codeword {}'.format(
-                    'CAUserItemPQ', ds, basic_dir, n_codebook, n_codeword))
-            os.system(
-                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --n_codebook {} --n_codeword {}'.format(
-                    'CAItemPQ', ds, basic_dir, n_codebook, n_codeword))
-
-
-def run_compute_all_n_codeword():
-    # dataset_l = ['fake', 'fakebig', 'movielens-small', 'movielens-1m']
-    n_codebook = 4
-    n_codeword_l = [16, 32, 64, 128, 256, 512, 1024]
-    for ds in dataset_l:
-        for n_codeword in n_codeword_l:
-            os.system(
-                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --n_codebook {} --n_codeword {}'.format(
-                    'CAUserItemPQ', ds, basic_dir, n_codebook, n_codeword))
-            os.system(
-                'cd build && ./ca --bound_name {} --dataset_name {} --basic_dir {} --n_codebook {} --n_codeword {}'.format(
-                    'CAItemPQ', ds, basic_dir, n_codebook, n_codeword))
-
-
-def run_compress_topt():
+def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
     dataset_l = ['netflix', 'movielens-27m', 'yahoomusic']
     # dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
-    index_size_l = [1536]
-    for index_size in index_size_l:
+    index_size = 1536
+    for ds in dataset_l:
+        n_sample = compute_n_sample(ds, 16)
         # os.system(
-        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-        #         ds, basic_dir, "SSComputeAll", n_sample))
-        for ds in dataset_l:
-            n_sample = compute_n_sample(ds, 16)
-            # os.system(
-            #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
-            #         ds, 5000, 500,
-            #         ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 500))
-            os.system(
-                'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-                    ds, basic_dir, "RSTopTIP", n_sample, index_size))
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-            #         ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
-            # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
-            #     ds, 5000, 500,
-            # ))
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --n_sample_score_distribution {} --n_sample_query {} --sample_topk {}'.format(
-            #         ds, basic_dir, 'QueryRankSampleScoreDistribution', n_sample, 8, 5000, 500))
-            # os.system(
-            #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-            #         ds, basic_dir, 'QueryRankSample', n_sample, 5000, 500))
-            # os.system('cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-            #     ds, basic_dir, 'RankSample', n_sample))
-            # os.system('cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
-            #     ds, basic_dir, 'RankSampleStoreID', n_sample))
+        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 5000, 500,
+        #         ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 500))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+        #         ds, basic_dir, "RSTopTIP", n_sample, index_size))
+        os.system(
+            'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --simpfer_k_max {}'.format(
+                ds, basic_dir, "Simpfer", n_sample, 1000))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
+        #         ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
+        # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
+        #     ds, 5000, 500,
+        # ))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --n_sample_score_distribution {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, basic_dir, 'QueryRankSampleScoreDistribution', n_sample, 8, 5000, 500))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, basic_dir, 'QueryRankSample', n_sample, 5000, 500))
+        # os.system('cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+        #     ds, basic_dir, 'RankSample', n_sample))
+        # os.system('cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {}'.format(
+        #     ds, basic_dir, 'RankSampleStoreID', n_sample))
 
 
 if __name__ == '__main__':
@@ -212,21 +189,7 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    # dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
-    # dataset_l = ['goodreads']
-    # index_size_l = [1536]
-    # for index_size in index_size_l:
-    #     for ds in dataset_l:
-    #         n_sample = compute_n_sample(ds, 32)
-    #         # if ds == 'movielens-27m':
-    #         #     os.system(
-    #         #         'cd build/attribution && ./rsbist --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-    #         #             ds, basic_dir, n_sample, index_size))
-    #         os.system(
-    #             'cd build/attribution && ./rsbimt --dataset_name {} --basic_dir {} --n_sample {} --index_size_gb {}'.format(
-    #                 ds, basic_dir, n_sample, index_size))
-
-    run_compress_topt()
+    run()
 
     # os.system(
     #     'cd build/attribution && ./qdur --dataset_name {} --basic_dir {} --n_sample_item {}'.format(
