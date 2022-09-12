@@ -2,7 +2,8 @@
 #define SVDUTIL_H
 
 #include "Base.h"
-#include <mlpack/core.hpp>
+#include <armadillo>
+//#include <mlpack/core.hpp>
 
 using namespace arma;
 
