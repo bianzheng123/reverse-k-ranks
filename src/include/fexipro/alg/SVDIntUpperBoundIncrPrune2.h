@@ -324,7 +324,7 @@ inline SIRPrune::~SIRPrune() {
 inline void
 SIRPrune::topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector_element_l, int64_t &ip_count) {
 
-    assert(vector_element_l.size() == q.rowNum * k);
+    assert(vector_element_l.size() == q.rowNum);
 
     std::vector<double> newQ(q.colNum);
     std::vector<int> newQIntPtr(q.colNum);
@@ -346,9 +346,11 @@ SIRPrune::topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector
     const double pRatio1 = preprocessedP->ratio1;
     const double pRatio2 = preprocessedP->ratio2;
 
+    std::vector<VectorElement> heap_ele_l(k);
+
     for (int qID = 0; qID < q.rowNum; qID++) {
 
-        VectorElement *heap = vector_element_l.data() + qID * k;
+        VectorElement *heap = heap_ele_l.data();
 
         const double *qPtr = q.getRowPtr(qID);
 
@@ -362,6 +364,16 @@ SIRPrune::topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector
         refine(q, k, heap, qNorm, newQ.data(), subQNorm, newQIntPtr.data(), qSumOfCoordinate1, qSumOfCoordinate2,
                ratio1, ratio2,
                newSVDQNorm, transformSubQNorm, sumOfQCoordinate, leftPartialQSumOfCoordinate, ip_count);
+
+        int topk_min_id = 0;
+        double topk_min_ip = heap_ele_l[0].data;
+        for (int topk_idx = 1; topk_idx < k; topk_idx++) {
+            if (topk_min_ip > heap_ele_l[topk_idx].data) {
+                topk_min_ip = heap_ele_l[topk_idx].data;
+                topk_min_id = topk_idx;
+            }
+        }
+        vector_element_l[qID] = heap_ele_l[topk_min_id];
     }
 
 //    Logger::Log("online time: " + to_string(tt.getElapsedTime()) + " secs");

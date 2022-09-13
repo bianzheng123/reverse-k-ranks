@@ -133,28 +133,19 @@ namespace ReverseMIPS {
                                  int64_t &ip_count,
                                  int &result_size) {
 
-            std::vector<VectorElement> topk_res_l(n_user_ * rtk_topk);
+            std::vector<VectorElement> topk_res_l(n_user_);
 
             sir_prune_.topK(user_matrix, rtk_topk, topk_res_l, ip_count);
 
             for (int64_t userID = 0; userID < n_user_; userID++) {
-                const int64_t topk_start_idx = userID * rtk_topk;
-                const int64_t topk_end_idx = (userID + 1) * rtk_topk;
-                int64_t topk_min_id = topk_start_idx;
-                double topk_min_ip = topk_res_l[topk_start_idx].data;
-                for (int64_t topk_idx = topk_start_idx + 1; topk_idx < topk_end_idx; topk_idx++) {
-                    if (topk_min_ip > topk_res_l[topk_idx].data) {
-                        topk_min_ip = topk_res_l[topk_idx].data;
-                        topk_min_id = topk_idx;
-                    }
-                }
+                double topk_IP = topk_res_l[userID].data;
                 const double queryIP = InnerProduct(query_item.vec_.data(), user_matrix.getRowPtr(userID),
                                                     (int) vec_dim_);
 
                 ip_count++;
-                if (queryIP > topk_min_ip) {
+                if (queryIP > topk_IP) {
                     result_size++;
-                    result_userID_l.push_back(userID);
+                    result_userID_l.push_back((int)userID);
                 }
             }
         }

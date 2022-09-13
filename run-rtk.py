@@ -50,19 +50,19 @@ def cmp_rtk(baseline_method, rtk_method, dataset_l, topk_l):
 
 def run():
     for ds in dataset_l:
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
     #     # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'Simpfer'))
 
     # topk_l = [10, 20, 30, 40, 50]
-    topk_l = [10, 20, 30]
+    topk_l = [10]
     cmp_rtk('MemoryBruteForce', 'Simpfer', dataset_l, topk_l)
 
 
 if __name__ == '__main__':
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal']
+    dataset_l = ['fake-normal', 'fake-uniform']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
