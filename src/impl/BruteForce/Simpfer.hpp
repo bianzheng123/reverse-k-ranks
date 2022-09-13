@@ -100,8 +100,7 @@ namespace ReverseMIPS::Simpfer {
                 while (rtk_topk < n_data_item_) {
                     simpfer_index_.RTopKRetrieval(query_sd_l[queryID], user_matrix_, rtk_topk,
                                                   result_userID_l,
-                                                  n_block_prune, n_sample_prune, n_norm_prune, ip_count, result_size,
-                                                  queryID);
+                                                  n_block_prune, n_sample_prune, n_norm_prune, ip_count, result_size);
 
                     if (result_size >= topk) {
                         break;

@@ -24,7 +24,7 @@ public:
     Matrix &operator=(const Matrix &) = delete;
 
     Matrix(Matrix &&x)
-    : rawData(x.rawData), rowNum(x.rowNum), colNum(x.colNum) {
+            : rawData(x.rawData), rowNum(x.rowNum), colNum(x.colNum) {
         x.rawData = nullptr;
     }
 
@@ -43,6 +43,10 @@ public:
     }
 
     inline double *getRowPtr(const int rowIndex) const {
+        return &rawData[rowIndex * colNum];
+    }
+
+    inline double *getRowPtr(const int64_t rowIndex) const {
         return &rawData[rowIndex * colNum];
     }
 

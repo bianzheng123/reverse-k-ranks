@@ -74,7 +74,7 @@ namespace ReverseMIPS {
         void ComputeByIndex(const SimpferData &query_item, const int &rtk_topk,
                             std::vector<int> &result_userID_l,
                             int &n_block_prune, int &sample_prune, int &norm_prune, int64_t &ip_count,
-                            int &result_size, const int &queryID) {
+                            int &result_size) {
             // init
             for (unsigned int userID = 0; userID < n_user_; ++userID) {
                 user_sd_l_[userID].init();
@@ -124,6 +124,7 @@ namespace ReverseMIPS {
                     norm_prune += n_user_member;
                 }
             }
+            assert(result_size <= n_user_);
         }
 
         void ComputeByBruteforce(const SimpferData &query_item, const Matrix &user_matrix,
@@ -136,7 +137,7 @@ namespace ReverseMIPS {
 
             sir_prune_.topK(user_matrix, rtk_topk, topk_res_l, ip_count);
 
-            for (int userID = 0; userID < n_user_; userID++) {
+            for (int64_t userID = 0; userID < n_user_; userID++) {
                 const int64_t topk_start_idx = userID * rtk_topk;
                 const int64_t topk_end_idx = (userID + 1) * rtk_topk;
                 int64_t topk_min_id = topk_start_idx;
@@ -163,7 +164,7 @@ namespace ReverseMIPS {
         void RTopKRetrieval(const SimpferData &query_item, Matrix &user_matrix, const int &rtk_topk,
                             std::vector<int> &result_userID_l,
                             int &n_block_prune, int &sample_prune, int &norm_prune, int64_t &ip_count,
-                            int &result_size, const int &queryID) {
+                            int &result_size) {
 
             result_userID_l.clear();
             n_block_prune = 0;
@@ -182,7 +183,7 @@ namespace ReverseMIPS {
                 ComputeByIndex(query_item, rtk_topk,
                                result_userID_l,
                                n_block_prune, sample_prune, norm_prune, ip_count,
-                               result_size, queryID);
+                               result_size);
 
             }
 
