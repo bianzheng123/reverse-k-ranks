@@ -1,9 +1,9 @@
 //
-// Created by BianZheng on 2022/8/2.
+// Created by BianZheng on 2022/8/27.
 //
 
-#ifndef REVERSE_KRANKS_RSCOMPRESSTOPTIPBRUTEFORCE_HPP
-#define REVERSE_KRANKS_RSCOMPRESSTOPTIPBRUTEFORCE_HPP
+#ifndef REVERSE_KRANKS_RSTOPTIPREFINEORDER_HPP
+#define REVERSE_KRANKS_RSTOPTIPREFINEORDER_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkLBHeap.hpp"
@@ -160,7 +160,9 @@ namespace ReverseMIPS::RSTopTIP {
                 size_t ip_cost = 0;
                 double read_disk_time = 0;
                 double rank_compute_time = 0;
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, user_, data_item_,
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
+                                  user_, data_item_,
+                                  prune_l_, topkLbHeap,
                                   n_user_candidate, io_cost, ip_cost, read_disk_time, rank_compute_time);
                 total_io_cost_ += io_cost;
                 total_ip_cost_ += ip_cost;
@@ -285,4 +287,4 @@ namespace ReverseMIPS::RSTopTIP {
     }
 
 }
-#endif //REVERSE_KRANKS_RSCOMPRESSTOPTIPBRUTEFORCE_HPP
+#endif //REVERSE_KRANKS_RSTOPTIPREFINEORDER_HPP

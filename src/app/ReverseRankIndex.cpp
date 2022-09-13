@@ -8,11 +8,8 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "BruteForce/QRSSDTopTIPRefineOrder.hpp"
 #include "BruteForce/QRSTopTIP.hpp"
-#include "BruteForce/QRSTopTIPRefineOrder.hpp"
 #include "BruteForce/RSTopTIP.hpp"
-#include "BruteForce/RSTopTIPRefineOrder.hpp"
 #include "BruteForce/Simpfer.hpp"
 
 #include "GridIndex.hpp"
@@ -20,7 +17,6 @@
 #include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSample.hpp"
 #include "RankSample.hpp"
-#include "RankSampleStoreID.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -101,24 +97,7 @@ int main(int argc, char **argv) {
     record.reset();
     unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
-    if (method_name == "QRSSDTopTIPRefineOrder") {
-        const int n_sample = para.n_sample;
-        const int n_sample_score_distribution = para.n_sample_score_distribution;
-        const int n_sample_query = para.n_sample_query;
-        const int sample_topk = para.sample_topk;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info(
-                "input parameter: n_sample {} index_size_gb {} n_sample_score_distribution {} n_sample_query {} sample_topk {}",
-                n_sample, index_size_gb, n_sample_score_distribution, n_sample_query, sample_topk);
-        index = QRSSDTopTIPRefineOrder::BuildIndex(data_item, user,
-                                                   index_path, dataset_name,
-                                                   n_sample, n_sample_score_distribution,
-                                                   index_size_gb,
-                                                   n_sample_query, sample_topk);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%ld-n_sample_score_distribution_%d",
-                n_sample, index_size_gb, n_sample_score_distribution);
-
-    } else if (method_name == "QRSTopTIP") {
+    if (method_name == "QRSTopTIP") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
         const int n_sample_query = para.n_sample_query;
@@ -130,18 +109,6 @@ int main(int argc, char **argv) {
                                       dataset_name, n_sample_query, sample_topk);
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu", n_sample, index_size_gb);
 
-    } else if (method_name == "QRSTopTIPRefineOrder") {
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        const int n_sample_query = para.n_sample_query;
-        const int sample_topk = para.sample_topk;
-        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
-                     n_sample, n_sample_query, sample_topk);
-        index = QRSTopTIPRefineOrder::BuildIndex(data_item, user, index_path,
-                                                 n_sample, index_size_gb,
-                                                 dataset_name, n_sample_query, sample_topk);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu", n_sample, index_size_gb);
-
     } else if (method_name == "RSTopTIP") {
         const int n_sample = para.n_sample;
         const uint64_t index_size_gb = para.index_size_gb;
@@ -149,16 +116,6 @@ int main(int argc, char **argv) {
                      n_sample, index_size_gb);
         index = RSTopTIP::BuildIndex(data_item, user, index_path,
                                      n_sample, index_size_gb);
-        sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
-                n_sample, index_size_gb);
-
-    } else if (method_name == "RSTopTIPRefineOrder") {
-        const int n_sample = para.n_sample;
-        const uint64_t index_size_gb = para.index_size_gb;
-        spdlog::info("input parameter: n_sample {}, index_size_gb {}",
-                     n_sample, index_size_gb);
-        index = RSTopTIPRefineOrder::BuildIndex(data_item, user, index_path,
-                                                n_sample, index_size_gb);
         sprintf(parameter_name, "n_sample_%d-index_size_gb_%lu",
                 n_sample, index_size_gb);
 
@@ -195,12 +152,6 @@ int main(int argc, char **argv) {
         index = RankSample::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    } else if (method_name == "RankSampleStoreID") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = RankSampleStoreID::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
     } else if (method_name == "Simpfer") {
         const int simpfer_k_max = para.simpfer_k_max;
         spdlog::info("input parameter: simpfer_k_max {}",
@@ -230,8 +181,8 @@ int main(int argc, char **argv) {
 
 //    vector<int> topk_l{500, 400, 300, 200, 100, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{50, 40, 30, 30, 20, 10};
-//    vector<int> topk_l{30, 20, 10};
-    vector<int> topk_l{10};
+    vector<int> topk_l{30, 20, 10};
+//    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;

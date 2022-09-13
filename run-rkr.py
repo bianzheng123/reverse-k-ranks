@@ -34,19 +34,12 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
     flag = True
     suffix_m = {
 
-        'CompressTopTIPBruteForce': 'n_sample_20-index_size_gb_50',
-        'CompressTopTIPBruteForceBatchRun': 'n_sample_128-index_size_gb_256',
-        'RSCompressTopTIPBruteForceBatchRun': 'n_sample_512-index_size_gb_256',
-        'QRSSDTopTIPRefineOrder': 'n_sample_20-index_size_gb_50-n_sample_score_distribution_8',
         'QRSTopTIP': 'n_sample_20-index_size_gb_50',
-        'QRSTopTIPRefineOrder': 'n_sample_20-index_size_gb_50',
         'RSTopTIP': 'n_sample_20-index_size_gb_50',
-        'RSTopTIPRefineOrder': 'n_sample_20-index_size_gb_50',
 
         'QueryRankSample': 'n_sample_20',
         'QueryRankSampleScoreDistribution': 'n_sample_20-n_sample_score_distribution_8',
         'RankSample': 'n_sample_20',
-        'RankSampleStoreID': 'n_sample_20',
     }
     for ds in dataset_l:
         for topk in topk_l:
@@ -86,17 +79,13 @@ def run():
         # 'RSCompressTopTIPBruteForceBatchRun',
         # 'DiskBruteForce',
         'MemoryBruteForce',
-        # 'QRSSDTopTIPRefineOrder',
-        # 'QRSTopTIP',
-        # 'QRSTopTIPRefineOrder',
-        # 'RSTopTIP',
-        # 'RSTopTIPRefineOrder',
+        'QRSTopTIP',
+        'RSTopTIP',
 
         # 'GridIndex',
         # 'QueryRankSample',
         # 'QueryRankSampleScoreDistribution',
         # 'RankSample',
-        'RankSampleStoreID',
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
@@ -107,20 +96,11 @@ def run():
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 30,
-        #         ds, 'QRSSDTopTIPRefineOrder', 150, 30))
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 30,
-        #         ds, 'QRSTopTIP', 150, 30))
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 30,
-        #         ds, 'QRSTopTIPRefineOrder', 150, 30))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIPRefineOrder'))
+        os.system(
+            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 150, 30,
+                ds, 'QRSTopTIP', 150, 30))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
@@ -136,7 +116,6 @@ def run():
         #         ds, 150, 30,
         #         ds, 'QueryRankSampleScoreDistribution', 150, 30))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleStoreID'))
 
     type_arr = ['userID', 'IP', 'rank']
     # topk_l = [10, 20, 30, 40, 50]
