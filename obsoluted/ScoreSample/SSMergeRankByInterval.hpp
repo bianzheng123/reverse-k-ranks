@@ -7,7 +7,7 @@
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/SVD.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "../MergeIntervalDiskCompression/MergeRankByInterval.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "ScoreSearch.hpp"

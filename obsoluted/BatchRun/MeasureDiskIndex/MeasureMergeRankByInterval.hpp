@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_MEASUREMERGERANKBYINTERVAL_HPP
 #define REVERSE_KRANKS_MEASUREMERGERANKBYINTERVAL_HPP
 
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/SpaceInnerProduct.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"

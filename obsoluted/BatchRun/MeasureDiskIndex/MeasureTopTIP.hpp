@@ -7,7 +7,7 @@
 
 #include "BatchRun/MeasureDiskIndex/BaseMeasureIndex.hpp"
 
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 

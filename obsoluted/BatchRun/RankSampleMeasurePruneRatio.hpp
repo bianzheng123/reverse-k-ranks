@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_RANKSAMPLEMEASUREPRUNERATIO_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"

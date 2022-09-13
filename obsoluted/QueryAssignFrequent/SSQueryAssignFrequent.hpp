@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_SSQUERYASSIGNFREQUENT_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "QueryAssignFrequent.hpp"
 #include "../ScoreSample/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"

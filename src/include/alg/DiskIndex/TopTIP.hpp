@@ -52,12 +52,6 @@ namespace ReverseMIPS {
         int BelowTopt(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
                       size_t &io_cost, size_t &ip_cost,
                       double &read_disk_time, double &rank_compute_time) {
-            if (rank_lb == rank_ub) {
-                int rank = rank_lb;
-                user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
-                n_user_candidate_++;
-                return rank;
-            }
             int end_idx = rank_lb;
             int start_idx = rank_ub;
             assert(0 <= start_idx && start_idx <= end_idx && end_idx <= topt_);
@@ -77,50 +71,7 @@ namespace ReverseMIPS {
             const double tmp_rank_compute_time = exact_rank_record_.get_elapsed_time_second();
             exact_rank_time_ += tmp_rank_compute_time;
             ip_cost += 0;
-
-            user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
-            n_user_candidate_++;
             return rank;
-        }
-
-        void BetweenTopt(const double &queryIP,
-                         const int &rank_lb, const int &rank_ub,
-                         const int &userID, const double *user_vecs, const VectorMatrix &item,
-                         size_t &io_cost, size_t &ip_cost,
-                         double &read_disk_time, double &rank_compute_time) {
-            //check the data is in topt
-            int end_idx = topt_;
-            int start_idx = rank_ub;
-            assert(0 <= start_idx && start_idx <= end_idx && end_idx <= topt_);
-
-            int base_rank = start_idx;
-            int read_count = end_idx - start_idx;
-
-            assert(0 <= read_count && read_count <= topt_);
-
-            const double tmp_read_disk_time = ReadDisk(userID, start_idx, read_count);
-            read_disk_time += tmp_read_disk_time;
-            read_disk_time_ += tmp_read_disk_time;
-            io_cost += read_count;
-
-            exact_rank_record_.reset();
-            int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
-            const double tmp_rank_compute_time = exact_rank_record_.get_elapsed_time_second();
-            exact_rank_time_ += tmp_rank_compute_time;
-            ip_cost += 0;
-
-            if (rank == topt_ + 1) {
-                exact_rank_record_.reset();
-                rank = exact_rank_ins_.QueryRankByCandidate(user_vecs, userID, item, queryIP);
-                rank++;
-                const double tmp_rank_compute_time_inloop = exact_rank_record_.get_elapsed_time_second();
-                rank_compute_time += tmp_rank_compute_time_inloop;
-                exact_rank_time_ += tmp_rank_compute_time_inloop;
-                ip_cost += n_data_item_;
-            }
-
-            user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
-            n_user_candidate_++;
         }
 
         int AboveTopt(const double &queryIP,
@@ -136,9 +87,6 @@ namespace ReverseMIPS {
             exact_rank_time_ += tmp_rank_compute_time;
             ip_cost += n_data_item_;
             io_cost += 0;
-
-            user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
-            n_user_candidate_++;
             return rank;
         }
 
@@ -156,7 +104,7 @@ namespace ReverseMIPS {
         //variable in retrieval
         std::ifstream index_stream_;
         std::unique_ptr<double[]> disk_cache_;
-        int n_user_candidate_;
+        int n_refine_user_;
         std::vector<UserRankElement> user_topk_cache_l_;
 
         inline TopTIP() = default;
@@ -231,102 +179,52 @@ namespace ReverseMIPS {
 
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
-                     const std::vector<bool> &prune_l, const VectorMatrix &user, const VectorMatrix &item,
-                     const int &n_total_user_candidate,
-                     size_t &io_cost, size_t &ip_cost,
-                     double &read_disk_time, double &rank_compute_time) {
-            assert(n_user_ == queryIP_l.size());
-            assert(n_user_ == rank_lb_l.size() && n_user_ == rank_ub_l.size());
-            assert(n_user_ == prune_l.size());
-
-            n_user_candidate_ = 0;
-            io_cost = 0;
-            ip_cost = 0;
-            read_disk_time = 0;
-            rank_compute_time = 0;
-            TimeRecord record;
-            for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID]) {
-                    continue;
-                }
-
-                GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
-                              user, item,
-                              io_cost, ip_cost, read_disk_time, rank_compute_time);
-
-                if (n_user_candidate_ % 7500 == 0) {
-                    const double progress = n_user_candidate_ / (0.01 * n_total_user_candidate);
-                    spdlog::info(
-                            "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",
-                            progress, io_cost, ip_cost, read_disk_time, rank_compute_time,
-                            record.get_elapsed_time_second(), get_current_RSS() / 1000000);
-                    record.reset();
-                }
-            }
-
-            assert(0 <= n_user_candidate_ && n_user_candidate_ <= n_user_);
-            std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_user_candidate_,
-                      std::less());
-
-        };
-
-        void GetRank(const std::vector<double> &queryIP_l,
-                     const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const VectorMatrix &user, const VectorMatrix &item,
-                     std::vector<bool> &prune_l, TopkLBHeap &topk_lb_heap,
-                     const int &n_total_user_candidate,
+                     const std::vector<int> &refine_seq_l, const int &refine_user_size, const int &remain_n_result,
                      size_t &io_cost, size_t &ip_cost,
                      double &read_disk_time, double &rank_compute_time) {
             assert(n_user_ == queryIP_l.size());
             assert(n_user_ == rank_lb_l.size() && n_user_ == rank_ub_l.size());
-            assert(n_user_ == prune_l.size());
 
-            int n_actual_user_candidate = 0;
-            //read disk and fine binary search
-            n_user_candidate_ = 0;
+            n_refine_user_ = 0;
             io_cost = 0;
             ip_cost = 0;
             read_disk_time = 0;
             rank_compute_time = 0;
-            int topk_lb_rank = topk_lb_heap.Front();
-            topk_lb_heap.Reset();
-            for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID] || rank_lb_l[userID] >= topk_lb_rank) {
+
+            assert(remain_n_result <= refine_user_size);
+            TopkMaxHeap heap(remain_n_result);
+
+            TimeRecord record;
+            record.reset();
+            for (int refineID = 0; refineID < refine_user_size; refineID++) {
+                const int userID = refine_seq_l[refineID];
+                assert(rank_ub_l[userID] <= rank_lb_l[userID]);
+                if (heap.Front() != -1 && heap.Front() < rank_ub_l[userID]) {
                     continue;
                 }
                 const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
                                                user, item,
                                                io_cost, ip_cost, read_disk_time, rank_compute_time);
-                n_actual_user_candidate++;
-                topk_lb_heap.Update(rank);
-                prune_l[userID] = true;
-            }
 
-            TimeRecord record;
-            record.reset();
-            for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID] || (topk_lb_heap.Front() != -1 && rank_ub_l[userID] > topk_lb_heap.Front())) {
-                    continue;
-                }
-                GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
-                              user, item,
-                              io_cost, ip_cost, read_disk_time, rank_compute_time);
-                n_actual_user_candidate++;
+                user_topk_cache_l_[n_refine_user_] = UserRankElement(userID, rank, queryIP_l[userID]);
+                n_refine_user_++;
+                heap.Update(rank);
 
-                if (n_user_candidate_ % 7500 == 0) {
-                    const double progress = n_user_candidate_ / (0.01 * n_total_user_candidate);
+                if (n_refine_user_ % 7500 == 0) {
+                    const double progress = n_refine_user_ / (0.01 * refine_user_size);
                     spdlog::info(
                             "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",
                             progress, io_cost, ip_cost, read_disk_time, rank_compute_time,
                             record.get_elapsed_time_second(), get_current_RSS() / 1000000);
                     record.reset();
                 }
+
             }
 
-            assert(n_actual_user_candidate == n_total_user_candidate);
 
-            assert(0 <= n_user_candidate_ && n_user_candidate_ <= n_user_);
-            std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_user_candidate_,
+            assert(0 <= remain_n_result && remain_n_result <= n_refine_user_ && n_refine_user_ <= n_user_);
+            std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_refine_user_,
                       std::less());
         }
 
@@ -334,13 +232,11 @@ namespace ReverseMIPS {
                           const VectorMatrix &user, const VectorMatrix &item,
                           size_t &io_cost, size_t &ip_cost, double &read_disk_time, double &rank_compute_time) {
             assert(rank_ub <= rank_lb);
-            int rank;
             if (rank_ub == rank_lb) {
-                rank = rank_ub;
-                user_topk_cache_l_[n_user_candidate_] = UserRankElement(userID, rank, queryIP);
-                n_user_candidate_++;
+                int rank = rank_ub;
                 return rank;
             }
+            int rank;
             if (rank_lb <= topt_) {
                 //retrieval the top-t like before
                 rank = BelowTopt(queryIP, rank_lb, rank_ub, userID,

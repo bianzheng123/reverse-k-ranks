@@ -5,7 +5,7 @@
 #ifndef REVERSE_K_RANKS_READALLID_HPP
 #define REVERSE_K_RANKS_READALLID_HPP
 
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"
 
 #include "struct/DistancePair.hpp"

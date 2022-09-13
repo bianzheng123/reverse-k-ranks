@@ -40,30 +40,9 @@ if (FINISH)
     target_link_libraries(mpr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 endif ()
 
-if (USE_CUDA)
-    set_source_files_properties(print-prune-ratio/PrintPruneRatio.cpp PROPERTIES LANGUAGE CUDA)
-    add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
-    target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(ppr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
-    set_target_properties(ppr PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    set_property(TARGET ppr PROPERTY CXX_STANDARD "17")
-    set_property(TARGET ppr PROPERTY CXX_STANDARD_REQUIRED ON)
-    set_property(TARGET ppr PROPERTY CXX_EXTENSIONS OFF)
-
-else ()
-    add_executable(ppr print-prune-ratio/PrintPruneRatio.cpp)
-    target_include_directories(ppr PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(ppr PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
-
-endif ()
-
 add_executable(dvd risk-read-distance-computation/DiskReadVSDistanceComputation.cpp)
 target_include_directories(dvd PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(dvd PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog)
-
-add_executable(pprnbi print-prune-ratio/PrintPruneRatioNoBuildIndex.cpp)
-target_include_directories(pprnbi PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(pprnbi PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
 add_executable(qdur memory-index-time-compare/QueryDistributionUserRank.cpp)
 target_include_directories(qdur PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
@@ -77,10 +56,10 @@ add_executable(biipb build-index-bound-selection/BuildIndexIPBound.cpp)
 target_include_directories(biipb PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(biipb PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
 
-add_executable(rsbist build-index-time/RSBuildIndexSingleThread.cpp)
-target_include_directories(rsbist PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(rsbist PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
-
-add_executable(rsbimt build-index-time/RSBuildIndexMultipleThread.cpp)
-target_include_directories(rsbimt PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(rsbimt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
+#add_executable(rsbist build-index-time/RSBuildIndexSingleThread.cpp)
+#target_include_directories(rsbist PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+#target_link_libraries(rsbist PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
+#
+#add_executable(rsbimt build-index-time/RSBuildIndexMultipleThread.cpp)
+#target_include_directories(rsbimt PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+#target_link_libraries(rsbimt PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})

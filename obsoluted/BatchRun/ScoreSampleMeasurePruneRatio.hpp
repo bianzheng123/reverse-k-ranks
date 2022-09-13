@@ -6,7 +6,7 @@
 #define REVERSE_K_RANKS_SCORESAMPLEMEASUREPRUNERATIO_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "../ScoreSample/ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"

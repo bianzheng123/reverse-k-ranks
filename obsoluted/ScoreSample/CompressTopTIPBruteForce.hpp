@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_COMPRESSTOPTIPBRUTEFROCE_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "ScoreSearch.hpp"

@@ -1,5 +1,4 @@
 import os
-import filecmp
 import numpy as np
 
 
@@ -23,14 +22,19 @@ def delete_file_if_exist(dire):
 
 
 def cmp_file(file1, file2):
-    status = filecmp.cmp(file1, file2)
-    if status:
-        return True
-    else:
-        return False
+    method1_result_l = np.loadtxt(file1, delimiter=',')
+    method2_result_l = np.loadtxt(file2, delimiter=',')
+
+    assert len(method1_result_l) == len(method2_result_l)
+
+    for i in range(len(method1_result_l)):
+        intersect = set(method1_result_l[i]).intersection(set(method2_result_l[i]))
+        if len(intersect) != len(method1_result_l[i]):
+            return False
+    return True
 
 
-def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
+def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
     flag = True
     suffix_m = {
 
@@ -43,32 +47,30 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
     }
     for ds in dataset_l:
         for topk in topk_l:
-            for _type in type_arr:
-                for method_idx in range(1, len(method_name_l), 1):
-                    baseline_method = method_name_l[0]
-                    cmp_method = method_name_l[method_idx]
-                    if baseline_method in suffix_m:
-                        base_method = os.path.join('result', 'rank',
-                                                   '{}-{}-top{}-{}-{}.csv'.format(
-                                                       ds, method_name_l[0], topk, suffix_m[baseline_method], _type))
-                    else:
-                        base_method = os.path.join('result', 'rank',
-                                                   '{}-{}-top{}-{}.csv'.format(ds, method_name_l[0], topk, _type))
+            for method_idx in range(len(compare_method_l)):
+                cmp_method = compare_method_l[method_idx]
+                if baseline_method in suffix_m:
+                    baseline_dir = os.path.join('result', 'rank',
+                                                '{}-{}-top{}-{}-userID.csv'.format(
+                                                    ds, baseline_method, topk, suffix_m[baseline_method]))
+                else:
+                    baseline_dir = os.path.join('result', 'rank',
+                                                '{}-{}-top{}-userID.csv'.format(
+                                                    ds, baseline_method, topk))
 
-                    if cmp_method in suffix_m:
-                        test_method = os.path.join('result', 'rank',
-                                                   '{}-{}-top{}-{}-{}.csv'.format(
-                                                       ds, method_name_l[method_idx], topk, suffix_m[cmp_method],
-                                                       _type))
-                    else:
-                        test_method = os.path.join('result', 'rank',
-                                                   '{}-{}-top{}-{}.csv'.format(
-                                                       ds, method_name_l[method_idx], topk, _type))
+                if cmp_method in suffix_m:
+                    cmp_dir = os.path.join('result', 'rank',
+                                           '{}-{}-top{}-{}-userID.csv'.format(
+                                               ds, cmp_method, topk, suffix_m[cmp_method]))
+                else:
+                    cmp_dir = os.path.join('result', 'rank',
+                                           '{}-{}-top{}-userID.csv'.format(
+                                               ds, cmp_method, topk))
 
-                    flag = cmp_file(base_method, test_method)
-                    if not flag:
-                        print("file have diff {} {}".format(base_method, test_method))
-                        exit(-1)
+                flag = cmp_file(baseline_dir, cmp_dir)
+                if not flag:
+                    print("file have diff {} {}".format(baseline_dir, cmp_dir))
+                    exit(-1)
     if flag:
         print("no error, no bug")
 
@@ -76,16 +78,15 @@ def cmp_file_all(method_name_l, type_arr, dataset_l, topk_l):
 def run():
     method_name_l = [
         'BatchDiskBruteForce',
-        # 'RSCompressTopTIPBruteForceBatchRun',
         # 'DiskBruteForce',
         'MemoryBruteForce',
         'QRSTopTIP',
         'RSTopTIP',
 
         # 'GridIndex',
-        # 'QueryRankSample',
-        # 'QueryRankSampleScoreDistribution',
-        # 'RankSample',
+        'QueryRankSample',
+        'QueryRankSampleScoreDistribution',
+        'RankSample',
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
@@ -104,23 +105,19 @@ def run():
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
 
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 50,
-        #         ds, 'QueryRankSample', 150, 50))
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 'QueryRankSampleScoreDistribution', 150, 50))
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 30,
-        #         ds, 'QueryRankSampleScoreDistribution', 150, 30))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        os.system(
+            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 150, 50,
+                ds, 'QueryRankSample', 150, 50))
+        os.system(
+            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 150, 30,
+                ds, 'QueryRankSampleScoreDistribution', 150, 30))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
 
-    type_arr = ['userID', 'IP', 'rank']
     # topk_l = [10, 20, 30, 40, 50]
     topk_l = [10, 20, 30]
-    cmp_file_all(method_name_l, type_arr, dataset_l, topk_l)
+    cmp_file_all('BatchDiskBruteForce', method_name_l, dataset_l, topk_l)
 
 
 if __name__ == '__main__':

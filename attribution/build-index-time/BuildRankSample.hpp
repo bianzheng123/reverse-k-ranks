@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_BUILDRANKSAMPLE_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
@@ -118,7 +118,7 @@ namespace ReverseMIPS::BuildRankSample {
             }
 
             // store queryIP
-            TopkLBHeap topkLbHeap(topk);
+            TopkMaxHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
                 query_record_.reset();
                 prune_l_.assign(n_user_, false);

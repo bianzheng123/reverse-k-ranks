@@ -6,7 +6,7 @@
 #define REVERSE_KRANKS_SSCOMPUTEALL_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ComputeAll.hpp"
 #include "ScoreSearch.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"

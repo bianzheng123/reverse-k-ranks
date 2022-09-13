@@ -14,8 +14,8 @@
 
 #include "GridIndex.hpp"
 
-#include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSample.hpp"
+#include "QueryRankSampleScoreDistribution.hpp"
 #include "RankSample.hpp"
 
 #include <spdlog/spdlog.h>

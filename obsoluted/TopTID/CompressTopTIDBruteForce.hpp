@@ -5,7 +5,7 @@
 #ifndef REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
 #define REVERSE_K_RANKS_COMPRESSTOPTIDBRUTEFORCE_HPP
 
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/TopTID.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "../ScoreSample/ScoreSearch.hpp"

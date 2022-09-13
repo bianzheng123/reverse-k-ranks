@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_QUERYASSIGNFREQUENT_HPP
 #define REVERSE_KRANKS_QUERYASSIGNFREQUENT_HPP
 
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"
 #include "struct/DistancePair.hpp"
 #include "struct/UserRankElement.hpp"

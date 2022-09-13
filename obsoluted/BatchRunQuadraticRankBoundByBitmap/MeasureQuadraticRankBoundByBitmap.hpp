@@ -6,7 +6,7 @@
 #define REVERSE_K_RANKS_MEASUREQUADRATICRANKBOUNDBYBITMAP_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 //#include "alg/Cluster/KMeansParallel.hpp"
 #include "alg/Cluster/GreedyMergeMinClusterSize.hpp"
 #include "alg/DiskIndex/ComputeRank/BaseIPBound.hpp"

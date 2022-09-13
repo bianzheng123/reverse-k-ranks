@@ -6,7 +6,7 @@
 #define REVERSE_K_RANKS_QUERYRANKSAMPLESCOREDISTRIBUTION_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/QRSScoreDistribution.hpp"
@@ -36,6 +36,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
             read_disk_time_ = 0;
             fine_binary_search_time_ = 0;
             rank_prune_ratio_ = 0;
+            total_io_cost_ = 0;
         }
 
         //rank search
@@ -48,15 +49,18 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         double inner_product_time_, coarse_binary_search_time_, read_disk_time_, fine_binary_search_time_;
         TimeRecord inner_product_record_, coarse_binary_search_record_;
         TimeRecord query_record_;
+        uint64_t total_io_cost_;
         double rank_prune_ratio_;
+
     public:
 
         //temporary retrieval variable
-        // store queryIP
+        std::vector<bool> prune_l_;
+        std::vector<bool> result_l_;
+        std::vector<int> refine_seq_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
-        std::vector<bool> prune_l_;
         std::unique_ptr<double[]> query_cache_;
 
         Index(//rank search
@@ -77,11 +81,13 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
             this->n_data_item_ = n_data_item;
 
             //retrieval variable
-            queryIP_l_.resize(n_user_);
-            rank_lb_l_.resize(n_user_);
-            rank_ub_l_.resize(n_user_);
-            prune_l_.resize(n_user_);
-            query_cache_ = std::make_unique<double[]>(vec_dim_);
+            this->prune_l_.resize(n_user_);
+            this->result_l_.resize(n_user_);
+            this->refine_seq_l_.resize(n_user_);
+            this->queryIP_l_.resize(n_user_);
+            this->rank_lb_l_.resize(n_user_);
+            this->rank_ub_l_.resize(n_user_);
+            this->query_cache_ = std::make_unique<double[]>(vec_dim_);
         }
 
         std::vector<std::vector<UserRankElement>>
@@ -106,17 +112,16 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
 
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
             for (int qID = 0; qID < n_query_item; qID++) {
-                query_heap_l[qID].reserve(topk);
+                query_heap_l[qID].resize(topk);
             }
 
             // for binary search, check the number
-            TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
                 query_record_.reset();
                 prune_l_.assign(n_user_, false);
+                result_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
-                topkLbHeap.Reset();
 
                 const double *query_item_vec = query_item.getVector(queryID);
                 double *query_vecs = query_cache_.get();
@@ -125,48 +130,58 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
                 //calculate IP
                 inner_product_record_.reset();
                 for (int userID = 0; userID < n_user_; userID++) {
-                    double *user_vec = user_.getVector(userID);
-                    double queryIP = InnerProduct(query_vecs, user_vec, vec_dim_);
-                    queryIP_l_[userID] = queryIP;
+                    queryIP_l_[userID] = InnerProduct(query_vecs, user_.getVector(userID), vec_dim_);
                 }
                 const double tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
                 this->inner_product_time_ += tmp_inner_product_time;
 
                 //rank search
+                int refine_user_size = 0;
+                int n_result_user = 0;
+                int n_prune_user = 0;
                 coarse_binary_search_record_.reset();
                 rank_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_,
-                                      prune_l_, topkLbHeap);
+                                      n_user_, topk,
+                                      refine_seq_l_, refine_user_size,
+                                      n_result_user, n_prune_user,
+                                      prune_l_, result_l_);
                 const double tmp_memory_index_time = coarse_binary_search_record_.get_elapsed_time_second();
                 coarse_binary_search_time_ += tmp_memory_index_time;
-
-                int n_user_candidate = 0;
-                for (int userID = 0; userID < n_user_; userID++) {
-                    if (!prune_l_[userID]) {
-                        n_user_candidate++;
-                    }
-                }
-                assert(n_user_candidate >= topk);
-                rank_prune_ratio_ += 1.0 * (n_user_ - n_user_candidate) / n_user_;
+                rank_prune_ratio_ += 1.0 * (n_user_ - refine_user_size) / n_user_;
+                assert(n_result_user + n_prune_user + refine_user_size == n_user_);
+                assert(0 <= n_result_user && n_result_user <= topk);
 
                 //read disk and fine binary search
                 size_t io_cost = 0;
                 size_t ip_cost = 0;
                 double read_disk_time = 0;
                 double rank_compute_time = 0;
-                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_, prune_l_, topkLbHeap,
+                disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
+                                  refine_seq_l_, refine_user_size, topk - n_result_user,
                                   io_cost, ip_cost, read_disk_time, rank_compute_time);
+                total_io_cost_ += io_cost;
 
-                for (int candID = 0; candID < topk; candID++) {
-                    query_heap_l[queryID].emplace_back(disk_ins_.user_topk_cache_l_[candID]);
+                int n_cand = 0;
+                for (int userID = 0; userID < n_user_; userID++) {
+                    if (result_l_[userID]) {
+                        query_heap_l[queryID][n_cand] = UserRankElement(userID, rank_lb_l_[userID], queryIP_l_[userID]);
+                        n_cand++;
+                    }
                 }
+
+                for (int candID = n_cand; candID < topk; candID++) {
+                    query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID - n_cand];
+                }
+                assert(n_cand + disk_ins_.n_refine_user_ >= topk);
                 assert(query_heap_l[queryID].size() == topk);
 
-                const double &total_time =
+                const double total_time =
                         query_record_.get_elapsed_time_second();
                 const double &memory_index_time = tmp_memory_index_time + tmp_inner_product_time;
-                query_performance_l[queryID] = SingleQueryPerformance(queryID, n_user_candidate,
+                query_performance_l[queryID] = SingleQueryPerformance(queryID,
+                                                                      n_prune_user, n_result_user,
+                                                                      disk_ins_.n_refine_user_,
                                                                       io_cost, ip_cost,
                                                                       total_time,
                                                                       memory_index_time, read_disk_time,
@@ -206,11 +221,11 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, read disk %.3fs\n\tfine binary search %.3fs\n\trank prune ratio %.4f\n\tmillion second per query %.3fms",
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, read disk %.3fs\n\tfine binary search %.3fs\n\ttotal io cost %ld, rank prune ratio %.4f\n\tmillion second per query %.3fms",
                     topk, retrieval_time,
                     inner_product_time_, coarse_binary_search_time_, read_disk_time_,
                     fine_binary_search_time_,
-                    rank_prune_ratio_,
+                    total_io_cost_, rank_prune_ratio_,
                     ms_per_query);
             std::string str(buff);
             return str;
@@ -225,7 +240,8 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
 
     std::unique_ptr<Index>
     BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const char *dataset_name,
-               const int &n_sample, const int n_sample_score_distribution, const int &n_sample_query, const int &sample_topk) {
+               const int &n_sample, const int n_sample_score_distribution, const int &n_sample_query,
+               const int &sample_topk) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
 

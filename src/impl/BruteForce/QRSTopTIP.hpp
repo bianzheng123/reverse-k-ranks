@@ -6,7 +6,7 @@
 #define REVERSE_K_RANKS_QRSTOPTIP_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "alg/TopkLBHeap.hpp"
+#include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/QueryRankSearch.hpp"
@@ -58,6 +58,8 @@ namespace ReverseMIPS::QRSTopTIP {
 
         //temporary retrieval variable
         std::vector<bool> prune_l_;
+        std::vector<bool> result_l_;
+        std::vector<int> refine_seq_l_;
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
@@ -84,6 +86,8 @@ namespace ReverseMIPS::QRSTopTIP {
 
             //retrieval variable
             this->prune_l_.resize(n_user_);
+            this->result_l_.resize(n_user_);
+            this->refine_seq_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
@@ -115,13 +119,12 @@ namespace ReverseMIPS::QRSTopTIP {
             }
 
             // store queryIP
-            TopkLBHeap topkLbHeap(topk);
             for (int queryID = 0; queryID < n_query_item; queryID++) {
                 query_record_.reset();
                 prune_l_.assign(n_user_, false);
+                result_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
                 rank_ub_l_.assign(n_user_, 0);
-                topkLbHeap.Reset();
 
                 const double *tmp_query_vecs = query_item.getVector(queryID);
                 double *query_vecs = query_cache_.get();
@@ -130,30 +133,27 @@ namespace ReverseMIPS::QRSTopTIP {
                 //calculate the exact IP
                 inner_product_record_.reset();
                 for (int userID = 0; userID < n_user_; userID++) {
-                    if (prune_l_[userID]) {
-                        continue;
-                    }
                     queryIP_l_[userID] = InnerProduct(user_.getVector(userID), query_vecs, vec_dim_);
                 }
                 const double tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
                 this->inner_product_time_ += tmp_inner_product_time;
 
                 //coarse binary search
+                int refine_user_size = 0;
+                int n_result_user = 0;
+                int n_prune_user = 0;
                 memory_index_search_record_.reset();
                 rank_bound_ins_.RankBound(queryIP_l_, rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
-                                      n_user_,
-                                      prune_l_, topkLbHeap);
+                                      n_user_, topk,
+                                      refine_seq_l_, refine_user_size,
+                                      n_result_user, n_prune_user,
+                                      prune_l_, result_l_);
                 const double tmp_memory_index_search_time = memory_index_search_record_.get_elapsed_time_second();
                 memory_index_search_time_ += tmp_memory_index_search_time;
-                int n_user_candidate = 0;
-                for (int userID = 0; userID < n_user_; userID++) {
-                    if (!prune_l_[userID]) {
-                        n_user_candidate++;
-                    }
-                }
-                assert(n_user_candidate >= topk);
-                rank_bound_prune_ratio_ += 1.0 * (n_user_ - n_user_candidate) / n_user_;
+                rank_bound_prune_ratio_ += 1.0 * (n_user_ - refine_user_size) / n_user_;
+                assert(n_result_user + n_prune_user + refine_user_size == n_user_);
+                assert(0 <= n_result_user && n_result_user <= topk);
 
                 //read disk and fine binary search
                 size_t io_cost = 0;
@@ -162,20 +162,31 @@ namespace ReverseMIPS::QRSTopTIP {
                 double rank_compute_time = 0;
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
                                   user_, data_item_,
-                                  prune_l_, topkLbHeap,
-                                  n_user_candidate, io_cost, ip_cost, read_disk_time, rank_compute_time);
+                                  refine_seq_l_, refine_user_size, topk - n_result_user,
+                                  io_cost, ip_cost, read_disk_time, rank_compute_time);
                 total_io_cost_ += io_cost;
                 total_ip_cost_ += ip_cost;
 
-                for (int candID = 0; candID < topk; candID++) {
-                    query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID];
+                int n_cand = 0;
+                for (int userID = 0; userID < n_user_; userID++) {
+                    if (result_l_[userID]) {
+                        query_heap_l[queryID][n_cand] = UserRankElement(userID, rank_lb_l_[userID], queryIP_l_[userID]);
+                        n_cand++;
+                    }
                 }
+
+                for (int candID = n_cand; candID < topk; candID++) {
+                    query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID - n_cand];
+                }
+                assert(n_cand + disk_ins_.n_refine_user_ >= topk);
                 assert(query_heap_l[queryID].size() == topk);
 
-                const double &total_time =
+                const double total_time =
                         query_record_.get_elapsed_time_second();
                 const double &memory_index_time = tmp_memory_index_search_time + tmp_inner_product_time;
-                query_performance_l[queryID] = SingleQueryPerformance(queryID, n_user_candidate,
+                query_performance_l[queryID] = SingleQueryPerformance(queryID,
+                                                                      n_prune_user, n_result_user,
+                                                                      disk_ins_.n_refine_user_,
                                                                       io_cost, ip_cost,
                                                                       total_time,
                                                                       memory_index_time, read_disk_time,
