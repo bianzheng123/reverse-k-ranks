@@ -157,8 +157,8 @@ def run():
         n_sample = compute_n_sample(ds, 16)
         os.system(
             'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 5000, 500,
-                ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 500))
+                ds, 5000, 600,
+                ds, basic_dir, 'QRSTopTIP', n_sample, index_size, 5000, 600))
         os.system(
             'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
                 ds, basic_dir, "RSTopTIP", n_sample, index_size))
