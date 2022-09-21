@@ -45,5 +45,5 @@ ax.bar(label_l, io_time_perc_l, width, bottom=memory_index_time_perc_l, color='#
 ax.set_ylabel('Percentage of Running Time')
 ax.legend(frameon=False, loc='best')
 
-# plt.savefig("running_time_profile.pdf", bbox_inches='tight')
-plt.savefig("running_time_profile.jpg", dpi=600, bbox_inches='tight')
+plt.savefig("running_time_profile.pdf", bbox_inches='tight')
+# plt.savefig("running_time_profile.jpg", dpi=600, bbox_inches='tight')

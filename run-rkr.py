@@ -41,7 +41,8 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
         'QRSTopTIP': 'n_sample_20-index_size_gb_50',
         'RSTopTIP': 'n_sample_20-index_size_gb_50',
 
-        'QueryRankSample': 'n_sample_20',
+        'QueryRankSampleSearchAllRank': 'n_sample_20',
+        'QueryRankSampleSearchKthRank': 'n_sample_20',
         'QueryRankSampleScoreDistribution': 'n_sample_20-n_sample_score_distribution_8',
         'RankSample': 'n_sample_20',
     }
@@ -80,13 +81,11 @@ def run():
         'BatchDiskBruteForce',
         # 'DiskBruteForce',
         'MemoryBruteForce',
-        'QRSTopTIP',
-        'RSTopTIP',
 
         # 'GridIndex',
-        'QueryRankSample',
-        'QueryRankSampleScoreDistribution',
-        'RankSample',
+        # 'QueryRankSampleSearchAllRank',
+        'QueryRankSampleSearchKthRank',
+        # 'RankSample',
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
@@ -97,22 +96,18 @@ def run():
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 30,
-                ds, 'QRSTopTIP', 150, 30))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RSTopTIP'))
+
+        # os.system('cd build && ./bst --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
-
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 50,
-                ds, 'QueryRankSample', 150, 50))
+        # os.system(
+        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 150, 10,
+        #         ds, 'QueryRankSampleSearchAllRank', 150, 10))
         os.system(
             'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
                 ds, 150, 30,
-                ds, 'QueryRankSampleScoreDistribution', 150, 30))
+                ds, 'QueryRankSampleSearchKthRank', 150, 30))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
 
     # topk_l = [10, 20, 30, 40, 50]

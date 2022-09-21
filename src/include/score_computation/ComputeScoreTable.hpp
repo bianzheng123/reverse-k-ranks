@@ -61,6 +61,8 @@ namespace ReverseMIPS {
 #else
             cpu = CPUScoreTable(user_vecs, item_vecs, n_user, n_data_item, vec_dim);
 #endif
+            compute_time_ = 0;
+            sort_time_ = 0;
 
         }
 

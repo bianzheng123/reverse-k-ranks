@@ -7,7 +7,7 @@
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
-#include "alg/DiskIndex/TopTIP.hpp"
+#include "../TopT/TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "ScoreSearch.hpp"
 

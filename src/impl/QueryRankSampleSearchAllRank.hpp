@@ -1,15 +1,15 @@
 //
-// Created by BianZheng on 2022/9/5.
+// Created by BianZheng on 2022/8/12.
 //
 
-#ifndef REVERSE_K_RANKS_QUERYRANKSAMPLESCOREDISTRIBUTION_HPP
-#define REVERSE_K_RANKS_QUERYRANKSAMPLESCOREDISTRIBUTION_HPP
+#ifndef REVERSE_KRANKS_QUERYRANKSAMPLESEARCHALLRANK_HPP
+#define REVERSE_KRANKS_QUERYRANKSAMPLESEARCHALLRANK_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QRSScoreDistribution.hpp"
+#include "alg/RankBoundRefinement/QueryRankSearchSearchAllRank.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -27,7 +27,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::QueryRankSampleScoreDistribution {
+namespace ReverseMIPS::QueryRankSampleSearchAllRank {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -40,7 +40,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         }
 
         //rank search
-        QRSScoreDistribution rank_ins_;
+        QueryRankSearchSearchAllRank rank_ins_;
         //read disk
         ReadAll disk_ins_;
 
@@ -64,7 +64,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         std::unique_ptr<double[]> query_cache_;
 
         Index(//rank search
-                QRSScoreDistribution &rank_ins,
+                QueryRankSearchSearchAllRank &rank_ins,
                 //disk index
                 ReadAll &disk_ins,
                 //general retrieval
@@ -240,43 +240,38 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
 
     std::unique_ptr<Index>
     BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const char *dataset_name,
-               const int &n_sample, const int n_sample_score_distribution, const int &n_sample_query,
-               const int &sample_topk) {
+               const int &n_sample, const int &n_sample_query, const int &sample_topk, const char *index_basic_dir) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
 
         user.vectorNormalize();
 
         //rank search
-        QRSScoreDistribution rank_ins(n_sample, n_sample_score_distribution,
-                                      n_data_item, n_user,
-                                      dataset_name, n_sample_query, sample_topk);
+        QueryRankSearchSearchAllRank rank_ins(n_sample, n_data_item, n_user, dataset_name,
+                                              n_sample_query, sample_topk, index_basic_dir);
 
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);
+        ReadAll disk_ins(n_user, n_data_item, index_path);
         disk_ins.PreprocessData(user, data_item);
+        disk_ins.RetrievalPreprocess();
 
-        //Compute Score Table
-        ComputeScoreTable cst(user, data_item);
-
+        const int report_every = 10000;
         TimeRecord record;
         record.reset();
-        std::vector<DistancePair> distance_l(n_data_item);
+        std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
-            cst.ComputeSortItems(userID, distance_l.data());
+            disk_ins.ReadDiskNoCache(userID, distance_l);
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
-            disk_ins.BuildIndexLoop(distance_l.data());
 
-            if (userID % cst.report_every_ == 0) {
+            if (userID % report_every == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
                 record.reset();
             }
         }
-        cst.FinishCompute();
-        disk_ins.FinishBuildIndex();
+        disk_ins.FinishRetrieval();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;
@@ -284,4 +279,4 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
 
 }
 
-#endif //REVERSE_K_RANKS_QUERYRANKSAMPLESCOREDISTRIBUTION_HPP
+#endif //REVERSE_KRANKS_QUERYRANKSAMPLESEARCHALLRANK_HPP

@@ -249,30 +249,27 @@ namespace ReverseMIPS::RankSample {
         RankSearch rank_ins(n_sample, n_data_item, n_user);
 
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);
+        ReadAll disk_ins(n_user, n_data_item, index_path);
         disk_ins.PreprocessData(user, data_item);
+        disk_ins.RetrievalPreprocess();
 
-        //Compute Score Table
-        ComputeScoreTable cst(user, data_item);
-
+        const int report_every = 10000;
         TimeRecord record;
         record.reset();
-        std::vector<DistancePair> distance_l(n_data_item);
+        std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
-            cst.ComputeSortItems(userID, distance_l.data());
+            disk_ins.ReadDiskNoCache(userID, distance_l);
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
-            disk_ins.BuildIndexLoop(distance_l.data());
 
-            if (userID % cst.report_every_ == 0) {
+            if (userID % report_every == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
                           << get_current_RSS() / 1000000 << " Mb \n";
                 record.reset();
             }
         }
-        cst.FinishCompute();
-        disk_ins.FinishBuildIndex();
+        disk_ins.FinishRetrieval();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;

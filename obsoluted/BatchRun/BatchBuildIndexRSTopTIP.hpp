@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_BATBUILDINDEXTOPT_HPP
 #define REVERSE_KRANKS_BATBUILDINDEXTOPT_HPP
 
-#include "alg/DiskIndex/TopTIP.hpp"
+#include "../TopT/TopTIP.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 #include "score_computation/ComputeScoreTable.hpp"
 #include "util/TimeMemory.hpp"

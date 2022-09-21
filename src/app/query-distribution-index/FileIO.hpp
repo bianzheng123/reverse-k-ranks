@@ -13,68 +13,125 @@
 #include <fstream>
 #include <algorithm>
 #include <random>
+#include <filesystem>
+#include <iostream>
 
 namespace ReverseMIPS {
 
-    void WriteDistributionBelowTopk(const std::vector<int> &sample_rank_l,
-                                    const std::vector<int> &kth_rank_l,
-                                    const std::vector<int> &sample_itemID_l,
-                                    const int &n_sample_item, const int &sample_topk,
-                                    const char *dataset_name) {
-        size_t n_sample_item_size_t = n_sample_item * n_sample_item;
-        assert(sample_rank_l.size() == n_sample_item_size_t);
-        assert(kth_rank_l.size() == n_sample_item);
+    bool TestConsistency(const std::vector<int> &sample_itemID_l,
+                         const std::vector<int> &sort_kth_rank_l,
+                         const std::vector<int> &sort_sampleID_l,
+                         const std::vector<int> &accu_n_user_rank_l,
+                         const int &n_data_item,
+                         const int &n_sample_item, const int sample_topk) {
+
         assert(sample_itemID_l.size() == n_sample_item);
+        assert(sort_kth_rank_l.size() == n_sample_item);
+        assert(sort_sampleID_l.size() == n_sample_item);
+        assert(accu_n_user_rank_l.size() == n_sample_item * (n_data_item + 1));
 
-        {
-            char resPath[256];
-            std::sprintf(resPath,
-                         "../index/query_distribution/%s-below-topk-n_sample_query_%d-sample_topk_%d.index",
-                         dataset_name, n_sample_item, sample_topk);
+        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+            const int sort_sampleID = sort_sampleID_l[sampleID];
+            assert(0 <= sort_sampleID && sort_sampleID <= n_sample_item - 1);
 
-            std::ofstream out_stream = std::ofstream(resPath, std::ios::binary | std::ios::out);
-            if (!out_stream) {
-                spdlog::error("error in write result");
-                exit(-1);
-            }
-
-            out_stream.write((char *) sample_rank_l.data(),
-                             (std::streamsize) (sizeof(int) * n_sample_item_size_t));
-
-            out_stream.close();
+            const int *user_rank_ptr = accu_n_user_rank_l.data() + sort_sampleID * (n_data_item + 1);
+            const int *rank_ptr = std::lower_bound(user_rank_ptr, user_rank_ptr + (n_data_item + 1),
+                                                   sample_topk,
+                                                   [](const int &arr_n_rank, const int &topk) {
+                                                       return arr_n_rank < topk;
+                                                   });
+            const int64_t kth_rank = rank_ptr - user_rank_ptr;
+            assert(kth_rank == sort_kth_rank_l[sampleID]);
+            assert(0 <= kth_rank && kth_rank <= n_data_item + 1);
         }
+        return true;
+    }
 
-        {
-            char resPath[256];
-            std::sprintf(resPath,
-                         "../index/query_distribution/%s-kth-rank-n_sample_query_%d-sample_topk_%d.index",
-                         dataset_name, n_sample_item, sample_topk);
-
-            std::ofstream out_stream = std::ofstream(resPath, std::ios::binary | std::ios::out);
-            if (!out_stream) {
-                spdlog::error("error in write result");
-                exit(-1);
-            }
-
-            out_stream.write((char *) kth_rank_l.data(),
-                             (std::streamsize) (n_sample_item * sizeof(int)));
-
-            out_stream.close();
+    void DeleteIfExist(const char *file_name) {
+        if (std::filesystem::remove_all(file_name)) {
+            std::cout << "file " << file_name << " deleted.\n";
         }
+    }
+
+    void WriteDistributionBelowTopk(const std::vector<int> &sample_itemID_l,
+                                    const std::vector<int> &sort_kth_rank_l,
+                                    const std::vector<int> &sort_sampleID_l,
+                                    const std::vector<int> &accu_n_user_rank_l,
+                                    const int &n_data_item,
+                                    const int &n_sample_item, const int &sample_topk,
+                                    const char *dataset_name, const char *index_dir) {
+        assert(sample_itemID_l.size() == n_sample_item);
+        assert(sort_kth_rank_l.size() == n_sample_item);
+        assert(sort_sampleID_l.size() == n_sample_item);
+        assert(accu_n_user_rank_l.size() == n_sample_item * (n_data_item + 1));
+        assert(TestConsistency(sample_itemID_l, sort_kth_rank_l,
+                               sort_sampleID_l, accu_n_user_rank_l,
+                               n_data_item, n_sample_item, sample_topk));
+
+        char file_path[256];
+        sprintf(file_path, "%s/query_distribution/%s-n_sample_item_%d-sample_topk_%d",
+                index_dir, dataset_name, n_sample_item, sample_topk);
+        DeleteIfExist(file_path);
+        std::filesystem::create_directory(file_path);
 
         {
-            char resPath[256];
-            std::sprintf(resPath, "../index/query_distribution/%s-sample-itemID-n_sample_query_%d-sample_topk_%d.txt",
-                         dataset_name, n_sample_item, sample_topk);
+            char resPath[512];
+            std::sprintf(resPath, "%s/sample_itemID_l.txt", file_path);
 
             std::ofstream out_stream = std::ofstream(resPath, std::ios::out);
             if (!out_stream) {
                 spdlog::error("error in write result");
                 exit(-1);
             }
-            for (int rank_itemID = 0; rank_itemID < n_sample_item; rank_itemID++) {
-                out_stream << sample_itemID_l[rank_itemID] << std::endl;
+
+            std::vector<int> sort_sample_itemID_l(n_sample_item);
+            for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+                const int itemID = sample_itemID_l[sort_sampleID_l[sampleID]];
+                sort_sample_itemID_l[sampleID] = itemID;
             }
+
+            for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+                out_stream << sort_sample_itemID_l[sampleID] << std::endl;
+            }
+
+            out_stream.close();
+        }
+
+        {
+            char resPath[512];
+            std::sprintf(resPath, "%s/sort_kth_rank_l.index", file_path);
+
+            std::ofstream out_stream = std::ofstream(resPath, std::ios::binary | std::ios::out);
+            if (!out_stream) {
+                spdlog::error("error in write result");
+                exit(-1);
+            }
+
+            out_stream.write((char *) sort_kth_rank_l.data(),
+                             (std::streamsize) (sizeof(int) * n_sample_item));
+
+            out_stream.close();
+        }
+
+        {
+            char resPath[512];
+            std::sprintf(resPath, "%s/accu_n_user_rank_l.index", file_path);
+
+            std::ofstream out_stream = std::ofstream(resPath, std::ios::binary | std::ios::out);
+            if (!out_stream) {
+                spdlog::error("error in write result");
+                exit(-1);
+            }
+
+            for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+                const int sorted_sampleID = sort_sampleID_l[sampleID];
+
+                const int *user_rank_ptr = accu_n_user_rank_l.data() + sorted_sampleID * (n_data_item + 1);
+
+                out_stream.write((char *) user_rank_ptr,
+                                 (std::streamsize) (sizeof(int) * (n_data_item + 1)));
+            }
+
             out_stream.close();
         }
 

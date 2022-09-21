@@ -6,7 +6,7 @@
 #define REVERSE_K_RANKS_BATCHRETRIEVALTOPT_HPP
 
 #include "struct/MethodBase.hpp"
-#include "BruteForce/RSTopTIP.hpp"
+#include "../TopT/RSTopTIP.hpp"
 #include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 

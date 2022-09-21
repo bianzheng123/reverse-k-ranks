@@ -1,15 +1,15 @@
 //
-// Created by BianZheng on 2022/8/12.
+// Created by BianZheng on 2022/9/5.
 //
 
-#ifndef REVERSE_KRANKS_QUERYRANKSAMPLE_HPP
-#define REVERSE_KRANKS_QUERYRANKSAMPLE_HPP
+#ifndef REVERSE_K_RANKS_QUERYRANKSAMPLESCOREDISTRIBUTION_HPP
+#define REVERSE_K_RANKS_QUERYRANKSAMPLESCOREDISTRIBUTION_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QueryRankSearch.hpp"
+#include "QRSScoreDistribution.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -27,7 +27,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::QueryRankSample {
+namespace ReverseMIPS::QueryRankSampleScoreDistribution {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -40,7 +40,7 @@ namespace ReverseMIPS::QueryRankSample {
         }
 
         //rank search
-        QueryRankSearch rank_ins_;
+        QRSScoreDistribution rank_ins_;
         //read disk
         ReadAll disk_ins_;
 
@@ -64,7 +64,7 @@ namespace ReverseMIPS::QueryRankSample {
         std::unique_ptr<double[]> query_cache_;
 
         Index(//rank search
-                QueryRankSearch &rank_ins,
+                QRSScoreDistribution &rank_ins,
                 //disk index
                 ReadAll &disk_ins,
                 //general retrieval
@@ -240,14 +240,17 @@ namespace ReverseMIPS::QueryRankSample {
 
     std::unique_ptr<Index>
     BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const char *dataset_name,
-               const int &n_sample, const int &n_sample_query, const int &sample_topk) {
+               const int &n_sample, const int n_sample_score_distribution, const int &n_sample_query,
+               const int &sample_topk) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
 
         user.vectorNormalize();
 
         //rank search
-        QueryRankSearch rank_ins(n_sample, n_data_item, n_user, dataset_name, n_sample_query, sample_topk);
+        QRSScoreDistribution rank_ins(n_sample, n_sample_score_distribution,
+                                      n_data_item, n_user,
+                                      dataset_name, n_sample_query, sample_topk);
 
         //disk index
         ReadAll disk_ins(n_user, n_data_item, index_path, n_data_item);
@@ -281,4 +284,4 @@ namespace ReverseMIPS::QueryRankSample {
 
 }
 
-#endif //REVERSE_KRANKS_QUERYRANKSAMPLE_HPP
+#endif //REVERSE_K_RANKS_QUERYRANKSAMPLESCOREDISTRIBUTION_HPP

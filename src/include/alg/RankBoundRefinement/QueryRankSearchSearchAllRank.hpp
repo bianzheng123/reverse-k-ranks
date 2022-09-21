@@ -2,8 +2,8 @@
 // Created by BianZheng on 2022/8/12.
 //
 
-#ifndef REVERSE_KRANKS_QUERYRANKSEARCH_HPP
-#define REVERSE_KRANKS_QUERYRANKSEARCH_HPP
+#ifndef REVERSE_KRANKS_QUERYRANKSEARCHSEARCHALLRANK_HPP
+#define REVERSE_KRANKS_QUERYRANKSEARCHSEARCHALLRANK_HPP
 
 #include "struct/DistancePair.hpp"
 #include <iostream>
@@ -12,80 +12,41 @@
 
 namespace ReverseMIPS {
 
-    class SampleQueryDistributionBelowTopk {
-        int n_data_item_;
-        std::unique_ptr<int[]> topk_rank_l_; // n_sample_query
-        std::unique_ptr<int[]> sample_rank_l_; // n_sample_query * n_sample_query, stores the number of un-pruned user in the rank of sampled query
-
-        std::vector<int> min_rank2queryID_l_;//n_sample_query, points to the minimum index of the same rank
-        std::vector<int> max_rank2queryID_l_;//n_sample_query, points to the maximum index of the same rank
-        std::vector<int> distinct_rank_l_;//n_distinct_rank_
+    class SearchAllRank {
+        uint64_t n_user_, n_data_item_;
+        std::unique_ptr<int[]> sort_kth_rank_l_; // n_sample_query
+        std::unique_ptr<int[]> sample_rank_l_; // n_data_item
+        std::unique_ptr<int[]> accu_user_rank_l_; // n_sample_query * (n_data_item_ + 1)
+        // stores the number of user candidates between [1, rank]
 
         uint64_t n_sample_query_;
         uint64_t sample_topk_;
     public:
 
-        uint64_t n_distinct_rank_;
+        uint64_t n_sample_rank_;
 
-        inline SampleQueryDistributionBelowTopk() = default;
+        inline SearchAllRank() = default;
 
-        inline SampleQueryDistributionBelowTopk(const int &n_data_item, const char *dataset_name,
-                                                const int &n_sample_query, const int &sample_topk,
-                                                const char *index_basic_dir) {
-            n_data_item_ = n_data_item;
+        inline SearchAllRank(const uint64_t &n_user, const uint64_t &n_data_item,
+                             const char *dataset_name,
+                             const int &n_sample_query, const int &sample_topk,
+                             const char *index_basic_dir) {
+            this->n_user_ = n_user;
+            this->n_data_item_ = n_data_item;
             this->n_sample_query_ = n_sample_query;
             this->sample_topk_ = sample_topk;
-            topk_rank_l_ = std::make_unique<int[]>(n_sample_query_);
-            sample_rank_l_ = std::make_unique<int[]>(n_sample_query_ * n_sample_query_);
+            this->n_sample_rank_ = n_data_item;
+            this->sort_kth_rank_l_ = std::make_unique<int[]>(n_sample_query_);
+            this->sample_rank_l_ = std::make_unique<int[]>(n_data_item);
+            this->accu_user_rank_l_ = std::make_unique<int[]>(n_sample_query_ * (n_data_item_ + 1));
 
+            //init sort_kth_rank_l_, accu_user_rank_l_
             ReadQueryDistribution(index_basic_dir, dataset_name);
 
-            //find distinct rank
-            std::vector<int> distinct_sample_rank_l(n_sample_query_);
-            distinct_sample_rank_l.assign(topk_rank_l_.get(), topk_rank_l_.get() + n_sample_query_);
-            std::sort(distinct_sample_rank_l.begin(), distinct_sample_rank_l.end());
-            distinct_sample_rank_l.erase(std::unique(distinct_sample_rank_l.begin(), distinct_sample_rank_l.end()),
-                                         distinct_sample_rank_l.end());
-            n_distinct_rank_ = distinct_sample_rank_l.size();
+            std::iota(sample_rank_l_.get(), sample_rank_l_.get() + n_data_item, 0);
 
-            distinct_rank_l_.resize(n_distinct_rank_);
-            distinct_rank_l_.assign(distinct_sample_rank_l.begin(), distinct_sample_rank_l.end());
-            assert(0 < n_distinct_rank_ && n_distinct_rank_ <= n_sample_query_);
-
-            min_rank2queryID_l_.resize(n_distinct_rank_);
-            max_rank2queryID_l_.resize(n_distinct_rank_);
-            min_rank2queryID_l_.assign(n_distinct_rank_, -1);
-            max_rank2queryID_l_.assign(n_distinct_rank_, -1);
-            spdlog::info("n_sample_query {}, sample_topk {}, n_distinct_rank {}",
-                         n_sample_query_, sample_topk_, n_distinct_rank_);
-
-            for (int rankID = 0; rankID < n_distinct_rank_; rankID++) {
-                int *min_queryID_ptr = std::lower_bound(topk_rank_l_.get(), topk_rank_l_.get() + n_sample_query_,
-                                                        distinct_rank_l_[rankID],
-                                                        [](const int &info, const int &value) {
-                                                            return info < value;
-                                                        });
-
-                int *max_queryID_ptr = std::lower_bound(topk_rank_l_.get(), topk_rank_l_.get() + n_sample_query_,
-                                                        distinct_rank_l_[rankID],
-                                                        [](const int &info, const int &value) {
-                                                            return info <= value;
-                                                        });
-                const long min_queryID = min_queryID_ptr - topk_rank_l_.get();
-                const long max_queryID = max_queryID_ptr - topk_rank_l_.get();
-                assert(min_queryID < max_queryID);
-                assert(0 <= min_queryID && min_queryID < n_sample_query_);
-                assert(1 <= max_queryID && max_queryID <= n_sample_query_);
-                min_rank2queryID_l_[rankID] = (int) min_queryID;
-                max_rank2queryID_l_[rankID] = (int) max_queryID - 1;
-                assert(min_rank2queryID_l_[rankID] >= 0);
-                assert(max_rank2queryID_l_[rankID] >= 0);
-            }
-
-            for (int rankID = 1; rankID < n_distinct_rank_; rankID++) {
-                assert(min_rank2queryID_l_[rankID] > min_rank2queryID_l_[rankID - 1]);
-                assert(max_rank2queryID_l_[rankID] > max_rank2queryID_l_[rankID - 1]);
-            }
+            spdlog::info("n_sample_query {}, sample_topk {}, n_sample_rank {}",
+                         n_sample_query_, sample_topk_, n_sample_rank_);
 
             /*
              * {
@@ -116,20 +77,20 @@ namespace ReverseMIPS {
 //            }
 //            printf("\n------------------\n");
 //            for (int sample_queryID = 0; sample_queryID < n_print; sample_queryID++) {
-//                printf("%4d ", topk_rank_l_[sample_queryID]);
+//                printf("%4d ", sort_kth_rank_l_[sample_queryID]);
 //            }
 //            printf("\n------------------\n");
 //            for (int sample_queryID = 0; sample_queryID < n_print; sample_queryID++) {
 //                for (int sample_queryID2 = 0; sample_queryID2 < n_print; sample_queryID2++) {
 //                    int print_thing;
 //                    if (sample_queryID2 == 0) {
-//                    print_thing = sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2];
+//                    print_thing = accu_user_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2];
 //                    } else {
-//                        print_thing = sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2] -
-//                                      sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2 - 1];
+//                        print_thing = accu_user_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2] -
+//                                      accu_user_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2 - 1];
 //                    }
 //                    if (sample_queryID > sample_queryID2) {
-//                        assert(sample_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2] == 0);
+//                        assert(accu_user_rank_l_[sample_queryID * n_sample_query_ + sample_queryID2] == 0);
 //                    }
 //
 //                    if (sample_queryID == sample_queryID2) {
@@ -146,85 +107,175 @@ namespace ReverseMIPS {
 
         }
 
-        void ReadQueryDistribution(const char *index_basic_dir, const char *dataset_name) {
+        void ReadQueryDistribution(
+                const char *index_basic_dir, const char *dataset_name) {
+
             {
-                char topk_rank_path[512];
-                sprintf(topk_rank_path,
-                        "%s/index/query_distribution/%s-kth-rank-n_sample_query_%ld-sample_topk_%ld.index",
+                char sort_kth_rank_path[512];
+                sprintf(sort_kth_rank_path,
+                        "%s/query_distribution/%s-n_sample_item_%ld-sample_topk_%ld/sort_kth_rank_l.index",
                         index_basic_dir, dataset_name, n_sample_query_, sample_topk_);
 
-                std::ifstream topk_rank_stream = std::ifstream(topk_rank_path, std::ios::binary | std::ios::in);
-                if (!topk_rank_stream) {
+                std::ifstream sort_kth_rank_stream = std::ifstream(sort_kth_rank_path, std::ios::binary | std::ios::in);
+                if (!sort_kth_rank_stream) {
                     spdlog::error("error in reading index");
                     exit(-1);
                 }
 
-                topk_rank_stream.read((char *) topk_rank_l_.get(), sizeof(int) * n_sample_query_);
-                topk_rank_stream.close();
+                sort_kth_rank_stream.seekg(0, std::ios::end);
+                std::ios::pos_type ss = sort_kth_rank_stream.tellg();
+                auto fsize = (size_t) ss;
+                assert(fsize == sizeof(int) * n_sample_query_);
+                sort_kth_rank_stream.seekg(0, std::ios::beg);
+
+                sort_kth_rank_stream.read((char *) sort_kth_rank_l_.get(), sizeof(int) * n_sample_query_);
+                sort_kth_rank_stream.close();
             }
 
             {
-                char rank_below_topk_path[512];
-                sprintf(rank_below_topk_path,
-                        "%s/index/query_distribution/%s-below-topk-n_sample_query_%ld-sample_topk_%ld.index",
+                char accu_user_rank_path[512];
+                sprintf(accu_user_rank_path,
+                        "%s/query_distribution/%s-n_sample_item_%ld-sample_topk_%ld/accu_n_user_rank_l.index",
                         index_basic_dir, dataset_name, n_sample_query_, sample_topk_);
 
-                std::ifstream rank_below_topk_stream = std::ifstream(rank_below_topk_path,
-                                                                     std::ios::binary | std::ios::in);
-                if (!rank_below_topk_stream) {
+                std::ifstream accu_user_rank_stream = std::ifstream(accu_user_rank_path,
+                                                                    std::ios::binary | std::ios::in);
+                if (!accu_user_rank_stream) {
                     spdlog::error("error in reading index");
                     exit(-1);
                 }
 
-                rank_below_topk_stream.read((char *) sample_rank_l_.get(),
-                                            sizeof(int) * n_sample_query_ * n_sample_query_);
-                rank_below_topk_stream.close();
+                accu_user_rank_stream.seekg(0, std::ios::end);
+                std::ios::pos_type ss = accu_user_rank_stream.tellg();
+                auto fsize = (size_t) ss;
+                assert(fsize == sizeof(int) * n_sample_query_ * (n_data_item_ + 1));
+                accu_user_rank_stream.seekg(0, std::ios::beg);
+
+                accu_user_rank_stream.read((char *) accu_user_rank_l_.get(),
+                                           sizeof(int) * n_sample_query_ * (n_data_item_ + 1));
+                accu_user_rank_stream.close();
             }
         }
 
-        int64_t GetUnpruneCandidate(const int &rankID_ub, const int &rankID_lb) {
-            assert(rankID_ub <= rankID_lb && rankID_lb < n_distinct_rank_);
+        int64_t GetTransitUserCandidate(const int &rankID_ub, const int &rankID_lb) {
+            int64_t first = GetUserCandidateEnd(rankID_ub);
+            int64_t second = GetUserCandidateBetween(rankID_ub, rankID_lb);
+            int64_t third = GetUserCandidateEnd(rankID_lb);
+            return -first + second + third;
+        }
+
+        // it is Upsilon([rank_ub + 1, rank_lb])
+        int64_t GetUserCandidateBetween(const int &rankID_ub, const int &rankID_lb) {
+            assert(0 <= rankID_ub && rankID_ub < rankID_lb && rankID_lb < n_sample_rank_);
+            const int rank_ub = sample_rank_l_[rankID_ub] + 1;
+            const int rank_lb = sample_rank_l_[rankID_lb];
+            assert(1 <= rank_ub && rank_ub <= rank_lb && rank_lb <= n_data_item_);
+
+            int *min_queryID_ptr = std::lower_bound(sort_kth_rank_l_.get(),
+                                                    sort_kth_rank_l_.get() + n_sample_query_,
+                                                    rank_ub,
+                                                    [](const int &info, const int &value) {
+                                                        return info < value;
+                                                    });
+
+            int *max_queryID_ptr = std::lower_bound(sort_kth_rank_l_.get(),
+                                                    sort_kth_rank_l_.get() + n_sample_query_,
+                                                    rank_lb,
+                                                    [](const int &info, const int &value) {
+                                                        return info <= value;
+                                                    });
+
+            const int &queryID_begin = (int) (min_queryID_ptr - sort_kth_rank_l_.get());
+            const int &queryID_end = (int) (max_queryID_ptr - sort_kth_rank_l_.get() - 1);
+            if (queryID_end < 0 || max_queryID_ptr - min_queryID_ptr == 0) {
+                return 0;
+            }
+            assert(0 <= queryID_begin && queryID_begin <= queryID_end && queryID_end < n_sample_query_);
+
+            assert(0 < rank_ub && rank_ub <= rank_lb && rank_lb <= n_data_item_);
+
             int64_t n_unprune_user = 0;
-            const int &queryID_ub = min_rank2queryID_l_[rankID_ub];
-            const int &queryID_lb = max_rank2queryID_l_[rankID_lb];
-            for (int queryID = queryID_ub; queryID <= queryID_lb; queryID++) {
-                n_unprune_user += sample_rank_l_[queryID * n_sample_query_ + queryID_lb];
+            for (int queryID = queryID_begin; queryID <= queryID_end; queryID++) {
+                int64_t n_user_candidate = accu_user_rank_l_[queryID * (n_data_item_ + 1) + rank_lb] -
+                                           accu_user_rank_l_[queryID * (n_data_item_ + 1) + rank_ub - 1];
+                n_unprune_user += n_user_candidate;
             }
 
             return n_unprune_user;
         }
 
-        int64_t GetUnpruneCandidate(const int &rankID) {
-            assert(rankID <= n_distinct_rank_);
-            if (rankID == n_distinct_rank_) {
+        // it is Upsilon([rank+1, n_data_item])
+        int64_t GetUserCandidateEnd(const int &rankID) {
+            assert(rankID < n_sample_rank_);
+            const int rank = sample_rank_l_[rankID] + 1;
+            int *min_queryID_ptr = std::lower_bound(sort_kth_rank_l_.get(),
+                                                    sort_kth_rank_l_.get() + n_sample_query_,
+                                                    rank,
+                                                    [](const int &info, const int &value) {
+                                                        return info < value;
+                                                    });
+            const int queryID_start = (int) (min_queryID_ptr - sort_kth_rank_l_.get());
+
+            assert(0 <= queryID_start);
+            assert(1 <= rank && rank <= n_data_item_);
+
+            int64_t n_unprune_user = 0;
+            for (int queryID = queryID_start; queryID < n_sample_query_; queryID++) {
+                int64_t n_user_candidate = (int64_t) n_user_ -
+                                           accu_user_rank_l_[queryID * (n_data_item_ + 1) + rank - 1];
+                assert(n_user_candidate >= 0);
+                n_unprune_user += n_user_candidate;
+            }
+
+            return n_unprune_user;
+        }
+
+        // Upsilon([0, rank])
+        int64_t GetUserCandidateBegin(const int &rankID) {
+            assert(rankID < n_sample_rank_);
+            const int rank = sample_rank_l_[rankID];
+            int *min_queryID_ptr = std::lower_bound(sort_kth_rank_l_.get(),
+                                                    sort_kth_rank_l_.get() + n_sample_query_,
+                                                    rank,
+                                                    [](const int &info, const int &value) {
+                                                        return info <= value;
+                                                    });
+            const int queryID_end = (int) (min_queryID_ptr - sort_kth_rank_l_.get() - 1);
+            if (queryID_end < 0) {
                 return 0;
             }
-            const int &queryID = min_rank2queryID_l_[rankID];
-            int64_t n_unprune_user = (int64_t) (n_data_item_ - sample_topk_) * (n_sample_query_ - queryID);
+            assert(0 <= queryID_end && queryID_end < n_sample_query_);
+
+            int64_t n_unprune_user = 0;
+            for (int queryID = 0; queryID <= queryID_end; queryID++) {
+                int64_t n_user_candidate = accu_user_rank_l_[queryID * (n_data_item_ + 1) + rank];
+                assert(n_user_candidate >= 0);
+                n_unprune_user += n_user_candidate;
+            }
 
             return n_unprune_user;
         }
 
         unsigned int GetRank(const unsigned int &rankID) {
-            assert(0 <= rankID && rankID <= n_distinct_rank_);
-            return distinct_rank_l_[rankID];
+            assert(0 <= rankID && rankID <= n_sample_rank_);
+            return sample_rank_l_[rankID];
         }
 
     };
 
-    class QueryRankSearch {
+    class QueryRankSearchSearchAllRank {
 
         size_t n_sample_, n_data_item_, n_user_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
 
-        inline QueryRankSearch() {}
+        inline QueryRankSearchSearchAllRank() {}
 
-        inline QueryRankSearch(const int &n_sample, const int &n_data_item,
-                               const int &n_user, const char *dataset_name,
-                               const int &n_sample_query, const int &sample_topk,
-                               const char *index_size_basic_dir = "..") {
+        inline QueryRankSearchSearchAllRank(const int &n_sample, const int &n_data_item,
+                                            const int &n_user, const char *dataset_name,
+                                            const int &n_sample_query, const int &sample_topk,
+                                            const char *index_basic_dir) {
             this->n_sample_ = n_sample;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
@@ -236,24 +287,25 @@ namespace ReverseMIPS {
             }
             assert(n_sample > 0);
 
-            Preprocess(dataset_name, n_sample_query, sample_topk, index_size_basic_dir);
+            Preprocess(dataset_name, n_sample_query, sample_topk, index_basic_dir);
 
         }
 
-        inline QueryRankSearch(const char *index_path) {
+        inline QueryRankSearchSearchAllRank(const char *index_path) {
             LoadIndex(index_path);
         }
 
         void Preprocess(const char *dataset_name, const int &n_sample_query, const int &sample_topk,
-                        const char *index_size_basic_dir) {
-            SampleQueryDistributionBelowTopk query_distribution_ins((int) n_data_item_, dataset_name,
-                                                                    n_sample_query, sample_topk, index_size_basic_dir);
-            const uint64_t n_sample_rank = query_distribution_ins.n_distinct_rank_;
+                        const char *index_basic_dir) {
+
+            SearchAllRank query_distribution_ins((int) n_user_, (int) n_data_item_, dataset_name,
+                                                 n_sample_query, sample_topk, index_basic_dir);
+            const uint64_t n_sample_rank = query_distribution_ins.n_sample_rank_;
 
             std::vector<int64_t> optimal_dp(n_sample_rank * n_sample_);
             std::vector<int> position_dp(n_sample_rank * n_sample_);
             for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
-                if (sampleID != 0 && sampleID % 100 == 0) {
+                if (sampleID != 0 && sampleID % 10 == 0) {
                     spdlog::info("sampleID {}, n_sample {}, progress {:.3f}",
                                  sampleID, n_sample_, (double) sampleID / (double) n_sample_);
                 }
@@ -261,8 +313,8 @@ namespace ReverseMIPS {
                 for (int rankID = 0; rankID < n_sample_rank; rankID++) {
                     if (sampleID == 0) {
                         optimal_dp[rankID * n_sample_ + sampleID] =
-                                query_distribution_ins.GetUnpruneCandidate(0, rankID) +
-                                query_distribution_ins.GetUnpruneCandidate(rankID + 1);
+                                query_distribution_ins.GetUserCandidateBegin(rankID) +
+                                query_distribution_ins.GetUserCandidateEnd(rankID);
 
                         position_dp[rankID * n_sample_ + sampleID] = rankID;
                     } else {
@@ -272,9 +324,8 @@ namespace ReverseMIPS {
                                 position_dp[rankID * n_sample_ + sampleID - 1];
                         for (int prev_rankID = rankID - 1; prev_rankID >= 0; prev_rankID--) {
                             const int64_t unprune_user_candidate =
-                                    -query_distribution_ins.GetUnpruneCandidate(prev_rankID + 1) +
-                                    query_distribution_ins.GetUnpruneCandidate(prev_rankID + 1, rankID) +
-                                    query_distribution_ins.GetUnpruneCandidate(rankID + 1);
+                                    query_distribution_ins.GetTransitUserCandidate(
+                                            prev_rankID, rankID);
                             assert(unprune_user_candidate <= 0);
 
                             if (optimal_dp[rankID * n_sample_ + sampleID] >
@@ -330,20 +381,6 @@ namespace ReverseMIPS {
                 std::cout << known_rank_idx_l_[rankID] << " ";
             }
             std::cout << std::endl;
-
-            std::vector<int> known_distinct_rank_l(n_sample_);
-            known_distinct_rank_l.assign(known_rank_idx_l_.get(), known_rank_idx_l_.get() + n_sample_);
-            std::sort(known_distinct_rank_l.begin(), known_distinct_rank_l.end());
-            known_distinct_rank_l.erase(std::unique(known_distinct_rank_l.begin(), known_distinct_rank_l.end()),
-                                        known_distinct_rank_l.end());
-
-            if (query_distribution_ins.n_distinct_rank_ >= n_sample_) {
-                assert(known_distinct_rank_l.size() == n_sample_);
-            }
-            spdlog::info("n_distinct_rank {}, n_sample {}, n_sample_distinct_rank {}",
-                         query_distribution_ins.n_distinct_rank_, n_sample_,
-                         known_distinct_rank_l.size());
-
 
             spdlog::info("rank bound: n_sample {}", n_sample_);
         }
@@ -451,4 +488,4 @@ namespace ReverseMIPS {
 
     };
 }
-#endif //REVERSE_KRANKS_QUERYRANKSEARCH_HPP
+#endif //REVERSE_KRANKS_QUERYRANKSEARCHSEARCHALLRANK_HPP

@@ -18,7 +18,6 @@ namespace ReverseMIPS {
     class ReadAll {
         int n_data_item_, n_user_;
         const char *index_path_;
-        int n_max_disk_read_;
 
         inline int FineBinarySearch(const double &queryIP, const int &userID,
                                     const int &base_rank,
@@ -35,24 +34,6 @@ namespace ReverseMIPS {
                                                return arrIP > queryIP;
                                            });
             return (int) (lb_ptr - iter_begin) + base_rank + 1;
-        }
-
-        inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
-            int64_t offset = (int64_t) userID * n_data_item_ + start_idx;
-            offset *= sizeof(double);
-            int64_t read_count_offset = read_count * sizeof(double);
-            index_stream_.seekg(offset, std::ios::beg);
-            system("# sync; echo 3 > /proc/sys/vm/drop_caches");
-            index_stream_.read((char *) disk_cache_.get(), read_count_offset);
-        }
-
-        void
-        BuildIndexPreprocess() {
-            out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
-            if (!out_stream_) {
-                spdlog::error("error in write result");
-                exit(-1);
-            }
         }
 
     public:
@@ -72,15 +53,21 @@ namespace ReverseMIPS {
 
         inline ReadAll() {}
 
-        inline ReadAll(const int &n_user, const int &n_data_item, const char *index_path, const int n_max_disk_read) {
+        inline ReadAll(const int &n_user, const int &n_data_item, const char *index_path) {
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->index_path_ = index_path;
-            this->n_max_disk_read_ = n_max_disk_read;
-            this->disk_cache_ = std::make_unique<double[]>(n_max_disk_read);
+            this->disk_cache_ = std::make_unique<double[]>(n_data_item_);
             this->user_topk_cache_l_.resize(n_user);
+        }
 
-            BuildIndexPreprocess();
+        void
+        BuildIndexPreprocess() {
+            out_stream_ = std::ofstream(index_path_, std::ios::binary | std::ios::out);
+            if (!out_stream_) {
+                spdlog::error("error in write result");
+                exit(-1);
+            }
         }
 
         void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
@@ -116,6 +103,24 @@ namespace ReverseMIPS {
 
         void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
             memcpy(query_write_vecs, query_vecs, vec_dim * sizeof(double));
+        }
+
+        inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
+            int64_t offset = (int64_t) userID * n_data_item_ + start_idx;
+            offset *= sizeof(double);
+            int64_t read_count_offset = read_count * sizeof(double);
+            index_stream_.seekg(offset, std::ios::beg);
+            system("# sync; echo 3 > /proc/sys/vm/drop_caches");
+            index_stream_.read((char *) disk_cache_.get(), read_count_offset);
+        }
+
+        inline void ReadDiskNoCache(const int &userID, std::vector<double> &distance_l) {
+            assert(distance_l.size() == n_data_item_);
+            int64_t offset = (int64_t) userID * n_data_item_;
+            offset *= sizeof(double);
+            int64_t read_count_offset = n_data_item_ * sizeof(double);
+            index_stream_.seekg(offset, std::ios::beg);
+            index_stream_.read((char *) distance_l.data(), read_count_offset);
         }
 
         void GetRank(const std::vector<double> &queryIP_l,
@@ -177,7 +182,7 @@ namespace ReverseMIPS {
             int base_rank = start_idx;
             int read_count = end_idx - start_idx;
 
-            assert(0 <= read_count && read_count <= n_max_disk_read_);
+            assert(0 <= read_count && read_count <= n_data_item_);
 
             read_disk_record_.reset();
             ReadDisk(userID, start_idx, read_count);

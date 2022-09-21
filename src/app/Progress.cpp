@@ -8,9 +8,9 @@
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "BruteForce/BatchDiskBruteForce.hpp"
-#include "BruteForce/DiskBruteForce.hpp"
-#include "BruteForce/MemoryBruteForce.hpp"
+#include "Progress/BatchDiskBruteForce.hpp"
+#include "Progress/DiskBruteForce.hpp"
+#include "Progress/MemoryBruteForce.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>

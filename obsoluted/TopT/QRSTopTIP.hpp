@@ -7,9 +7,9 @@
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
-#include "alg/DiskIndex/TopTIP.hpp"
+#include "TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QueryRankSearch.hpp"
+#include "alg/RankBoundRefinement/QueryRankSearchSearchAllRank.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
