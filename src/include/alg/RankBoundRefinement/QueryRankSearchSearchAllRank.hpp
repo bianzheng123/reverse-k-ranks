@@ -305,10 +305,12 @@ namespace ReverseMIPS {
             std::vector<int64_t> optimal_dp(n_sample_rank * n_sample_);
             std::vector<int> position_dp(n_sample_rank * n_sample_);
             for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
-                if (sampleID != 0 && sampleID % 10 == 0) {
-                    spdlog::info("sampleID {}, n_sample {}, progress {:.3f}",
-                                 sampleID, n_sample_, (double) sampleID / (double) n_sample_);
-                }
+                spdlog::info("sampleID {}, n_sample {}, progress {:.3f}",
+                             sampleID, n_sample_, (double) sampleID / (double) n_sample_);
+//                if (sampleID != 0 && sampleID % 10 == 0) {
+//                    spdlog::info("sampleID {}, n_sample {}, progress {:.3f}",
+//                                 sampleID, n_sample_, (double) sampleID / (double) n_sample_);
+//                }
 #pragma omp parallel for default(none) shared(n_sample_rank, sampleID, optimal_dp, query_distribution_ins, position_dp, std::cout)
                 for (int rankID = 0; rankID < n_sample_rank; rankID++) {
                     if (sampleID == 0) {
