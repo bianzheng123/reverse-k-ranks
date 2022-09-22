@@ -18,21 +18,10 @@ namespace ReverseMIPS {
                   std::vector<SingleQueryPerformance> &query_performance_l) = 0;
 
         virtual std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) = 0;
+        PerformanceStatistics(const int &topk) = 0;
 
         virtual std::string BuildIndexStatistics() {
             return "Build Index Info: none";
-        };
-
-        virtual std::string VariancePerformanceMetricName() {
-            return "queryID, retrieval time, second per query";
-        }
-
-        virtual std::string VariancePerformanceStatistics(
-                const double &retrieval_time, const double &second_per_query, const int &queryID) {
-            char str[256];
-            sprintf(str, "%d,%.3f,%.3f", queryID, retrieval_time, second_per_query);
-            return str;
         };
 
         virtual ~BaseIndex() = default;

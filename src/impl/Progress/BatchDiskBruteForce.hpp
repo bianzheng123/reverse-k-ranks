@@ -22,6 +22,7 @@ namespace ReverseMIPS::BatchDiskBruteForce {
 
     class Index : public BaseIndex {
         void ResetTimer() {
+            total_retrieval_time_ = 0;
             read_disk_time_ = 0;
             inner_product_time_ = 0;
             binary_search_time_ = 0;
@@ -31,9 +32,9 @@ namespace ReverseMIPS::BatchDiskBruteForce {
         VectorMatrix user_;
         int vec_dim_, n_data_item_;
         size_t n_cache; //should larger than top-k
-        double read_disk_time_, inner_product_time_, binary_search_time_;
+        double total_retrieval_time_, read_disk_time_, inner_product_time_, binary_search_time_;
+        TimeRecord total_retrieval_record_, read_disk_record_, inner_product_record_, binary_search_record_;
         const char *index_path_;
-        TimeRecord read_disk_record_, inner_product_record_, binary_search_record_;
 
         Index() {}
 
@@ -60,12 +61,11 @@ namespace ReverseMIPS::BatchDiskBruteForce {
                 exit(-1);
             }
 
-            spdlog::info("n_query_item {}", n_execute_query);
-
             if (topk > user_.n_vector_) {
                 spdlog::error("top-k is too large, program exit");
                 exit(-1);
             }
+            total_retrieval_record_.reset();
 
 //            size_t avail_memory = get_avail_memory();
             size_t a = user_.n_vector_;
@@ -218,6 +218,7 @@ namespace ReverseMIPS::BatchDiskBruteForce {
             for (int qID = 0; qID < n_query_item; qID++) {
                 std::sort(query_heap_l[qID].begin(), query_heap_l[qID].end(), std::less<UserRankElement>());
             }
+            total_retrieval_time_ += total_retrieval_record_.get_elapsed_time_second();
 
             return query_heap_l;
         }
@@ -233,20 +234,18 @@ namespace ReverseMIPS::BatchDiskBruteForce {
         }
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
+        PerformanceStatistics(const int &topk) override {
             // int topk;
             //double total_time,
             //          inner_product_time, read_disk_time, binary_search_time;
-            //double ms_per_query;
             //unit: second
 
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, read disk %.3fs, binary search %.3fs\n\tmillion second per query %.3fms",
-                    topk, retrieval_time,
-                    inner_product_time_, read_disk_time_, binary_search_time_,
-                    ms_per_query);
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, read disk %.3fs, binary search %.3fs",
+                    topk, total_retrieval_time_,
+                    inner_product_time_, read_disk_time_, binary_search_time_);
             std::string str(buff);
             return str;
         }

@@ -85,7 +85,7 @@ def run():
         # 'GridIndex',
         # 'QueryRankSampleSearchAllRank',
         'QueryRankSampleSearchKthRank',
-        # 'RankSample',
+        'RankSample',
     ]
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))

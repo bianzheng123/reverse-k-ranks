@@ -22,6 +22,7 @@ namespace ReverseMIPS::DiskBruteForce {
 
     class Index : public BaseIndex {
         void ResetTimer() {
+            total_retrieval_time_ = 0;
             read_disk_time_ = 0;
             inner_product_time_ = 0;
             binary_search_time_ = 0;
@@ -31,9 +32,9 @@ namespace ReverseMIPS::DiskBruteForce {
         VectorMatrix user_;
         int vec_dim_, n_data_item_;
         size_t n_cache; //should larger than top-k
-        double read_disk_time_, inner_product_time_, binary_search_time_;
+        double total_retrieval_time_, read_disk_time_, inner_product_time_, binary_search_time_;
+        TimeRecord total_retrieval_record_, read_disk_record_, inner_product_record_, binary_search_record_;
         const char *index_path_;
-        TimeRecord read_disk_record_, inner_product_record_, binary_search_record_;
 
         Index() {}
 
@@ -47,7 +48,7 @@ namespace ReverseMIPS::DiskBruteForce {
 
         std::vector<std::vector<UserRankElement>>
         Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query,
-                  std::vector<SingleQueryPerformance>& query_performance_l) override {
+                  std::vector<SingleQueryPerformance> &query_performance_l) override {
             TimeRecord query_record;
             ResetTimer();
             std::ifstream index_stream_ = std::ifstream(this->index_path_, std::ios::binary | std::ios::in);
@@ -64,8 +65,6 @@ namespace ReverseMIPS::DiskBruteForce {
                 spdlog::error("top-k is too large, program exit");
                 exit(-1);
             }
-
-            spdlog::info("n_query_item {}", n_execute_query);
 
 //            size_t avail_memory = get_avail_memory();
             size_t a = user_.n_vector_;
@@ -95,6 +94,7 @@ namespace ReverseMIPS::DiskBruteForce {
 
             query_record.reset();
             for (int qID = 0; qID < n_query_item; qID++) {
+                total_retrieval_record_.reset();
                 //calculate distance
                 double *query_item_vec = query_item.getVector(qID);
                 inner_product_record_.reset();
@@ -161,6 +161,7 @@ namespace ReverseMIPS::DiskBruteForce {
                     }
                 }
                 tmp_other_time += heap_record.get_elapsed_time_second();
+                total_retrieval_time_ += total_retrieval_record_.get_elapsed_time_second();
 
                 if (qID % report_query_every_ == 0) {
                     spdlog::info("top-{} retrieval query number {}%, {} s/iter Mem: {} Mb", topk,
@@ -198,20 +199,18 @@ namespace ReverseMIPS::DiskBruteForce {
         }
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
+        PerformanceStatistics(const int &topk) override {
             // int topk;
             //double total_time,
             //          inner_product_time, read_disk_time, binary_search_time;
-            //double ms_per_query;
             //unit: second
 
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, read disk %.3fs, binary search %.3fs\n\tmillion second per query %.3fms",
-                    topk, retrieval_time,
-                    inner_product_time_, read_disk_time_, binary_search_time_,
-                    ms_per_query);
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, read disk %.3fs, binary search %.3fs",
+                    topk, total_retrieval_time_,
+                    inner_product_time_, read_disk_time_, binary_search_time_);
             std::string str(buff);
             return str;
         }

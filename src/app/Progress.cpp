@@ -122,11 +122,8 @@ int main(int argc, char **argv) {
         vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_query_item,
                                                                      query_performance_l);
 
-        double retrieval_time = record.get_elapsed_time_second();
-        double ms_per_query = retrieval_time / n_query_item * 1000;
-
-        string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
-        config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
+        string performance_str = index->PerformanceStatistics(topk);
+        config.AddRetrievalInfo(performance_str);
 
         query_performance_topk_l.emplace_back(query_performance_l);
 

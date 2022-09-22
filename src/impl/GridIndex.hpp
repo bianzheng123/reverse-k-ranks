@@ -28,6 +28,7 @@ namespace ReverseMIPS::GridIndex {
 
     class Index : public BaseIndex {
         void ResetTimer() {
+            total_retrieval_time_ = 0;
             inner_product_time_ = 0;
             inner_product_bound_time_ = 0;
             early_prune_ratio_ = 0;
@@ -37,8 +38,8 @@ namespace ReverseMIPS::GridIndex {
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
-        double inner_product_time_, inner_product_bound_time_;
-        TimeRecord inner_product_record_, inner_product_bound_record_;
+        double total_retrieval_time_, inner_product_time_, inner_product_bound_time_;
+        TimeRecord total_retrieval_record_, inner_product_record_, inner_product_bound_record_;
         double early_prune_ratio_;
     public:
 
@@ -70,7 +71,7 @@ namespace ReverseMIPS::GridIndex {
 
         std::vector<std::vector<UserRankElement>>
         Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query,
-                  std::vector<SingleQueryPerformance>& query_performance_l) override {
+                  std::vector<SingleQueryPerformance> &query_performance_l) override {
             ResetTimer();
 
             if (n_execute_query > query_item.n_vector_) {
@@ -84,12 +85,13 @@ namespace ReverseMIPS::GridIndex {
             }
 
             //coarse binary search
-            spdlog::info("n_query_item {}", n_execute_query);
             const int n_query_item = n_execute_query;
 
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
             for (int queryID = 0; queryID < n_query_item; queryID++) {
+                system("# sync; echo 3 > /proc/sys/vm/drop_caches");
+                total_retrieval_record_.reset();
                 double *query_vecs = query_ptr_.get();
                 ip_bound_ins_->PreprocessQuery(query_item.getVector(queryID), vec_dim_, query_vecs);
 
@@ -139,6 +141,7 @@ namespace ReverseMIPS::GridIndex {
                 std::make_heap(rank_max_heap.begin(), rank_max_heap.end(), std::less());
                 std::sort_heap(rank_max_heap.begin(), rank_max_heap.end(), std::less());
                 inner_product_bound_time_ += inner_product_bound_record_.get_elapsed_time_second();
+                total_retrieval_time_ += total_retrieval_record_.get_elapsed_time_second();
                 early_prune_ratio_ += early_prune_candidate * 1.0 / n_user_;
             }
 
@@ -188,22 +191,20 @@ namespace ReverseMIPS::GridIndex {
         }
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
+        PerformanceStatistics(const int &topk) override {
             // int topk;
             //double total_time,
             //          inner_product_time, inner_product_bound_time
             //double early_prune_ratio_
-            //double ms_per_query;
             //unit: second
 
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tearly prune ratio %.4f\n\tmillion second per query %.3fms",
-                    topk, retrieval_time,
+                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tearly prune ratio %.4f",
+                    topk, total_retrieval_time_,
                     inner_product_time_, inner_product_bound_time_,
-                    early_prune_ratio_,
-                    ms_per_query);
+                    early_prune_ratio_);
             std::string str(buff);
             return str;
         }

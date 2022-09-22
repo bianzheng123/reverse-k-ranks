@@ -38,6 +38,7 @@ namespace ReverseMIPS::Simpfer {
 
     class Index : public BaseIndex {
         void ResetTimer() {
+            total_retrieval_time_ = 0;
         }
 
     public:
@@ -46,7 +47,8 @@ namespace ReverseMIPS::Simpfer {
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
-        TimeRecord query_record_;
+        double total_retrieval_time_;
+        TimeRecord total_retrieval_record_;
 
         Index(
                 SimpferIndex &&simpfer_index, Matrix &&user_matrix,
@@ -78,7 +80,6 @@ namespace ReverseMIPS::Simpfer {
                 exit(-1);
             }
 
-            spdlog::info("n_query_item {}", n_execute_query);
             const int n_query_item = n_execute_query;
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
 
@@ -87,7 +88,8 @@ namespace ReverseMIPS::Simpfer {
 
             // store queryIP
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-                query_record_.reset();
+                system("# sync; echo 3 > /proc/sys/vm/drop_caches");
+                total_retrieval_record_.reset();
 
                 int rtk_topk = 1;
                 std::vector<int> result_userID_l;
@@ -109,9 +111,10 @@ namespace ReverseMIPS::Simpfer {
 
                 }
 
-                const double single_query_time = query_record_.get_elapsed_time_second();
-                spdlog::info("queryID {}, result_size {}, rtk_topk {}, single_query_time {:.2f}s",
-                             queryID, result_size, rtk_topk, single_query_time);
+                const double query_time = total_retrieval_record_.get_elapsed_time_second();
+                total_retrieval_time_ += query_time;
+                spdlog::info("queryID {}, result_size {}, rtk_topk {}, query_time {:.2f}s",
+                             queryID, result_size, rtk_topk, query_time);
                 assert(result_userID_l.size() == result_size);
 
                 for (int resultID = 0; resultID < result_size; resultID++) {
@@ -124,10 +127,7 @@ namespace ReverseMIPS::Simpfer {
         }
 
         std::string
-        PerformanceStatistics(
-                const int &topk,
-                const double &retrieval_time,
-                const double &ms_per_query) override {
+        PerformanceStatistics(const int &topk) override {
             // int topk;
             //double total_time,
             //          inner_product_time, memory_index_search_time_
@@ -138,8 +138,8 @@ namespace ReverseMIPS::Simpfer {
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tmillion second per query %.3fms",
-                    topk, retrieval_time, ms_per_query);
+                    "top%d retrieval time:\n\ttotal %.3fs",
+                    topk, total_retrieval_time_);
             std::string str(buff);
             return str;
         }

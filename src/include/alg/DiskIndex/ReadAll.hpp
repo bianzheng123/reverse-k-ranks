@@ -110,7 +110,6 @@ namespace ReverseMIPS {
             offset *= sizeof(double);
             int64_t read_count_offset = read_count * sizeof(double);
             index_stream_.seekg(offset, std::ios::beg);
-            system("# sync; echo 3 > /proc/sys/vm/drop_caches");
             index_stream_.read((char *) disk_cache_.get(), read_count_offset);
         }
 

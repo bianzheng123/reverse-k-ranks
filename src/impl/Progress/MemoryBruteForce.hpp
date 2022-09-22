@@ -17,6 +17,7 @@ namespace ReverseMIPS::MemoryBruteForce {
         void ResetTime() {
             this->inner_product_time_ = 0;
             this->binary_search_time_ = 0;
+            this->total_retrieval_time_ = 0;
         }
 
     public:
@@ -26,8 +27,8 @@ namespace ReverseMIPS::MemoryBruteForce {
 
         int vec_dim_;
         int preprocess_report_every_ = 100;
-        double inner_product_time_, binary_search_time_;
-        TimeRecord preprocess_record_, inner_product_record_, binary_search_record_;
+        double total_retrieval_time_, inner_product_time_, binary_search_time_;
+        TimeRecord total_retrieval_record_, preprocess_record_, inner_product_record_, binary_search_record_;
 
         Index() {}
 
@@ -76,14 +77,13 @@ namespace ReverseMIPS::MemoryBruteForce {
 
         std::vector<std::vector<UserRankElement>>
         Retrieval(const VectorMatrix &query_item, const int &topk, const int &n_execute_query,
-                  std::vector<SingleQueryPerformance>& query_performance_l) override {
+                  std::vector<SingleQueryPerformance> &query_performance_l) override {
             if (topk > user_.n_vector_) {
                 spdlog::error("top-k is larger than user, system exit");
                 exit(-1);
             }
             ResetTime();
 
-            spdlog::info("n_query_item {}", n_execute_query);
             int n_query_item = n_execute_query;
             int n_user = user_.n_vector_;
 
@@ -95,6 +95,7 @@ namespace ReverseMIPS::MemoryBruteForce {
             std::vector<std::vector<UserRankElement>> results(n_query_item, std::vector<UserRankElement>());
 
             for (int qID = 0; qID < n_query_item; qID++) {
+                total_retrieval_record_.reset();
                 double *query_item_vec = query_item.getVector(qID);
                 std::vector<UserRankElement> &minHeap = results[qID];
                 minHeap.resize(topk);
@@ -139,7 +140,7 @@ namespace ReverseMIPS::MemoryBruteForce {
                 }
                 std::make_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
                 std::sort_heap(minHeap.begin(), minHeap.end(), std::less<UserRankElement>());
-
+                total_retrieval_time_ += total_retrieval_record_.get_elapsed_time_second();
             }
 
             return results;
@@ -159,20 +160,18 @@ namespace ReverseMIPS::MemoryBruteForce {
         }
 
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
+        PerformanceStatistics(const int &topk) override {
             // int topk;
             //double total_time,
             //          inner_product_time, binary_search_time;
-            //double ms_per_query;
             //unit: second
 
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, binary search %.3fs\n\tmillion second per query %.3fms",
-                    topk, retrieval_time,
-                    inner_product_time_, binary_search_time_,
-                    ms_per_query);
+                    "top%d retrieval time:\n\ttotal %.3fs\n\tinner product %.3fs, binary search %.3fs",
+                    topk, total_retrieval_time_,
+                    inner_product_time_, binary_search_time_);
             std::string str(buff);
             return str;
         }

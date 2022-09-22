@@ -31,6 +31,7 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
 
     class Index : public BaseIndex {
         void ResetTimer() {
+            total_retrieval_time_ = 0;
             inner_product_time_ = 0;
             coarse_binary_search_time_ = 0;
             read_disk_time_ = 0;
@@ -46,9 +47,8 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
 
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
-        double inner_product_time_, coarse_binary_search_time_, read_disk_time_, fine_binary_search_time_;
-        TimeRecord inner_product_record_, coarse_binary_search_record_;
-        TimeRecord query_record_;
+        double total_retrieval_time_, inner_product_time_, coarse_binary_search_time_, read_disk_time_, fine_binary_search_time_;
+        TimeRecord total_retrieval_record_, inner_product_record_, coarse_binary_search_record_;
         uint64_t total_io_cost_;
         double rank_prune_ratio_;
 
@@ -107,7 +107,6 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
             }
 
             //coarse binary search
-            spdlog::info("n_query_item {}", n_execute_query);
             const int n_query_item = n_execute_query;
 
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
@@ -117,7 +116,8 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
 
             // for binary search, check the number
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-                query_record_.reset();
+                system("# sync; echo 3 > /proc/sys/vm/drop_caches");
+                total_retrieval_record_.reset();
                 prune_l_.assign(n_user_, false);
                 result_l_.assign(n_user_, false);
                 rank_lb_l_.assign(n_user_, n_data_item_);
@@ -177,7 +177,8 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
                 assert(query_heap_l[queryID].size() == topk);
 
                 const double total_time =
-                        query_record_.get_elapsed_time_second();
+                        total_retrieval_record_.get_elapsed_time_second();
+                total_retrieval_time_ += total_time;
                 const double &memory_index_time = tmp_memory_index_time + tmp_inner_product_time;
                 query_performance_l[queryID] = SingleQueryPerformance(queryID,
                                                                       n_prune_user, n_result_user,
@@ -197,36 +198,23 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
             return query_heap_l;
         }
 
-        std::string VariancePerformanceMetricName() override {
-            return "queryID, retrieval time, second per query, rank prune ratio";
-        }
-
-        std::string VariancePerformanceStatistics(
-                const double &retrieval_time, const double &second_per_query, const int &queryID) override {
-            char str[256];
-            sprintf(str, "%d,%.3f,%.3f,%.3f", queryID, retrieval_time, second_per_query, rank_prune_ratio_);
-            return str;
-        };
-
         std::string
-        PerformanceStatistics(const int &topk, const double &retrieval_time, const double &ms_per_query) override {
+        PerformanceStatistics(const int &topk) override {
             // int topk;
             //double total_time,
             //          inner_product_time, coarse_binary_search_time, read_disk_time
             //          fine_binary_search_time;
             //double rank_prune_ratio;
-            //double ms_per_query;
             //unit: second
 
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, read disk %.3fs\n\tfine binary search %.3fs\n\ttotal io cost %ld, rank prune ratio %.4f\n\tmillion second per query %.3fms",
-                    topk, retrieval_time,
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, coarse binary search %.3fs, read disk %.3fs\n\tfine binary search %.3fs\n\ttotal io cost %ld, rank prune ratio %.4f",
+                    topk, total_retrieval_time_,
                     inner_product_time_, coarse_binary_search_time_, read_disk_time_,
                     fine_binary_search_time_,
-                    total_io_cost_, rank_prune_ratio_,
-                    ms_per_query);
+                    total_io_cost_, rank_prune_ratio_);
             std::string str(buff);
             return str;
         }
