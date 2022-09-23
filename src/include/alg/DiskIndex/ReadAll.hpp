@@ -152,14 +152,14 @@ namespace ReverseMIPS {
                 n_refine_user_++;
                 heap.Update(rank);
 
-                if (n_refine_user_ % 7500 == 0) {
-                    const double progress = n_refine_user_ / (0.01 * refine_user_size);
-                    spdlog::info(
-                            "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",
-                            progress, io_cost, ip_cost, read_disk_time, rank_computation_time,
-                            record.get_elapsed_time_second(), get_current_RSS() / 1000000);
-                    record.reset();
-                }
+//                if (n_refine_user_ % 7500 == 0) {
+//                    const double progress = n_refine_user_ / (0.01 * refine_user_size);
+//                    spdlog::info(
+//                            "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",
+//                            progress, io_cost, ip_cost, read_disk_time, rank_computation_time,
+//                            record.get_elapsed_time_second(), get_current_RSS() / 1000000);
+//                    record.reset();
+//                }
             }
 
             assert(0 <= remain_n_result && remain_n_result <= n_refine_user_ && n_refine_user_ <= n_user_);

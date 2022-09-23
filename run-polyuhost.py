@@ -167,9 +167,6 @@ def run():
         os.system(
             'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
                 dataset_dir, ds, index_dir, 'RankSample', n_sample))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
-                dataset_dir, ds, index_dir, "Simpfer", 1025))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
         #         ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
@@ -177,11 +174,14 @@ def run():
         #     ds, 5000, 500,
         # ))
 
-    for ds in dataset_l:
-        n_sample = compute_n_sample(ds, 16)
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 'QueryRankSampleSearchAllRank', n_sample, 5000, 600))
+    # for ds in dataset_l:
+    #     n_sample = compute_n_sample(ds, 16)
+    #     os.system(
+    #         'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
+    #             dataset_dir, ds, index_dir, "Simpfer", 1025))
+    #     os.system(
+    #         'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+    #             dataset_dir, ds, index_dir, 'QueryRankSampleSearchAllRank', n_sample, 5000, 600))
 
 
 if __name__ == '__main__':
