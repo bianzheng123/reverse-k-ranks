@@ -13,6 +13,7 @@
 #include <boost/sort/sort.hpp>
 #include <vector>
 #include <parallel/algorithm>
+#include <thread>
 
 #ifdef USE_GPU
 
