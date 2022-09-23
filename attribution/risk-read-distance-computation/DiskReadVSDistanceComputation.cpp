@@ -2,13 +2,13 @@
 // Created by BianZheng on 2022/3/16.
 //
 
+#include <spdlog/spdlog.h>
 #include "alg/SpaceInnerProduct.hpp"
 #include "util/TimeMemory.hpp"
 #include <iostream>
 #include <vector>
 #include <random>
 #include <fstream>
-#include <spdlog/spdlog.h>
 
 using namespace std;
 using namespace ReverseMIPS;
