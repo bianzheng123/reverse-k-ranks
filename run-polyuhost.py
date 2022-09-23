@@ -28,7 +28,7 @@ def compute_n_sample(dataset_name, memory_capacity):
     n_element_per_block = disk_page / size_element
     n_data_item = dataset_m[dataset_name][0]
     n_user = dataset_m[dataset_name][2]
-    require_n_sample = np.ceil(n_data_item / n_element_per_block)
+    require_n_sample = np.ceil(n_data_item / n_element_per_block) + 1
     require_memory_capacity = require_n_sample * n_user * size_element / 1024 / 1024 / 1024
 
     n_sample = require_n_sample
