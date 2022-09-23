@@ -88,7 +88,6 @@ namespace ReverseMIPS::Simpfer {
 
             // store queryIP
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-                system("# sync; echo 3 > /proc/sys/vm/drop_caches");
                 total_retrieval_record_.reset();
 
                 int rtk_topk = 1;

@@ -1,15 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(Reverse-kRanks)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_Release} -O3")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-
-set(CMAKE_CUDA_STANDARD 17)
-set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 find_package(Boost COMPONENTS program_options)
 
@@ -73,54 +70,17 @@ set_target_properties(fexiprolib PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(fexiprolib PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 target_include_directories(fexiprolib PRIVATE ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 
-set(USE_CUDA OFF)
+add_executable(bst src/app/BuildScoreTable.cpp)
+target_include_directories(bst PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(bst PRIVATE armadillo pthread spdlog::spdlog OpenMP::OpenMP_CXX ${Boost_LIBRARIES} fexiprolib)
 
-if (USE_CUDA)
-    add_definitions(-DUSE_GPU)
-    enable_language(CUDA)
-    find_package(Thrust REQUIRED CONFIG)
-    thrust_create_target(Thrust)
+add_executable(rri src/app/ReverseRankIndex.cpp)
+target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(rri PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
-    set_source_files_properties(src/app/query-distribution-index/QueryDistributionIndex.cpp PROPERTIES LANGUAGE CUDA)
-    add_executable(dbt src/app/query-distribution-index/QueryDistributionIndex.cpp)
-    target_include_directories(dbt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(dbt PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
-    set_target_properties(dbt PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    set_property(TARGET dbt PROPERTY CXX_STANDARD "17")
-    set_property(TARGET dbt PROPERTY CXX_STANDARD_REQUIRED ON)
-    set_property(TARGET dbt PROPERTY CXX_EXTENSIONS OFF)
-
-    set_source_files_properties(src/app/BuildScoreTable.cpp PROPERTIES LANGUAGE CUDA)
-    add_executable(bst src/app/BuildScoreTable.cpp)
-    target_include_directories(bst PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(bst PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
-    set_target_properties(bst PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    set_property(TARGET bst PROPERTY CXX_STANDARD "17")
-    set_property(TARGET bst PROPERTY CXX_STANDARD_REQUIRED ON)
-    set_property(TARGET bst PROPERTY CXX_EXTENSIONS OFF)
-
-    set_source_files_properties(src/app/ReverseRankIndex.cpp PROPERTIES LANGUAGE CUDA)
-    add_executable(rri src/app/ReverseRankIndex.cpp)
-    target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(rri PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas fexiprolib)
-    set_target_properties(rri PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    set_property(TARGET rri PROPERTY CXX_STANDARD "17")
-    set_property(TARGET rri PROPERTY CXX_STANDARD_REQUIRED ON)
-    set_property(TARGET rri PROPERTY CXX_EXTENSIONS OFF)
-
-else () # not use cuda
-    add_executable(bst src/app/BuildScoreTable.cpp)
-    target_include_directories(bst PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(bst PRIVATE armadillo pthread spdlog::spdlog OpenMP::OpenMP_CXX ${Boost_LIBRARIES} fexiprolib)
-
-    add_executable(rri src/app/ReverseRankIndex.cpp)
-    target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(rri PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
-
-    add_executable(dbt src/app/query-distribution-index/QueryDistributionIndex.cpp)
-    target_include_directories(dbt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-    target_link_libraries(dbt PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
-endif ()
+add_executable(dbt src/app/query-distribution-index/QueryDistributionIndex.cpp)
+target_include_directories(dbt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(dbt PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
 ##set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
 #add_executable(brtt src/app/BatchRunTopT.cpp)
@@ -153,3 +113,5 @@ endif ()
 if (BUILD_TEST_MODULE)
     add_subdirectory(test)
 endif ()
+
+add_subdirectory(test-mmap)

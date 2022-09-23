@@ -8,6 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
+#include "alg/DiskIndex/ReadAllMMap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/QueryRankSearchSearchAllRank.hpp"
 
@@ -43,7 +44,7 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
         //rank search
         QueryRankSearchSearchAllRank rank_ins_;
         //read disk
-        ReadAll disk_ins_;
+        ReadAllMMap disk_ins_;
 
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
@@ -66,7 +67,7 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
         Index(//rank search
                 QueryRankSearchSearchAllRank &rank_ins,
                 //disk index
-                ReadAll &disk_ins,
+                ReadAllMMap &disk_ins,
                 //general retrieval
                 VectorMatrix &user, const int &n_data_item
         ) {
@@ -116,7 +117,6 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
 
             // for binary search, check the number
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-                system("# sync; echo 3 > /proc/sys/vm/drop_caches");
                 total_retrieval_record_.reset();
                 prune_l_.assign(n_user_, false);
                 result_l_.assign(n_user_, false);
@@ -238,17 +238,19 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
         QueryRankSearchSearchAllRank rank_ins(n_sample, n_data_item, n_user, dataset_name,
                                               n_sample_query, sample_topk, index_basic_dir);
 
-        //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path);
+        ReadAllMMap disk_ins(n_user, n_data_item, index_path);
         disk_ins.PreprocessData(user, data_item);
-        disk_ins.RetrievalPreprocess();
+
+        //disk index
+        ReadAll read_ins(n_user, n_data_item, index_path);
+        read_ins.RetrievalPreprocess();
 
         const int report_every = 10000;
         TimeRecord record;
         record.reset();
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
-            disk_ins.ReadDiskNoCache(userID, distance_l);
+            read_ins.ReadDiskNoCache(userID, distance_l);
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
 
@@ -259,7 +261,7 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
                 record.reset();
             }
         }
-        disk_ins.FinishRetrieval();
+        read_ins.FinishRetrieval();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;

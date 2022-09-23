@@ -7,7 +7,7 @@
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
-#include "alg/DiskIndex/ReadAll.hpp"
+#include "alg/DiskIndex/ReadAllMMap.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 
@@ -43,7 +43,7 @@ namespace ReverseMIPS::RankSample {
         //rank search
         RankSearch rank_ins_;
         //read disk
-        ReadAll disk_ins_;
+        ReadAllMMap disk_ins_;
 
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
@@ -66,7 +66,7 @@ namespace ReverseMIPS::RankSample {
         Index(//rank search
                 RankSearch &rank_ins,
                 //disk index
-                ReadAll &disk_ins,
+                ReadAllMMap &disk_ins,
                 //general retrieval
                 VectorMatrix &user, const int &n_data_item
         ) {
@@ -116,7 +116,6 @@ namespace ReverseMIPS::RankSample {
 
             // for binary search, check the number
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-                system("# sync; echo 3 > /proc/sys/vm/drop_caches");
                 total_retrieval_record_.reset();
                 prune_l_.assign(n_user_, false);
                 result_l_.assign(n_user_, false);
@@ -237,16 +236,18 @@ namespace ReverseMIPS::RankSample {
         RankSearch rank_ins(n_sample, n_data_item, n_user);
 
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path);
+        ReadAllMMap disk_ins(n_user, n_data_item, index_path);
         disk_ins.PreprocessData(user, data_item);
-        disk_ins.RetrievalPreprocess();
+
+        ReadAll read_ins(n_user, n_data_item, index_path);
+        read_ins.RetrievalPreprocess();
 
         const int report_every = 10000;
         TimeRecord record;
         record.reset();
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
-            disk_ins.ReadDiskNoCache(userID, distance_l);
+            read_ins.ReadDiskNoCache(userID, distance_l);
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
 
@@ -257,7 +258,7 @@ namespace ReverseMIPS::RankSample {
                 record.reset();
             }
         }
-        disk_ins.FinishRetrieval();
+        read_ins.FinishRetrieval();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;

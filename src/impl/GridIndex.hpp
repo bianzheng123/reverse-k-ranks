@@ -90,7 +90,6 @@ namespace ReverseMIPS::GridIndex {
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
             for (int queryID = 0; queryID < n_query_item; queryID++) {
-                system("# sync; echo 3 > /proc/sys/vm/drop_caches");
                 total_retrieval_record_.reset();
                 double *query_vecs = query_ptr_.get();
                 ip_bound_ins_->PreprocessQuery(query_item.getVector(queryID), vec_dim_, query_vecs);
