@@ -149,7 +149,8 @@ def run_build_index():
 
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
     for ds in dataset_l:
