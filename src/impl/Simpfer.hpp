@@ -6,7 +6,6 @@
 #define REVERSE_KRANKS_SIMPFER_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
-#include "../../obsoluted/TopT/TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 

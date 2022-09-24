@@ -8,6 +8,7 @@
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
+#include "alg/DiskIndex/ReadAllDirectIO.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 
@@ -43,7 +44,7 @@ namespace ReverseMIPS::RankSample {
         //rank search
         RankSearch rank_ins_;
         //read disk
-        ReadAll disk_ins_;
+        ReadAllDirectIO disk_ins_;
 
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
@@ -66,7 +67,7 @@ namespace ReverseMIPS::RankSample {
         Index(//rank search
                 RankSearch &rank_ins,
                 //disk index
-                ReadAll &disk_ins,
+                ReadAllDirectIO &disk_ins,
                 //general retrieval
                 VectorMatrix &user, const int &n_data_item
         ) {
@@ -236,7 +237,7 @@ namespace ReverseMIPS::RankSample {
         RankSearch rank_ins(n_sample, n_data_item, n_user);
 
         //disk index
-        ReadAll disk_ins(n_user, n_data_item, index_path);
+        ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
         disk_ins.PreprocessData(user, data_item);
 
         ReadAll read_ins(n_user, n_data_item, index_path);
