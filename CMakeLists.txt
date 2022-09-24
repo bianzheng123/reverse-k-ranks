@@ -114,4 +114,4 @@ if (BUILD_TEST_MODULE)
     add_subdirectory(test)
 endif ()
 
-add_subdirectory(test-mmap)
+add_subdirectory(test-direct-io)
