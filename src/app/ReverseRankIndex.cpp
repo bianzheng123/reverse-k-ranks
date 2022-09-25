@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     vector<vector<SingleQueryPerformance>> query_performance_topk_l;
-    const int n_execute_query = n_query_item;
+    const int n_execute_query = 100;
     for (int topk: topk_l) {
         vector<SingleQueryPerformance> query_performance_l(n_execute_query);
         vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,

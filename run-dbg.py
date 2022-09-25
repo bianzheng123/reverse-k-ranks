@@ -149,24 +149,24 @@ def run_build_index():
 
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
-    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
-    dataset_l = ['amazon-home-kitchen']
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
     for ds in dataset_l:
         os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
             dataset_dir, ds, index_dir))
-        n_sample = compute_n_sample(ds, 16)
-        os.system(
-            'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 5000, 600
-            ))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-                dataset_dir, ds, index_dir, 'RankSample', n_sample))
+        # n_sample = compute_n_sample(ds, 16)
+        # os.system(
+        #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+        #         dataset_dir, ds, index_dir, 5000, 600
+        #     ))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+        #         dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+        #         dataset_dir, ds, index_dir, 'RankSample', n_sample))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
         #         ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
