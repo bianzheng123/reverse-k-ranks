@@ -41,6 +41,7 @@ namespace ReverseMIPS {
         const char *index_path_;
         int64_t n_user_, n_data_item_;
         int64_t io_ele_unit_, disk_cache_capacity_;
+        TimeRecord record_;
 
     public:
 
@@ -68,7 +69,8 @@ namespace ReverseMIPS {
             }
         }
 
-        DiskData ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
+        DiskData ReadDisk(const int &userID, const int &start_idx, const int &read_count,
+                          double &read_disk_time, size_t &io_cost) {
             assert(0 <= start_idx && start_idx < n_data_item_);
             assert(0 <= read_count && read_count <= n_data_item_);
             assert(0 <= start_idx + read_count && start_idx + read_count <= n_data_item_);
@@ -84,12 +86,14 @@ namespace ReverseMIPS {
             assert(ele_actual_offset + ele_actual_read_count >= ele_offset + read_count);
             assert(ele_actual_read_count <= disk_cache_capacity_);
 
+            record_.reset();
             off_t seek_offset = lseek(fileID_, sizeof(double) * ele_actual_offset, SEEK_SET);
-            assert(seek_offset == sizeof(double) * ele_actual_offset);
-//        printf("seek_offset %ld\n", seek_offset);
             ssize_t read_chars = read(fileID_, disk_cache_, ele_actual_read_count * sizeof(double));
+            read_disk_time = record_.get_elapsed_time_second();
+            io_cost = ele_actual_read_count;
+
+            assert(seek_offset == sizeof(double) * ele_actual_offset);
             assert(read_chars != -1 && (read_chars == 0 || read_count <= read_chars));
-//        printf("read_chars = %d\n", (int) (read_chars));
             assert(ele_actual_read_count * sizeof(double) % DISK_PAGE_SIZE == 0);
 
             DiskData res(disk_cache_, read_count, ele_offset % io_ele_unit_ * sizeof(double));
@@ -161,8 +165,10 @@ namespace ReverseMIPS {
             memcpy(query_write_vecs, query_vecs, vec_dim * sizeof(double));
         }
 
-        inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
-            disk_data_ = read_disk_index_.ReadDisk(userID, start_idx, read_count);
+        inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count,
+                             double &read_disk_time, size_t &io_cost) {
+            disk_data_ = read_disk_index_.ReadDisk(userID, start_idx, read_count,
+                                                   read_disk_time, io_cost);
         }
 
         void GetRank(const std::vector<double> &queryIP_l,
@@ -226,12 +232,12 @@ namespace ReverseMIPS {
 
             assert(0 <= read_count && read_count <= n_data_item_);
 
-            read_disk_record_.reset();
-            ReadDisk(userID, start_idx, read_count);
-            const double tmp_read_disk = read_disk_record_.get_elapsed_time_second();
-            io_cost += read_count;
-            read_disk_time += tmp_read_disk;
-            read_disk_time_ += tmp_read_disk;
+            double tmp_read_disk_time = 0;
+            size_t tmp_io_cost = 0;
+            ReadDisk(userID, start_idx, read_count, tmp_read_disk_time, tmp_io_cost);
+            io_cost += tmp_io_cost;
+            read_disk_time += tmp_read_disk_time;
+            read_disk_time_ += tmp_read_disk_time;
             exact_rank_refinement_record_.reset();
             int rank = FineBinarySearch(queryIP, userID, base_rank, read_count);
             exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
