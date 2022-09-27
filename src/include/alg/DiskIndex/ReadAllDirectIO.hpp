@@ -165,11 +165,6 @@ namespace ReverseMIPS {
             memcpy(query_write_vecs, query_vecs, vec_dim * sizeof(double));
         }
 
-        inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count,
-                             double &read_disk_time, size_t &io_cost) {
-
-        }
-
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<int> &refine_seq_l, const int &refine_user_size, const int &remain_n_result,
