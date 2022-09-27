@@ -18,7 +18,7 @@
 
 namespace ReverseMIPS {
 
-#define DISK_PAGE_SIZE 512
+#define DISK_PAGE_SIZE 4096
 
     using namespace std;
 
@@ -167,8 +167,7 @@ namespace ReverseMIPS {
 
         inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count,
                              double &read_disk_time, size_t &io_cost) {
-            disk_data_ = read_disk_index_.ReadDisk(userID, start_idx, read_count,
-                                                   read_disk_time, io_cost);
+
         }
 
         void GetRank(const std::vector<double> &queryIP_l,
@@ -234,7 +233,8 @@ namespace ReverseMIPS {
 
             double tmp_read_disk_time = 0;
             size_t tmp_io_cost = 0;
-            ReadDisk(userID, start_idx, read_count, tmp_read_disk_time, tmp_io_cost);
+            disk_data_ = read_disk_index_.ReadDisk(userID, start_idx, read_count,
+                                                   tmp_read_disk_time, tmp_io_cost);
             io_cost += tmp_io_cost;
             read_disk_time += tmp_read_disk_time;
             read_disk_time_ += tmp_read_disk_time;
