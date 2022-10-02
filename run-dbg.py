@@ -22,7 +22,8 @@ def compute_n_sample(dataset_name, memory_capacity):
                  'yahoomusic_big': [135736, 1000, 1823179],
                  'yahoomusic': [97213, 1000, 1948882],
                  'yelp': [159585, 1000, 2189457],
-                 'goodreads': [2359650, 1000, 876145]}
+                 'goodreads': [2359650, 1000, 876145],
+                 'amazon-home-kitchen': [2511610, 1000, 409243]}
     size_element = 8
     disk_page = 4096
     n_element_per_block = disk_page / size_element
