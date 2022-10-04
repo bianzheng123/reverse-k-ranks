@@ -1,0 +1,99 @@
+nohup: ignoring input
+[2022-09-23 08:30:27.440] [info] dataset_name amazon-home-kitchen, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-09-23 08:30:27.440] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-09-23 08:30:34.420] [info] n_data_item 409243, n_query_item 1000, n_user 2511610, vec_dim 150
+[2022-09-23 08:30:34.603] [info] preprocessed 0.0%, Mem: 3564 Mb, 0.034162907 s/iter, compute time 0.010942677s, sort time 0.016566945s, process index time 0.00322797s
+[2022-09-23 08:46:46.614] [info] preprocessed 1.2%, Mem: 3568 Mb, 972.011268994 s/iter, compute time 311.85921043099927s, sort time 528.0510756710001s, process index time 132.07735510399954s
+[2022-09-23 09:03:02.816] [info] preprocessed 2.4%, Mem: 3568 Mb, 976.201754401 s/iter, compute time 314.2050610870021s, sort time 527.768398295001s, process index time 134.20462657399864s
+[2022-09-23 09:19:26.616] [info] preprocessed 3.6%, Mem: 3568 Mb, 983.792506924 s/iter, compute time 314.31947964599823s, sort time 529.9284312850009s, process index time 139.52103969499845s
+[2022-09-23 09:35:46.149] [info] preprocessed 4.8%, Mem: 3568 Mb, 979.532831348 s/iter, compute time 314.4639119010013s, sort time 526.056971254999s, process index time 138.988296336s
+[2022-09-23 09:52:16.921] [info] preprocessed 6.0%, Mem: 3568 Mb, 990.007204706 s/iter, compute time 314.185121697998s, sort time 526.693810085998s, process index time 149.10474232700093s
+[2022-09-23 10:08:51.613] [info] preprocessed 7.2%, Mem: 3568 Mb, 994.691640503 s/iter, compute time 314.0166379090015s, sort time 531.283677343001s, process index time 149.36780245700118s
+[2022-09-23 10:25:24.267] [info] preprocessed 8.4%, Mem: 3568 Mb, 992.65450252 s/iter, compute time 314.14459332799856s, sort time 525.1435631049991s, process index time 153.3426122630009s
+[2022-09-23 10:41:56.266] [info] preprocessed 9.6%, Mem: 3568 Mb, 991.998636026 s/iter, compute time 314.31620345899995s, sort time 528.6060567500006s, process index time 149.05281187999915s
+[2022-09-23 10:58:27.085] [info] preprocessed 10.8%, Mem: 3568 Mb, 990.818608357 s/iter, compute time 314.1279145440005s, sort time 526.8653516539973s, process index time 149.80175636400094s
+[2022-09-23 11:15:02.451] [info] preprocessed 11.9%, Mem: 3568 Mb, 995.365988086 s/iter, compute time 314.2845431249993s, sort time 527.7011923869978s, process index time 153.35660210600037s
+[2022-09-23 11:31:37.386] [info] preprocessed 13.1%, Mem: 3568 Mb, 994.9344569 s/iter, compute time 313.86153214800174s, sort time 526.744530418005s, process index time 154.3048264250007s
+[2022-09-23 11:48:13.735] [info] preprocessed 14.3%, Mem: 3568 Mb, 996.349394449 s/iter, compute time 314.2013446640017s, sort time 531.4919983050014s, process index time 150.6323856580001s
+[2022-09-23 12:04:49.494] [info] preprocessed 15.5%, Mem: 3568 Mb, 995.740267991 s/iter, compute time 314.1974352620023s, sort time 526.9442009149999s, process index time 154.57503096100004s
+[2022-09-23 12:21:28.393] [info] preprocessed 16.7%, Mem: 3568 Mb, 998.899380357 s/iter, compute time 314.1104034849984s, sort time 530.1571230639978s, process index time 154.6082638700005s
+[2022-09-23 12:38:02.633] [info] preprocessed 17.9%, Mem: 3568 Mb, 994.239874161 s/iter, compute time 314.1468671079985s, sort time 529.5986377129985s, process index time 150.470712815s
+[2022-09-23 12:54:42.191] [info] preprocessed 19.1%, Mem: 3568 Mb, 999.557354141 s/iter, compute time 313.7516995449975s, sort time 532.1309559000014s, process index time 153.65098596999812s
+[2022-09-23 13:11:17.139] [info] preprocessed 20.3%, Mem: 3568 Mb, 994.94235265 s/iter, compute time 314.207786705004s, sort time 528.9050415659987s, process index time 151.8059528089998s
+[2022-09-23 13:27:54.853] [info] preprocessed 21.5%, Mem: 3568 Mb, 997.713286328 s/iter, compute time 314.3056013979995s, sort time 530.9739587959999s, process index time 152.41004861600052s
+[2022-09-23 13:44:25.641] [info] preprocessed 22.7%, Mem: 3568 Mb, 990.788267876 s/iter, compute time 314.0844135789989s, sort time 525.2134494299999s, process index time 151.46693155000045s
+[2022-09-23 14:01:02.627] [info] preprocessed 23.9%, Mem: 3568 Mb, 996.985678872 s/iter, compute time 313.5775031419971s, sort time 530.1127198090014s, process index time 153.27176692100042s
+[2022-09-23 14:17:38.383] [info] preprocessed 25.1%, Mem: 3568 Mb, 995.746992147 s/iter, compute time 314.93693391899944s, sort time 530.0641655100021s, process index time 150.72221544799976s
+[2022-09-23 14:34:13.943] [info] preprocessed 26.3%, Mem: 3568 Mb, 995.559869634 s/iter, compute time 314.0739647889992s, sort time 528.076296687999s, process index time 153.38551883600027s
+[2022-09-23 14:50:55.326] [info] preprocessed 27.5%, Mem: 3568 Mb, 1001.364539841 s/iter, compute time 314.03690780499835s, sort time 528.7466459419992s, process index time 158.5573156730009s
+[2022-09-23 15:07:31.967] [info] preprocessed 28.7%, Mem: 3568 Mb, 996.641277699 s/iter, compute time 313.8559117509985s, sort time 526.4683180060024s, process index time 156.29331497399986s
+[2022-09-23 15:24:12.183] [info] preprocessed 29.9%, Mem: 3568 Mb, 1000.215084136 s/iter, compute time 313.97078567900246s, sort time 529.252469897005s, process index time 156.96739774900067s
+[2022-09-23 15:40:45.723] [info] preprocessed 31.1%, Mem: 3568 Mb, 993.54045986 s/iter, compute time 313.9214649160011s, sort time 527.0191690379995s, process index time 152.57629833599947s
+[2022-09-23 15:57:21.513] [info] preprocessed 32.3%, Mem: 3568 Mb, 995.789840175 s/iter, compute time 314.21812819599916s, sort time 528.2216014939988s, process index time 153.32653820999988s
+[2022-09-23 16:14:05.516] [info] preprocessed 33.4%, Mem: 3568 Mb, 1004.003081962 s/iter, compute time 314.21532380799823s, sort time 532.1874238400025s, process index time 157.5765224320003s
+[2022-09-23 16:30:42.478] [info] preprocessed 34.6%, Mem: 3568 Mb, 996.960371543 s/iter, compute time 314.08978921899734s, sort time 525.3335501019995s, process index time 157.513430603001s
+[2022-09-23 16:47:26.641] [info] preprocessed 35.8%, Mem: 3568 Mb, 1004.162634999 s/iter, compute time 313.5194488960005s, sort time 531.2809826939977s, process index time 159.33850517399918s
+[2022-09-23 17:04:06.816] [info] preprocessed 37.0%, Mem: 3568 Mb, 1000.175431924 s/iter, compute time 314.10062353200055s, sort time 526.5615633440058s, process index time 159.489695353s
+[2022-09-23 17:20:46.942] [info] preprocessed 38.2%, Mem: 3568 Mb, 1000.125041839 s/iter, compute time 313.9183779039983s, sort time 526.9121685269977s, process index time 159.27089668400018s
+[2022-09-23 17:37:28.631] [info] preprocessed 39.4%, Mem: 3568 Mb, 1001.689488731 s/iter, compute time 314.06254161099946s, sort time 526.441383629s, process index time 161.16181916300076s
+[2022-09-23 17:54:11.588] [info] preprocessed 40.6%, Mem: 3568 Mb, 1002.956879293 s/iter, compute time 314.12964217299884s, sort time 528.1870516070029s, process index time 160.6164549810012s
+[2022-09-23 18:10:55.958] [info] preprocessed 41.8%, Mem: 3568 Mb, 1003.972885776 s/iter, compute time 313.6690816919984s, sort time 528.4265285500024s, process index time 161.85362686099862s
+[2022-09-23 18:27:39.791] [info] preprocessed 43.0%, Mem: 3568 Mb, 1003.832678295 s/iter, compute time 314.44042517100223s, sort time 531.494922249997s, process index time 157.87378322100025s
+[2022-09-23 18:44:28.772] [info] preprocessed 44.2%, Mem: 3568 Mb, 1008.973711599 s/iter, compute time 314.28282386399854s, sort time 530.8493647100001s, process index time 163.81787467299944s
+[2022-09-23 19:01:10.899] [info] preprocessed 45.4%, Mem: 3568 Mb, 1002.126498983 s/iter, compute time 314.2323068299985s, sort time 525.8990654170007s, process index time 161.97155295400063s
+[2022-09-23 19:17:53.997] [info] preprocessed 46.6%, Mem: 3568 Mb, 1003.097917323 s/iter, compute time 314.1386233319988s, sort time 527.6353420860023s, process index time 161.30049877200017s
+[2022-09-23 19:34:36.214] [info] preprocessed 47.8%, Mem: 3568 Mb, 1002.216435658 s/iter, compute time 314.1452412310047s, sort time 527.1822319790014s, process index time 160.86521833199822s
+[2022-09-23 19:51:19.962] [info] preprocessed 49.0%, Mem: 3568 Mb, 1003.74733425 s/iter, compute time 314.22318013499853s, sort time 526.6661942470009s, process index time 162.83432468000066s
+[2022-09-23 20:08:09.262] [info] preprocessed 50.2%, Mem: 3568 Mb, 1009.299412974 s/iter, compute time 314.716260914s, sort time 531.8697644309996s, process index time 162.68980385499955s
+[2022-09-23 20:24:54.179] [info] preprocessed 51.4%, Mem: 3568 Mb, 1004.917435195 s/iter, compute time 314.1549000840013s, sort time 526.8983073490016s, process index time 163.84052973399983s
+[2022-09-23 20:41:34.037] [info] preprocessed 52.6%, Mem: 3568 Mb, 999.85774247 s/iter, compute time 313.85308336300335s, sort time 520.5851695479987s, process index time 165.3959660189995s
+[2022-09-23 20:58:22.170] [info] preprocessed 53.8%, Mem: 3568 Mb, 1008.132718408 s/iter, compute time 314.51557380700035s, sort time 527.1245190509992s, process index time 166.46908232700028s
+[2022-09-23 21:15:16.181] [info] preprocessed 54.9%, Mem: 3568 Mb, 1014.010334859 s/iter, compute time 314.65249807200246s, sort time 529.497341454001s, process index time 169.83689886899987s
+[2022-09-23 21:32:04.747] [info] preprocessed 56.1%, Mem: 3568 Mb, 1008.565584696 s/iter, compute time 314.7230389929976s, sort time 529.134790062s, process index time 164.68427472699932s
+[2022-09-23 21:48:58.092] [info] preprocessed 57.3%, Mem: 3568 Mb, 1013.344243448 s/iter, compute time 314.6728012540009s, sort time 534.256748487001s, process index time 164.39115393899863s
+[2022-09-23 22:06:09.493] [info] preprocessed 58.5%, Mem: 3568 Mb, 1031.40061127 s/iter, compute time 321.42557901000214s, sort time 538.4440343930005s, process index time 171.50684855599988s
+[2022-09-23 22:23:11.062] [info] preprocessed 59.7%, Mem: 3568 Mb, 1021.569259531 s/iter, compute time 315.97934870400013s, sort time 533.8721678469999s, process index time 171.69398457400152s
+[2022-09-23 22:40:03.276] [info] preprocessed 60.9%, Mem: 3568 Mb, 1012.213407295 s/iter, compute time 314.30643546000204s, sort time 527.7566598430016s, process index time 170.12660370099988s
+[2022-09-23 22:56:53.609] [info] preprocessed 62.1%, Mem: 3568 Mb, 1010.333102969 s/iter, compute time 314.3823245429981s, sort time 525.8178893309981s, process index time 170.1093104829984s
+[2022-09-23 23:13:42.716] [info] preprocessed 63.3%, Mem: 3568 Mb, 1009.106487583 s/iter, compute time 314.57128216599784s, sort time 525.0794878149982s, process index time 169.4321040189987s
+[2022-09-23 23:30:40.035] [info] preprocessed 64.5%, Mem: 3568 Mb, 1017.318255422 s/iter, compute time 313.91056054s, sort time 532.238138826002s, process index time 171.14587469300227s
+[2022-09-23 23:47:36.173] [info] preprocessed 65.7%, Mem: 3568 Mb, 1016.138324225 s/iter, compute time 314.362742054002s, sort time 529.2476516789969s, process index time 172.5043127319993s
+[2022-09-24 00:04:29.616] [info] preprocessed 66.9%, Mem: 3568 Mb, 1013.441285661 s/iter, compute time 314.335002796001s, sort time 526.8980004629993s, process index time 172.18472479700037s
+[2022-09-24 00:22:13.809] [info] preprocessed 68.1%, Mem: 3568 Mb, 1064.193091879 s/iter, compute time 332.3480628539983s, sort time 554.4730638600017s, process index time 177.34743716200023s
+[2022-09-24 00:40:06.011] [info] preprocessed 69.3%, Mem: 3568 Mb, 1072.190916224 s/iter, compute time 336.6726380509974s, sort time 559.5943447149998s, process index time 175.89934028799996s
+[2022-09-24 00:56:58.860] [info] preprocessed 70.5%, Mem: 3568 Mb, 1012.84913016 s/iter, compute time 313.84094569199954s, sort time 523.8776818830012s, process index time 175.10695530299955s
+[2022-09-24 01:13:47.736] [info] preprocessed 71.7%, Mem: 3568 Mb, 1008.876129113 s/iter, compute time 314.28018760399857s, sort time 526.3423175049969s, process index time 168.23006977099925s
+[2022-09-24 01:30:22.797] [info] preprocessed 72.9%, Mem: 3568 Mb, 995.060815532 s/iter, compute time 315.9869347520028s, sort time 514.5013106629981s, process index time 164.54888949000102s
+[2022-09-24 01:47:14.764] [info] preprocessed 74.1%, Mem: 3568 Mb, 1011.965878554 s/iter, compute time 314.60042601000083s, sort time 527.5545054550015s, process index time 169.78731749700034s
+[2022-09-24 02:04:06.764] [info] preprocessed 75.3%, Mem: 3568 Mb, 1011.999887887 s/iter, compute time 314.50452365499865s, sort time 528.3041013840011s, process index time 169.16759255300016s
+[2022-09-24 02:20:50.316] [info] preprocessed 76.4%, Mem: 3568 Mb, 1003.552765536 s/iter, compute time 313.6578244119999s, sort time 514.5204734140036s, process index time 175.35086954700063s
+[2022-09-24 02:37:33.432] [info] preprocessed 77.6%, Mem: 3568 Mb, 1003.1054685 s/iter, compute time 314.5200354339988s, sort time 521.0298683009981s, process index time 167.5320677070001s
+[2022-09-24 02:54:26.640] [info] preprocessed 78.8%, Mem: 3568 Mb, 1013.20773855 s/iter, compute time 314.58208881799857s, sort time 529.3931321539997s, process index time 169.20887812900006s
+[2022-09-24 03:11:15.650] [info] preprocessed 80.0%, Mem: 3568 Mb, 1009.010389867 s/iter, compute time 314.6642429260004s, sort time 520.2150738190024s, process index time 174.10740841600096s
+[2022-09-24 03:28:11.217] [info] preprocessed 81.2%, Mem: 3568 Mb, 1015.567264646 s/iter, compute time 314.28986131899876s, sort time 522.3553959710032s, process index time 178.89831358199854s
+[2022-09-24 03:45:16.635] [info] preprocessed 82.4%, Mem: 3568 Mb, 1025.417032396 s/iter, compute time 314.36359094899854s, sort time 523.9340490019991s, process index time 187.09590390400044s
+[2022-09-24 04:02:27.787] [info] preprocessed 83.6%, Mem: 3568 Mb, 1031.152600839 s/iter, compute time 314.55333736300304s, sort time 527.3124110810045s, process index time 189.26324974099973s
+[2022-09-24 04:19:40.983] [info] preprocessed 84.8%, Mem: 3568 Mb, 1033.195303405 s/iter, compute time 314.380603547s, sort time 529.6680697020017s, process index time 189.12296268499887s
+[2022-09-24 04:36:37.213] [info] preprocessed 86.0%, Mem: 3568 Mb, 1016.229911765 s/iter, compute time 314.2204230290009s, sort time 519.1652340729974s, process index time 182.82080975299883s
+[2022-09-24 04:53:38.563] [info] preprocessed 87.2%, Mem: 3568 Mb, 1021.349773353 s/iter, compute time 313.6433197279992s, sort time 520.4315288229998s, process index time 187.25133856500022s
+[2022-09-24 05:10:51.705] [info] preprocessed 88.4%, Mem: 3568 Mb, 1033.141159077 s/iter, compute time 314.2342568039957s, sort time 529.3152866040043s, process index time 189.56797588600026s
+[2022-09-24 05:27:53.549] [info] preprocessed 89.6%, Mem: 3568 Mb, 1021.836345934 s/iter, compute time 314.2234419909982s, sort time 522.2489729440024s, process index time 185.34036331699926s
+[2022-09-24 05:45:06.666] [info] preprocessed 90.8%, Mem: 3568 Mb, 1033.117465922 s/iter, compute time 314.583708734999s, sort time 527.9881782060035s, process index time 190.52190517000085s
+[2022-09-24 06:02:18.784] [info] preprocessed 92.0%, Mem: 3568 Mb, 1032.117732761 s/iter, compute time 314.65092492100183s, sort time 523.34229192s, process index time 194.10085560500002s
+[2022-09-24 06:19:35.982] [info] preprocessed 93.2%, Mem: 3568 Mb, 1037.197397169 s/iter, compute time 314.11704032000046s, sort time 528.6925296220013s, process index time 194.3643083630006s
+[2022-09-24 06:36:54.222] [info] preprocessed 94.4%, Mem: 3568 Mb, 1038.239870465 s/iter, compute time 314.85713779599985s, sort time 529.8396529550016s, process index time 193.5193671829977s
+[2022-09-24 06:54:11.993] [info] preprocessed 95.6%, Mem: 3568 Mb, 1037.770724702 s/iter, compute time 314.93527292300126s, sort time 528.8477035450032s, process index time 193.96422756399946s
+[2022-09-24 07:11:19.433] [info] preprocessed 96.8%, Mem: 3568 Mb, 1027.43955086 s/iter, compute time 314.38899735399997s, sort time 522.5641431740003s, process index time 190.46293543300123s
+[2022-09-24 07:28:38.271] [info] preprocessed 97.9%, Mem: 3568 Mb, 1038.837152543 s/iter, compute time 315.72836885899744s, sort time 527.6926001159959s, process index time 195.39263841000073s
+[2022-09-24 07:45:54.734] [info] preprocessed 99.1%, Mem: 3568 Mb, 1036.463103586 s/iter, compute time 314.23318638900304s, sort time 524.8808674300021s, process index time 197.32549795399865s
+[2022-09-24 07:58:26.100] [info] finish preprocess and save the index
+[2022-09-24 07:58:26.101] [info] build index time: total 84471.680873327s
+[2022-09-24 07:58:26.101] [error] error in write result
+Traceback (most recent call last):
+  File "run-dbg.py", line 193, in <module>
+    run()
+  File "run-dbg.py", line 159, in run
+    n_sample = compute_n_sample(ds, 16)
+  File "run-dbg.py", line 29, in compute_n_sample
+    n_data_item = dataset_m[dataset_name][0]
+KeyError: 'amazon-home-kitchen'

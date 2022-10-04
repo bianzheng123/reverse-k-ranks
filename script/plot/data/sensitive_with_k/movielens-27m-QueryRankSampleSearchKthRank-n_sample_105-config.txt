@@ -1,0 +1,47 @@
+number of query item 100
+build index time 27329.803s
+Build Index Info: none
+top10 retrieval time: total 11.067s
+	inner product 4.353s, coarse binary search 1.921s, read disk 4.754s
+	fine binary search 0.001s
+	total io cost 439296, rank prune ratio 1.0000
+top20 retrieval time: total 15.331s
+	inner product 4.454s, coarse binary search 1.945s, read disk 8.889s
+	fine binary search 0.002s
+	total io cost 830464, rank prune ratio 1.0000
+top30 retrieval time: total 18.534s
+	inner product 4.469s, coarse binary search 1.963s, read disk 12.058s
+	fine binary search 0.002s
+	total io cost 1137664, rank prune ratio 0.9999
+top40 retrieval time: total 21.259s
+	inner product 4.515s, coarse binary search 1.965s, read disk 14.731s
+	fine binary search 0.003s
+	total io cost 1421824, rank prune ratio 0.9999
+top50 retrieval time: total 24.033s
+	inner product 4.651s, coarse binary search 2.006s, read disk 17.323s
+	fine binary search 0.004s
+	total io cost 1706496, rank prune ratio 0.9999
+top100 retrieval time: total 34.879s
+	inner product 4.798s, coarse binary search 2.036s, read disk 27.989s
+	fine binary search 0.006s
+	total io cost 2845184, rank prune ratio 0.9998
+top200 retrieval time: total 59.642s
+	inner product 4.833s, coarse binary search 2.084s, read disk 52.659s
+	fine binary search 0.012s
+	total io cost 5444608, rank prune ratio 0.9997
+top300 retrieval time: total 81.654s
+	inner product 4.885s, coarse binary search 2.084s, read disk 74.606s
+	fine binary search 0.017s
+	total io cost 7890944, rank prune ratio 0.9996
+top400 retrieval time: total 99.290s
+	inner product 4.860s, coarse binary search 2.100s, read disk 92.247s
+	fine binary search 0.021s
+	total io cost 10068992, rank prune ratio 0.9995
+top500 retrieval time: total 115.184s
+	inner product 4.974s, coarse binary search 2.119s, read disk 108.000s
+	fine binary search 0.025s
+	total io cost 12054016, rank prune ratio 0.9994
+top600 retrieval time: total 134.905s
+	inner product 4.944s, coarse binary search 2.117s, read disk 127.745s
+	fine binary search 0.029s
+	total io cost 14376960, rank prune ratio 0.9993

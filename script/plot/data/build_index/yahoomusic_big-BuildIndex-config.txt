@@ -1,0 +1,2 @@
+build index time 29719.713s
+compute time 6960.416 s, sort time 19360.622 s, process index time 3395.957 s
