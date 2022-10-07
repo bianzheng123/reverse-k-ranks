@@ -182,17 +182,10 @@ namespace ReverseMIPS {
             this->user_topk_cache_l_.resize(n_user);
         }
 
-        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
-        };
-
         void RetrievalPreprocess() {
             read_disk_time_ = 0;
             exact_rank_refinement_time_ = 0;
             file_reader_ = FileReader(this->index_path_);
-        }
-
-        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
-            memcpy(query_write_vecs, query_vecs, vec_dim * sizeof(double));
         }
 
         inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {

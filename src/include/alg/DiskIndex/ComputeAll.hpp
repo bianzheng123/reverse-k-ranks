@@ -30,14 +30,8 @@ namespace ReverseMIPS {
             this->user_topk_cache_l_.resize(n_user);
         }
 
-        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {};
-
         void RetrievalPreprocess() {
             exact_rank_refinement_time_ = 0;
-        }
-
-        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
-            memcpy(query_write_vecs, query_vecs, vec_dim * sizeof(double));
         }
 
         void GetRank(const VectorMatrix &user, const VectorMatrix &data_item,

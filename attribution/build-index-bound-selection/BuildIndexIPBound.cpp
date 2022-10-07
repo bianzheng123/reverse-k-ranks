@@ -4,7 +4,6 @@
 
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
-#include "util/FileIO.hpp"
 #include "struct/UserRankElement.hpp"
 #include "struct/VectorMatrix.hpp"
 
@@ -18,6 +17,7 @@
 #include "BuildIndexIPBound/PartIntPartNorm.hpp"
 
 #include "BuildIndexIPBound.hpp"
+#include "FileIO.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -28,7 +28,7 @@
 class Parameter {
 public:
     std::string basic_dir, dataset_name, bound_name;
-    int scale, n_codebook, n_codeword;
+    int scale, n_codebook, n_codeword, n_sample_item;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -48,8 +48,10 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "scale for integer bound")
             ("n_codebook, ncb", po::value<int>(&para.n_codebook)->default_value(8),
              "number of codebook")
-            ("n_codeword, ncw", po::value<int>(&para.n_codeword)->default_value(32),
-             "number of codeword");
+            ("n_codeword, ncw", po::value<int>(&para.n_codeword)->default_value(64),
+             "number of codeword")
+            ("n_sample_item, nsi", po::value<int>(&para.n_sample_item)->default_value(128),
+             "number of sampled item");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -81,22 +83,20 @@ int main(int argc, char **argv) {
     VectorMatrix &query_item = data[2];
     spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
-    char index_path[256];
-    sprintf(index_path, "../../index/index");
-
     char parameter_name[256] = "";
     std::unique_ptr<BaseIPBound> IPbound_ptr;
 
     if (bound_name == "Grid") {
+        const int n_codeword = para.n_codeword;
         const int min_codeword = std::floor(std::sqrt(1.0 * 80 * std::sqrt(3 * user.vec_dim_)));
         int n_cur_codeword = 1;
         while (n_cur_codeword < min_codeword) {
             n_cur_codeword = n_cur_codeword << 1;
         }
-        spdlog::info("input parameter: min_codework {}, codeword {}",
-                     min_codeword, n_cur_codeword);
-        IPbound_ptr = std::make_unique<Grid>(n_user, n_data_item, vec_dim, n_cur_codeword);
-        sprintf(parameter_name, "codeword_%d", n_cur_codeword);
+        spdlog::info("input parameter: min_codework {}, n_cur_codeword {}, n_codeword {}",
+                     min_codeword, n_cur_codeword, n_codeword);
+        IPbound_ptr = std::make_unique<Grid>(n_user, n_data_item, vec_dim, n_codeword);
+        sprintf(parameter_name, "codeword_%d", n_codeword);
 
     } else if (bound_name == "FullDim") {
         spdlog::info("input parameter: none");
@@ -140,38 +140,38 @@ int main(int argc, char **argv) {
     const double time_used = record.get_elapsed_time_second();
     spdlog::info("bound_name {}, build index time {}s, bucket_size_var {}", bound_name, time_used, bucket_size_var);
 
-//    double build_index_time = record.get_elapsed_time_second();
-//    spdlog::info("finish preprocess and save the index");
-//
-//    vector<int> topk_l{20, 10};
-//    RetrievalResult config;
-//    vector<vector<vector<UserRankElement>>> result_rank_l;
-//    for (int topk: topk_l) {
-//        record.reset();
-//        std::vector<SingleQueryPerformance> query_performance_l(n_query_item);
-//        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk,
-//                                                                     n_query_item, query_performance_l);
-//
-//        double retrieval_time = record.get_elapsed_time_second();
-//        double ms_per_query = retrieval_time / n_query_item * 1000;
-//
-//        string performance_str = index->PerformanceStatistics(topk, retrieval_time, ms_per_query);
-//        config.AddRetrievalInfo(performance_str, topk, retrieval_time, ms_per_query);
-//
-//        result_rank_l.emplace_back(result_rk);
-//        spdlog::info("finish top-{}", topk);
-//    }
-//
-//    spdlog::info("build index time: total {}s", build_index_time);
-//    int n_topk = (int) topk_l.size();
-//
-//    for (int i = 0; i < n_topk; i++) {
-//        cout << config.GetConfig(i) << endl;
-//        WriteRankResult(result_rank_l[i], dataset_name, bound_name.c_str(), parameter_name);
-//    }
-//
-//    config.AddBuildIndexInfo(index->BuildIndexStatistics());
-//    config.AddBuildIndexTime(build_index_time);
-//    config.WritePerformance(dataset_name, bound_name.c_str(), parameter_name);
+    double build_index_time = record.get_elapsed_time_second();
+    spdlog::info("finish preprocess and save the index");
+
+    vector<int> topk_l{30, 20, 10};
+    RetrievalResult2 config;
+    vector<vector<vector<UserRankElement>>> result_rank_l;
+    for (int topk: topk_l) {
+        record.reset();
+        std::vector<SingleQueryPerformance> query_performance_l(n_query_item);
+        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk,
+                                                                     n_query_item, query_performance_l);
+
+        double retrieval_time = record.get_elapsed_time_second();
+
+        string performance_str = index->PerformanceStatistics(topk);
+        config.AddRetrievalInfo(performance_str);
+
+        result_rank_l.emplace_back(result_rk);
+        spdlog::info("finish top-{}", topk);
+    }
+
+    spdlog::info("build index time: total {}s", build_index_time);
+    int n_topk = (int) topk_l.size();
+
+    for (int i = 0; i < n_topk; i++) {
+        cout << config.GetConfig(i) << endl;
+        const int topk = topk_l[i];
+        WriteRankResult2(result_rank_l[i], topk, dataset_name, bound_name.c_str(), parameter_name);
+    }
+
+    config.AddBuildIndexInfo(index->BuildIndexStatistics());
+    config.AddBuildIndexTime(build_index_time);
+    config.WritePerformance(dataset_name, bound_name.c_str(), parameter_name);
     return 0;
 }

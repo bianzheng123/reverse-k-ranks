@@ -24,26 +24,35 @@ namespace ReverseMIPS {
         assert(rank_lb_l.size() == n_user);
         assert(rank_ub_l.size() == n_user);
         assert(refine_seq_l.size() == n_user);
-        assert(refine_user_size == 0);
-        assert(n_result_user == 0);
-        assert(n_prune_user == 0);
         assert(prune_l.size() == n_user);
         assert(result_l.size() == n_user);
+        assert(n_result_user <= topk);
+        assert(topk - n_result_user <= refine_user_size);
 
-        TopkMaxHeap lbr_heap(topk);
-        TopkMaxHeap ubr_heap(topk);
+        TopkMaxHeap lbr_heap(topk - n_result_user);
+        TopkMaxHeap ubr_heap(topk - n_result_user);
         lbr_heap.Reset();
         ubr_heap.Reset();
 
         for (int userID = 0; userID < n_user; userID++) {
             assert(rank_ub_l[userID] <= rank_lb_l[userID]);
-            assert(!prune_l[userID] && !result_l[userID]);
+            assert(!(prune_l[userID] == true && result_l[userID] == true));
+            if (prune_l[userID] || result_l[userID]) {
+                continue;
+            }
             lbr_heap.Update(rank_lb_l[userID]);
             ubr_heap.Update(rank_ub_l[userID]);
         }
         const int min_topk_lb_rank = lbr_heap.Front();
         const int min_topk_ub_rank = ubr_heap.Front();
+        assert(min_topk_lb_rank != -1 && min_topk_ub_rank != -1);
+        refine_user_size = 0;
         for (int userID = 0; userID < n_user; userID++) {
+            if (prune_l[userID] || result_l[userID]) {
+                assert(!(prune_l[userID] && result_l[userID]));
+                continue;
+            }
+
             assert(!prune_l[userID] && !result_l[userID]);
             const int &tmp_ub = rank_ub_l[userID];
             if (min_topk_lb_rank <= tmp_ub) {

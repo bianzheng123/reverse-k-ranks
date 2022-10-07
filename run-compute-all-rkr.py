@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import filecmp
 
 
 class CMDcolors:
@@ -22,29 +23,17 @@ def delete_file_if_exist(dire):
 
 
 def cmp_file(file1, file2):
-    method1_result_l = np.loadtxt(file1, delimiter=',')
-    method2_result_l = np.loadtxt(file2, delimiter=',')
-
-    assert len(method1_result_l) == len(method2_result_l)
-
-    for i in range(len(method1_result_l)):
-        intersect = set(method1_result_l[i]).intersection(set(method2_result_l[i]))
-        if len(intersect) != len(method1_result_l[i]):
-            return False
-    return True
+    return filecmp.cmp(file1, file2)
 
 
 def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
     flag = True
     suffix_m = {
 
-        'QRSTopTIP': 'n_sample_20-index_size_gb_50',
-        'RSTopTIP': 'n_sample_20-index_size_gb_50',
-
-        'QueryRankSampleSearchAllRank': 'n_sample_20',
-        'QueryRankSampleSearchKthRank': 'n_sample_20',
-        'RankSample': 'n_sample_20',
-        'RankSampleIntIPBound': 'n_sample_20',
+        'Grid': 'codeword_64',
+        'FullInt': 'scale_1000',
+        'PartDimPartInt': 'scale_1000',
+        'PartIntPartNorm': 'scale_1000',
     }
     for ds in dataset_l:
         for topk in topk_l:
@@ -82,15 +71,15 @@ def run():
         # 'DiskBruteForce',
         'MemoryBruteForce',
 
-        # 'GridIndex',
-        'QueryRankSampleSearchAllRank',
-        'QueryRankSampleSearchKthRank',
-        'RankSample',
-        'RankSampleIntIPBound',
-    ]
+        # 'Grid',
+        # 'FullDim',
+        # 'FullNorm',
+        # 'FullInt',
+        # 'PartDimPartInt',
+        # 'PartDimPartNorm',
+        # 'PartIntPartNorm',
 
-    # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
-    # os.system('cd build && ./{} {}'.format('bbfdi', ds))
+    ]
 
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     for ds in dataset_l:
@@ -98,19 +87,13 @@ def run():
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
 
-        # os.system('cd build && ./bst --dataset_name {}'.format(ds))
-
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 10,
-                ds, 'QueryRankSampleSearchAllRank', 150, 10))
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 30,
-                ds, 'QueryRankSampleSearchKthRank', 150, 30))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntIPBound'))
+        # os.system('cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, 'Grid'))
+        # os.system('cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, 'FullDim'))
+        # os.system('cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, 'FullNorm'))
+        # os.system('cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, 'FullInt'))
+        # os.system('cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, 'PartDimPartInt'))
+        # os.system('cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, 'PartDimPartNorm'))
+        # os.system('cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, 'PartIntPartNorm'))
 
     # topk_l = [10, 20, 30, 40, 50]
     topk_l = [10, 20, 30]
@@ -118,9 +101,8 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal', 'fake-uniform']
-    # dataset_l = ['fake-normal']
+    # dataset_l = ['fake-small', 'fake-normal', 'fake-uniform', 'netflix-small']
+    dataset_l = ['fake-small']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 

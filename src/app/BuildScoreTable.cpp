@@ -61,7 +61,6 @@ void BuildScoreTable(VectorMatrix &user, VectorMatrix &data_item,
     user.vectorNormalize();
     //disk index
     ReadAll disk_ins(n_user, n_data_item, index_path);
-    disk_ins.PreprocessData(user, data_item);
     disk_ins.BuildIndexPreprocess();
 
     //Compute Score Table

@@ -152,17 +152,10 @@ namespace ReverseMIPS {
             this->read_disk_index_ = ReadDiskIndex(n_user, n_data_item, index_path);
         }
 
-        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
-        };
-
         void RetrievalPreprocess() {
             read_disk_time_ = 0;
             exact_rank_refinement_time_ = 0;
             read_disk_index_.StartRead();
-        }
-
-        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
-            memcpy(query_write_vecs, query_vecs, vec_dim * sizeof(double));
         }
 
         void GetRank(const std::vector<double> &queryIP_l,

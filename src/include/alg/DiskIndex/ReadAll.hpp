@@ -70,9 +70,6 @@ namespace ReverseMIPS {
             }
         }
 
-        void PreprocessData(VectorMatrix &user, VectorMatrix &data_item) {
-        };
-
         void BuildIndexLoop(const DistancePair *distance_cache) {
             std::vector<double> distance_double(n_data_item_);
             for (int i = 0; i < n_data_item_; i++) {
@@ -99,10 +96,6 @@ namespace ReverseMIPS {
             if (!index_stream_) {
                 spdlog::error("error in writing index");
             }
-        }
-
-        void PreprocessQuery(const double *query_vecs, const int &vec_dim, double *query_write_vecs) {
-            memcpy(query_write_vecs, query_vecs, vec_dim * sizeof(double));
         }
 
         inline void ReadDisk(const int &userID, const int &start_idx, const int &read_count) {
