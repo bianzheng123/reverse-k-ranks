@@ -12,6 +12,9 @@
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
 #include "RankSample.hpp"
+#include "RankSampleApprByGridIPBound.hpp"
+#include "RankSampleApprByNormIPBound.hpp"
+#include "RankSampleApprByUserIPBound.hpp"
 #include "RankSampleIntIPBound.hpp"
 #include "Simpfer.hpp"
 
@@ -125,6 +128,24 @@ int main(int argc, char **argv) {
         index = RankSample::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
+    } else if (method_name == "RankSampleApprByGridIPBound") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = RankSampleApprByGridIPBound::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
+    } else if (method_name == "RankSampleApprByNormIPBound") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = RankSampleApprByNormIPBound::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
+    } else if (method_name == "RankSampleApprByUserIPBound") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = RankSampleApprByUserIPBound::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
     } else if (method_name == "RankSampleIntIPBound") {
         const int n_sample = para.n_sample;
         spdlog::info("input parameter: n_sample {}", n_sample);
@@ -160,8 +181,8 @@ int main(int argc, char **argv) {
 
 //    vector<int> topk_l{600, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{50, 40, 30, 30, 20, 10};
-    vector<int> topk_l{30, 20, 10};
-//    vector<int> topk_l{10};
+//    vector<int> topk_l{30, 20, 10};
+    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;

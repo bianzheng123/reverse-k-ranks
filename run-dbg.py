@@ -150,27 +150,27 @@ def run_build_index():
 
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
-    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
-    dataset_l = ['amazon-home-kitchen']
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
     for ds in dataset_l:
         # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
         #     dataset_dir, ds, index_dir))
-        n_sample = compute_n_sample(ds, 32)
-        os.system(
-            'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 5000, 600
-            ))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
+        # n_sample = compute_n_sample(ds, 32)
+        # os.system(
+        #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+        #         dataset_dir, ds, index_dir, 5000, 600
+        #     ))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+        #         dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
         # os.system(
         #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
         #         dataset_dir, ds, index_dir, 'RankSample', n_sample))
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
-        #         ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
+        os.system(
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
+                dataset_dir, ds, index_dir, "Simpfer", 1025))
         # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
         #     ds, 5000, 500,
         # ))
@@ -187,8 +187,8 @@ def run():
 
 if __name__ == '__main__':
     dataset_dir = os.path.join('/home', 'zhengbian', 'Dataset', 'ReverseMIPS')
-    # index_dir = os.path.join('/home', 'zhengbian', 'reverse-k-ranks', 'index')
-    index_dir = os.path.join('/data', 'ReverseMIPS')
+    index_dir = os.path.join('/home', 'zhengbian', 'reverse-k-ranks', 'index')
+    # index_dir = os.path.join('/data', 'ReverseMIPS')
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 

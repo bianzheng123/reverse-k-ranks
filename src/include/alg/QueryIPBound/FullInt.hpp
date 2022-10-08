@@ -52,6 +52,7 @@ namespace ReverseMIPS {
             }
             user_max_dim_ = std::abs(user_max_dim_);
 
+#pragma omp parallel for default(none) shared(user, user_max_dim_)
             for (int userID = 0; userID < n_user_; userID++) {
                 int *user_int_vecs = user_int_ptr_.get() + userID * vec_dim_;
                 double *user_double_vecs = user.getVector(userID);
