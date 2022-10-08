@@ -161,12 +161,24 @@ def run():
             'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
                 dataset_dir, ds, index_dir, 'RankSample', n_sample))
         os.system(
-            'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 5000, 600
-            ))
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+                dataset_dir, ds, index_dir, 'RankSampleApprByGridIPBound', n_sample))
         os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+                dataset_dir, ds, index_dir, 'RankSampleApprByNormIPBound', n_sample))
+        os.system(
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+                dataset_dir, ds, index_dir, 'RankSampleApprByUserIPBound', n_sample))
+        os.system(
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+                dataset_dir, ds, index_dir, 'RankSampleIntIPBound', n_sample))
+        # os.system(
+        #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+        #         dataset_dir, ds, index_dir, 5000, 600
+        #     ))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+        #         dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
         # os.system(
         #     'cd build && ./rri --dataset_name {} --basic_dir {} --method_name {} --n_sample {} --index_size_gb {}'.format(
         #         ds, basic_dir, "RSTopTIPRefineOrder", n_sample, index_size))
