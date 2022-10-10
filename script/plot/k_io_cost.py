@@ -20,7 +20,7 @@ markersize = 10
 matplotlib.RcParams.update(params)
 
 fig = plt.figure(figsize=(25, 4))
-fig.text(0.1, 0.5, 'Running Time (s)', va='center', rotation='vertical')
+fig.text(0.1, 0.5, 'IO Cost', va='center', rotation='vertical')
 basic_dir = os.path.join('data', 'sensitive_with_k')
 
 
@@ -28,11 +28,11 @@ def plot(i, fname, ds, is_finish):
     subplot_str = 150 + i
     ax = fig.add_subplot(subplot_str)
     df = pd.read_csv(os.path.join(basic_dir, '{}.csv'.format(fname)))
-    ax.plot(df['topk'], df['QueryRankSampleTime'],
+    ax.plot(df['topk'], df['QueryRankSampleIOCost'],
             color=color_l[0], linewidth=2.5, linestyle='-',
             label='Query Rank Sample',
             marker=marker_l[0], markersize=markersize)
-    ax.plot(df['topk'], df['RankSampleTime'],
+    ax.plot(df['topk'], df['RankSampleIOCost'],
             color=color_l[1], linewidth=2.5, linestyle='-',
             label='Rank Sample',
             marker=marker_l[1], markersize=markersize)
@@ -57,4 +57,4 @@ for i, ds_name in enumerate(ds_m.keys(), 0):
     is_finish = (i == len(ds_m.keys()) - 1)
     plot(i + 1, ds_name, ds_m[ds_name], is_finish)
 
-plt.savefig("k_running_time.pdf", bbox_inches='tight')
+plt.savefig("k_io_cost.pdf", bbox_inches='tight')

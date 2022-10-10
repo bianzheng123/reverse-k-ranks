@@ -170,7 +170,7 @@ def run():
         #         dataset_dir, ds, index_dir, 'RankSample', n_sample))
         os.system(
             'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
-                dataset_dir, ds, index_dir, "Simpfer", 1025))
+                dataset_dir, ds, index_dir, "Simpfer", 35))
         # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
         #     ds, 5000, 500,
         # ))

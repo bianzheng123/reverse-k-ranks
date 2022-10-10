@@ -3,7 +3,7 @@ test.py
 /build/
 /result/
 /index/
-*.log
+/*.log
 /.idea/
 /motivation/data/
 /motivation/result/

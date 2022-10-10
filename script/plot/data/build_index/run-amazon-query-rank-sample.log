@@ -1,0 +1,447 @@
+nohup: ignoring input
+[2022-10-05 15:31:32.734] [info] QueryDistributionIndex dataset_name amazon-home-kitchen, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-10-05 15:31:32.735] [info] index_dir /data/ReverseMIPS
+[2022-10-05 15:31:39.527] [info] n_data_item 409243, n_query_item 1000, n_user 2511610, vec_dim 150
+[2022-10-05 15:31:39.651] [info] n_sample_item 3000, sample_topk 600
+[2022-10-06 03:05:43.873] [info] FullSample n_sample_item 3000, n_sample_rank 409243
+[2022-10-06 03:05:47.397] [info] compute_rank_time 41644.221168553s, store_index_time 3.524745351s
+[2022-10-06 03:05:47.771] [info] QueryRankSampleSearchKthRank dataset_name amazon-home-kitchen, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-10-06 03:05:47.771] [info] index_dir /data/ReverseMIPS
+[2022-10-06 03:05:54.733] [info] n_data_item 409243, n_query_item 1000, n_user 2511610, vec_dim 150
+[2022-10-06 03:05:54.733] [info] input parameter: n_sample 801 n_sample_query 3000 sample_topk 600
+[2022-10-06 03:06:04.740] [info] n_sample_query 3000, sample_topk 600, n_sample_rank 5813
+[2022-10-06 03:30:25.415] [info] sampleID 10, n_sample 801, progress 0.012
+[2022-10-06 03:57:56.426] [info] sampleID 20, n_sample 801, progress 0.025
+[2022-10-06 04:25:04.623] [info] sampleID 30, n_sample 801, progress 0.037
+[2022-10-06 04:52:49.914] [info] sampleID 40, n_sample 801, progress 0.050
+[2022-10-06 05:20:52.843] [info] sampleID 50, n_sample 801, progress 0.062
+[2022-10-06 05:48:19.437] [info] sampleID 60, n_sample 801, progress 0.075
+[2022-10-06 06:15:53.912] [info] sampleID 70, n_sample 801, progress 0.087
+[2022-10-06 06:43:27.973] [info] sampleID 80, n_sample 801, progress 0.100
+[2022-10-06 07:10:51.642] [info] sampleID 90, n_sample 801, progress 0.112
+[2022-10-06 07:38:00.129] [info] sampleID 100, n_sample 801, progress 0.125
+[2022-10-06 08:05:20.555] [info] sampleID 110, n_sample 801, progress 0.137
+[2022-10-06 08:32:10.417] [info] sampleID 120, n_sample 801, progress 0.150
+[2022-10-06 09:00:22.933] [info] sampleID 130, n_sample 801, progress 0.162
+[2022-10-06 09:28:10.944] [info] sampleID 140, n_sample 801, progress 0.175
+[2022-10-06 09:55:45.914] [info] sampleID 150, n_sample 801, progress 0.187
+[2022-10-06 10:23:20.350] [info] sampleID 160, n_sample 801, progress 0.200
+[2022-10-06 10:50:59.905] [info] sampleID 170, n_sample 801, progress 0.212
+[2022-10-06 11:18:25.576] [info] sampleID 180, n_sample 801, progress 0.225
+[2022-10-06 11:46:25.721] [info] sampleID 190, n_sample 801, progress 0.237
+[2022-10-06 12:14:52.230] [info] sampleID 200, n_sample 801, progress 0.250
+[2022-10-06 12:43:11.046] [info] sampleID 210, n_sample 801, progress 0.262
+[2022-10-06 13:11:30.049] [info] sampleID 220, n_sample 801, progress 0.275
+[2022-10-06 13:39:48.208] [info] sampleID 230, n_sample 801, progress 0.287
+[2022-10-06 14:08:06.338] [info] sampleID 240, n_sample 801, progress 0.300
+[2022-10-06 14:36:07.039] [info] sampleID 250, n_sample 801, progress 0.312
+[2022-10-06 15:03:20.955] [info] sampleID 260, n_sample 801, progress 0.325
+[2022-10-06 15:31:19.176] [info] sampleID 270, n_sample 801, progress 0.337
+[2022-10-06 15:59:16.348] [info] sampleID 280, n_sample 801, progress 0.350
+[2022-10-06 16:27:16.653] [info] sampleID 290, n_sample 801, progress 0.362
+[2022-10-06 16:55:04.532] [info] sampleID 300, n_sample 801, progress 0.375
+[2022-10-06 17:22:18.366] [info] sampleID 310, n_sample 801, progress 0.387
+[2022-10-06 17:49:37.382] [info] sampleID 320, n_sample 801, progress 0.400
+[2022-10-06 18:17:12.461] [info] sampleID 330, n_sample 801, progress 0.412
+[2022-10-06 18:45:01.852] [info] sampleID 340, n_sample 801, progress 0.424
+[2022-10-06 19:12:33.227] [info] sampleID 350, n_sample 801, progress 0.437
+[2022-10-06 19:40:46.922] [info] sampleID 360, n_sample 801, progress 0.449
+[2022-10-06 20:08:21.918] [info] sampleID 370, n_sample 801, progress 0.462
+[2022-10-06 20:37:07.180] [info] sampleID 380, n_sample 801, progress 0.474
+[2022-10-06 21:05:17.716] [info] sampleID 390, n_sample 801, progress 0.487
+[2022-10-06 21:33:02.268] [info] sampleID 400, n_sample 801, progress 0.499
+[2022-10-06 22:00:33.055] [info] sampleID 410, n_sample 801, progress 0.512
+[2022-10-06 22:27:06.634] [info] sampleID 420, n_sample 801, progress 0.524
+[2022-10-06 22:54:32.368] [info] sampleID 430, n_sample 801, progress 0.537
+[2022-10-06 23:21:57.539] [info] sampleID 440, n_sample 801, progress 0.549
+[2022-10-06 23:49:34.036] [info] sampleID 450, n_sample 801, progress 0.562
+[2022-10-07 00:17:43.235] [info] sampleID 460, n_sample 801, progress 0.574
+[2022-10-07 00:45:16.005] [info] sampleID 470, n_sample 801, progress 0.587
+[2022-10-07 01:12:48.204] [info] sampleID 480, n_sample 801, progress 0.599
+[2022-10-07 01:40:53.320] [info] sampleID 490, n_sample 801, progress 0.612
+[2022-10-07 02:08:46.925] [info] sampleID 500, n_sample 801, progress 0.624
+[2022-10-07 02:36:52.104] [info] sampleID 510, n_sample 801, progress 0.637
+[2022-10-07 03:04:52.965] [info] sampleID 520, n_sample 801, progress 0.649
+[2022-10-07 03:32:47.280] [info] sampleID 530, n_sample 801, progress 0.662
+[2022-10-07 04:00:39.959] [info] sampleID 540, n_sample 801, progress 0.674
+[2022-10-07 04:28:20.487] [info] sampleID 550, n_sample 801, progress 0.687
+[2022-10-07 04:56:07.783] [info] sampleID 560, n_sample 801, progress 0.699
+[2022-10-07 05:24:32.224] [info] sampleID 570, n_sample 801, progress 0.712
+[2022-10-07 05:51:38.311] [info] sampleID 580, n_sample 801, progress 0.724
+[2022-10-07 06:19:42.755] [info] sampleID 590, n_sample 801, progress 0.737
+[2022-10-07 06:47:11.608] [info] sampleID 600, n_sample 801, progress 0.749
+[2022-10-07 07:14:45.428] [info] sampleID 610, n_sample 801, progress 0.762
+[2022-10-07 07:42:23.494] [info] sampleID 620, n_sample 801, progress 0.774
+[2022-10-07 08:10:03.010] [info] sampleID 630, n_sample 801, progress 0.787
+[2022-10-07 08:37:42.075] [info] sampleID 640, n_sample 801, progress 0.799
+[2022-10-07 09:05:14.629] [info] sampleID 650, n_sample 801, progress 0.811
+[2022-10-07 09:32:08.813] [info] sampleID 660, n_sample 801, progress 0.824
+[2022-10-07 10:00:05.137] [info] sampleID 670, n_sample 801, progress 0.836
+[2022-10-07 10:27:52.092] [info] sampleID 680, n_sample 801, progress 0.849
+[2022-10-07 10:55:49.530] [info] sampleID 690, n_sample 801, progress 0.861
+[2022-10-07 11:23:41.985] [info] sampleID 700, n_sample 801, progress 0.874
+[2022-10-07 11:51:23.667] [info] sampleID 710, n_sample 801, progress 0.886
+[2022-10-07 12:19:02.275] [info] sampleID 720, n_sample 801, progress 0.899
+[2022-10-07 12:46:27.247] [info] sampleID 730, n_sample 801, progress 0.911
+[2022-10-07 13:14:07.509] [info] sampleID 740, n_sample 801, progress 0.924
+[2022-10-07 13:42:00.780] [info] sampleID 750, n_sample 801, progress 0.936
+[2022-10-07 14:10:02.838] [info] sampleID 760, n_sample 801, progress 0.949
+[2022-10-07 14:37:45.539] [info] sampleID 770, n_sample 801, progress 0.961
+[2022-10-07 15:05:35.539] [info] sampleID 780, n_sample 801, progress 0.974
+[2022-10-07 15:33:34.179] [info] sampleID 790, n_sample 801, progress 0.986
+[2022-10-07 16:01:25.245] [info] sampleID 800, n_sample 801, progress 0.999
+0 4 5 55 56 84 92 110 144 145 166 169 210 226 227 270 316 328 346 371 381 406 454 461 490 492 527 575 624 631 668 680 717 739 757 792 795 828 916 930 974 975 1075 1099 1215 1226 1264 1265 1347 1368 1431 1479 1544 1578 1630 1631 1710 1795 1849 1876 1957 2040 2051 2117 2179 2207 2323 2366 2465 2490 2491 2583 2677 2683 2768 2831 2951 2991 3106 3173 3287 3354 3462 3509 3595 3613 3696 3833 3881 3882 3974 4022 4126 4164 4213 4215 4259 4260 4320 4349 4432 4433 4538 4597 4609 4711 4752 4868 4936 4964 5136 5232 5233 5285 5319 5388 5526 5533 5647 5759 5781 5899 6041 6056 6118 6224 6337 6471 6487 6695 6811 6912 7013 7212 7273 7441 7484 7773 7777 7863 7901 8034 8093 8218 8294 8465 8499 8675 8763 8764 8861 8869 8965 8968 9058 9272 9348 9450 9634 9727 9856 9982 9983 10066 10088 10255 10259 10401 10583 10584 10673 10815 11073 11154 11165 11319 11424 11574 11717 11954 12126 12294 12380 12549 12590 12715 12716 12884 12895 13058 13090 13270 13271 13313 13314 13446 13447 13493 13494 13643 13644 13660 13713 13714 13879 13976 13977 14060 14180 14523 14524 14687 14839 14840 15013 15024 15146 15147 15285 15522 15842 16135 16180 16351 16352 16571 16604 16779 16780 16952 16953 17074 17075 17237 17238 17360 17361 17555 17556 17677 17678 17941 17942 18090 18091 18415 18521 18522 18695 18696 18768 18769 18891 18892 19091 19421 19623 19624 19766 19767 19793 19838 19839 19958 19999 20216 20366 20367 20428 20429 20757 20996 20997 21061 21062 21270 21271 21476 21816 21817 21854 21855 22285 22505 22873 22874 22947 22948 23175 23195 23514 23809 23810 24197 24198 24649 24650 24724 24725 25040 25045 25082 25083 25197 25340 25341 25371 25372 25560 25561 25695 25696 26073 26074 26094 26201 26569 26570 26774 26775 26882 26883 26985 26986 27210 27211 27243 27244 27303 27304 27503 27504 27588 27589 27613 27632 27718 27731 27995 28221 28550 28551 28756 28757 28828 28829 28902 28903 28975 28976 29403 29404 29476 29477 29514 29515 29536 29549 29757 29969 29971 30237 30238 30293 30427 30790 31120 31587 31588 31799 32248 32249 32292 32293 32463 32464 32657 32666 32684 32948 32949 33048 33049 33145 33146 33503 33504 33839 33840 33915 33916 33988 33989 34049 34050 34414 34415 34625 34626 34712 34713 34927 34928 35061 35062 35181 35507 35508 35822 35823 35959 35960 36049 36063 36364 36636 36875 36876 37147 37148 37364 37365 37463 37464 37503 37778 37779 37858 37873 38056 38057 38177 38178 38304 38308 38922 39243 39247 39421 39430 39660 39661 39889 39890 40230 40231 40307 40762 40763 40864 40865 40999 41000 41105 41362 41363 41731 41732 41815 41816 42184 42197 42268 42688 43254 43255 43611 43612 43654 43886 43887 44211 44212 44257 44422 44427 44474 44636 44643 45092 45479 45480 45591 45651 45934 45935 46006 46222 46236 46596 46597 46966 46972 47397 47406 48032 48073 48275 48285 48387 48600 48959 48982 49400 49452 49656 49668 49792 49907 50098 50392 50393 50504 50514 50918 51510 51578 51598 52140 52141 52448 52646 53029 53090 53180 53352 53936 53990 54451 54509 54743 55164 55282 55710 55714 55875 55960 56295 56583 57090 57304 57680 57851 58129 58298 58621 58626 58748 58786 58969 59111 59624 59883 60231 60432 60789 61121 61774 61906 62225 63171 63749 64177 64859 64982 65453 66122 66527 66886 67381 67870 68331 68332 68820 68833 69523 69941 70229 70977 71112 71455 72213 73276 73611 74202 74564 75570 75687 76424 76425 77215 77216 78487 78488 79334 79335 80332 81841 82586 82590 83055 84602 85449 85821 87277 88515 89114 90381 92079 93399 95603 96647 98501 99509 101379 102100 104457 105977 105978 107577 107711 108746 109595 112903 113979 115039 115068 115409 116439 119214 121486 122640 123297 125242 127990 129406 131097 132965 133804 137919 141090 142011 143110 145393 146818 148311 148315 148827 148946 149370 152236 152237 153053 155000 157270 157580 158337 158743 159556 160602 160606 161330 162089 163078 163672 163712 164613 164726 165413 165823 166005 167054 167389 168169 169024 170047 170505 172259 172587 173825 174321 176272 176859 177667 178747 179990 180108 181019 181538 182128 183711 184181 185696 188660 189139 191358 192157 193959 194493 196971 197403 199472 201405 202483 205047 205318 207758 210492 212071 213927 215918 221916 223002 224760 225469 228248 228646 230987 231947 233460 234256 236238 237518 240061 241469 243510 246867 250115 251488 252228 254047 255373 256918 259317 261838 265018 266908 270135 271964 275180 276172 277439 281883 283632 285028 290622 291943 294274 294884 298535 299544 300857 302861 305100 309159 311029 311573 313618 317239 319130 323387 327673 328160 331704 332902 334121 338121 339615 341956 346321 347497 348859 349814 351561 352140 353343 354013 355000 355578 356046 356906 359080 362135 367449 367619 371773 377988 379342 380994 381868 383050 384214 385363 386559 387454 387933 388784 389304 389897 390443 392069 
+[2022-10-07 16:04:08.330] [info] rank bound: n_sample 801
+preprocessed 0 %, 0.00271958 s/iter Mem: 19695 Mb 
+preprocessed 0.398151 %, 64.4473 s/iter Mem: 19695 Mb 
+preprocessed 0.796302 %, 132.548 s/iter Mem: 19695 Mb 
+preprocessed 1.19445 %, 132.451 s/iter Mem: 19695 Mb 
+preprocessed 1.5926 %, 133.546 s/iter Mem: 19695 Mb 
+preprocessed 1.99075 %, 133.939 s/iter Mem: 19695 Mb 
+preprocessed 2.38891 %, 133.612 s/iter Mem: 19695 Mb 
+preprocessed 2.78706 %, 133.341 s/iter Mem: 19695 Mb 
+preprocessed 3.18521 %, 134.488 s/iter Mem: 19695 Mb 
+preprocessed 3.58336 %, 134.07 s/iter Mem: 19695 Mb 
+preprocessed 3.98151 %, 134.104 s/iter Mem: 19695 Mb 
+preprocessed 4.37966 %, 133.744 s/iter Mem: 19695 Mb 
+preprocessed 4.77781 %, 135.235 s/iter Mem: 19695 Mb 
+preprocessed 5.17596 %, 135.725 s/iter Mem: 19695 Mb 
+preprocessed 5.57411 %, 135.605 s/iter Mem: 19695 Mb 
+preprocessed 5.97226 %, 135.172 s/iter Mem: 19695 Mb 
+preprocessed 6.37042 %, 134.981 s/iter Mem: 19695 Mb 
+preprocessed 6.76857 %, 135.78 s/iter Mem: 19695 Mb 
+preprocessed 7.16672 %, 135.757 s/iter Mem: 19695 Mb 
+preprocessed 7.56487 %, 135.683 s/iter Mem: 19695 Mb 
+preprocessed 7.96302 %, 135.564 s/iter Mem: 19695 Mb 
+preprocessed 8.36117 %, 135.757 s/iter Mem: 19695 Mb 
+preprocessed 8.75932 %, 136.886 s/iter Mem: 19695 Mb 
+preprocessed 9.15747 %, 136.901 s/iter Mem: 19695 Mb 
+preprocessed 9.55562 %, 136.95 s/iter Mem: 19695 Mb 
+preprocessed 9.95377 %, 136.423 s/iter Mem: 19695 Mb 
+preprocessed 10.3519 %, 137.037 s/iter Mem: 19695 Mb 
+preprocessed 10.7501 %, 137.12 s/iter Mem: 19695 Mb 
+preprocessed 11.1482 %, 136.964 s/iter Mem: 19695 Mb 
+preprocessed 11.5464 %, 136.696 s/iter Mem: 19695 Mb 
+preprocessed 11.9445 %, 136.874 s/iter Mem: 19695 Mb 
+preprocessed 12.3427 %, 137.619 s/iter Mem: 19695 Mb 
+preprocessed 12.7408 %, 138.212 s/iter Mem: 19695 Mb 
+preprocessed 13.139 %, 138.004 s/iter Mem: 19695 Mb 
+preprocessed 13.5371 %, 137.874 s/iter Mem: 19695 Mb 
+preprocessed 13.9353 %, 137.94 s/iter Mem: 19695 Mb 
+preprocessed 14.3334 %, 137.789 s/iter Mem: 19695 Mb 
+preprocessed 14.7316 %, 138.325 s/iter Mem: 19695 Mb 
+preprocessed 15.1297 %, 138.368 s/iter Mem: 19695 Mb 
+preprocessed 15.5279 %, 138.356 s/iter Mem: 19695 Mb 
+preprocessed 15.926 %, 139.74 s/iter Mem: 19695 Mb 
+preprocessed 16.3242 %, 140.204 s/iter Mem: 19695 Mb 
+preprocessed 16.7223 %, 139.666 s/iter Mem: 19695 Mb 
+preprocessed 17.1205 %, 139.938 s/iter Mem: 19695 Mb 
+preprocessed 17.5186 %, 139.786 s/iter Mem: 19695 Mb 
+preprocessed 17.9168 %, 139.953 s/iter Mem: 19695 Mb 
+preprocessed 18.3149 %, 139.778 s/iter Mem: 19695 Mb 
+preprocessed 18.7131 %, 139.934 s/iter Mem: 19695 Mb 
+preprocessed 19.1112 %, 139.552 s/iter Mem: 19695 Mb 
+preprocessed 19.5094 %, 141.052 s/iter Mem: 19695 Mb 
+preprocessed 19.9075 %, 141.352 s/iter Mem: 19695 Mb 
+preprocessed 20.3057 %, 141.171 s/iter Mem: 19695 Mb 
+preprocessed 20.7039 %, 141.239 s/iter Mem: 19695 Mb 
+preprocessed 21.102 %, 141.493 s/iter Mem: 19695 Mb 
+preprocessed 21.5002 %, 141.426 s/iter Mem: 19695 Mb 
+preprocessed 21.8983 %, 141.555 s/iter Mem: 19695 Mb 
+preprocessed 22.2965 %, 141.489 s/iter Mem: 19695 Mb 
+preprocessed 22.6946 %, 141.67 s/iter Mem: 19695 Mb 
+preprocessed 23.0928 %, 142.157 s/iter Mem: 19695 Mb 
+preprocessed 23.4909 %, 143.136 s/iter Mem: 19695 Mb 
+preprocessed 23.8891 %, 143.153 s/iter Mem: 19695 Mb 
+preprocessed 24.2872 %, 143.122 s/iter Mem: 19695 Mb 
+preprocessed 24.6854 %, 143.331 s/iter Mem: 19695 Mb 
+preprocessed 25.0835 %, 143.041 s/iter Mem: 19695 Mb 
+preprocessed 25.4817 %, 143.191 s/iter Mem: 19695 Mb 
+preprocessed 25.8798 %, 143.253 s/iter Mem: 19695 Mb 
+preprocessed 26.278 %, 143.793 s/iter Mem: 19695 Mb 
+preprocessed 26.6761 %, 144.364 s/iter Mem: 19695 Mb 
+preprocessed 27.0743 %, 145.221 s/iter Mem: 19695 Mb 
+preprocessed 27.4724 %, 145.26 s/iter Mem: 19695 Mb 
+preprocessed 27.8706 %, 145.178 s/iter Mem: 19695 Mb 
+preprocessed 28.2687 %, 145.093 s/iter Mem: 19695 Mb 
+preprocessed 28.6669 %, 145.185 s/iter Mem: 19695 Mb 
+preprocessed 29.065 %, 145.244 s/iter Mem: 19695 Mb 
+preprocessed 29.4632 %, 145.436 s/iter Mem: 19695 Mb 
+preprocessed 29.8613 %, 145.855 s/iter Mem: 19695 Mb 
+preprocessed 30.2595 %, 146.881 s/iter Mem: 19695 Mb 
+preprocessed 30.6576 %, 147.016 s/iter Mem: 19695 Mb 
+preprocessed 31.0558 %, 147.025 s/iter Mem: 19695 Mb 
+preprocessed 31.4539 %, 146.962 s/iter Mem: 19695 Mb 
+preprocessed 31.8521 %, 146.779 s/iter Mem: 19695 Mb 
+preprocessed 32.2502 %, 146.878 s/iter Mem: 19695 Mb 
+preprocessed 32.6484 %, 146.939 s/iter Mem: 19695 Mb 
+preprocessed 33.0465 %, 147.001 s/iter Mem: 19695 Mb 
+preprocessed 33.4447 %, 147.586 s/iter Mem: 19695 Mb 
+preprocessed 33.8428 %, 148.492 s/iter Mem: 19695 Mb 
+preprocessed 34.241 %, 149.037 s/iter Mem: 19695 Mb 
+preprocessed 34.6391 %, 148.548 s/iter Mem: 19695 Mb 
+preprocessed 35.0373 %, 148.434 s/iter Mem: 19695 Mb 
+preprocessed 35.4354 %, 148.344 s/iter Mem: 19695 Mb 
+preprocessed 35.8336 %, 148.36 s/iter Mem: 19695 Mb 
+preprocessed 36.2317 %, 148.706 s/iter Mem: 19695 Mb 
+preprocessed 36.6299 %, 148.508 s/iter Mem: 19695 Mb 
+preprocessed 37.028 %, 149.076 s/iter Mem: 19695 Mb 
+preprocessed 37.4262 %, 150.276 s/iter Mem: 19695 Mb 
+preprocessed 37.8243 %, 150.448 s/iter Mem: 19695 Mb 
+preprocessed 38.2225 %, 150.476 s/iter Mem: 19695 Mb 
+preprocessed 38.6206 %, 150.396 s/iter Mem: 19695 Mb 
+preprocessed 39.0188 %, 151.327 s/iter Mem: 19695 Mb 
+preprocessed 39.4169 %, 150.948 s/iter Mem: 19695 Mb 
+preprocessed 39.8151 %, 150.508 s/iter Mem: 19695 Mb 
+preprocessed 40.2132 %, 150.875 s/iter Mem: 19695 Mb 
+preprocessed 40.6114 %, 151.61 s/iter Mem: 19695 Mb 
+preprocessed 41.0096 %, 152.853 s/iter Mem: 19695 Mb 
+preprocessed 41.4077 %, 152.702 s/iter Mem: 19695 Mb 
+preprocessed 41.8059 %, 152.704 s/iter Mem: 19695 Mb 
+preprocessed 42.204 %, 152.537 s/iter Mem: 19695 Mb 
+preprocessed 42.6022 %, 153.155 s/iter Mem: 19695 Mb 
+preprocessed 43.0003 %, 153.112 s/iter Mem: 19695 Mb 
+preprocessed 43.3985 %, 152.944 s/iter Mem: 19695 Mb 
+preprocessed 43.7966 %, 153.565 s/iter Mem: 19695 Mb 
+preprocessed 44.1948 %, 154.247 s/iter Mem: 19695 Mb 
+preprocessed 44.5929 %, 154.542 s/iter Mem: 19695 Mb 
+preprocessed 44.9911 %, 154.68 s/iter Mem: 19695 Mb 
+preprocessed 45.3892 %, 154.795 s/iter Mem: 19695 Mb 
+preprocessed 45.7874 %, 154.758 s/iter Mem: 19695 Mb 
+preprocessed 46.1855 %, 154.536 s/iter Mem: 19695 Mb 
+preprocessed 46.5837 %, 154.387 s/iter Mem: 19695 Mb 
+preprocessed 46.9818 %, 155.437 s/iter Mem: 19695 Mb 
+preprocessed 47.38 %, 155.867 s/iter Mem: 19695 Mb 
+preprocessed 47.7781 %, 156.582 s/iter Mem: 19695 Mb 
+preprocessed 48.1763 %, 156.646 s/iter Mem: 19695 Mb 
+preprocessed 48.5744 %, 156.394 s/iter Mem: 19695 Mb 
+preprocessed 48.9726 %, 156.536 s/iter Mem: 19695 Mb 
+preprocessed 49.3707 %, 156.042 s/iter Mem: 19695 Mb 
+preprocessed 49.7689 %, 156.488 s/iter Mem: 19695 Mb 
+preprocessed 50.167 %, 158.356 s/iter Mem: 19695 Mb 
+preprocessed 50.5652 %, 158.393 s/iter Mem: 19695 Mb 
+preprocessed 50.9633 %, 158.461 s/iter Mem: 19695 Mb 
+preprocessed 51.3615 %, 158.581 s/iter Mem: 19695 Mb 
+preprocessed 51.7596 %, 158.779 s/iter Mem: 19695 Mb 
+preprocessed 52.1578 %, 158.932 s/iter Mem: 19695 Mb 
+preprocessed 52.5559 %, 158.576 s/iter Mem: 19695 Mb 
+preprocessed 52.9541 %, 158.76 s/iter Mem: 19695 Mb 
+preprocessed 53.3522 %, 160.46 s/iter Mem: 19695 Mb 
+preprocessed 53.7504 %, 161.911 s/iter Mem: 19695 Mb 
+preprocessed 54.1485 %, 160.552 s/iter Mem: 19695 Mb 
+preprocessed 54.5467 %, 160.917 s/iter Mem: 19695 Mb 
+preprocessed 54.9448 %, 160.705 s/iter Mem: 19695 Mb 
+preprocessed 55.343 %, 161.37 s/iter Mem: 19695 Mb 
+preprocessed 55.7411 %, 160.582 s/iter Mem: 19695 Mb 
+preprocessed 56.1393 %, 161.088 s/iter Mem: 19695 Mb 
+preprocessed 56.5374 %, 163.045 s/iter Mem: 19695 Mb 
+preprocessed 56.9356 %, 164.316 s/iter Mem: 19695 Mb 
+preprocessed 57.3337 %, 163.361 s/iter Mem: 19695 Mb 
+preprocessed 57.7319 %, 163.332 s/iter Mem: 19695 Mb 
+preprocessed 58.13 %, 163.539 s/iter Mem: 19695 Mb 
+preprocessed 58.5282 %, 163.622 s/iter Mem: 19695 Mb 
+preprocessed 58.9263 %, 163.087 s/iter Mem: 19695 Mb 
+preprocessed 59.3245 %, 164.609 s/iter Mem: 19695 Mb 
+preprocessed 59.7226 %, 167.081 s/iter Mem: 19695 Mb 
+preprocessed 60.1208 %, 165.87 s/iter Mem: 19695 Mb 
+preprocessed 60.5189 %, 167.131 s/iter Mem: 19695 Mb 
+preprocessed 60.9171 %, 167.017 s/iter Mem: 19695 Mb 
+preprocessed 61.3153 %, 166.263 s/iter Mem: 19695 Mb 
+preprocessed 61.7134 %, 166.459 s/iter Mem: 19695 Mb 
+preprocessed 62.1116 %, 166.878 s/iter Mem: 19695 Mb 
+preprocessed 62.5097 %, 167.82 s/iter Mem: 19695 Mb 
+preprocessed 62.9079 %, 168.865 s/iter Mem: 19695 Mb 
+preprocessed 63.306 %, 169.766 s/iter Mem: 19695 Mb 
+preprocessed 63.7042 %, 169.258 s/iter Mem: 19695 Mb 
+preprocessed 64.1023 %, 170.067 s/iter Mem: 19695 Mb 
+preprocessed 64.5005 %, 168.925 s/iter Mem: 19695 Mb 
+preprocessed 64.8986 %, 169.114 s/iter Mem: 19695 Mb 
+preprocessed 65.2968 %, 170.796 s/iter Mem: 19695 Mb 
+preprocessed 65.6949 %, 171.321 s/iter Mem: 19695 Mb 
+preprocessed 66.0931 %, 172.053 s/iter Mem: 19695 Mb 
+preprocessed 66.4912 %, 171.43 s/iter Mem: 19695 Mb 
+preprocessed 66.8894 %, 171.847 s/iter Mem: 19695 Mb 
+preprocessed 67.2875 %, 171.83 s/iter Mem: 19695 Mb 
+preprocessed 67.6857 %, 171.549 s/iter Mem: 19695 Mb 
+preprocessed 68.0838 %, 174.108 s/iter Mem: 19695 Mb 
+preprocessed 68.482 %, 175.406 s/iter Mem: 19695 Mb 
+preprocessed 68.8801 %, 175.156 s/iter Mem: 19695 Mb 
+preprocessed 69.2783 %, 175.477 s/iter Mem: 19695 Mb 
+preprocessed 69.6764 %, 175.055 s/iter Mem: 19695 Mb 
+preprocessed 70.0746 %, 182.226 s/iter Mem: 19695 Mb 
+preprocessed 70.4727 %, 178.347 s/iter Mem: 19695 Mb 
+preprocessed 70.8709 %, 179.011 s/iter Mem: 19695 Mb 
+preprocessed 71.269 %, 178.811 s/iter Mem: 19695 Mb 
+preprocessed 71.6672 %, 179.109 s/iter Mem: 19695 Mb 
+preprocessed 72.0653 %, 178.668 s/iter Mem: 19695 Mb 
+preprocessed 72.4635 %, 179.01 s/iter Mem: 19695 Mb 
+preprocessed 72.8616 %, 183.032 s/iter Mem: 19695 Mb 
+preprocessed 73.2598 %, 182.006 s/iter Mem: 19695 Mb 
+preprocessed 73.6579 %, 182.089 s/iter Mem: 19695 Mb 
+preprocessed 74.0561 %, 181.333 s/iter Mem: 19695 Mb 
+preprocessed 74.4542 %, 182.232 s/iter Mem: 19695 Mb 
+preprocessed 74.8524 %, 181.695 s/iter Mem: 19695 Mb 
+preprocessed 75.2505 %, 196.038 s/iter Mem: 19695 Mb 
+preprocessed 75.6487 %, 204.999 s/iter Mem: 19695 Mb 
+preprocessed 76.0468 %, 184.702 s/iter Mem: 19695 Mb 
+preprocessed 76.445 %, 185.525 s/iter Mem: 19695 Mb 
+preprocessed 76.8431 %, 186.71 s/iter Mem: 19695 Mb 
+preprocessed 77.2413 %, 191.542 s/iter Mem: 19695 Mb 
+preprocessed 77.6394 %, 230.564 s/iter Mem: 19695 Mb 
+preprocessed 78.0376 %, 207.599 s/iter Mem: 19695 Mb 
+preprocessed 78.4357 %, 272.827 s/iter Mem: 19695 Mb 
+preprocessed 78.8339 %, 189.064 s/iter Mem: 19695 Mb 
+preprocessed 79.232 %, 189.545 s/iter Mem: 19695 Mb 
+preprocessed 79.6302 %, 188.775 s/iter Mem: 19695 Mb 
+preprocessed 80.0283 %, 191.782 s/iter Mem: 19695 Mb 
+preprocessed 80.4265 %, 197.773 s/iter Mem: 19695 Mb 
+preprocessed 80.8247 %, 229.648 s/iter Mem: 19695 Mb 
+preprocessed 81.2228 %, 319.943 s/iter Mem: 19695 Mb 
+preprocessed 81.621 %, 192.939 s/iter Mem: 19695 Mb 
+preprocessed 82.0191 %, 193.287 s/iter Mem: 19695 Mb 
+preprocessed 82.4173 %, 193.14 s/iter Mem: 19695 Mb 
+preprocessed 82.8154 %, 193.443 s/iter Mem: 19695 Mb 
+preprocessed 83.2136 %, 195.775 s/iter Mem: 19695 Mb 
+preprocessed 83.6117 %, 196.351 s/iter Mem: 19695 Mb 
+preprocessed 84.0099 %, 197.227 s/iter Mem: 19695 Mb 
+preprocessed 84.408 %, 197.321 s/iter Mem: 19695 Mb 
+preprocessed 84.8062 %, 197.423 s/iter Mem: 19695 Mb 
+preprocessed 85.2043 %, 197.389 s/iter Mem: 19695 Mb 
+preprocessed 85.6025 %, 197.753 s/iter Mem: 19695 Mb 
+preprocessed 86.0006 %, 199.036 s/iter Mem: 19695 Mb 
+preprocessed 86.3988 %, 201.575 s/iter Mem: 19695 Mb 
+preprocessed 86.7969 %, 201.784 s/iter Mem: 19695 Mb 
+preprocessed 87.1951 %, 201.599 s/iter Mem: 19695 Mb 
+preprocessed 87.5932 %, 201.667 s/iter Mem: 19695 Mb 
+preprocessed 87.9914 %, 201.725 s/iter Mem: 19695 Mb 
+preprocessed 88.3895 %, 206.6 s/iter Mem: 19695 Mb 
+preprocessed 88.7877 %, 206.499 s/iter Mem: 19695 Mb 
+preprocessed 89.1858 %, 206.506 s/iter Mem: 19695 Mb 
+preprocessed 89.584 %, 206.655 s/iter Mem: 19695 Mb 
+preprocessed 89.9821 %, 207.354 s/iter Mem: 19695 Mb 
+preprocessed 90.3803 %, 207.13 s/iter Mem: 19695 Mb 
+preprocessed 90.7784 %, 208.182 s/iter Mem: 19695 Mb 
+preprocessed 91.1766 %, 211.752 s/iter Mem: 19695 Mb 
+preprocessed 91.5747 %, 211.614 s/iter Mem: 19695 Mb 
+preprocessed 91.9729 %, 211.353 s/iter Mem: 19695 Mb 
+preprocessed 92.371 %, 211.834 s/iter Mem: 19695 Mb 
+preprocessed 92.7692 %, 211.912 s/iter Mem: 19695 Mb 
+preprocessed 93.1673 %, 214.15 s/iter Mem: 19695 Mb 
+preprocessed 93.5655 %, 218.197 s/iter Mem: 19695 Mb 
+preprocessed 93.9636 %, 217.241 s/iter Mem: 19695 Mb 
+preprocessed 94.3618 %, 217.912 s/iter Mem: 19695 Mb 
+preprocessed 94.7599 %, 218.571 s/iter Mem: 19695 Mb 
+preprocessed 95.1581 %, 219.201 s/iter Mem: 19695 Mb 
+preprocessed 95.5562 %, 221.518 s/iter Mem: 19695 Mb 
+preprocessed 95.9544 %, 223.361 s/iter Mem: 19695 Mb 
+preprocessed 96.3525 %, 223.528 s/iter Mem: 19695 Mb 
+preprocessed 96.7507 %, 223.566 s/iter Mem: 19695 Mb 
+preprocessed 97.1488 %, 228.708 s/iter Mem: 19695 Mb 
+preprocessed 97.547 %, 226.754 s/iter Mem: 19695 Mb 
+preprocessed 97.9451 %, 229.601 s/iter Mem: 19695 Mb 
+preprocessed 98.3433 %, 228.831 s/iter Mem: 19695 Mb 
+preprocessed 98.7414 %, 229.552 s/iter Mem: 19695 Mb 
+preprocessed 99.1396 %, 229.67 s/iter Mem: 19695 Mb 
+preprocessed 99.5377 %, 239.359 s/iter Mem: 19695 Mb 
+preprocessed 99.9359 %, 234.442 s/iter Mem: 19695 Mb 
+[2022-10-08 03:42:13.575] [info] finish preprocess and save the index
+[2022-10-08 03:46:36.357] [info] finish top-600
+[2022-10-08 03:46:36.357] [info] top600 retrieval time: total 261.942s
+	inner product 38.207s, coarse binary search 27.811s, read disk 195.476s
+	fine binary search 0.040s
+	total io cost 22308352, rank prune ratio 0.9999
+[2022-10-08 03:50:50.419] [info] finish top-500
+[2022-10-08 03:50:50.419] [info] top500 retrieval time: total 254.062s
+	inner product 37.771s, coarse binary search 27.551s, read disk 188.300s
+	fine binary search 0.039s
+	total io cost 21272576, rank prune ratio 0.9999
+[2022-10-08 03:54:58.260] [info] finish top-400
+[2022-10-08 03:54:58.260] [info] top400 retrieval time: total 247.840s
+	inner product 38.252s, coarse binary search 27.918s, read disk 181.240s
+	fine binary search 0.037s
+	total io cost 20328960, rank prune ratio 0.9999
+[2022-10-08 03:58:48.851] [info] finish top-300
+[2022-10-08 03:58:48.851] [info] top300 retrieval time: total 230.590s
+	inner product 37.537s, coarse binary search 27.840s, read disk 164.795s
+	fine binary search 0.031s
+	total io cost 18191872, rank prune ratio 0.9999
+[2022-10-08 04:02:26.041] [info] finish top-200
+[2022-10-08 04:02:26.041] [info] top200 retrieval time: total 217.190s
+	inner product 37.087s, coarse binary search 27.372s, read disk 152.334s
+	fine binary search 0.029s
+	total io cost 16476160, rank prune ratio 0.9999
+[2022-10-08 04:05:57.119] [info] finish top-100
+[2022-10-08 04:05:57.119] [info] top100 retrieval time: total 211.078s
+	inner product 36.941s, coarse binary search 27.387s, read disk 146.373s
+	fine binary search 0.027s
+	total io cost 16429056, rank prune ratio 0.9999
+[2022-10-08 04:09:02.935] [info] finish top-50
+[2022-10-08 04:09:02.935] [info] top50 retrieval time: total 185.816s
+	inner product 38.130s, coarse binary search 28.001s, read disk 119.321s
+	fine binary search 0.021s
+	total io cost 12345856, rank prune ratio 0.9999
+[2022-10-08 04:12:06.232] [info] finish top-40
+[2022-10-08 04:12:06.232] [info] top40 retrieval time: total 183.296s
+	inner product 37.130s, coarse binary search 27.565s, read disk 118.244s
+	fine binary search 0.020s
+	total io cost 12063232, rank prune ratio 0.9999
+[2022-10-08 04:15:09.192] [info] finish top-30
+[2022-10-08 04:15:09.192] [info] top30 retrieval time: total 182.960s
+	inner product 37.027s, coarse binary search 27.694s, read disk 117.878s
+	fine binary search 0.021s
+	total io cost 11735040, rank prune ratio 0.9999
+[2022-10-08 04:16:22.259] [info] finish top-20
+[2022-10-08 04:16:22.259] [info] top20 retrieval time: total 73.067s
+	inner product 37.055s, coarse binary search 27.512s, read disk 8.174s
+	fine binary search 0.001s
+	total io cost 1036288, rank prune ratio 1.0000
+[2022-10-08 04:17:33.533] [info] finish top-10
+[2022-10-08 04:17:33.533] [info] top10 retrieval time: total 71.273s
+	inner product 37.604s, coarse binary search 27.700s, read disk 5.646s
+	fine binary search 0.001s
+	total io cost 460800, rank prune ratio 1.0000
+[2022-10-08 04:17:33.534] [info] build index time: total 174978.842179309s
+top600 retrieval time: total 261.942s
+	inner product 38.207s, coarse binary search 27.811s, read disk 195.476s
+	fine binary search 0.040s
+	total io cost 22308352, rank prune ratio 0.9999
+top500 retrieval time: total 254.062s
+	inner product 37.771s, coarse binary search 27.551s, read disk 188.300s
+	fine binary search 0.039s
+	total io cost 21272576, rank prune ratio 0.9999
+top400 retrieval time: total 247.840s
+	inner product 38.252s, coarse binary search 27.918s, read disk 181.240s
+	fine binary search 0.037s
+	total io cost 20328960, rank prune ratio 0.9999
+top300 retrieval time: total 230.590s
+	inner product 37.537s, coarse binary search 27.840s, read disk 164.795s
+	fine binary search 0.031s
+	total io cost 18191872, rank prune ratio 0.9999
+top200 retrieval time: total 217.190s
+	inner product 37.087s, coarse binary search 27.372s, read disk 152.334s
+	fine binary search 0.029s
+	total io cost 16476160, rank prune ratio 0.9999
+top100 retrieval time: total 211.078s
+	inner product 36.941s, coarse binary search 27.387s, read disk 146.373s
+	fine binary search 0.027s
+	total io cost 16429056, rank prune ratio 0.9999
+top50 retrieval time: total 185.816s
+	inner product 38.130s, coarse binary search 28.001s, read disk 119.321s
+	fine binary search 0.021s
+	total io cost 12345856, rank prune ratio 0.9999
+top40 retrieval time: total 183.296s
+	inner product 37.130s, coarse binary search 27.565s, read disk 118.244s
+	fine binary search 0.020s
+	total io cost 12063232, rank prune ratio 0.9999
+top30 retrieval time: total 182.960s
+	inner product 37.027s, coarse binary search 27.694s, read disk 117.878s
+	fine binary search 0.021s
+	total io cost 11735040, rank prune ratio 0.9999
+top20 retrieval time: total 73.067s
+	inner product 37.055s, coarse binary search 27.512s, read disk 8.174s
+	fine binary search 0.001s
+	total io cost 1036288, rank prune ratio 1.0000
+top10 retrieval time: total 71.273s
+	inner product 37.604s, coarse binary search 27.700s, read disk 5.646s
+	fine binary search 0.001s
+	total io cost 460800, rank prune ratio 1.0000
