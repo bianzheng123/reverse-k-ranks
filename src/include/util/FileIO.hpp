@@ -55,7 +55,7 @@ namespace ReverseMIPS {
 
         void AddMemoryInfo(const uint64_t estimated_size_byte) {
             char str[256];
-            sprintf(str, "Estimated memory %.3fGB, Peak memory %.3fGB, Current memory %.3fGB\n",
+            sprintf(str, "Estimated memory %.3fGB, Peak memory %.3fGB, Current memory %.3fGB",
                     estimated_size_byte * 1.0 / 1024 / 1024 / 1024,
                     get_peak_RSS() * 1.0 / 1024 / 1024 / 1024,
                     get_current_RSS() * 1.0 / 1024 / 1024 / 1024);
