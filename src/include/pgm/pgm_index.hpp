@@ -101,12 +101,18 @@ namespace pgm {
             };
 
             // Build first level
+//            auto in_fun = [&](auto i) {
+//                auto x = first[i];
+//                // Here there is an adjustment for inputs with duplicate keys: at the end of a run of duplicate keys equal
+//                // to x=first[i] such that x+1!=first[i+1], we map the values x+1,...,first[i+1]-1 to their correct rank i
+//                auto flag = i > 0 && i + 1u < n && x == first[i - 1] && x != first[i + 1] && x + 1 != first[i + 1];
+//                return std::pair<K, size_t>(x + flag, i);
+//            };
             auto in_fun = [&](auto i) {
                 auto x = first[i];
                 // Here there is an adjustment for inputs with duplicate keys: at the end of a run of duplicate keys equal
                 // to x=first[i] such that x+1!=first[i+1], we map the values x+1,...,first[i+1]-1 to their correct rank i
-                auto flag = i > 0 && i + 1u < n && x == first[i - 1] && x != first[i + 1] && x + 1 != first[i + 1];
-                return std::pair<K, size_t>(x + flag, i);
+                return std::pair<K, size_t>(x, i);
             };
             auto out_fun = [&](auto cs) { segments.emplace_back(cs); };
             last_n = build_level(epsilon, in_fun, out_fun);
