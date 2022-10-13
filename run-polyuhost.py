@@ -156,22 +156,25 @@ def run():
     for ds in dataset_l:
         # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
         #     dataset_dir, ds, index_dir))
-        n_sample = compute_n_sample(ds, 16)
+        # n_sample = compute_n_sample(ds, 16)
         os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-                dataset_dir, ds, index_dir, 'RankSample', n_sample))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-                dataset_dir, ds, index_dir, 'RankSampleApprByGridIPBound', n_sample))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-                dataset_dir, ds, index_dir, 'RankSampleApprByNormIPBound', n_sample))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-                dataset_dir, ds, index_dir, 'RankSampleApprByUserIPBound', n_sample))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-                dataset_dir, ds, index_dir, 'RankSampleIntIPBound', n_sample))
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {}'.format(
+                dataset_dir, ds, index_dir, 'LinearModel'))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+        #         dataset_dir, ds, index_dir, 'RankSample', n_sample))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+        #         dataset_dir, ds, index_dir, 'RankSampleApprByGridIPBound', n_sample))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+        #         dataset_dir, ds, index_dir, 'RankSampleApprByNormIPBound', n_sample))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+        #         dataset_dir, ds, index_dir, 'RankSampleApprByUserIPBound', n_sample))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+        #         dataset_dir, ds, index_dir, 'RankSampleIntIPBound', n_sample))
         # os.system(
         #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
         #         dataset_dir, ds, index_dir, 5000, 600

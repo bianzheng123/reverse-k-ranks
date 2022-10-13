@@ -9,6 +9,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "GridIndex.hpp"
+#include "LinearModel.hpp"
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
 #include "RankSample.hpp"
@@ -16,6 +17,7 @@
 #include "RankSampleApprByNormIPBound.hpp"
 #include "RankSampleApprByUserIPBound.hpp"
 #include "RankSampleIntIPBound.hpp"
+#include "RankSampleIntPGM.hpp"
 #include "Simpfer.hpp"
 
 #include <spdlog/spdlog.h>
@@ -102,6 +104,10 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: none");
         index = GridIndex::BuildIndex(data_item, user);
 
+    } else if (method_name == "LinearModel") {
+        spdlog::info("input parameter: none");
+        index = LinearModel::BuildIndex(data_item, user, index_path);
+
     } else if (method_name == "QueryRankSampleSearchAllRank") {
         const int n_sample = para.n_sample;
         const int n_sample_query = para.n_sample_query;
@@ -152,6 +158,12 @@ int main(int argc, char **argv) {
         index = RankSampleIntIPBound::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
+    } else if (method_name == "RankSampleIntPGM") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = RankSampleIntPGM::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
     } else if (method_name == "Simpfer") {
         const int simpfer_k_max = para.simpfer_k_max;
         spdlog::info("input parameter: simpfer_k_max {}",
@@ -187,7 +199,7 @@ int main(int argc, char **argv) {
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     vector<vector<SingleQueryPerformance>> query_performance_topk_l;
-    const int n_execute_query = 1000;
+    const int n_execute_query = 100;
     for (int topk: topk_l) {
         vector<SingleQueryPerformance> query_performance_l(n_execute_query);
         vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,

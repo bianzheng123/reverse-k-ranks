@@ -36,7 +36,7 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST_MODULE OFF)
-set(BUILD_ATTRIBUTION ON)
+set(BUILD_ATTRIBUTION OFF)
 
 set(BUILD_PROGRESS ON)
 
@@ -69,6 +69,16 @@ set_target_properties(fexiprolib PROPERTIES LINKER_LANGUAGE CXX)
 #target_link_directories(fexiprolib PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 target_link_libraries(fexiprolib PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 target_include_directories(fexiprolib PRIVATE ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+
+set(pgm
+        src/include/pgm/pgm_index.hpp
+        src/include/pgm/piecewise_linear_model.hpp
+        )
+
+add_library(pgmindexlib SHARED ${pgm})
+set_target_properties(pgmindexlib PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(pgmindexlib PRIVATE OpenMP::OpenMP_CXX)
+#target_include_directories(pgmindexlib INTERFACE include/)
 
 add_executable(bst src/app/BuildScoreTable.cpp)
 target_include_directories(bst PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
