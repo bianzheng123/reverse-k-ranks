@@ -13,10 +13,6 @@
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
 #include "RankSample.hpp"
-#include "RankSampleApprByGridIPBound.hpp"
-#include "RankSampleApprByNormIPBound.hpp"
-#include "RankSampleApprByUserIPBound.hpp"
-#include "RankSampleIntIPBound.hpp"
 #include "RankSampleIntPGM.hpp"
 #include "Simpfer.hpp"
 
@@ -134,30 +130,6 @@ int main(int argc, char **argv) {
         index = RankSample::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    } else if (method_name == "RankSampleApprByGridIPBound") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = RankSampleApprByGridIPBound::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
-    } else if (method_name == "RankSampleApprByNormIPBound") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = RankSampleApprByNormIPBound::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
-    } else if (method_name == "RankSampleApprByUserIPBound") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = RankSampleApprByUserIPBound::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
-    } else if (method_name == "RankSampleIntIPBound") {
-        const int n_sample = para.n_sample;
-        spdlog::info("input parameter: n_sample {}", n_sample);
-        index = RankSampleIntIPBound::BuildIndex(data_item, user, index_path, n_sample);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
     } else if (method_name == "RankSampleIntPGM") {
         const int n_sample = para.n_sample;
         spdlog::info("input parameter: n_sample {}", n_sample);
@@ -192,19 +164,18 @@ int main(int argc, char **argv) {
 //    }
 
 //    vector<int> topk_l{600, 500, 400, 300, 200, 100, 50, 40, 30, 20, 10};
-    vector<int> topk_l{50, 40, 30, 30, 20, 10};
+    vector<int> topk_l{60, 50, 40, 30, 20, 10};
 //    vector<int> topk_l{30, 20, 10};
 //    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     vector<vector<SingleQueryPerformance>> query_performance_topk_l;
-    const int n_execute_query = 100;
+    const int n_execute_query = n_query_item;
     for (int topk: topk_l) {
         vector<SingleQueryPerformance> query_performance_l(n_execute_query);
         vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,
                                                                      query_performance_l);
-//        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_query_item);
 
         string performance_str = index->PerformanceStatistics(topk);
         config.AddRetrievalInfo(performance_str);
@@ -226,7 +197,7 @@ int main(int argc, char **argv) {
                               parameter_name);
     }
 
-    config.AddBuildIndexInfo(index->BuildIndexStatistics());
+    config.AddMemoryInfo(index->IndexSizeByte());
     config.AddBuildIndexTime(build_index_time);
     config.AddExecuteQuery(n_execute_query);
     config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);

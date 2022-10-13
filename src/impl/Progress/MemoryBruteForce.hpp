@@ -176,6 +176,11 @@ namespace ReverseMIPS::MemoryBruteForce {
             return str;
         }
 
+        uint64_t IndexSizeByte() override {
+            return sizeof(double) * n_user_ * n_data_item_;
+        }
+
+
     };
 
     std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {

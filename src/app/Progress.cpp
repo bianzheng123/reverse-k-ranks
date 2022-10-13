@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
                               parameter_name);
     }
 
-    config.AddBuildIndexInfo(index->BuildIndexStatistics());
+    config.AddMemoryInfo(index->IndexSizeByte());
     config.AddBuildIndexTime(build_index_time);
     config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     return 0;

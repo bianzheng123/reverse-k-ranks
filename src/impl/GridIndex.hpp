@@ -208,6 +208,11 @@ namespace ReverseMIPS::GridIndex {
             return str;
         }
 
+        uint64_t IndexSizeByte() override {
+            return ip_bound_ins_->IndexSize();
+        }
+
+
     };
 
     /*

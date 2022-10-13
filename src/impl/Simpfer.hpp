@@ -142,6 +142,10 @@ namespace ReverseMIPS::Simpfer {
             return str;
         }
 
+        uint64_t IndexSizeByte() override {
+            return simpfer_index_.IndexSizeByte();
+        }
+
     };
 
     /*

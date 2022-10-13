@@ -215,6 +215,10 @@ namespace ReverseMIPS::DiskBruteForce {
             return str;
         }
 
+        uint64_t IndexSizeByte() override {
+            return 0;
+        }
+
     };
 
     const int write_every_ = 30000;

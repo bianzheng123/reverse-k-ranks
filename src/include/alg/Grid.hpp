@@ -195,6 +195,13 @@ namespace ReverseMIPS {
             }
         }
 
+        uint64_t IndexSize(){
+            const uint64_t grid_size = sizeof(std::pair<double, double>) * n_partition_ * n_partition_;
+            const uint64_t user_codeword_size = sizeof(unsigned char) * n_user_ * vec_dim_;
+            const uint64_t item_codeword_size = sizeof(unsigned char) * n_data_item_ * vec_dim_;
+            return grid_size + user_codeword_size + item_codeword_size;
+        }
+
     };
 }
 

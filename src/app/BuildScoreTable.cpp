@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
     sprintf(build_index_info, "compute time %.3f s, sort time %.3f s, process index time %.3f s",
             total_compute_time, total_sort_time, total_process_index_time);
 
-    config.AddBuildIndexInfo(build_index_info);
+    config.AddInfo(build_index_info);
     config.AddBuildIndexTime(build_index_time);
     config.WritePerformance(dataset_name, "BuildIndex", parameter_name);
     return 0;

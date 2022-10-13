@@ -91,10 +91,6 @@ def run():
         # 'QueryRankSampleSearchAllRank',
         # 'QueryRankSampleSearchKthRank',
         # 'RankSample',
-        # 'RankSampleApprByGridIPBound',
-        # 'RankSampleApprByNormIPBound',
-        # 'RankSampleApprByUserIPBound',
-        # 'RankSampleIntIPBound',
         # 'RankSampleIntPGM',
     ]
 
@@ -120,11 +116,7 @@ def run():
         #         ds, 150, 30,
         #         ds, 'QueryRankSampleSearchKthRank', 150, 30))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleApprByGridIPBound'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleApprByNormIPBound'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleApprByUserIPBound'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntPGM'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntIPBound'))
 
     # topk_l = [10, 20, 30, 40, 50]
     topk_l = [10, 20, 30]
@@ -132,9 +124,9 @@ def run():
 
 
 if __name__ == '__main__':
-    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-normal', 'fake-uniform']
-    # dataset_l = ['fake-normal']
+    dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 

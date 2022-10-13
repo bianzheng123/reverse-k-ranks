@@ -204,6 +204,12 @@ namespace ReverseMIPS {
             index_stream.close();
         }
 
+        uint64_t IndexSizeByte() {
+            const uint64_t known_rank_idx_size = sizeof(int) * n_sample_;
+            const uint64_t bound_distance_table_size = sizeof(double) * n_user_ * n_sample_;
+            return known_rank_idx_size + bound_distance_table_size;
+        }
+
     };
 }
 #endif //REVERSE_KRANKS_RANKSEARCH_HPP

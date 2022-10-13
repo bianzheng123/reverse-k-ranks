@@ -38,7 +38,7 @@ namespace ReverseMIPS {
                 preprocess_cache_[itemID] = -distance_ptr[itemID];
             }
             pgm_ins_l_[userID] = pgm::PGMIndex<double, 256, 3, double>(preprocess_cache_, n_data_item_);
-            if(userID == n_user_ - 1){
+            if (userID == n_user_ - 1) {
                 printf("segment count %ld, height %ld, size in bytes %ld\n",
                        pgm_ins_l_[userID].segments_count(), pgm_ins_l_[userID].height(),
                        pgm_ins_l_[userID].size_in_bytes());
@@ -101,6 +101,10 @@ namespace ReverseMIPS {
                 assert(qIP_ub_upper_rank <= qIP_ub_lower_rank);
                 assert(qIP_ub_upper_rank <= qIP_lb_lower_rank);
             }
+        }
+
+        uint64_t IndexSizeByte() {
+            return pgm_ins_l_[0].size_in_bytes() * n_user_;
         }
 
     };

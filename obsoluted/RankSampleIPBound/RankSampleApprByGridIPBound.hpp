@@ -2,14 +2,14 @@
 // Created by BianZheng on 2022/10/7.
 //
 
-#ifndef REVERSE_KRANKS_RANKSAMPLEAPPRBYNORMIPBOUND_HPP
-#define REVERSE_KRANKS_RANKSAMPLEAPPRBYNORMIPBOUND_HPP
+#ifndef REVERSE_KRANKS_RANKSAMPLEAPPRBYGRIDIPBOUND_HPP
+#define REVERSE_KRANKS_RANKSAMPLEAPPRBYGRIDIPBOUND_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
-#include "alg/QueryIPBound/ApproximateByNorm.hpp"
+#include "ApproximateByGrid.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 
@@ -29,7 +29,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::RankSampleApprByNormIPBound {
+namespace ReverseMIPS::RankSampleApprByGridIPBound {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -44,7 +44,7 @@ namespace ReverseMIPS::RankSampleApprByNormIPBound {
         }
 
         // IP Bound
-        ApproximateByNorm ip_bound_ins_;
+        ApproximateByGrid ip_bound_ins_;
         //rank search
         RankSearch rank_ins_;
         //read disk
@@ -70,7 +70,7 @@ namespace ReverseMIPS::RankSampleApprByNormIPBound {
 
         Index(
                 //ip bound ins
-                ApproximateByNorm &ip_bound_ins,
+                ApproximateByGrid &ip_bound_ins,
                 //rank search
                 RankSearch &rank_ins,
                 //disk index
@@ -259,7 +259,7 @@ namespace ReverseMIPS::RankSampleApprByNormIPBound {
 
         user.vectorNormalize();
 
-        ApproximateByNorm ip_bound_ins(n_user, n_data_item, vec_dim, 128);
+        ApproximateByGrid ip_bound_ins(n_user, n_data_item, vec_dim, 128);
         ip_bound_ins.Preprocess(user, data_item);
 
         //rank search
@@ -294,4 +294,4 @@ namespace ReverseMIPS::RankSampleApprByNormIPBound {
     }
 
 }
-#endif //REVERSE_KRANKS_RANKSAMPLEAPPRBYNORMIPBOUND_HPP
+#endif //REVERSE_KRANKS_RANKSAMPLEAPPRBYGRIDIPBOUND_HPP

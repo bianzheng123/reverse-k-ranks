@@ -53,12 +53,21 @@ namespace ReverseMIPS {
             return config_l[ID];
         }
 
-        void AddBuildIndexInfo(const std::string &str) {
+        void AddMemoryInfo(const uint64_t estimated_size_byte) {
+            char str[256];
+            sprintf(str, "Estimated memory %.3fGB, Peak memory %.3fGB, Current memory %.3fGB\n",
+                    estimated_size_byte * 1.0 / 1024 / 1024 / 1024,
+                    get_peak_RSS() * 1.0 / 1024 / 1024 / 1024,
+                    get_current_RSS() * 1.0 / 1024 / 1024 / 1024);
             this->config_l.emplace_back(str);
         }
 
         void AddRetrievalInfo(const std::string &str) {
             this->config_l.emplace_back(str);
+        }
+
+        void AddInfo(const std::string info){
+            this->config_l.emplace_back(info);
         }
 
         void AddBuildIndexTime(const double &build_index_time) {
@@ -71,13 +80,6 @@ namespace ReverseMIPS {
         void AddExecuteQuery(const int &n_execute_query) {
             char buff[128];
             sprintf(buff, "number of query item %d", n_execute_query);
-            std::string str(buff);
-            this->config_l.emplace_back(str);
-        }
-
-        void AddQueryInfo(const int n_eval_query) {
-            char buff[128];
-            sprintf(buff, "number of evaluate query %d", n_eval_query);
             std::string str(buff);
             this->config_l.emplace_back(str);
         }
@@ -220,7 +222,7 @@ namespace ReverseMIPS {
         inline SingleQueryPerformance() = default;
 
         inline SingleQueryPerformance(const int &queryID,
-                                      const int &n_prune_user, const int& n_result_user, const int& n_refine_user,
+                                      const int &n_prune_user, const int &n_result_user, const int &n_refine_user,
                                       const size_t &io_cost, const size_t &ip_cost,
                                       const double &total_time,
                                       const double &memory_index_time, const double &io_time, const double &ip_time) {
@@ -245,10 +247,12 @@ namespace ReverseMIPS {
 
         char resPath[256];
         if (strcmp(other_name, "") == 0) {
-            std::sprintf(resPath, "../result/single_query_performance/%s-%s-top%d-single-query-performance.csv", dataset_name,
+            std::sprintf(resPath, "../result/single_query_performance/%s-%s-top%d-single-query-performance.csv",
+                         dataset_name,
                          method_name, topk);
         } else {
-            std::sprintf(resPath, "../result/single_query_performance/%s-%s-top%d-%s-single-query-performance.csv", dataset_name,
+            std::sprintf(resPath, "../result/single_query_performance/%s-%s-top%d-%s-single-query-performance.csv",
+                         dataset_name,
                          method_name, topk,
                          other_name);
         }
@@ -258,7 +262,8 @@ namespace ReverseMIPS {
         }
 
         char buff[512];
-        sprintf(buff, "queryID,n_prune_user,n_result_user,n_refine_user,io_cost,ip_cost,total_time,memory_index_time,io_time,ip_time");
+        sprintf(buff,
+                "queryID,n_prune_user,n_result_user,n_refine_user,io_cost,ip_cost,total_time,memory_index_time,io_time,ip_time");
         std::string str(buff);
         file << str << std::endl;
         for (int i = 0; i < n_query_item; i++) {

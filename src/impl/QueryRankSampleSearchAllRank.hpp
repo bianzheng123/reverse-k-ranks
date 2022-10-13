@@ -39,6 +39,7 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
             compute_rank_time_ = 0;
             rank_prune_ratio_ = 0;
             total_io_cost_ = 0;
+            total_refine_user_ = 0;
         }
 
         //rank search
@@ -50,7 +51,7 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
         int vec_dim_, n_data_item_, n_user_;
         double total_retrieval_time_, inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_;
         TimeRecord total_retrieval_record_, inner_product_record_, rank_bound_record_;
-        uint64_t total_io_cost_;
+        uint64_t total_io_cost_, total_refine_user_;
         double rank_prune_ratio_;
 
     public:
@@ -147,6 +148,7 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
                 rank_prune_ratio_ += 1.0 * (n_user_ - refine_user_size) / n_user_;
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
                 assert(0 <= n_result_user && n_result_user <= topk);
+                total_refine_user_ += refine_user_size;
 
                 //read disk and fine binary search
                 size_t io_cost = 0;
@@ -206,12 +208,16 @@ namespace ReverseMIPS::QueryRankSampleSearchAllRank {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, rank prune ratio %.4f",
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, total refine user %ld, rank prune ratio %.4f",
                     topk, total_retrieval_time_,
                     inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_,
-                    total_io_cost_, rank_prune_ratio_);
+                    total_io_cost_, total_refine_user_, rank_prune_ratio_);
             std::string str(buff);
             return str;
+        }
+
+        uint64_t IndexSizeByte() override {
+            return rank_ins_.IndexSizeByte();
         }
 
     };

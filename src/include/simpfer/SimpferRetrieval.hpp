@@ -145,7 +145,7 @@ namespace ReverseMIPS {
                 ip_count++;
                 if (queryIP > topk_IP) {
                     result_size++;
-                    result_userID_l.push_back((int)userID);
+                    result_userID_l.push_back((int) userID);
                 }
             }
         }
@@ -178,6 +178,10 @@ namespace ReverseMIPS {
 
             }
 
+        }
+
+        uint64_t IndexSizeByte() const {
+            return 0;
         }
     };
 }
