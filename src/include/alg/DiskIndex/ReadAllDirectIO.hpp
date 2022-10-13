@@ -92,9 +92,6 @@ namespace ReverseMIPS {
             read_disk_time = record_.get_elapsed_time_second();
             io_cost = ele_actual_read_count;
 
-            if(seek_offset != sizeof(double) * ele_actual_offset){
-                printf("actual_seek_offset %ld, theoretical offset %ld\n", seek_offset, sizeof(double) * ele_actual_offset);
-            }
             assert(seek_offset == sizeof(double) * ele_actual_offset);
             assert(read_chars != -1 && (read_chars == 0 || read_count <= read_chars));
             assert(ele_actual_read_count * sizeof(double) % DISK_PAGE_SIZE == 0);

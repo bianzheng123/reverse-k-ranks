@@ -93,7 +93,7 @@ public:
     }
 
     bool add_point(const X &x, const Y &y) {
-        if (points_in_hull > 0 && x <= last_x)
+        if (points_in_hull > 0 && x <= last_x - 0.001)
             throw std::logic_error("Points must be increasing by x.");
 
         last_x = x;
