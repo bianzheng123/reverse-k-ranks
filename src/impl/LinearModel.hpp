@@ -242,6 +242,7 @@ namespace ReverseMIPS::LinearModel {
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
             read_ins.ReadDiskNoCache(userID, distance_l);
+            std::sort(distance_l.begin(), distance_l.end(), std::greater());
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
 
