@@ -51,9 +51,9 @@ namespace ReverseMIPS {
             for (int sampleID = 0; sampleID < n_sample_query_; sampleID++) {
                 const int rank = sort_kth_rank_l_[sampleID];
                 rank_s.insert(rank);
-                if (rank != 0) {
-                    rank_s.insert(rank - 1);
-                }
+//                if (rank != 0) {
+//                    rank_s.insert(rank - 1);
+//                }
             }
 
             std::vector<int> sample_rank_l;

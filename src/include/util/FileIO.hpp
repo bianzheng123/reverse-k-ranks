@@ -66,7 +66,7 @@ namespace ReverseMIPS {
             this->config_l.emplace_back(str);
         }
 
-        void AddInfo(const std::string info){
+        void AddInfo(const std::string &info){
             this->config_l.emplace_back(info);
         }
 

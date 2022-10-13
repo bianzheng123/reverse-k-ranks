@@ -186,8 +186,9 @@ int main(int argc, char **argv) {
 
     RetrievalResult config;
     char build_index_info[256];
-    sprintf(build_index_info, "compute_rank_time %.3f s, store_index_time %.3f s",
-            compute_rank_time, store_index_time);
+    sprintf(build_index_info, "compute_rank_time %.3fs, store_index_time %.3fs, total_run_time %.3fs",
+            compute_rank_time, store_index_time, compute_rank_time + store_index_time);
+    config.AddInfo(build_index_info);
     config.WritePerformance(dataset_name, "QueryDistributionIndex", "");
 
     return 0;
