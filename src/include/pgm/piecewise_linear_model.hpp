@@ -68,7 +68,7 @@ private:
     std::vector<Point> lower;
     std::vector<Point> upper;
     X first_x = 0;
-    X last_x = 0;
+    X last_x = std::numeric_limits<X>::lowest();
     size_t lower_start = 0;
     size_t upper_start = 0;
     size_t points_in_hull = 0;
