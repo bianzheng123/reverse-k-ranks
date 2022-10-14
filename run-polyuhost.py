@@ -74,13 +74,13 @@ def run():
         # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
         #     dataset_dir, ds, index_dir))
         n_sample = compute_n_sample_by_memory_index(ds, 16)
-        n_part = 4
+        n_part = 2
         for i in range(1, n_part + 1, 1):
             tmp_i = i / n_part
             tmp_n_sample = int(n_sample * tmp_i)
-            os.system(
-                'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {}'.format(
-                    dataset_dir, ds, index_dir, 'LinearModel'))
+            # os.system(
+            #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {}'.format(
+            #         dataset_dir, ds, index_dir, 'LinearModel'))
             os.system(
                 'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
                     dataset_dir, ds, index_dir, 'RankSample', tmp_n_sample))
