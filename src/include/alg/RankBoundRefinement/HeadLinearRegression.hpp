@@ -31,7 +31,7 @@ namespace ReverseMIPS {
         inline HeadLinearRegression(const int &n_data_item, const int &n_user) {
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
-            this->n_parameter_ = 2; // real linear regression
+            this->n_parameter_ = 3; // real linear regression
             this->predict_para_l_ = std::make_unique<double[]>(n_user * n_parameter_);
             this->error_l_ = std::make_unique<int[]>(n_user);
         }

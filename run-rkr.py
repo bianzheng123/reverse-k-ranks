@@ -86,9 +86,9 @@ def run():
         # 'GridIndex',
         # 'LinearModel',
         # 'QueryRankSampleSearchAllRank',
-        'QueryRankSampleSearchKthRank',
+        # 'QueryRankSampleSearchKthRank',
         # 'RankSample',
-        # 'RankSampleIntLR',
+        'RankSampleIntLR',
         # 'RankSampleIntPGM',
     ]
 
@@ -109,12 +109,12 @@ def run():
         #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #         ds, 150, 10,
         #         ds, 'QueryRankSampleSearchAllRank', 150, 10))
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 60,
-                ds, 'QueryRankSampleSearchKthRank', 150, 60))
+        # os.system(
+        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 150, 60,
+        #         ds, 'QueryRankSampleSearchKthRank', 150, 60))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntLR'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntLR'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntPGM'))
 
     # topk_l = [10, 20, 30, 40, 50]
