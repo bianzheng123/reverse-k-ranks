@@ -23,7 +23,7 @@ namespace ReverseMIPS {
 
         inline RankSearch(const int &n_sample, const int &n_data_item,
                           const int &n_user) {
-            const int sample_every = n_data_item / (n_sample - 1);
+            const int sample_every = std::round(n_data_item * 1.0 / n_sample);
             this->n_sample_ = n_sample;
             this->sample_every_ = sample_every;
             this->n_data_item_ = n_data_item;
@@ -49,16 +49,26 @@ namespace ReverseMIPS {
         }
 
         void Preprocess() {
-            for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
-                if (sampleID == n_sample_ - 1) {
-                    known_rank_idx_l_[sampleID] = (int) n_data_item_ - 1;
-                } else {
-                    known_rank_idx_l_[sampleID] = sample_every_ - 1 + sampleID * sample_every_;
-                    assert(known_rank_idx_l_[sampleID] < n_data_item_);
-                }
+            int sample_rank = (int) sample_every_ - 1;
+            int count_sampleID = 0;
+            while (sample_rank < n_data_item_ && count_sampleID < n_sample_) {
+                known_rank_idx_l_[count_sampleID] = sample_rank;
+                sample_rank += (int) sample_every_;
+                count_sampleID++;
             }
+            sample_rank = (int) n_data_item_ - 1;
+            for (int sampleID = count_sampleID; sampleID < n_sample_; sampleID++) {
+                if ((sample_rank - sample_every_ + 1) % sample_every_ == 0) {
+                    sample_rank--;
+                }
+                known_rank_idx_l_[sampleID] = sample_rank;
+                sample_rank--;
+            }
+            std::sort(known_rank_idx_l_.get(), known_rank_idx_l_.get() + n_sample_);
+            assert(0 <= known_rank_idx_l_[0] && known_rank_idx_l_[0] < n_data_item_);
             for (int sampleID = 1; sampleID < n_sample_; sampleID++) {
-                assert(known_rank_idx_l_[sampleID - 1] <= known_rank_idx_l_[sampleID]);
+                assert(0 <= known_rank_idx_l_[sampleID] && known_rank_idx_l_[sampleID] < n_data_item_);
+                assert(known_rank_idx_l_[sampleID - 1] < known_rank_idx_l_[sampleID]);
                 assert(known_rank_idx_l_[sampleID] - known_rank_idx_l_[sampleID - 1] <= sample_every_);
             }
 

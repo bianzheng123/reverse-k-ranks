@@ -87,8 +87,8 @@ def run():
         # 'LinearModel',
         # 'QueryRankSampleSearchAllRank',
         # 'QueryRankSampleSearchKthRank',
-        # 'RankSample',
-        'RankSampleIntLR',
+        'RankSample',
+        # 'RankSampleIntLR',
         # 'RankSampleIntPGM',
     ]
 
@@ -97,9 +97,9 @@ def run():
 
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     for ds in dataset_l:
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
-        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
+        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
 
         # os.system('cd build && ./bst --dataset_name {}'.format(ds))
 
@@ -113,8 +113,8 @@ def run():
         #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #         ds, 150, 60,
         #         ds, 'QueryRankSampleSearchKthRank', 150, 60))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntLR'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntLR'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntPGM'))
 
     # topk_l = [10, 20, 30, 40, 50]
