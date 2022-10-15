@@ -13,6 +13,7 @@
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
 #include "RankSample.hpp"
+#include "RankSampleIntLR.hpp"
 #include "RankSampleIntPGM.hpp"
 #include "Simpfer.hpp"
 
@@ -130,7 +131,13 @@ int main(int argc, char **argv) {
         index = RankSample::BuildIndex(data_item, user, index_path, n_sample);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    } else if (method_name == "RankSampleIntPGM") {
+    }else if (method_name == "RankSampleIntLR") {
+        const int n_sample = para.n_sample;
+        spdlog::info("input parameter: n_sample {}", n_sample);
+        index = RankSampleIntLR::BuildIndex(data_item, user, index_path, n_sample);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
+    }  else if (method_name == "RankSampleIntPGM") {
         const int n_sample = para.n_sample;
         spdlog::info("input parameter: n_sample {}", n_sample);
         index = RankSampleIntPGM::BuildIndex(data_item, user, index_path, n_sample);

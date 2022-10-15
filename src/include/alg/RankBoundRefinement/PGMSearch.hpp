@@ -47,6 +47,7 @@ namespace ReverseMIPS {
 
         void FinishPreprocess() {
             delete[]preprocess_cache_;
+            preprocess_cache_ = nullptr;
         }
 
         void SearchRankBound(const double &queryIP, const int &userID,

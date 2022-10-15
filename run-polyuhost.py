@@ -84,6 +84,9 @@ def run():
             os.system(
                 'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
                     dataset_dir, ds, index_dir, 'RankSample', tmp_n_sample))
+            os.system(
+                'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+                    dataset_dir, ds, index_dir, 'RankSampleIntLR', tmp_n_sample))
         # os.system(
         #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
         #         dataset_dir, ds, index_dir, 5000, 600

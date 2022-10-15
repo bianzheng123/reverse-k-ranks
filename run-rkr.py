@@ -44,10 +44,7 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
         'QueryRankSampleSearchAllRank': 'n_sample_20',
         'QueryRankSampleSearchKthRank': 'n_sample_20',
         'RankSample': 'n_sample_20',
-        'RankSampleApprByGridIPBound': 'n_sample_20',
-        'RankSampleApprByNormIPBound': 'n_sample_20',
-        'RankSampleApprByUserIPBound': 'n_sample_20',
-        'RankSampleIntIPBound': 'n_sample_20',
+        'RankSampleIntLR': 'n_sample_20',
         'RankSampleIntPGM': 'n_sample_20',
     }
     for ds in dataset_l:
@@ -89,8 +86,9 @@ def run():
         # 'GridIndex',
         # 'LinearModel',
         # 'QueryRankSampleSearchAllRank',
-        'QueryRankSampleSearchKthRank',
+        # 'QueryRankSampleSearchKthRank',
         # 'RankSample',
+        'RankSampleIntLR',
         # 'RankSampleIntPGM',
     ]
 
@@ -99,9 +97,9 @@ def run():
 
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     for ds in dataset_l:
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
-        os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
 
         # os.system('cd build && ./bst --dataset_name {}'.format(ds))
 
@@ -111,11 +109,12 @@ def run():
         #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #         ds, 150, 10,
         #         ds, 'QueryRankSampleSearchAllRank', 150, 10))
-        os.system(
-            'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 150, 60,
-                ds, 'QueryRankSampleSearchKthRank', 150, 60))
+        # os.system(
+        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 150, 60,
+        #         ds, 'QueryRankSampleSearchKthRank', 150, 60))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntLR'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSampleIntPGM'))
 
     # topk_l = [10, 20, 30, 40, 50]
@@ -124,9 +123,9 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-normal', 'fake-uniform']
-    dataset_l = ['fake-normal']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 

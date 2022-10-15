@@ -1,14 +1,16 @@
 //
-// Created by BianZheng on 2022/2/25.
+// Created by BianZheng on 2022/10/14.
 //
 
-#ifndef REVERSE_KRANKS_RANKBOUND_HPP
-#define REVERSE_KRANKS_RANKBOUND_HPP
+#ifndef REVERSE_K_RANKS_RANKSAMPLEINTLR_HPP
+#define REVERSE_K_RANKS_RANKSAMPLEINTLR_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
+#include "alg/QueryIPBound/FullInt.hpp"
+#include "alg/RankBoundRefinement/HeadLinearRegression.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
 
@@ -28,7 +30,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::RankSample {
+namespace ReverseMIPS::RankSampleIntLR {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -38,10 +40,15 @@ namespace ReverseMIPS::RankSample {
             read_disk_time_ = 0;
             compute_rank_time_ = 0;
             rank_prune_ratio_ = 0;
+            ip_bound_prune_ratio_ = 0;
             total_io_cost_ = 0;
             total_refine_user_ = 0;
         }
 
+        // IP Bound
+        FullInt ip_bound_ins_;
+        //rank bound search
+        HeadLinearRegression rank_bound_ins_;
         //rank search
         RankSearch rank_ins_;
         //read disk
@@ -52,7 +59,7 @@ namespace ReverseMIPS::RankSample {
         double total_retrieval_time_, inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_;
         TimeRecord total_retrieval_record_, inner_product_record_, rank_bound_record_;
         uint64_t total_io_cost_, total_refine_user_;
-        double rank_prune_ratio_;
+        double rank_prune_ratio_, ip_bound_prune_ratio_;
 
     public:
 
@@ -63,14 +70,23 @@ namespace ReverseMIPS::RankSample {
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
+        std::vector<std::pair<double, double>> queryIP_bound_l_;
 
-        Index(//rank search
+        Index(
+                //ip bound ins
+                FullInt &ip_bound_ins,
+                //rank search for compute loose rank bound
+                HeadLinearRegression &rank_bound_ins,
+                //rank search
                 RankSearch &rank_ins,
                 //disk index
                 ReadAllDirectIO &disk_ins,
                 //general retrieval
                 VectorMatrix &user, const int &n_data_item
         ) {
+            // IP Bound
+            this->ip_bound_ins_ = std::move(ip_bound_ins);
+            this->rank_bound_ins_ = std::move(rank_bound_ins);
             //rank search
             this->rank_ins_ = std::move(rank_ins);
             //read disk
@@ -88,6 +104,7 @@ namespace ReverseMIPS::RankSample {
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
+            this->queryIP_bound_l_.resize(n_user_);
         }
 
         std::vector<std::vector<UserRankElement>>
@@ -122,18 +139,37 @@ namespace ReverseMIPS::RankSample {
 
                 const double *query_vecs = query_item.getVector(queryID);
 
+                inner_product_record_.reset();
+                ip_bound_ins_.IPBound(query_vecs, user_, queryIP_bound_l_);
+                const double tmp_ip_bound_time = inner_product_record_.get_elapsed_time_second();
+                this->inner_product_time_ += tmp_ip_bound_time;
+
+                int refine_user_size = n_user_;
+                int n_result_user = 0;
+                int n_prune_user = 0;
+                rank_bound_record_.reset();
+                rank_bound_ins_.RankBound(queryIP_bound_l_, rank_lb_l_, rank_ub_l_, queryID);
+                PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
+                                      n_user_, topk,
+                                      refine_seq_l_, refine_user_size,
+                                      n_result_user, n_prune_user,
+                                      prune_l_, result_l_);
+                const double tmp_first_rank_bound_time = rank_bound_record_.get_elapsed_time_second();
+                rank_bound_time_ += tmp_first_rank_bound_time;
+                ip_bound_prune_ratio_ += 1.0 * (n_user_ - refine_user_size) / n_user_;
+                assert(n_result_user + n_prune_user + refine_user_size == n_user_);
+                assert(0 <= n_result_user && n_result_user <= topk);
+
                 //calculate IP
                 inner_product_record_.reset();
-                for (int userID = 0; userID < n_user_; userID++) {
+                for (int refineID = 0; refineID < refine_user_size; refineID++) {
+                    const int userID = refine_seq_l_[refineID];
                     queryIP_l_[userID] = InnerProduct(query_vecs, user_.getVector(userID), vec_dim_);
                 }
                 const double tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
                 this->inner_product_time_ += tmp_inner_product_time;
 
                 //rank search
-                int refine_user_size = n_user_;
-                int n_result_user = 0;
-                int n_prune_user = 0;
                 rank_bound_record_.reset();
                 rank_ins_.RankBound(queryIP_l_, prune_l_, result_l_, rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
@@ -141,8 +177,8 @@ namespace ReverseMIPS::RankSample {
                                       refine_seq_l_, refine_user_size,
                                       n_result_user, n_prune_user,
                                       prune_l_, result_l_);
-                const double tmp_rank_bound_time = rank_bound_record_.get_elapsed_time_second();
-                rank_bound_time_ += tmp_rank_bound_time;
+                const double tmp_second_rank_bound_time = rank_bound_record_.get_elapsed_time_second();
+                rank_bound_time_ += tmp_second_rank_bound_time;
                 rank_prune_ratio_ += 1.0 * (n_user_ - refine_user_size) / n_user_;
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
                 assert(0 <= n_result_user && n_result_user <= topk);
@@ -175,7 +211,8 @@ namespace ReverseMIPS::RankSample {
                 const double total_time =
                         total_retrieval_record_.get_elapsed_time_second();
                 total_retrieval_time_ += total_time;
-                const double &memory_index_time = tmp_rank_bound_time + tmp_inner_product_time;
+                const double &memory_index_time = tmp_ip_bound_time + tmp_first_rank_bound_time +
+                                                  tmp_inner_product_time + tmp_second_rank_bound_time;
                 query_performance_l[queryID] = SingleQueryPerformance(queryID,
                                                                       n_prune_user, n_result_user,
                                                                       disk_ins_.n_refine_user_,
@@ -183,8 +220,6 @@ namespace ReverseMIPS::RankSample {
                                                                       total_time,
                                                                       memory_index_time, read_disk_time,
                                                                       rank_compute_time);
-                spdlog::info("queryID {}, topk {}, n_refine_users {}, io_cost {}, total_time {}", queryID, topk,
-                             n_result_user, io_cost, total_time);
             }
             disk_ins_.FinishRetrieval();
 
@@ -192,6 +227,7 @@ namespace ReverseMIPS::RankSample {
             compute_rank_time_ = disk_ins_.exact_rank_refinement_time_;
 
             rank_prune_ratio_ /= n_query_item;
+            ip_bound_prune_ratio_ /= n_query_item;
 
             return query_heap_l;
         }
@@ -208,16 +244,16 @@ namespace ReverseMIPS::RankSample {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, total refine user %ld, rank prune ratio %.4f",
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, total refine user %ld, IP bound prune ratio %.4f, rank prune ratio %.4f",
                     topk, total_retrieval_time_,
                     inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_,
-                    total_io_cost_, total_refine_user_, rank_prune_ratio_);
+                    total_io_cost_, total_refine_user_, ip_bound_prune_ratio_, rank_prune_ratio_);
             std::string str(buff);
             return str;
         }
 
         uint64_t IndexSizeByte() override {
-            return rank_ins_.IndexSizeByte();
+            return rank_ins_.IndexSizeByte() + rank_bound_ins_.IndexSizeByte();
         }
 
     };
@@ -231,11 +267,18 @@ namespace ReverseMIPS::RankSample {
     BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &n_sample) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
+        const int vec_dim = user.vec_dim_;
 
         user.vectorNormalize();
 
+        FullInt ip_bound_ins(n_user, vec_dim, 1000);
+        ip_bound_ins.Preprocess(user, data_item);
+
         //rank search
         RankSearch rank_ins(n_sample, n_data_item, n_user);
+
+        HeadLinearRegression rank_bound_ins(n_data_item, n_user);
+        rank_bound_ins.StartPreprocess(rank_ins.known_rank_idx_l_.get(), n_sample);
 
         //disk index
         ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
@@ -252,6 +295,8 @@ namespace ReverseMIPS::RankSample {
 
             rank_ins.LoopPreprocess(distance_l.data(), userID);
 
+            rank_bound_ins.LoopPreprocess(rank_ins.SampleData(userID), userID);
+
             if (userID % report_every == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                           << record.get_elapsed_time_second() << " s/iter" << " Mem: "
@@ -260,11 +305,12 @@ namespace ReverseMIPS::RankSample {
             }
         }
         read_ins.FinishRetrieval();
+        rank_bound_ins.FinishPreprocess();
 
-        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
+        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(ip_bound_ins, rank_bound_ins, rank_ins, disk_ins,
+                                                                   user, n_data_item);
         return index_ptr;
     }
 
 }
-
-#endif //REVERSE_KRANKS_RANKBOUND_HPP
+#endif //REVERSE_K_RANKS_RANKSAMPLEINTLR_HPP

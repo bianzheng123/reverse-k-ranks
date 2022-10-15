@@ -45,6 +45,9 @@ namespace ReverseMIPS {
         }
         const int min_topk_lb_rank = lbr_heap.Front();
         const int min_topk_ub_rank = ubr_heap.Front();
+        if (min_topk_lb_rank == -1 && min_topk_ub_rank == -1) {
+            return;
+        }
         assert(min_topk_lb_rank != -1 && min_topk_ub_rank != -1);
         refine_user_size = 0;
         for (int userID = 0; userID < n_user; userID++) {
@@ -54,16 +57,23 @@ namespace ReverseMIPS {
             }
 
             assert(!prune_l[userID] && !result_l[userID]);
-            const int &tmp_ub = rank_ub_l[userID];
-            if (min_topk_lb_rank <= tmp_ub) {
-                prune_l[userID] = true;
-                n_prune_user++;
-            }
-
             const int &tmp_lb = rank_lb_l[userID];
             if (tmp_lb <= min_topk_ub_rank) {
                 result_l[userID] = true;
                 n_result_user++;
+            }
+            if (n_result_user == topk) {
+                for (int tmp_userID = userID + 1; tmp_userID < n_user; tmp_userID++) {
+                    prune_l[tmp_userID] = true;
+                    n_prune_user++;
+                }
+                break;
+            }
+
+            const int &tmp_ub = rank_ub_l[userID];
+            if (min_topk_lb_rank <= tmp_ub && min_topk_lb_rank != min_topk_ub_rank) {
+                prune_l[userID] = true;
+                n_prune_user++;
             }
             assert((prune_l[userID] ^ result_l[userID]) || (!prune_l[userID] && !result_l[userID]));
 
@@ -82,12 +92,6 @@ namespace ReverseMIPS {
                       }
                   });
         assert(refine_user_size <= n_user);
-
-//        printf("refine_user_size %d\n", refine_user_size);
-//        for (int ID = 0; ID < refine_user_size; ID++) {
-//            printf("[%d, %d] ", rank_lb_l[refine_seq_l[ID]], rank_ub_l[refine_seq_l[ID]]);
-//        }
-//        printf("\n");
 
     }
 

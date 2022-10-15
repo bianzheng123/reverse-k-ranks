@@ -15,9 +15,9 @@ namespace ReverseMIPS {
     class RankSearch {
 
         size_t n_sample_, sample_every_, n_data_item_, n_user_;
-        std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
+        std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
 
         inline RankSearch() {}
 
@@ -82,6 +82,10 @@ namespace ReverseMIPS {
                 unsigned int rankID = known_rank_idx_l_[crankID];
                 bound_distance_table_[n_sample_ * userID + crankID] = distance_ptr[rankID];
             }
+        }
+
+        const double *SampleData(const int &userID) const {
+            return bound_distance_table_.get() + userID * n_sample_;
         }
 
         inline void
