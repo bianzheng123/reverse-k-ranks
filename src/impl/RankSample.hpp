@@ -115,7 +115,9 @@ namespace ReverseMIPS::RankSample {
             }
 
             // for binary search, check the number
-            for (int queryID = 0; queryID < n_query_item; queryID++) {
+//            for (int queryID = 0; queryID < n_query_item; queryID++) {
+            {
+                const int queryID = 613;
                 total_retrieval_record_.reset();
                 prune_l_.assign(n_user_, false);
                 result_l_.assign(n_user_, false);
@@ -147,6 +149,13 @@ namespace ReverseMIPS::RankSample {
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
                 assert(0 <= n_result_user && n_result_user <= topk);
                 total_refine_user_ += refine_user_size;
+
+                for (int userID = 0; userID < n_user_; userID++) {
+                    std::cout << "topk: " << topk << ", queryID: " << queryID << ", rank_lb: " << rank_lb_l_[userID]
+                              << ", rank_ub: " << rank_ub_l_[userID] <<
+                              std::boolalpha << ", is_prune: " << prune_l_[userID] <<
+                              ", is_result: " << result_l_[userID] << std::endl;
+                }
 
                 //read disk and fine binary search
                 size_t io_cost = 0;
@@ -184,8 +193,9 @@ namespace ReverseMIPS::RankSample {
                                                                       memory_index_time, read_disk_time,
                                                                       rank_compute_time);
                 spdlog::info("queryID {}, topk {}, n_refine_users {}, io_cost {}, total_time {}", queryID, topk,
-                             n_result_user, io_cost, total_time);
+                             refine_user_size, io_cost, total_time);
             }
+//            }
             disk_ins_.FinishRetrieval();
 
             read_disk_time_ = disk_ins_.read_disk_time_;
