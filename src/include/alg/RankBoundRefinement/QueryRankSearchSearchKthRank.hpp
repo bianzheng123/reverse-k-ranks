@@ -289,9 +289,9 @@ namespace ReverseMIPS {
 
         size_t n_sample_, n_data_item_, n_user_;
         size_t n_sample_query_, sample_topk_;
-        std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
+        std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
 
         inline QueryRankSearchSearchKthRank() {}
 

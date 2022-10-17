@@ -2,8 +2,8 @@
 // Created by BianZheng on 2022/10/14.
 //
 
-#ifndef REVERSE_K_RANKS_RANKSAMPLEINTLR_HPP
-#define REVERSE_K_RANKS_RANKSAMPLEINTLR_HPP
+#ifndef REVERSE_K_RANKS_QUERYRANKSAMPLEINTLR_HPP
+#define REVERSE_K_RANKS_QUERYRANKSAMPLEINTLR_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
@@ -12,7 +12,7 @@
 #include "alg/QueryIPBound/FullInt.hpp"
 #include "alg/RankBoundRefinement/HeadLinearRegression.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/RankSearch.hpp"
+#include "alg/RankBoundRefinement/QueryRankSearchSearchKthRank.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -30,7 +30,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::RankSampleIntLR {
+namespace ReverseMIPS::QueryRankSampleIntLR {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -50,7 +50,7 @@ namespace ReverseMIPS::RankSampleIntLR {
         //rank bound search
         HeadLinearRegression rank_bound_ins_;
         //rank search
-        RankSearch rank_ins_;
+        QueryRankSearchSearchKthRank rank_ins_;
         //read disk
         ReadAllDirectIO disk_ins_;
 
@@ -78,7 +78,7 @@ namespace ReverseMIPS::RankSampleIntLR {
                 //rank search for compute loose rank bound
                 HeadLinearRegression &rank_bound_ins,
                 //rank search
-                RankSearch &rank_ins,
+                QueryRankSearchSearchKthRank &rank_ins,
                 //disk index
                 ReadAllDirectIO &disk_ins,
                 //general retrieval
@@ -264,7 +264,8 @@ namespace ReverseMIPS::RankSampleIntLR {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &n_sample) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const char *dataset_name,
+               const int &n_sample, const int &n_sample_query, const int &sample_topk, const char *index_basic_dir) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = user.vec_dim_;
@@ -275,7 +276,7 @@ namespace ReverseMIPS::RankSampleIntLR {
         ip_bound_ins.Preprocess(user, data_item);
 
         //rank search
-        RankSearch rank_ins(n_sample, n_data_item, n_user);
+        QueryRankSearchSearchKthRank rank_ins(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
 
         HeadLinearRegression rank_bound_ins(n_data_item, n_user);
         rank_bound_ins.StartPreprocess(rank_ins.known_rank_idx_l_.get(), n_sample);
@@ -292,8 +293,6 @@ namespace ReverseMIPS::RankSampleIntLR {
         std::vector<double> distance_l(n_data_item);
         for (int userID = 0; userID < n_user; userID++) {
             read_ins.ReadDiskNoCache(userID, distance_l);
-
-            rank_ins.LoopPreprocess(distance_l.data(), userID);
 
             rank_bound_ins.LoopPreprocess(rank_ins.SampleData(userID), userID);
 
@@ -313,4 +312,4 @@ namespace ReverseMIPS::RankSampleIntLR {
     }
 
 }
-#endif //REVERSE_K_RANKS_RANKSAMPLEINTLR_HPP
+#endif //REVERSE_K_RANKS_QUERYRANKSAMPLEINTLR_HPP
