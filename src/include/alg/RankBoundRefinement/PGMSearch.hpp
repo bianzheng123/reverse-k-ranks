@@ -16,7 +16,7 @@ namespace ReverseMIPS {
     class PGMSearch {
 
         size_t n_data_item_, n_user_;
-        std::vector<pgm::PGMIndex<double, 2, 2, double>> pgm_ins_l_;
+        std::vector<pgm::PGMIndex<double, 1, 1, double>> pgm_ins_l_;
         double *preprocess_cache_;
     public:
 
@@ -37,7 +37,7 @@ namespace ReverseMIPS {
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 preprocess_cache_[itemID] = -distance_ptr[itemID];
             }
-            pgm_ins_l_[userID] = pgm::PGMIndex<double, 2, 2, double>(preprocess_cache_, n_data_item_);
+            pgm_ins_l_[userID] = pgm::PGMIndex<double, 1, 1, double>(preprocess_cache_, n_data_item_);
             if (userID == n_user_ - 1) {
                 printf("segment count %ld, height %ld, size in bytes %ld\n",
                        pgm_ins_l_[userID].segments_count(), pgm_ins_l_[userID].height(),
