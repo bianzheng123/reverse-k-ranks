@@ -67,7 +67,8 @@ def run_build_index():
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
-    dataset_l = ['movielens-27m', 'netflix']
+    # dataset_l = ['movielens-27m', 'netflix']
+    dataset_l = ['netflix']
     # dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
 
     for ds in dataset_l:
@@ -87,12 +88,12 @@ def run():
         #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
         #         dataset_dir, ds, index_dir, 5000, 600
         #     ))
-        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
-            ds, 5000, 600,
-        ))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
+        # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
+        #     ds, 5000, 600,
+        # ))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+        #         dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
 
     # for ds in dataset_l:
     #     n_sample = compute_n_sample(ds, 16)

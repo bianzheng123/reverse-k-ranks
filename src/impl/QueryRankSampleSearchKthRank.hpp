@@ -259,6 +259,7 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
                 record.reset();
             }
         }
+        rank_ins.SaveIndex(index_basic_dir, dataset_name);
         read_ins.FinishRetrieval();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);

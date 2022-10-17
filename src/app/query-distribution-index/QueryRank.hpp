@@ -5,6 +5,7 @@
 #ifndef REVERSE_K_RANKS_KTHUSERRANK_HPP
 #define REVERSE_K_RANKS_KTHUSERRANK_HPP
 
+#include "FileIO.hpp"
 #include "ComputeItemScore.hpp"
 #include "ReadScoreTable.hpp"
 
@@ -15,6 +16,7 @@
 #include <queue>
 
 namespace ReverseMIPS {
+
     void SampleItem(const int &n_data_item, const int64_t &n_sample_item, std::vector<int> &sample_itemID_l) {
         assert(sample_itemID_l.size() == n_sample_item);
         std::vector<int> shuffle_item_idx_l(n_data_item);
@@ -115,6 +117,50 @@ namespace ReverseMIPS {
         }
         assert(std::is_sorted(sort_kth_rank_l.begin(), sort_kth_rank_l.end()));
 
+    }
+
+    void BuildIndex(const VectorMatrix &user, const VectorMatrix &data_item,
+                    const char *index_path, const char *dataset_name, const char *index_dir,
+                    const int &n_sample_item, const int &sample_topk,
+                    double &compute_rank_time, double &store_index_time) {
+        TimeRecord record;
+        record.reset();
+        const int n_data_item = data_item.n_vector_;
+        std::vector<int> sample_itemID_l(n_sample_item);
+        SampleItem(n_data_item, n_sample_item, sample_itemID_l);
+
+        std::vector<int> accu_n_user_rank_l(n_sample_item * (n_data_item + 1));
+        ComputeQueryRank(user, data_item,
+                         sample_itemID_l, n_sample_item,
+                         accu_n_user_rank_l, index_path);
+
+        //sort the rank in ascending sort, should also influence sample_itemID_l
+        std::vector<int> sort_kth_rank_l(n_sample_item);
+        std::vector<int> sort_sampleID_l(n_sample_item);
+        ComputeSortKthRank(accu_n_user_rank_l, n_data_item,
+                           n_sample_item, sample_topk,
+                           sort_kth_rank_l, sort_sampleID_l);
+        compute_rank_time = record.get_elapsed_time_second();
+
+//    for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+//        printf("%d ", sort_kth_rank_l[sampleID]);
+//    }
+//    printf("\n");
+//
+//    for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+//        const int sort_sampleID = sort_sampleID_l[sampleID];
+//        for (int i = 0; i < 30; i++) {
+//            printf("%5d ", accu_n_user_rank_l[sort_sampleID * (n_data_item + 1) + i]);
+//        }
+//        printf("\n");
+//    }
+
+        record.reset();
+        WriteDistributionBelowTopk(sample_itemID_l, sort_kth_rank_l,
+                                   sort_sampleID_l, accu_n_user_rank_l,
+                                   n_data_item, n_sample_item, sample_topk,
+                                   dataset_name, index_dir);
+        store_index_time = record.get_elapsed_time_second();
     }
 
 }

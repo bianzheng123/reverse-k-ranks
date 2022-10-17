@@ -36,7 +36,8 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "the basic directory of dataset")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
              "dataset_name")
-            ("index_dir, id", po::value<std::string>(&para.index_dir)->default_value("/home/bianzheng/reverse-k-ranks/index"),
+            ("index_dir, id",
+             po::value<std::string>(&para.index_dir)->default_value("/home/bianzheng/reverse-k-ranks/index"),
              "the directory of the index");
 
     po::variables_map vm;
@@ -152,7 +153,8 @@ int main(int argc, char **argv) {
 
     RetrievalResult config;
 
-    spdlog::info("build index time: total {}s", build_index_time);
+    spdlog::info("build index time: total {}s, compute time {}s, sort time {}s, process index time {}s",
+                 build_index_time, total_compute_time, total_sort_time, total_process_index_time);
 
     char build_index_info[256];
     sprintf(build_index_info, "compute time %.3f s, sort time %.3f s, process index time %.3f s",

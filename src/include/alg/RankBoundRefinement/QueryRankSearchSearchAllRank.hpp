@@ -266,6 +266,7 @@ namespace ReverseMIPS {
     class QueryRankSearchSearchAllRank {
 
         size_t n_sample_, n_data_item_, n_user_;
+        size_t n_sample_query_, sample_topk_;
         std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
@@ -279,6 +280,8 @@ namespace ReverseMIPS {
             this->n_sample_ = n_sample;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
+            this->n_sample_query_ = n_sample_query;
+            this->sample_topk_ = sample_topk;
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
             if (n_sample <= 0 || n_sample >= n_data_item) {
@@ -291,8 +294,10 @@ namespace ReverseMIPS {
 
         }
 
-        inline QueryRankSearchSearchAllRank(const char *index_path) {
-            LoadIndex(index_path);
+        inline QueryRankSearchSearchAllRank(const char *index_path, const char *dataset_name,
+                                            const size_t &n_sample, const size_t &n_sample_query,
+                                            const size_t &sample_topk) {
+            LoadIndex(index_path, dataset_name, n_sample, n_sample_query, sample_topk);
         }
 
         void Preprocess(const char *dataset_name, const int &n_sample_query, const int &sample_topk,
@@ -483,15 +488,21 @@ namespace ReverseMIPS {
             }
         }
 
-        void SaveIndex(const char *index_path) {
+        void SaveIndex(const char *index_basic_dir, const char* dataset_name) {
+            char index_path[256];
+            sprintf(index_path,
+                    "%s/memory_index/QueryRankSearchAllRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                    index_basic_dir, dataset_name, n_sample_, n_sample_query_, sample_topk_);
             std::ofstream out_stream_ = std::ofstream(index_path, std::ios::binary | std::ios::out);
             if (!out_stream_) {
-                spdlog::error("error in write result");
+                spdlog::error("error in write result, not found index");
                 exit(-1);
             }
             out_stream_.write((char *) &n_sample_, sizeof(size_t));
             out_stream_.write((char *) &n_data_item_, sizeof(size_t));
             out_stream_.write((char *) &n_user_, sizeof(size_t));
+            out_stream_.write((char *) &n_sample_query_, sizeof(size_t));
+            out_stream_.write((char *) &sample_topk_, sizeof(size_t));
 
             out_stream_.write((char *) known_rank_idx_l_.get(), (int64_t) (n_sample_ * sizeof(int)));
             out_stream_.write((char *) bound_distance_table_.get(), (int64_t) (n_user_ * n_sample_ * sizeof(double)));
@@ -499,7 +510,12 @@ namespace ReverseMIPS {
             out_stream_.close();
         }
 
-        void LoadIndex(const char *index_path) {
+        void LoadIndex(const char *index_basic_dir, const char *dataset_name,
+                       const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk) {
+            char index_path[256];
+            sprintf(index_path,
+                    "%s/memory_index/QueryRankSearchAllRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                    index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
             if (!index_stream) {
                 spdlog::error("error in reading index");
@@ -509,6 +525,9 @@ namespace ReverseMIPS {
             index_stream.read((char *) &n_sample_, sizeof(size_t));
             index_stream.read((char *) &n_data_item_, sizeof(size_t));
             index_stream.read((char *) &n_user_, sizeof(size_t));
+            index_stream.read((char *) &n_sample_query_, sizeof(size_t));
+            index_stream.read((char *) &sample_topk_, sizeof(size_t));
+            assert(n_sample_ == n_sample && n_sample_query_ == n_sample_query && sample_topk_ == sample_topk);
 
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             index_stream.read((char *) known_rank_idx_l_.get(), (int64_t) (sizeof(int) * n_sample_));
