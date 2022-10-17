@@ -10,10 +10,11 @@
 
 #include "GridIndex.hpp"
 #include "LinearModel.hpp"
+#include "QueryRankSampleIntLR.hpp"
+#include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
 #include "RankSample.hpp"
-#include "QueryRankSampleIntLR.hpp"
 #include "RankSampleIntPGM.hpp"
 #include "Simpfer.hpp"
 
@@ -115,6 +116,16 @@ int main(int argc, char **argv) {
                                                  n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
+    } else if (method_name == "QueryRankSampleScoreDistribution") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleScoreDistribution::BuildIndex(data_item, user, index_path, dataset_name,
+                                                 n_sample, n_sample_query, sample_topk, index_dir);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
     } else if (method_name == "QueryRankSampleSearchAllRank") {
         const int n_sample = para.n_sample;
         const int n_sample_query = para.n_sample_query;
@@ -174,9 +185,9 @@ int main(int argc, char **argv) {
 //        spdlog::info("{}", performance_str);
 //    }
 
-//    vector<int> topk_l{600, 500, 100, 50, 30, 10, 1};
+    vector<int> topk_l{600, 500, 100, 50, 30, 10, 1};
 //    vector<int> topk_l{60, 50, 40, 30, 20, 10};
-    vector<int> topk_l{30, 20, 10};
+//    vector<int> topk_l{30, 20, 10};
 //    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
