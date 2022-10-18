@@ -173,20 +173,30 @@ namespace ReverseMIPS {
             assert(remain_n_result <= refine_user_size);
             TopkMaxHeap heap(remain_n_result);
 
-            TimeRecord record;
-            record.reset();
-            for (int refineID = 0; refineID < refine_user_size; refineID++) {
-                const int userID = refine_seq_l[refineID];
-                assert(rank_ub_l[userID] <= rank_lb_l[userID]);
-                if (heap.Front() != -1 && heap.Front() < rank_ub_l[userID]) {
-                    continue;
-                }
-                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
-                                               io_cost, ip_cost, read_disk_time, rank_computation_time);
-
-                user_topk_cache_l_[n_refine_user_] = UserRankElement(userID, rank, queryIP_l[userID]);
+            if (remain_n_result == 0) {
+                return;
+            } else if (refine_user_size == 1) {
+                const int userID = refine_seq_l[0];
+                const int rank = rank_lb_l[userID];
+                user_topk_cache_l_[0] = UserRankElement(userID, rank, queryIP_l[userID]);
                 n_refine_user_++;
-                heap.Update(rank);
+
+            } else {
+
+//            TimeRecord record;
+//            record.reset();
+                for (int refineID = 0; refineID < refine_user_size; refineID++) {
+                    const int userID = refine_seq_l[refineID];
+                    assert(rank_ub_l[userID] <= rank_lb_l[userID]);
+                    if (heap.Front() != -1 && heap.Front() < rank_ub_l[userID]) {
+                        continue;
+                    }
+                    const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
+                                                   io_cost, ip_cost, read_disk_time, rank_computation_time);
+
+                    user_topk_cache_l_[n_refine_user_] = UserRankElement(userID, rank, queryIP_l[userID]);
+                    n_refine_user_++;
+                    heap.Update(rank);
 
 //                if (n_refine_user_ % 7500 == 0) {
 //                    const double progress = n_refine_user_ / (0.01 * refine_user_size);
@@ -196,6 +206,8 @@ namespace ReverseMIPS {
 //                            record.get_elapsed_time_second(), get_current_RSS() / 1000000);
 //                    record.reset();
 //                }
+                }
+
             }
 
             assert(0 <= remain_n_result && remain_n_result <= n_refine_user_ && n_refine_user_ <= n_user_);

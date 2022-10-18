@@ -64,8 +64,12 @@ namespace ReverseMIPS {
             }
             if (n_result_user == topk) {
                 for (int tmp_userID = userID + 1; tmp_userID < n_user; tmp_userID++) {
-                    prune_l[tmp_userID] = true;
-                    n_prune_user++;
+                    if (prune_l[tmp_userID] || result_l[tmp_userID]) {
+                        continue;
+                    }else{
+                        prune_l[tmp_userID] = true;
+                        n_prune_user++;
+                    }
                 }
                 break;
             }
