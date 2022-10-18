@@ -74,22 +74,22 @@ def run():
         # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
         #     dataset_dir, ds, index_dir))
         n_sample = compute_n_sample_by_memory_index(ds, 16)
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {}'.format(
-                dataset_dir, ds, index_dir, 'LinearModel'))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {}'.format(
+        #         dataset_dir, ds, index_dir, 'LinearModel'))
         # os.system(
         #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
         #         dataset_dir, ds, index_dir, 'RankSample', n_sample))
         # os.system(
         #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
         #         dataset_dir, ds, index_dir, 'RankSampleIntLR', n_sample))
-        # os.system(
-        #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-        #         dataset_dir, ds, index_dir, 5000, 600
-        #     ))
-        os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
-            ds, 9000, 600,
-        ))
+        os.system(
+            'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+                dataset_dir, ds, index_dir, 9000, 600
+            ))
+        # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
+        #     ds, 9000, 600,
+        # ))
         os.system(
             'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
                 dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 9000, 600))
