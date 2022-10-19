@@ -39,6 +39,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
             compute_rank_time_ = 0;
             rank_prune_ratio_ = 0;
             total_io_cost_ = 0;
+            sample_refine_user_ = 0;
             total_refine_user_ = 0;
         }
 
@@ -51,7 +52,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         int vec_dim_, n_data_item_, n_user_;
         double total_retrieval_time_, inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_;
         TimeRecord total_retrieval_record_, inner_product_record_, rank_bound_record_;
-        uint64_t total_io_cost_, total_refine_user_;
+        uint64_t total_io_cost_, sample_refine_user_, total_refine_user_;
         double rank_prune_ratio_;
 
     public:
@@ -63,6 +64,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         std::vector<double> queryIP_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
+        std::vector<int> bucketID_l_;
 
         Index(//rank search
                 QueryRankSearchScoreDistribution &rank_ins,
@@ -88,6 +90,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
             this->queryIP_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
+            this->bucketID_l_.resize(n_user_);
         }
 
         std::vector<std::vector<UserRankElement>>
@@ -135,7 +138,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
                 int n_result_user = 0;
                 int n_prune_user = 0;
                 rank_bound_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, prune_l_, result_l_, rank_lb_l_, rank_ub_l_);
+                rank_ins_.RankBound(queryIP_l_, prune_l_, result_l_, rank_lb_l_, rank_ub_l_, bucketID_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       refine_seq_l_, refine_user_size,
@@ -143,10 +146,23 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
                                       prune_l_, result_l_);
                 const double tmp_rank_bound_time = rank_bound_record_.get_elapsed_time_second();
                 rank_bound_time_ += tmp_rank_bound_time;
-                rank_prune_ratio_ += 1.0 * (n_user_ - refine_user_size) / n_user_;
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
                 assert(0 <= n_result_user && n_result_user <= topk);
-                total_refine_user_ += refine_user_size;
+                sample_refine_user_ += refine_user_size;
+
+                //rank search
+                rank_bound_record_.reset();
+                rank_ins_.ScoreDistributionRankBound(queryIP_l_, prune_l_, result_l_, bucketID_l_,
+                                                     rank_lb_l_, rank_ub_l_);
+                PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
+                                      n_user_, topk,
+                                      refine_seq_l_, refine_user_size,
+                                      n_result_user, n_prune_user,
+                                      prune_l_, result_l_);
+                const double tmp_second_rank_bound_time = rank_bound_record_.get_elapsed_time_second();
+                rank_bound_time_ += tmp_second_rank_bound_time;
+                assert(n_result_user + n_prune_user + refine_user_size == n_user_);
+                assert(0 <= n_result_user && n_result_user <= topk);
 
                 //read disk and fine binary search
                 size_t io_cost = 0;
@@ -157,6 +173,8 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
                                   refine_seq_l_, refine_user_size, topk - n_result_user,
                                   io_cost, ip_cost, read_disk_time, rank_compute_time);
                 total_io_cost_ += io_cost;
+                total_refine_user_ += disk_ins_.n_refine_user_;
+                rank_prune_ratio_ += 1.0 * (n_user_ - disk_ins_.n_refine_user_) / n_user_;
 
                 int n_cand = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
@@ -206,10 +224,10 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, rank prune ratio %.4f",
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, sample refine user %ld, total refine user %ld, rank prune ratio %.4f",
                     topk, total_retrieval_time_,
                     inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_,
-                    total_io_cost_, rank_prune_ratio_);
+                    total_io_cost_, sample_refine_user_, total_refine_user_, rank_prune_ratio_);
             std::string str(buff);
             return str;
         }

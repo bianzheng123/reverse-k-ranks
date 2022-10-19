@@ -175,7 +175,36 @@ namespace ReverseMIPS {
 
         void RankBound(const std::vector<double> &queryIP_l,
                        const std::vector<bool> &prune_l, const std::vector<bool> &result_l,
-                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) const {
+                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l, std::vector<int> &bucketID_l) const {
+            assert(queryIP_l.size() == n_user_);
+            assert(prune_l.size() == n_user_);
+            assert(result_l.size() == n_user_);
+            assert(rank_lb_l.size() == n_user_);
+            assert(rank_ub_l.size() == n_user_);
+            assert(bucketID_l.size() == n_user_);
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID] || result_l[userID]) {
+                    continue;
+                }
+                int lower_rank = rank_lb_l[userID];
+                int upper_rank = rank_ub_l[userID];
+                assert(upper_rank <= lower_rank);
+                double queryIP = queryIP_l[userID];
+
+                int bucketID = 0;
+                CoarseBinarySearch(queryIP, userID,
+                                   bucketID, lower_rank, upper_rank);
+                bucketID_l[userID] = bucketID;
+
+                rank_lb_l[userID] = lower_rank;
+                rank_ub_l[userID] = upper_rank;
+            }
+        }
+
+        void ScoreDistributionRankBound(const std::vector<double> &queryIP_l,
+                                        const std::vector<bool> &prune_l, const std::vector<bool> &result_l,
+                                        const std::vector<int> &bucketID_l,
+                                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) {
             assert(queryIP_l.size() == n_user_);
             assert(prune_l.size() == n_user_);
             assert(result_l.size() == n_user_);
@@ -190,38 +219,14 @@ namespace ReverseMIPS {
                 assert(upper_rank <= lower_rank);
                 double queryIP = queryIP_l[userID];
 
-                int bucketID = 0;
-                CoarseBinarySearch(queryIP, userID,
-                                   bucketID, lower_rank, upper_rank);
-
+                int bucketID = bucketID_l[userID];
                 ScoreDistribution(queryIP, userID, bucketID, lower_rank, upper_rank);
 
                 rank_lb_l[userID] = lower_rank;
                 rank_ub_l[userID] = upper_rank;
             }
-        }
 
-        void RankBound(const std::vector<std::pair<double, double>> &queryIP_l,
-                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) const {
-            for (int userID = 0; userID < n_user_; userID++) {
-                const double queryIP_lb = queryIP_l[userID].first;
-                int qIP_lb_tmp_lower_rank, qIP_lb_tmp_upper_rank;
 
-                int bucketID = 0;
-                CoarseBinarySearch(queryIP_lb, userID,
-                                   bucketID, qIP_lb_tmp_lower_rank, qIP_lb_tmp_upper_rank);
-
-                const double queryIP_ub = queryIP_l[userID].second;
-                int qIP_ub_tmp_lower_rank, qIP_ub_tmp_upper_rank;
-                CoarseBinarySearch(queryIP_ub, userID,
-                                   bucketID, qIP_ub_tmp_lower_rank, qIP_ub_tmp_upper_rank);
-
-                rank_lb_l[userID] = qIP_lb_tmp_lower_rank;
-                rank_ub_l[userID] = qIP_ub_tmp_upper_rank;
-                assert(qIP_lb_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
-                assert(qIP_ub_tmp_upper_rank <= qIP_ub_tmp_lower_rank);
-                assert(qIP_ub_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
-            }
         }
 
         void SaveIndex(const char *index_basic_dir, const char *dataset_name) {
@@ -240,8 +245,8 @@ namespace ReverseMIPS {
             out_stream_.write((char *) &n_sample_query_, sizeof(size_t));
             out_stream_.write((char *) &sample_topk_, sizeof(size_t));
 
-            out_stream_.write((char *) known_rank_idx_l_.get(), (int64_t)(n_sample_ * sizeof(int)));
-            out_stream_.write((char *) bound_distance_table_.get(), (int64_t)(n_user_ * n_sample_ * sizeof(double)));
+            out_stream_.write((char *) known_rank_idx_l_.get(), (int64_t) (n_sample_ * sizeof(int)));
+            out_stream_.write((char *) bound_distance_table_.get(), (int64_t) (n_user_ * n_sample_ * sizeof(double)));
 
             out_stream_.close();
         }
@@ -266,10 +271,10 @@ namespace ReverseMIPS {
             assert(n_sample_ == n_sample && n_sample_query_ == n_sample_query && sample_topk_ == sample_topk);
 
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
-            index_stream.read((char *) known_rank_idx_l_.get(), (int64_t)(sizeof(int) * n_sample_));
+            index_stream.read((char *) known_rank_idx_l_.get(), (int64_t) (sizeof(int) * n_sample_));
 
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
-            index_stream.read((char *) bound_distance_table_.get(), (int64_t)(sizeof(double) * n_user_ * n_sample_));
+            index_stream.read((char *) bound_distance_table_.get(), (int64_t) (sizeof(double) * n_user_ * n_sample_));
 
             index_stream.close();
         }

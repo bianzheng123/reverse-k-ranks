@@ -143,10 +143,8 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
                                       prune_l_, result_l_);
                 const double tmp_rank_bound_time = rank_bound_record_.get_elapsed_time_second();
                 rank_bound_time_ += tmp_rank_bound_time;
-                rank_prune_ratio_ += 1.0 * (n_user_ - refine_user_size) / n_user_;
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
                 assert(0 <= n_result_user && n_result_user <= topk);
-                total_refine_user_ += refine_user_size;
 
                 //read disk and fine binary search
                 size_t io_cost = 0;
@@ -157,6 +155,8 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
                                   refine_seq_l_, refine_user_size, topk - n_result_user,
                                   io_cost, ip_cost, read_disk_time, rank_compute_time);
                 total_io_cost_ += io_cost;
+                total_refine_user_ += disk_ins_.n_refine_user_;
+                rank_prune_ratio_ += 1.0 * (n_user_ - disk_ins_.n_refine_user_) / n_user_;
 
                 int n_cand = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
@@ -206,10 +206,10 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, rank prune ratio %.4f",
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, total refine user %ld, rank prune ratio %.4f",
                     topk, total_retrieval_time_,
                     inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_,
-                    total_io_cost_, rank_prune_ratio_);
+                    total_io_cost_, total_refine_user_, rank_prune_ratio_);
             std::string str(buff);
             return str;
         }

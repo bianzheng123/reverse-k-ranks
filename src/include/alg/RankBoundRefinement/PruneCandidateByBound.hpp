@@ -29,6 +29,11 @@ namespace ReverseMIPS {
         assert(n_result_user <= topk);
         assert(topk - n_result_user <= refine_user_size);
 
+        if (n_result_user == topk) {
+            assert(refine_user_size == 0);
+            return;
+        }
+
         TopkMaxHeap lbr_heap(topk - n_result_user);
         TopkMaxHeap ubr_heap(topk - n_result_user);
         lbr_heap.Reset();
@@ -66,7 +71,7 @@ namespace ReverseMIPS {
                 for (int tmp_userID = userID + 1; tmp_userID < n_user; tmp_userID++) {
                     if (prune_l[tmp_userID] || result_l[tmp_userID]) {
                         continue;
-                    }else{
+                    } else {
                         prune_l[tmp_userID] = true;
                         n_prune_user++;
                     }
@@ -85,6 +90,17 @@ namespace ReverseMIPS {
                 refine_seq_l[refine_user_size] = userID;
                 refine_user_size++;
             }
+        }
+
+        if (refine_user_size + n_result_user == topk) {
+            for (int refineID = 0; refineID < refine_user_size; refineID++) {
+                const int userID = refine_seq_l[refineID];
+                result_l[userID] = true;
+                n_result_user++;
+                assert(!prune_l[userID]);
+            }
+            refine_user_size = 0;
+            return;
         }
 
         std::sort(refine_seq_l.begin(), refine_seq_l.begin() + refine_user_size,
