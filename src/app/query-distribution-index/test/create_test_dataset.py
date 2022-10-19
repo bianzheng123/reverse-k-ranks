@@ -15,9 +15,9 @@ def change_index(from_ds, to_ds, basic_dir, n_sample_query, sample_topk):
     print("len data_item ", data_item.shape)
 
     query_idx_l = np.loadtxt(os.path.join('/home/bianzheng/reverse-k-ranks/index/query_distribution',
-                                          '{}-sample-itemID-n_sample_query_{}-sample_topk_{}.txt'.format(from_ds,
-                                                                                                  n_sample_query,
-                                                                                                  sample_topk)))
+                                          '{}-n_sample_item_{}-sample_topk_{}/sample_itemID_l.txt'.format(from_ds,
+                                                                                                          n_sample_query,
+                                                                                                          sample_topk)))
     query_idx_l = np.array(query_idx_l, dtype=np.int32)
     query_item = data_item[query_idx_l]
     print("len query_item ", query_item.shape)
@@ -33,34 +33,14 @@ def change_index(from_ds, to_ds, basic_dir, n_sample_query, sample_topk):
     vecs_io.dvecs_write(os.path.join(basic_dir, to_ds, '%s_user.dvecs' % to_ds), user)
 
     below_topk_from_ds_path = os.path.join('/home/bianzheng/reverse-k-ranks/index/query_distribution',
-                                           '{}-below-topk-n_sample_query_{}-sample_topk_{}.index'.format(from_ds,
-                                                                                                         n_sample_query,
-                                                                                                         sample_topk))
+                                           '{}-n_sample_item_{}-sample_topk_{}'.format(from_ds,
+                                                                                       n_sample_query,
+                                                                                       sample_topk))
     below_topk_to_ds_path = os.path.join('/home/bianzheng/reverse-k-ranks/index/query_distribution',
-                                         '{}-below-topk-n_sample_query_{}-sample_topk_{}.index'.format(to_ds,
-                                                                                                       n_sample_query,
-                                                                                                       sample_topk))
-    os.system('cp {} {}'.format(below_topk_from_ds_path, below_topk_to_ds_path))
-
-    kth_rank_from_ds_path = os.path.join('/home/bianzheng/reverse-k-ranks/index/query_distribution',
-                                         '{}-kth-rank-n_sample_query_{}-sample_topk_{}.index'.format(from_ds,
-                                                                                                     n_sample_query,
-                                                                                                     sample_topk))
-    kth_rank_to_ds_path = os.path.join('/home/bianzheng/reverse-k-ranks/index/query_distribution',
-                                       '{}-kth-rank-n_sample_query_{}-sample_topk_{}.index'.format(to_ds,
-                                                                                                   n_sample_query,
-                                                                                                   sample_topk))
-    os.system('cp {} {}'.format(kth_rank_from_ds_path, kth_rank_to_ds_path))
-
-    sample_itemID_from_ds_path = os.path.join('/home/bianzheng/reverse-k-ranks/index/query_distribution',
-                                              '{}-sample-itemID-n_sample_query_{}-sample_topk_{}.txt'.format(from_ds,
-                                                                                                             n_sample_query,
-                                                                                                             sample_topk))
-    sample_itemID_to_ds_path = os.path.join('/home/bianzheng/reverse-k-ranks/index/query_distribution',
-                                            '{}-sample-itemID-n_sample_query_{}-sample_topk_{}.txt'.format(to_ds,
-                                                                                                           n_sample_query,
-                                                                                                           sample_topk))
-    os.system('cp {} {}'.format(sample_itemID_from_ds_path, sample_itemID_to_ds_path))
+                                         '{}-n_sample_item_{}-sample_topk_{}'.format(to_ds,
+                                                                                    n_sample_query,
+                                                                                    sample_topk))
+    os.system('cp -r {} {}'.format(below_topk_from_ds_path, below_topk_to_ds_path))
 
 
 if __name__ == '__main__':

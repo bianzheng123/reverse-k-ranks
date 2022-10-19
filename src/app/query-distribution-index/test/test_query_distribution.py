@@ -18,10 +18,12 @@ if __name__ == '__main__':
         create_test_dataset.change_index(from_ds, ds_m[from_ds], basic_dir, n_sample_item, sample_topk)
 
     for ds in ds_m.values():
+        os.system('cd /home/bianzheng/reverse-k-ranks/build && ./bst --dataset_name {}'.format(ds))
+
         os.system(
             'cd /home/bianzheng/reverse-k-ranks/build && ./rri --dataset_name {} --method_name {} --n_sample {}'.format(
                 ds, 'RankSample', 20))
         os.system(
             'cd /home/bianzheng/reverse-k-ranks/build && ./rri --method_name {} --dataset_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-                'QueryRankSample',
+                'QueryRankSampleSearchKthRank',
                 ds, 20, n_sample_item, sample_topk))
