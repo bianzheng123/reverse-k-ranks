@@ -313,8 +313,11 @@ namespace ReverseMIPS {
                 exit(-1);
             }
             assert(n_sample > 0);
-
+            TimeRecord record;
+            record.reset();
             Preprocess(dataset_name, n_sample_query, sample_topk, index_basic_dir);
+            const double select_sample_time = record.get_elapsed_time_second();
+            spdlog::info("Select Sample Time {:.3f}s", select_sample_time);
 
         }
 
@@ -376,7 +379,7 @@ namespace ReverseMIPS {
                         spdlog::info("sampleID {}, n_sample {}, progress {:.3f}",
                                      sampleID, n_sample_, (double) sampleID / (double) n_sample_);
                     }
-//#pragma omp parallel for default(none) shared(n_sample_rank, sampleID, optimal_dp, query_distribution_ins, position_dp, std::cout)
+#pragma omp parallel for default(none) shared(n_sample_rank, sampleID, optimal_dp, query_distribution_ins, position_dp, n_sample_query)
                     for (int rankID = 0; rankID < n_sample_rank; rankID++) {
                         assert(sampleID != 0);
                         optimal_dp[rankID * n_sample_ + sampleID] =
