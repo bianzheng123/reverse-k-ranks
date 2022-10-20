@@ -36,7 +36,7 @@ find_package(Armadillo)
 find_package(OpenMP)
 
 set(BUILD_TEST_MODULE OFF)
-set(BUILD_ATTRIBUTION OFF)
+set(BUILD_ATTRIBUTION ON)
 
 set(BUILD_PROGRESS ON)
 
@@ -83,6 +83,10 @@ target_link_libraries(pgmindexlib PRIVATE OpenMP::OpenMP_CXX)
 add_executable(bst src/app/BuildScoreTable.cpp)
 target_include_directories(bst PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(bst PRIVATE armadillo pthread spdlog::spdlog OpenMP::OpenMP_CXX ${Boost_LIBRARIES} fexiprolib)
+
+add_executable(brsi src/app/BuildRankSampleIndex.cpp)
+target_include_directories(brsi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(brsi PRIVATE armadillo pthread spdlog::spdlog OpenMP::OpenMP_CXX ${Boost_LIBRARIES} fexiprolib)
 
 add_executable(rri src/app/ReverseRankIndex.cpp)
 target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})

@@ -21,6 +21,24 @@ def delete_file_if_exist(dire):
         os.system(command)
 
 
+def count_n_sample_given_memory_capacity():
+    dataset_m = {'movielens-27m': [52889, 1000, 283228],
+                 'netflix': [16770, 1000, 480189],
+                 'yahoomusic_big': [135736, 1000, 1823179],
+                 'yelp': [159585, 1000, 2189457],
+                 'amazon': [409243, 1000, 2511610]}
+    for ds in dataset_m.keys():
+        n_item = dataset_m[ds][0]
+        n_user = dataset_m[ds][2]
+        memory_capacity_l = [2, 4, 8, 16, 32, 64]
+        sample_l = []
+        for memory_capacity in memory_capacity_l:
+            n_sample = int(np.floor(memory_capacity * 1024 * 1024 * 1024 / 8 / n_user))
+            sample_l.append(n_sample)
+        print("ds: {}".format(ds))
+        print(sample_l)
+
+
 def cmp_file(file1, file2):
     method1_result_l = np.loadtxt(file1, delimiter=',')
     method2_result_l = np.loadtxt(file2, delimiter=',')
@@ -84,7 +102,7 @@ def run():
         'MemoryBruteForce',
 
         # 'GridIndex',
-        'LinearModel',
+        # 'LinearModel',
         # 'QueryRankSampleIntLR',
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
@@ -107,7 +125,7 @@ def run():
         # os.system('cd build && ./bst --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'LinearModel'))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'LinearModel'))
 
         # os.system(
         #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
@@ -126,6 +144,7 @@ def run():
         #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #         ds, 150, 60,
         #         ds, 'QueryRankSampleSearchKthRank', 150, 60))
+        os.system('cd build && ./brsi --dataset_name {} --n_sample {}'.format(ds, 20))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
 
     # topk_l = [10, 20, 30, 40, 50]
@@ -135,8 +154,8 @@ def run():
 
 if __name__ == '__main__':
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal', 'fake-uniform']
-    # dataset_l = ['fake-normal']
+    # dataset_l = ['fake-normal', 'fake-uniform']
+    dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 

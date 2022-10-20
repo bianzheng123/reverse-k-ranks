@@ -228,38 +228,22 @@ namespace ReverseMIPS::RankSample {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &n_sample) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user,
+               const char *disk_index_path, const char *dataset_name, const char *basic_index_path,
+               const int &n_sample) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
 
         user.vectorNormalize();
 
         //rank search
-        RankSearch rank_ins(n_sample, n_data_item, n_user);
+        char rank_sample_index_path[256];
+        sprintf(rank_sample_index_path, "%s/memory_index/RankSample-%s-n_sample_%d.index",
+                basic_index_path, dataset_name, n_sample);
+        RankSearch rank_ins(rank_sample_index_path);
 
         //disk index
-        ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
-
-        ReadAll read_ins(n_user, n_data_item, index_path);
-        read_ins.RetrievalPreprocess();
-
-        const int report_every = 10000;
-        TimeRecord record;
-        record.reset();
-        std::vector<double> distance_l(n_data_item);
-        for (int userID = 0; userID < n_user; userID++) {
-            read_ins.ReadDiskNoCache(userID, distance_l);
-
-            rank_ins.LoopPreprocess(distance_l.data(), userID);
-
-            if (userID % report_every == 0) {
-                std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                          << get_current_RSS() / 1000000 << " Mb \n";
-                record.reset();
-            }
-        }
-        read_ins.FinishRetrieval();
+        ReadAllDirectIO disk_ins(n_user, n_data_item, disk_index_path);
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;

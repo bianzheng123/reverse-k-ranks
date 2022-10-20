@@ -50,24 +50,34 @@ def compute_n_sample_by_memory_index(dataset_name, memory_capacity):
 
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
-    dataset_l = ['yahoomusic_big', 'yelp', 'movielens-27m', 'netflix']
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
     for ds in dataset_l:
         # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
         #     dataset_dir, ds, index_dir))
-        # os.system(
-        #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-        #         dataset_dir, ds, index_dir, 5000, 600
-        #     ))
-        n_sample = compute_n_sample_by_memory_index(ds, 16)
+        if ds == 'movielens-27m':
+            os.system(
+                'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+                    dataset_dir, ds, index_dir, 9000, 600
+                ))
+        else:
+            os.system(
+                'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+                    dataset_dir, ds, index_dir, 5000, 600
+                ))
+        os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {}'.format(
+            dataset_dir, ds, index_dir))
+        n_sample = compute_n_sample_by_memory_index(ds, 64)
+        os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {}'.format(
+            dataset_dir, ds, index_dir, n_sample))
         # os.system(
         #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
         #         dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-                dataset_dir, ds, index_dir, 'RankSample', n_sample))
+        # os.system(
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+        #         dataset_dir, ds, index_dir, 'RankSample', n_sample))
         # os.system(
         #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
         #         dataset_dir, ds, index_dir, "Simpfer", 35))
@@ -93,21 +103,3 @@ if __name__ == '__main__':
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
     run()
-
-    # os.system(
-    #     'cd build/attribution && ./qdur --dataset_name {} --basic_dir {} --n_sample_item {}'.format(
-    #         'yahoomusic_big', basic_dir, 5000))
-    # os.system(
-    #     'cd build/attribution && ./bfcs --dataset_name {} --basic_dir {} --n_sample_item {} --n_sample_rank {} --topk {}'.format(
-    #         'yahoomusic_big', basic_dir, 5000, 1500, 30))
-
-    # TODO run
-    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads', 'amazon']
-    # for ds in dataset_l:
-    #     os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(ds, 1000, 10))
-    #     os.system(
-    #         'cd build/attribution && ./ppr --dataset_name {} --n_sample_query {} --sample_topk {}'.format(
-    #             ds, 1000, 10))
-
-    # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format('amazon', 5000, 50))
-    # os.system('cd build && ./brrstt --dataset_name {}'.format('amazon'))
