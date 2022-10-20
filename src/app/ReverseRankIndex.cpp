@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
                      n_sample, n_sample_query, sample_topk);
         index = QueryRankSampleScoreDistribution::BuildIndex(data_item, user, index_path, dataset_name,
-                                                 n_sample, n_sample_query, sample_topk, index_dir);
+                                                             n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else if (method_name == "QueryRankSampleSearchAllRank") {
