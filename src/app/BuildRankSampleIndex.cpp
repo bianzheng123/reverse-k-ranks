@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
     const char *dataset_name = para.dataset_name.c_str();
     const char *dataset_dir = para.dataset_dir.c_str();
     string index_dir = para.index_dir;
-    spdlog::info("dataset_name {}, dataset_dir {}", dataset_name, dataset_dir);
+    spdlog::info("BuildRankSampleIndex dataset_name {}, dataset_dir {}", dataset_name, dataset_dir);
     spdlog::info("index_dir {}", index_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
@@ -127,6 +127,12 @@ int main(int argc, char **argv) {
         n_sample_l.clear();
         n_sample_l.push_back(para.n_sample);
     }
+    std::string n_sample_info = "n_sample:";
+    const int sample_length = (int) n_sample_l.size();
+    for (int sampleID = 0; sampleID < sample_length; sampleID++) {
+        n_sample_info += std::to_string(n_sample_l[sampleID]);
+    }
+    spdlog::info("{}", n_sample_info);
 
     char score_table_path[256];
     sprintf(score_table_path, "%s/%s.index", index_dir.c_str(), dataset_name);
@@ -143,12 +149,6 @@ int main(int argc, char **argv) {
     RetrievalResult config;
 
     spdlog::info("BuildRankSampleIndex build index time: total {}s", build_index_time);
-
-    std::string n_sample_info = "n_sample:";
-    const int sample_length = (int) n_sample_l.size();
-    for (int sampleID = 0; sampleID < sample_length; sampleID++) {
-        n_sample_info += std::to_string(n_sample_l[sampleID]);
-    }
 
     config.AddInfo(n_sample_info);
     config.AddBuildIndexTime(build_index_time);
