@@ -236,33 +236,10 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
         user.vectorNormalize();
 
         //rank search
-        QueryRankSearchSearchKthRank rank_ins(n_sample, n_data_item, n_user, dataset_name,
-                                              n_sample_query, sample_topk, index_basic_dir);
+        QueryRankSearchSearchKthRank rank_ins(index_basic_dir, dataset_name,
+                                              n_sample, n_sample_query, sample_topk, true);
 
         ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
-
-        //disk index
-        ReadAll read_ins(n_user, n_data_item, index_path);
-        read_ins.RetrievalPreprocess();
-
-        const int report_every = 10000;
-        TimeRecord record;
-        record.reset();
-        std::vector<double> distance_l(n_data_item);
-        for (int userID = 0; userID < n_user; userID++) {
-            read_ins.ReadDiskNoCache(userID, distance_l);
-
-            rank_ins.LoopPreprocess(distance_l.data(), userID);
-
-            if (userID % report_every == 0) {
-                std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                          << get_current_RSS() / 1000000 << " Mb \n";
-                record.reset();
-            }
-        }
-        rank_ins.SaveIndex(index_basic_dir, dataset_name);
-        read_ins.FinishRetrieval();
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
         return index_ptr;

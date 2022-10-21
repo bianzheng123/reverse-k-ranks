@@ -110,6 +110,7 @@ int main(int argc, char **argv) {
             compute_rank_time, store_index_time, build_index_time);
     config.AddInfo(build_index_info);
     config.WritePerformance(dataset_name, "QueryDistributionIndex", "");
+    spdlog::info("QueryDistributionIndex finish");
 
     return 0;
 }

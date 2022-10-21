@@ -21,12 +21,20 @@ def delete_file_if_exist(dire):
         os.system(command)
 
 
+'''first is n_item, second is n_query, thrid is n_user'''
+dataset_m = {'fake-normal': [5000, 100, 1000],
+             'fake-uniform': [5000, 100, 1000],
+             'fakebig': [5000, 100, 5000],
+             'netflix-small': [5000, 100, 2000],
+
+             'movielens-27m': [52889, 1000, 283228],
+             'netflix': [16770, 1000, 480189],
+             'yahoomusic_big': [135736, 1000, 1823179],
+             'yelp': [159585, 1000, 2189457],
+             'amazon': [409243, 1000, 2511610]}
+
+
 def count_n_sample_given_memory_capacity():
-    dataset_m = {'movielens-27m': [52889, 1000, 283228],
-                 'netflix': [16770, 1000, 480189],
-                 'yahoomusic_big': [135736, 1000, 1823179],
-                 'yelp': [159585, 1000, 2189457],
-                 'amazon': [409243, 1000, 2511610]}
     for ds in dataset_m.keys():
         n_item = dataset_m[ds][0]
         n_user = dataset_m[ds][2]
@@ -109,6 +117,7 @@ def run():
         # 'QueryRankSampleSearchKthRank',
         'RankSample',
     ]
+
     os.system('cd result/rank && rm *')
     os.system('cd result/single_query_performance && rm *')
     os.system('cd result/vis_performance && rm *')
@@ -127,23 +136,30 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'LinearModel'))
 
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 60,
-        #         ds, 'QueryRankSampleSearchKthRank', 150, 60))
+        n_sample_item = 150
+        sample_topk = 60
+        n_data_item = dataset_m[ds][0]
+        n_user = dataset_m[ds][2]
+        n_sample = 20
+        os.system("cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}".format(
+            ds, n_sample_item, sample_topk
+        ))
+        os.system(
+            "cd build && ./fsr --dataset_name {} --n_data_item {} --n_user {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
+                ds, n_data_item, n_user, n_sample, n_sample_item, sample_topk
+            ))
+        os.system("cd build && ./bqrsi --dataset_name {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
+            ds, n_sample, n_sample_item, sample_topk
+        ))
+        os.system("cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}".format(
+            ds, 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
+        ))
+
         # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #     ds, 'QueryRankSampleIntLR', 150, 60))
         # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #     ds, 'QueryRankSampleScoreDistribution', 150, 60))
 
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 60,
-        #         ds, 'QueryRankSampleSearchAllRank', 150, 60))
-        # os.system(
-        #     'cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {} && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #         ds, 150, 60,
-        #         ds, 'QueryRankSampleSearchKthRank', 150, 60))
         os.system('cd build && ./brsi --dataset_name {} --n_sample {}'.format(ds, 20))
         os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
 

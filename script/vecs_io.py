@@ -101,7 +101,7 @@ def bvecs_write(filename, vecs):
 
 if __name__ == '__main__':
     basic_dir = '/home/bianzheng/Dataset/ReverseMIPS'
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     for ds in dataset_l:
         item_l, d = dvecs_read(
             os.path.join(basic_dir, ds, "{}_data_item.dvecs".format(ds)))

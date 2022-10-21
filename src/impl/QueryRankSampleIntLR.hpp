@@ -276,7 +276,7 @@ namespace ReverseMIPS::QueryRankSampleIntLR {
         ip_bound_ins.Preprocess(user, data_item);
 
         //rank search
-        QueryRankSearchSearchKthRank rank_ins(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
+        QueryRankSearchSearchKthRank rank_ins(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk, true);
 
         HeadLinearRegression rank_bound_ins(n_data_item, n_user);
         rank_bound_ins.StartPreprocess(rank_ins.known_rank_idx_l_.get(), n_sample);

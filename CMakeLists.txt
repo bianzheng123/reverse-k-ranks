@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(Reverse-kRanks)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_Release} -O3")
@@ -95,6 +95,14 @@ target_link_libraries(rri PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::s
 add_executable(dbt src/app/query-distribution-index/QueryDistributionIndex.cpp)
 target_include_directories(dbt PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(dbt PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
+
+add_executable(fsr src/app/query-distribution-index/FindSampleRank.cpp)
+target_include_directories(fsr PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(fsr PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
+
+add_executable(bqrsi src/app/query-distribution-index/BuildQueryRankSampleIndex.cpp)
+target_include_directories(bqrsi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(bqrsi PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
 ##set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
 #add_executable(brtt src/app/BatchRunTopT.cpp)
