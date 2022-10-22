@@ -101,7 +101,7 @@ namespace ReverseMIPS {
         inline void
         CoarseBinarySearch(const double &queryIP, const int &userID,
                            int &rank_lb, int &rank_ub) const {
-            double *search_iter = bound_distance_table_.get() + userID * n_sample_;
+            double *search_iter = bound_distance_table_.get() + n_sample_ * userID;
 
             int bucket_ub = 0;
             int bucket_lb = (int) n_sample_ - 1;
