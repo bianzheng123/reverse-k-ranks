@@ -14,7 +14,7 @@ namespace ReverseMIPS {
 
     class RankSearch {
 
-        size_t n_sample_, sample_every_, n_data_item_, n_user_;
+        size_t n_sample_, max_sample_every_, n_data_item_, n_user_;
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
         std::unique_ptr<int[]> known_rank_idx_l_; // n_sample_
@@ -23,17 +23,11 @@ namespace ReverseMIPS {
 
         inline RankSearch(const int &n_sample, const int &n_data_item,
                           const int &n_user) {
-            const int sample_every = std::round(n_data_item * 1.0 / n_sample);
             this->n_sample_ = n_sample;
-            this->sample_every_ = sample_every;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
-            if (sample_every >= n_data_item) {
-                spdlog::error("sample every larger than n_data_item, sample ratio too small, program exit");
-                exit(-1);
-            }
             if (n_sample <= 0 || n_sample >= n_data_item) {
                 spdlog::error("n_sample too small or too large, program exit");
                 exit(-1);
@@ -49,35 +43,29 @@ namespace ReverseMIPS {
         }
 
         void Preprocess() {
-            int sample_rank = (int) sample_every_ - 1;
-            int count_sampleID = 0;
-            while (sample_rank < n_data_item_ && count_sampleID < n_sample_) {
-                known_rank_idx_l_[count_sampleID] = sample_rank;
-                sample_rank += (int) sample_every_;
-                count_sampleID++;
-            }
-            sample_rank = (int) n_data_item_ - 1;
-            for (int sampleID = count_sampleID; sampleID < n_sample_; sampleID++) {
-                if ((sample_rank - sample_every_ + 1) % sample_every_ == 0) {
-                    sample_rank--;
-                }
-                known_rank_idx_l_[sampleID] = sample_rank;
-                sample_rank--;
+            const int end_sample_rank = (int) n_data_item_ - 1;
+            const double delta = (end_sample_rank - 0) * 1.0 / n_sample_;
+            for (int sampleID = 0; sampleID < n_sample_; sampleID++) {
+                known_rank_idx_l_[sampleID] = std::floor(sampleID * delta);
             }
             std::sort(known_rank_idx_l_.get(), known_rank_idx_l_.get() + n_sample_);
             assert(0 <= known_rank_idx_l_[0] && known_rank_idx_l_[0] < n_data_item_);
+            int max_sample_every = 0;
             for (int sampleID = 1; sampleID < n_sample_; sampleID++) {
                 assert(0 <= known_rank_idx_l_[sampleID] && known_rank_idx_l_[sampleID] < n_data_item_);
                 assert(known_rank_idx_l_[sampleID - 1] < known_rank_idx_l_[sampleID]);
-                assert(known_rank_idx_l_[sampleID] - known_rank_idx_l_[sampleID - 1] <= sample_every_);
+                max_sample_every = std::max(max_sample_every,
+                                            known_rank_idx_l_[sampleID] - known_rank_idx_l_[sampleID - 1]);
             }
+            max_sample_every_ = max_sample_every;
+            assert(max_sample_every_ <= std::ceil(1.0 * n_data_item_ / n_sample_));
 
             for (int rankID = 0; rankID < n_sample_; rankID++) {
                 std::cout << known_rank_idx_l_[rankID] << " ";
             }
             std::cout << std::endl;
 
-            spdlog::info("rank bound: sample_every {}, n_sample {}", sample_every_, n_sample_);
+            spdlog::info("rank bound: max_sample_every {}, n_sample {}", max_sample_every_, n_sample_);
         }
 
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {
@@ -187,7 +175,7 @@ namespace ReverseMIPS {
                 exit(-1);
             }
             out_stream_.write((char *) &n_sample_, sizeof(size_t));
-            out_stream_.write((char *) &sample_every_, sizeof(size_t));
+            out_stream_.write((char *) &max_sample_every_, sizeof(size_t));
             out_stream_.write((char *) &n_data_item_, sizeof(size_t));
             out_stream_.write((char *) &n_user_, sizeof(size_t));
 
@@ -205,7 +193,7 @@ namespace ReverseMIPS {
             }
 
             index_stream.read((char *) &n_sample_, sizeof(size_t));
-            index_stream.read((char *) &sample_every_, sizeof(size_t));
+            index_stream.read((char *) &max_sample_every_, sizeof(size_t));
             index_stream.read((char *) &n_data_item_, sizeof(size_t));
             index_stream.read((char *) &n_user_, sizeof(size_t));
 

@@ -33,8 +33,7 @@ def compute_n_sample_by_memory_index(dataset_name, memory_capacity):
 
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
-    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
-    dataset_l = ['movielens-27m', 'netflix']
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
@@ -51,13 +50,11 @@ def run():
         #         'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
         #             dataset_dir, ds, index_dir, 5000, 600
         #         ))
-        # os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {}'.format(
-        #     dataset_dir, ds, index_dir))
-        for memory_capacity in [2, 4, 8, 16, 32, 64]:
-            n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
-            os.system(
-                'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-                    dataset_dir, ds, index_dir, 'RankSample', n_sample))
+        os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {}'.format(
+            dataset_dir, ds, index_dir))
+        n_sample = compute_n_sample_by_memory_index(ds, 64)
+        os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {}'.format(
+            dataset_dir, ds, index_dir, n_sample))
 
         # os.system(
         #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
@@ -68,6 +65,14 @@ def run():
         # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
         #     ds, 5000, 500,
         # ))
+
+    dataset_l = ['movielens-27m', 'netflix']
+    for ds in dataset_l:
+        for memory_capacity in [2, 4, 8, 16, 32, 64]:
+            n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
+            os.system(
+                'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+                    dataset_dir, ds, index_dir, 'RankSample', n_sample))
 
 
 if __name__ == '__main__':

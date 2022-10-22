@@ -56,6 +56,10 @@ add_executable(rrs sample-score-distribution/ReadRankSample.cpp)
 target_include_directories(rrs PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(rrs PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
+add_executable(trsa sample-score-distribution/TestRankSampleApproach.cpp)
+target_include_directories(trsa PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(trsa PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
 #add_executable(biipb build-index-bound-selection/BuildIndexIPBound.cpp)
 #target_include_directories(biipb PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 #target_link_libraries(biipb PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})

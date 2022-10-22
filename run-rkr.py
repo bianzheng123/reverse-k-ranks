@@ -136,24 +136,24 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'LinearModel'))
 
-        n_sample_item = 150
-        sample_topk = 60
-        n_data_item = dataset_m[ds][0]
-        n_user = dataset_m[ds][2]
-        n_sample = 20
-        os.system("cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}".format(
-            ds, n_sample_item, sample_topk
-        ))
-        os.system(
-            "cd build && ./fsr --dataset_name {} --n_data_item {} --n_user {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
-                ds, n_data_item, n_user, n_sample, n_sample_item, sample_topk
-            ))
-        os.system("cd build && ./bqrsi --dataset_name {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
-            ds, n_sample, n_sample_item, sample_topk
-        ))
-        os.system("cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}".format(
-            ds, 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
-        ))
+        # n_sample_item = 150
+        # sample_topk = 60
+        # n_data_item = dataset_m[ds][0]
+        # n_user = dataset_m[ds][2]
+        # n_sample = 20
+        # os.system("cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}".format(
+        #     ds, n_sample_item, sample_topk
+        # ))
+        # os.system(
+        #     "cd build && ./fsr --dataset_name {} --n_data_item {} --n_user {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
+        #         ds, n_data_item, n_user, n_sample, n_sample_item, sample_topk
+        #     ))
+        # os.system("cd build && ./bqrsi --dataset_name {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
+        #     ds, n_sample, n_sample_item, sample_topk
+        # ))
+        # os.system("cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}".format(
+        #     ds, 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
+        # ))
 
         # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #     ds, 'QueryRankSampleIntLR', 150, 60))
@@ -169,9 +169,9 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-normal', 'fake-uniform']
-    dataset_l = ['fake-normal']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
