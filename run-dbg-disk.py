@@ -33,40 +33,32 @@ def compute_n_sample_by_memory_index(dataset_name, memory_capacity):
 
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    dataset_l = ['movielens-27m']
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
-    for ds in dataset_l:
-        # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
-        #     dataset_dir, ds, index_dir))
-        # if ds == 'movielens-27m':
-        #     os.system(
-        #         'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-        #             dataset_dir, ds, index_dir, 9000, 600
-        #         ))
-        # else:
-        #     os.system(
-        #         'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-        #             dataset_dir, ds, index_dir, 5000, 600
-        #         ))
-        os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {}'.format(
-            dataset_dir, ds, index_dir))
-        n_sample = compute_n_sample_by_memory_index(ds, 64)
-        os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {}'.format(
-            dataset_dir, ds, index_dir, n_sample))
+    # for ds in dataset_l:
+    #     os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
+    #         dataset_dir, ds, index_dir))
+    #     os.system(
+    #         'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+    #             dataset_dir, ds, index_dir, 5000, 600
+    #         ))
+    #     os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {}'.format(
+    #         dataset_dir, ds, index_dir))
+    #     n_sample = compute_n_sample_by_memory_index(ds, 64)
+    #     os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {}'.format(
+    #         dataset_dir, ds, index_dir, n_sample))
+    #
+    #     os.system(
+    #         'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+    #             dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
+    #     os.system(
+    #         'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
+    #             dataset_dir, ds, index_dir, "Simpfer", 35))
 
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-        #         dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
-        #         dataset_dir, ds, index_dir, "Simpfer", 35))
-        # os.system('cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}'.format(
-        #     ds, 5000, 500,
-        # ))
-
-    dataset_l = ['movielens-27m', 'netflix']
+    dataset_l = ['yahoomusic_big', 'yelp']
     for ds in dataset_l:
         for memory_capacity in [2, 4, 8, 16, 32, 64]:
             n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)

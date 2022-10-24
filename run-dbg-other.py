@@ -33,12 +33,12 @@ def compute_n_sample_by_memory_index(dataset_name, memory_capacity):
 
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp'] # TODO specify the dataset name
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']  # TODO specify the dataset name
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
     for ds in dataset_l:
-        n_sample_item = 9000 if ds == 'movielens-27m' else 5000
+        n_sample_item = 5000
         sample_topk = 600
         n_data_item = dataset_m[ds][0]
         n_user = dataset_m[ds][2]
