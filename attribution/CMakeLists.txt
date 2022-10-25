@@ -60,6 +60,10 @@ add_executable(trsa sample-score-distribution/TestRankSampleApproach.cpp)
 target_include_directories(trsa PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(trsa PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
 
+add_executable(ibc int-bound-compare/IntBoundCompare.cpp)
+target_include_directories(ibc PRIVATE ${armadillo_SOURCE_DIR}/include ../src/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(ibc PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES})
+
 #add_executable(biipb build-index-bound-selection/BuildIndexIPBound.cpp)
 #target_include_directories(biipb PRIVATE ../src/include ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 #target_link_libraries(biipb PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES})
