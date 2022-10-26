@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import send_email
 
 
 class CMDcolors:
@@ -115,8 +114,8 @@ def run():
         # 'QueryRankSampleIntLR',
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
-        # 'QueryRankSampleSearchKthRank',
-        'RankSample',
+        'QueryRankSampleSearchKthRank',
+        # 'RankSample',
     ]
 
     os.system('cd result/rank && rm *')
@@ -137,33 +136,36 @@ def run():
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
         # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'LinearModel'))
 
-        # n_sample_item = 150
-        # sample_topk = 60
-        # n_data_item = dataset_m[ds][0]
-        # n_user = dataset_m[ds][2]
-        # n_sample = 20
-        # os.system("cd build && ./dbt --dataset_name {} --n_sample_item {} --sample_topk {}".format(
-        #     ds, n_sample_item, sample_topk
-        # ))
-        # os.system(
-        #     "cd build && ./fsr --dataset_name {} --n_data_item {} --n_user {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
-        #         ds, n_data_item, n_user, n_sample, n_sample_item, sample_topk
-        #     ))
-        # os.system("cd build && ./bqrsi --dataset_name {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
-        #     ds, n_sample, n_sample_item, sample_topk
-        # ))
-        # os.system("cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}".format(
-        #     ds, 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
-        # ))
-        #
+        n_sample_item = 150
+        sample_topk = 60
+        n_data_item = dataset_m[ds][0]
+        n_user = dataset_m[ds][2]
+        n_sample = 20
+        os.system(
+            "cd build && ./qdi --dataset_name {} --n_sample_item {} --sample_topk {}".format(
+                ds, n_sample_item, sample_topk
+            ))
+        os.system(
+            "cd build && ./fsr --dataset_name {} --n_data_item {} --n_user {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
+                ds, n_data_item, n_user, n_sample, n_sample_item, sample_topk
+            ))
+        os.system(
+            "cd build && ./bqrsi --dataset_name {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
+                ds, n_sample, n_sample_item, sample_topk
+            ))
+        os.system(
+            "cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}".format(
+                ds, 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
+            ))
+
         # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #     ds, 'QueryRankSampleIntLR', n_sample_item, sample_topk))
         # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #     ds, 'QueryRankSampleScoreDistribution', 150, 60))
 
-        os.system('cd build && ./brsi --dataset_name {} --n_sample {}'.format(ds, 20))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
-    send_email.send('test complete')
+        # os.system('cd build && ./brsi --dataset_name {} --n_sample {}'.format(ds, 20))
+        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+    # send_email.send('test complete')
 
     # topk_l = [10, 20, 30, 40, 50]
     topk_l = [10, 20, 30]

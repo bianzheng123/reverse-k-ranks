@@ -82,7 +82,7 @@ def run():
         n_data_item = dataset_m[ds][0]
         n_user = dataset_m[ds][2]
         # os.system(
-        #     'cd build && ./dbt --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+        #     'cd build && ./qdi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
         #         dataset_dir, ds, index_dir, n_sample_query, sample_topk
         #     ))
         # os.system(

@@ -53,6 +53,9 @@ namespace ReverseMIPS {
 
         ComputeItemScore cis(user, data_item);
 
+        TimeRecord record;
+        record.reset();
+
         std::vector<double> itemIP_l(n_data_item);
         std::vector<double> sample_item_score_l(n_sample_item);
         for (int userID = 0; userID < n_user; userID++) {
@@ -70,6 +73,15 @@ namespace ReverseMIPS {
                 assert(0 <= rank && rank <= n_data_item);
 
                 accu_n_user_rank_l[sampleID * (n_data_item + 1) + rank]++;
+            }
+
+            if(userID != 0 && userID % 100000 == 0){
+                spdlog::info(
+                        "ComputeQueryRank {:.1f}%, Mem: {} Mb, {} s/iter",
+                        userID / (0.01 * n_user), get_current_RSS() / 1000000,
+                        record.get_elapsed_time_second());
+                record.reset();
+
             }
 
         }
