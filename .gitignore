@@ -3,11 +3,13 @@ test.py
 /build/
 /result/
 /index/
+/index_amazon/
 /*.log
 /.idea/
 /motivation/data/
 /motivation/result/
 index
+index_amazon
 /attribution/build/
 /attribution/data/
 /attribution/result/
@@ -15,6 +17,7 @@ index
 cmake-build-debug/
 cmake-build-release/
 /attribution/*.jpg
+/attribution/sample-score-distribution/*.jpg
 /attribution/*.txt
 *.eps
 /attribution/disk-index-compression/ignore-fig

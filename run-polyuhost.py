@@ -21,7 +21,8 @@ dataset_m = {'movielens-27m': [52889, 1000, 283228],
              'yahoomusic_big': [135736, 1000, 1823179],
              'yahoomusic': [97213, 1000, 1948882],
              'yelp': [159585, 1000, 2189457],
-             'goodreads': [2359650, 1000, 876145]}
+             'goodreads': [2359650, 1000, 876145],
+             'amazon-home-kitchen': [409243, 1000, 2511610]}
 element_size = 8
 
 
@@ -60,63 +61,66 @@ def compute_n_sample_by_memory_index_qrssd(dataset_name, memory_capacity):
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'goodreads']
     # dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'goodreads']
-    dataset_l = ['movielens-27m', 'netflix']
+    dataset_l = ['movielens-27m']
     # dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
 
     for ds in dataset_l:
-        # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
-        #     dataset_dir, ds, index_dir))
-        memory_capacity = 2
-        n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {}'.format(
-        #         dataset_dir, ds, index_dir, 'LinearModel'))
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-        #         dataset_dir, ds, index_dir, 'RankSample', n_sample))
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-        #         dataset_dir, ds, index_dir, 'RankSampleIntLR', n_sample))
-        n_sample_query = 5000
-        sample_topk = 600
-        n_data_item = dataset_m[ds][0]
-        n_user = dataset_m[ds][2]
-        # os.system(
-        #     'cd build && ./qdi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-        #         dataset_dir, ds, index_dir, n_sample_query, sample_topk
-        #     ))
-        # os.system(
-        #     "cd build && ./fsr --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {} --n_data_item {} --n_user {}".format(
-        #         ds, index_dir, n_sample, n_sample_query, sample_topk, n_data_item, n_user
-        #     ))
-        os.system(
-            "cd build && ./bqrsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
-                dataset_dir, ds, index_dir, n_sample, n_sample_query, sample_topk
-            ))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, n_sample_query, sample_topk))
+        os.system('cd build/attribution && ./ibc --dataset_name {} --dataset_dir {}'.format(ds, dataset_dir))
 
-        n_sample_qrssd = compute_n_sample_by_memory_index_qrssd(ds, memory_capacity)
-        os.system(
-            "cd build && ./fsr --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {} --n_data_item {} --n_user {}".format(
-                ds, index_dir, n_sample_qrssd, n_sample_query, sample_topk, n_data_item, n_user
-            ))
-        os.system(
-            "cd build && ./bqrsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
-                dataset_dir, ds, index_dir, n_sample_qrssd, n_sample_query, sample_topk
-            ))
-        os.system(
-            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-                dataset_dir, ds, index_dir, 'QueryRankSampleScoreDistribution',
-                n_sample_qrssd, n_sample_query, sample_topk))
-
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-        #         dataset_dir, ds, index_dir, 'QueryRankSampleIntLR', n_sample, 9000, 600))
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-        #         dataset_dir, ds, index_dir, 'QueryRankSampleScoreDistribution', n_sample, 9000, 600))
+    # for ds in dataset_l:
+    #     # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
+    #     #     dataset_dir, ds, index_dir))
+    #     memory_capacity = 2
+    #     n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
+    #     # os.system(
+    #     #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {}'.format(
+    #     #         dataset_dir, ds, index_dir, 'LinearModel'))
+    #     # os.system(
+    #     #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+    #     #         dataset_dir, ds, index_dir, 'RankSample', n_sample))
+    #     # os.system(
+    #     #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
+    #     #         dataset_dir, ds, index_dir, 'RankSampleIntLR', n_sample))
+    #     n_sample_query = 5000
+    #     sample_topk = 600
+    #     n_data_item = dataset_m[ds][0]
+    #     n_user = dataset_m[ds][2]
+    #     # os.system(
+    #     #     'cd build && ./qdi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+    #     #         dataset_dir, ds, index_dir, n_sample_query, sample_topk
+    #     #     ))
+    #     # os.system(
+    #     #     "cd build && ./fsr --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {} --n_data_item {} --n_user {}".format(
+    #     #         ds, index_dir, n_sample, n_sample_query, sample_topk, n_data_item, n_user
+    #     #     ))
+    #     os.system(
+    #         "cd build && ./bqrsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
+    #             dataset_dir, ds, index_dir, n_sample, n_sample_query, sample_topk
+    #         ))
+    #     os.system(
+    #         'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+    #             dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, n_sample_query, sample_topk))
+    #
+    #     n_sample_qrssd = compute_n_sample_by_memory_index_qrssd(ds, memory_capacity)
+    #     os.system(
+    #         "cd build && ./fsr --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {} --n_data_item {} --n_user {}".format(
+    #             ds, index_dir, n_sample_qrssd, n_sample_query, sample_topk, n_data_item, n_user
+    #         ))
+    #     os.system(
+    #         "cd build && ./bqrsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
+    #             dataset_dir, ds, index_dir, n_sample_qrssd, n_sample_query, sample_topk
+    #         ))
+    #     os.system(
+    #         'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+    #             dataset_dir, ds, index_dir, 'QueryRankSampleScoreDistribution',
+    #             n_sample_qrssd, n_sample_query, sample_topk))
+    #
+    #     # os.system(
+    #     #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+    #     #         dataset_dir, ds, index_dir, 'QueryRankSampleIntLR', n_sample, 9000, 600))
+    #     # os.system(
+    #     #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+    #     #         dataset_dir, ds, index_dir, 'QueryRankSampleScoreDistribution', n_sample, 9000, 600))
 
 
 if __name__ == '__main__':

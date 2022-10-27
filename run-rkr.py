@@ -31,7 +31,7 @@ dataset_m = {'fake-normal': [5000, 100, 1000],
              'netflix': [16770, 1000, 480189],
              'yahoomusic_big': [135736, 1000, 1823179],
              'yelp': [159585, 1000, 2189457],
-             'amazon': [409243, 1000, 2511610]}
+             'amazon-home-kitchen': [409243, 1000, 2511610]}
 
 
 def count_n_sample_given_memory_capacity():
