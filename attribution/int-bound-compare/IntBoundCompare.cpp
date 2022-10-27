@@ -63,6 +63,9 @@ int main(int argc, char **argv) {
 
     user.vectorNormalize();
 
+    const int report_every = 10000;
+    TimeRecord batch_record;
+    batch_record.reset();
     TimeRecord record;
     record.reset();
     FullInt ip_bound_ins(n_user, vec_dim, 1000);
@@ -76,11 +79,18 @@ int main(int argc, char **argv) {
         for (int userID = 0; userID < n_user; userID++) {
             ip_bound_val += ip_bound_l[userID].first;
         }
+        if (itemID != 0 && itemID % report_every == 0) {
+            std::cout << "preprocessed " << itemID / (0.01 * n_data_item) << " %, "
+                      << batch_record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                      << get_current_RSS() / 1000000 << " Mb \n";
+            batch_record.reset();
+        }
     }
 
     const double ip_bound_time = record.get_elapsed_time_second();
 
     record.reset();
+    batch_record.reset();
 
     double ip_val = 0;
     for (int itemID = 0; itemID < n_data_item; itemID++) {
@@ -89,6 +99,12 @@ int main(int argc, char **argv) {
             const double *user_vecs = user.getVector(userID);
             const double ip = InnerProduct(item_vecs, user_vecs, vec_dim);
             ip_val += ip;
+        }
+        if (itemID != 0 && itemID % report_every == 0) {
+            std::cout << "preprocessed " << itemID / (0.01 * n_data_item) << " %, "
+                      << batch_record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                      << get_current_RSS() / 1000000 << " Mb \n";
+            batch_record.reset();
         }
     }
     const double ip_time = record.get_elapsed_time_second();
