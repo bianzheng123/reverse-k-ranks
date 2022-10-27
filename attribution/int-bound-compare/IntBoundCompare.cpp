@@ -110,6 +110,7 @@ int main(int argc, char **argv) {
     const double ip_time = record.get_elapsed_time_second();
 
     assert(ip_val > ip_bound_val);
+    printf("ip_val %.3f, ip_bound_val %.3f\n", ip_val, ip_bound_val);
     spdlog::info("finish preprocess and save the index");
 
     spdlog::info("ip_bound_time {}s, ip_time {}s", ip_bound_time, ip_time);

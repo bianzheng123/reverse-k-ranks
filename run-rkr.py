@@ -111,7 +111,7 @@ def run():
 
         # 'GridIndex',
         # 'LinearModel',
-        # 'QueryRankSampleIntLR',
+        'QueryRankSampleIntLR',
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
         'QueryRankSampleSearchKthRank',
@@ -158,8 +158,8 @@ def run():
                 ds, 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
             ))
 
-        # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #     ds, 'QueryRankSampleIntLR', n_sample_item, sample_topk))
+        os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+            ds, 'QueryRankSampleIntLR', n_sample_item, sample_topk))
         # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #     ds, 'QueryRankSampleScoreDistribution', 150, 60))
 
