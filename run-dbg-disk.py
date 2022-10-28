@@ -54,19 +54,19 @@ def run():
         #     dataset_dir, ds, index_amazon_dir, n_sample))
 
         # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-        #         dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+        #         dataset_dir, ds, 'false', index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
         # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
-        #         dataset_dir, ds, index_dir, "Simpfer", 35))
+        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
+        #         dataset_dir, ds, 'false', index_dir, "Simpfer", 35))
 
     # dataset_l = ['yahoomusic_big', 'yelp']
     # for ds in dataset_l:
     #     for memory_capacity in [16]:
     #         n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
     #         os.system(
-    #             'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {}'.format(
-    #                 dataset_dir, ds, index_dir, 'RankSample', n_sample))
+    #             'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {}'.format(
+    #                 dataset_dir, ds, 'false', index_dir, 'RankSample', n_sample))
 
 
 if __name__ == '__main__':

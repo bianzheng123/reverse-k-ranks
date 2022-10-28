@@ -282,7 +282,8 @@ namespace ReverseMIPS {
         uint64_t IndexSizeByte() const {
             const uint64_t known_rank_idx_size = sizeof(int) * n_sample_;
             const uint64_t bound_distance_table_size = sizeof(double) * n_user_ * n_sample_;
-            return known_rank_idx_size + bound_distance_table_size;
+            const uint64_t score_distribution_size = n_user_ * (n_sample_ - 1) * n_sample_score_ / 8;
+            return known_rank_idx_size + bound_distance_table_size + score_distribution_size;
         }
 
     };

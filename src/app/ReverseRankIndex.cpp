@@ -27,6 +27,7 @@
 class Parameter {
 public:
     std::string dataset_dir, dataset_name, method_name, index_dir;
+    bool test_topk;
     int n_sample, n_sample_query, sample_topk;
     int simpfer_k_max;
 };
@@ -45,6 +46,9 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("index_dir, id",
              po::value<std::string>(&para.index_dir)->default_value("/home/bianzheng/reverse-k-ranks/index"),
              "the directory of the index")
+            ("test_topk, tt",
+             po::value<bool>(&para.test_topk)->default_value(true),
+             "whether is test topk")
             ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("BatchDiskBruteForce"),
              "method_name")
             // memory index parameter
@@ -185,9 +189,16 @@ int main(int argc, char **argv) {
 //        spdlog::info("{}", performance_str);
 //    }
 
+    vector<int> topk_l;
+    if (para.test_topk) {
+        topk_l = {30, 20, 10};
+    } else {
+        topk_l = {600, 500, 200, 100, 50, 20, 10, 1};
+    }
+
 //    vector<int> topk_l{600, 500, 200, 100, 50, 20, 10, 1};
 //    vector<int> topk_l{60, 50, 40, 30, 20, 10};
-    vector<int> topk_l{30, 20, 10};
+//    vector<int> topk_l{30, 20, 10};
 //    vector<int> topk_l{10};
 //    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;

@@ -8,17 +8,36 @@
 #include "struct/DistancePair.hpp"
 #include <iostream>
 #include <memory>
+#include <limits>
 #include <Eigen/Dense>
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
+
+    double constexpr sqrtNewtonRaphson(double x, double curr, double prev) {
+        return curr == prev
+               ? curr
+               : sqrtNewtonRaphson(x, 0.5 * (curr + x / curr), curr);
+    }
+
+    /*
+    * Constexpr version of the square root
+    * Return value:
+    *	- For a finite and non-negative value of "x", returns an approximation for the square root of "x"
+    *   - Otherwise, returns NaN
+    */
+    double constexpr sqrt(double x) {
+        return x >= 0 && x < std::numeric_limits<double>::infinity()
+               ? sqrtNewtonRaphson(x, x, 0)
+               : std::numeric_limits<double>::quiet_NaN();
+    }
 
     class HeadLinearRegression {
 
         size_t n_data_item_, n_user_;
         static constexpr int n_predict_parameter_ = 2; // (a, b) for linear estimation
         static constexpr int n_distribution_parameter_ = 2; // mu, sigma
-        static constexpr double sqrt_2_ = std::sqrt(2.0);
+        static constexpr double sqrt_2_ = sqrt(2.0);
         int n_sample_rank_;
         std::unique_ptr<int[]> sample_rank_l_; // n_sample_rank
         std::unique_ptr<double[]> predict_para_l_; // n_user_ * n_predict_parameter
@@ -245,7 +264,10 @@ namespace ReverseMIPS {
         }
 
         uint64_t IndexSizeByte() const {
-            return n_user_ * (sizeof(double) + sizeof(double) + sizeof(int));
+            const uint64_t sample_rank_size = sizeof(int) * n_sample_rank_;
+            const uint64_t para_size = sizeof(double) * n_user_ * (n_predict_parameter_ + n_distribution_parameter_);
+            const uint64_t error_size = sizeof(int) * n_user_;
+            return sample_rank_size + para_size + error_size;
         }
 
     };

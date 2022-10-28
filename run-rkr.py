@@ -133,8 +133,8 @@ def run():
 
         # os.system('cd build && ./bst --dataset_name {}'.format(ds))
 
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'GridIndex'))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'LinearModel'))
+        # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'GridIndex'))
+        # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'LinearModel'))
 
         n_sample_item = 150
         sample_topk = 60
@@ -154,17 +154,18 @@ def run():
                 ds, n_sample, n_sample_item, sample_topk
             ))
         os.system(
-            "cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}".format(
-                ds, 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
+            "cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}".format(
+                ds, 'true', 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
             ))
 
-        os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-            ds, 'QueryRankSampleIntLR', n_sample_item, sample_topk))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-        #     ds, 'QueryRankSampleScoreDistribution', 150, 60))
+        os.system(
+            'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+                ds, 'true', 'QueryRankSampleIntLR', n_sample_item, sample_topk))
+        # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #     ds, 'true', 'QueryRankSampleScoreDistribution', 150, 60))
 
         # os.system('cd build && ./brsi --dataset_name {} --n_sample {}'.format(ds, 20))
-        # os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'RankSample'))
+        # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'RankSample'))
     # send_email.send('test complete')
 
     # topk_l = [10, 20, 30, 40, 50]

@@ -53,7 +53,7 @@ def run():
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
     #     # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --method_name {}'.format(ds, 'Simpfer'))
+        os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'Simpfer'))
 
     # topk_l = [10, 20, 30, 40, 50]
     topk_l = [10]
