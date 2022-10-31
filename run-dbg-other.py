@@ -24,6 +24,7 @@ dataset_m = {'movielens-27m': [52889, 1000, 283228],
              'goodreads': [2359650, 1000, 876145],
              'amazon-home-kitchen': [409243, 1000, 2511610]}
 element_size = 8
+dimension = 150
 
 
 def compute_n_sample_by_memory_index(dataset_name, memory_capacity):
@@ -39,7 +40,8 @@ def compute_n_sample_by_memory_index_qrsintlr(dataset_name, memory_capacity):
     sizeof_double = 8
     sizeof_int = 4
     n_sample = 1.0 * (
-            memory_capacity * 1024 * 1024 * 1024 - n_user * 4 * sizeof_double - n_user * dimension * sizeof_int - n_data_item * dimension * sizeof_int
+            memory_capacity * 1024 * 1024 * 1024 - n_user * 4 * sizeof_double - (
+            n_user + n_data_item) * dimension * sizeof_int
     ) / sizeof_double / n_user
     return int(n_sample)
 
@@ -55,12 +57,12 @@ def run():
         sample_topk = 600
         n_data_item = dataset_m[ds][0]
         n_user = dataset_m[ds][2]
-        memory_capacity = 16  # TODO specify the memory capacity
-        n_sample = compute_n_sample_by_memory_index_qrsintlr(ds, memory_capacity)
-        os.system(
-            "cd build && ./fsr --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {} --n_data_item {} --n_user {}".format(
-                ds, index_dir, n_sample, n_sample_item, sample_topk, n_data_item, n_user
-            ))
+        for memory_capacity in [16]:  # TODO specify the memory capacity
+            n_sample = compute_n_sample_by_memory_index_qrsintlr(ds, memory_capacity)
+            os.system(
+                "cd build && ./fsr --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {} --n_data_item {} --n_user {}".format(
+                    ds, index_dir, n_sample, n_sample_item, sample_topk, n_data_item, n_user
+                ))
 
 
 if __name__ == '__main__':
