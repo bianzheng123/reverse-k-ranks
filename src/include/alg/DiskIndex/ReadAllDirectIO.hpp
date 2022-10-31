@@ -161,14 +161,11 @@ namespace ReverseMIPS {
         void GetRank(const std::vector<double> &queryIP_l,
                      const std::vector<int> &rank_lb_l, const std::vector<int> &rank_ub_l,
                      const std::vector<int> &refine_seq_l, const int &refine_user_size, const int &remain_n_result,
-                     size_t &io_cost, size_t &ip_cost,
-                     double &read_disk_time, double &rank_computation_time) {
+                     size_t &io_cost, double &read_disk_time) {
 
             n_refine_user_ = 0;
             io_cost = 0;
-            ip_cost = 0;
             read_disk_time = 0;
-            rank_computation_time = 0;
 
             assert(remain_n_result <= refine_user_size);
             TopkMaxHeap heap(remain_n_result);
@@ -187,7 +184,7 @@ namespace ReverseMIPS {
                     continue;
                 }
                 const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
-                                               io_cost, ip_cost, read_disk_time, rank_computation_time);
+                                               io_cost, read_disk_time);
 
                 user_topk_cache_l_[n_refine_user_] = UserRankElement(userID, rank, queryIP_l[userID]);
                 n_refine_user_++;
@@ -196,8 +193,8 @@ namespace ReverseMIPS {
 //                if (n_refine_user_ % 7500 == 0) {
 //                    const double progress = n_refine_user_ / (0.01 * refine_user_size);
 //                    spdlog::info(
-//                            "compute rank {:.2f}%, io_cost {}, ip_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",
-//                            progress, io_cost, ip_cost, read_disk_time, rank_computation_time,
+//                            "compute rank {:.2f}%, io_cost {}, read_disk_time {:.3f}s, rank_compute_time {:.3f}s, {:.2f}s/iter Mem: {} Mb",
+//                            progress, io_cost, read_disk_time, rank_computation_time,
 //                            record.get_elapsed_time_second(), get_current_RSS() / 1000000);
 //                    record.reset();
 //                }
@@ -210,8 +207,7 @@ namespace ReverseMIPS {
         }
 
         int GetSingleRank(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
-                          size_t &io_cost, size_t &ip_cost,
-                          double &read_disk_time, double &rank_computation_time) {
+                          size_t &io_cost, double &read_disk_time) {
             if (rank_lb == rank_ub) {
                 int rank = rank_lb;
                 return rank;

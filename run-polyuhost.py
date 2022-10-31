@@ -24,6 +24,7 @@ dataset_m = {'movielens-27m': [52889, 1000, 283228],
              'goodreads': [2359650, 1000, 876145],
              'amazon-home-kitchen': [409243, 1000, 2511610]}
 element_size = 8
+dimension = 150
 
 
 def compute_n_sample_by_block(dataset_name, memory_capacity):
@@ -60,9 +61,13 @@ def compute_n_sample_by_memory_index_qrssd(dataset_name, memory_capacity):
 
 def compute_n_sample_by_memory_index_qrsintlr(dataset_name, memory_capacity):
     n_user = dataset_m[dataset_name][2]
+    n_data_item = dataset_m[dataset_name][0]
     sizeof_char = 1
     sizeof_double = 8
-    n_sample = 1.0 * (memory_capacity * 1024 * 1024 * 1024 - n_user * 4 * sizeof_double) / sizeof_double / n_user
+    sizeof_int = 4
+    n_sample = 1.0 * (
+            memory_capacity * 1024 * 1024 * 1024 - n_user * 4 * sizeof_double - n_user * dimension * sizeof_int - n_data_item * dimension * sizeof_int
+    ) / sizeof_double / n_user
     return int(n_sample)
 
 

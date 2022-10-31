@@ -38,6 +38,7 @@ namespace ReverseMIPS::LinearModel {
             read_disk_time_ = 0;
             compute_rank_time_ = 0;
             rank_prune_ratio_ = 0;
+            total_ip_cost_ = 0;
             total_io_cost_ = 0;
             total_refine_user_ = 0;
         }
@@ -51,7 +52,7 @@ namespace ReverseMIPS::LinearModel {
         int vec_dim_, n_data_item_, n_user_;
         double total_retrieval_time_, inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_;
         TimeRecord total_retrieval_record_, inner_product_record_, rank_bound_record_;
-        uint64_t total_io_cost_, total_refine_user_;
+        uint64_t total_ip_cost_, total_io_cost_, total_refine_user_;
         double rank_prune_ratio_;
 
     public:
@@ -129,6 +130,8 @@ namespace ReverseMIPS::LinearModel {
                 }
                 const double tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
                 this->inner_product_time_ += tmp_inner_product_time;
+                const int ip_cost = n_user_;
+                this->total_ip_cost_ += ip_cost;
 
                 //rank search
                 int refine_user_size = n_user_;
@@ -148,12 +151,10 @@ namespace ReverseMIPS::LinearModel {
 
                 //read disk and fine binary search
                 size_t io_cost = 0;
-                size_t ip_cost = 0;
                 double read_disk_time = 0;
-                double rank_compute_time = 0;
                 disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
                                   refine_seq_l_, refine_user_size, topk - n_result_user,
-                                  io_cost, ip_cost, read_disk_time, rank_compute_time);
+                                  io_cost, read_disk_time);
                 total_io_cost_ += io_cost;
                 total_refine_user_ += disk_ins_.n_refine_user_;
                 rank_prune_ratio_ += 1.0 * (n_user_ - disk_ins_.n_refine_user_) / n_user_;
@@ -179,10 +180,9 @@ namespace ReverseMIPS::LinearModel {
                 query_performance_l[queryID] = SingleQueryPerformance(queryID,
                                                                       n_prune_user, n_result_user,
                                                                       disk_ins_.n_refine_user_,
-                                                                      io_cost, ip_cost,
+                                                                      ip_cost, io_cost,
                                                                       total_time,
-                                                                      memory_index_time, read_disk_time,
-                                                                      rank_compute_time);
+                                                                      memory_index_time, read_disk_time);
             }
             disk_ins_.FinishRetrieval();
 
@@ -206,10 +206,10 @@ namespace ReverseMIPS::LinearModel {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal io cost %ld, total refine user %ld, rank prune ratio %.4f",
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal ip cost %ld, total io cost %ld, total refine user %ld, rank prune ratio %.4f",
                     topk, total_retrieval_time_,
                     inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_,
-                    total_io_cost_, total_refine_user_, rank_prune_ratio_);
+                    total_ip_cost_, total_io_cost_, total_refine_user_, rank_prune_ratio_);
             std::string str(buff);
             return str;
         }

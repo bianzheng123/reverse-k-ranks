@@ -32,6 +32,18 @@ def compute_n_sample_by_memory_index(dataset_name, memory_capacity):
     return int(n_sample)
 
 
+def compute_n_sample_by_memory_index_qrsintlr(dataset_name, memory_capacity):
+    n_user = dataset_m[dataset_name][2]
+    n_data_item = dataset_m[dataset_name][0]
+    sizeof_char = 1
+    sizeof_double = 8
+    sizeof_int = 4
+    n_sample = 1.0 * (
+            memory_capacity * 1024 * 1024 * 1024 - n_user * 4 * sizeof_double - n_user * dimension * sizeof_int - n_data_item * dimension * sizeof_int
+    ) / sizeof_double / n_user
+    return int(n_sample)
+
+
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
     dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']  # TODO specify the dataset name
@@ -44,7 +56,7 @@ def run():
         n_data_item = dataset_m[ds][0]
         n_user = dataset_m[ds][2]
         memory_capacity = 16  # TODO specify the memory capacity
-        n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
+        n_sample = compute_n_sample_by_memory_index_qrsintlr(ds, memory_capacity)
         os.system(
             "cd build && ./fsr --dataset_name {} --index_dir {} --n_sample {} --n_sample_query {} --sample_topk {} --n_data_item {} --n_user {}".format(
                 ds, index_dir, n_sample, n_sample_item, sample_topk, n_data_item, n_user
