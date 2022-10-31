@@ -18,7 +18,7 @@
 
 namespace ReverseMIPS {
 
-#define DISK_PAGE_SIZE 4096
+#define DISK_PAGE_SIZE 512
 
     using namespace std;
 

@@ -1,18 +1,18 @@
 //
-// Created by BianZheng on 2022/10/12.
+// Created by BianZheng on 2022/10/29.
 //
 
-#ifndef REVERSE_KRANKS_RANKSAMPLEPGM_HPP
-#define REVERSE_KRANKS_RANKSAMPLEPGM_HPP
+#ifndef REVERSE_K_RANKS_QUERYRANKSAMPLEMINMAXINTLR_HPP
+#define REVERSE_K_RANKS_QUERYRANKSAMPLEMINMAXINTLR_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
 #include "alg/QueryIPBound/FullInt.hpp"
-#include "alg/RankBoundRefinement/PGMSearch.hpp"
+#include "alg/RankBoundRefinement/MinMaxHeadLinearRegression.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/RankSearch.hpp"
+#include "alg/RankBoundRefinement/QueryRankSearchSearchKthRank.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -30,7 +30,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::RankSampleIntPGM {
+namespace ReverseMIPS::QueryRankSampleMinMaxIntLR {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -47,10 +47,10 @@ namespace ReverseMIPS::RankSampleIntPGM {
 
         // IP Bound
         FullInt ip_bound_ins_;
-        //rank search for compute loose rank bound
-        PGMSearch rank_bound_ins_;
+        //rank bound search
+        MinMaxHeadLinearRegression rank_bound_ins_;
         //rank search
-        RankSearch rank_ins_;
+        QueryRankSearchSearchKthRank rank_ins_;
         //read disk
         ReadAllDirectIO disk_ins_;
 
@@ -76,9 +76,9 @@ namespace ReverseMIPS::RankSampleIntPGM {
                 //ip bound ins
                 FullInt &ip_bound_ins,
                 //rank search for compute loose rank bound
-                PGMSearch rank_bound_ins,
+                MinMaxHeadLinearRegression &rank_bound_ins,
                 //rank search
-                RankSearch &rank_ins,
+                QueryRankSearchSearchKthRank &rank_ins,
                 //disk index
                 ReadAllDirectIO &disk_ins,
                 //general retrieval
@@ -148,7 +148,7 @@ namespace ReverseMIPS::RankSampleIntPGM {
                 int n_result_user = 0;
                 int n_prune_user = 0;
                 rank_bound_record_.reset();
-                rank_bound_ins_.RankBound(queryIP_bound_l_, rank_lb_l_, rank_ub_l_);
+                rank_bound_ins_.RankBound(queryIP_bound_l_, rank_lb_l_, rank_ub_l_, queryID);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       refine_seq_l_, refine_user_size,
@@ -264,7 +264,8 @@ namespace ReverseMIPS::RankSampleIntPGM {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const int &n_sample) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const char *dataset_name,
+               const int &n_sample, const int &n_sample_query, const int &sample_topk, const char *index_basic_dir) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = user.vec_dim_;
@@ -274,11 +275,12 @@ namespace ReverseMIPS::RankSampleIntPGM {
         FullInt ip_bound_ins(n_user, vec_dim, 1000);
         ip_bound_ins.Preprocess(user, data_item);
 
-        PGMSearch rank_bound_ins(n_data_item, n_user);
-        rank_bound_ins.StartPreprocess();
-
         //rank search
-        RankSearch rank_ins(n_sample, n_data_item, n_user);
+        QueryRankSearchSearchKthRank rank_ins(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk,
+                                              true);
+
+        MinMaxHeadLinearRegression rank_bound_ins(n_data_item, n_user);
+        rank_bound_ins.StartPreprocess(rank_ins.known_rank_idx_l_.get(), n_sample);
 
         //disk index
         ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
@@ -293,9 +295,7 @@ namespace ReverseMIPS::RankSampleIntPGM {
         for (int userID = 0; userID < n_user; userID++) {
             read_ins.ReadDiskNoCache(userID, distance_l);
 
-            rank_bound_ins.LoopPreprocess(distance_l.data(), userID);
-
-            rank_ins.LoopPreprocess(distance_l.data(), userID);
+            rank_bound_ins.LoopPreprocess(rank_ins.SampleData(userID), userID);
 
             if (userID % report_every == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
@@ -307,9 +307,10 @@ namespace ReverseMIPS::RankSampleIntPGM {
         read_ins.FinishRetrieval();
         rank_bound_ins.FinishPreprocess();
 
-        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(ip_bound_ins, rank_bound_ins, rank_ins, disk_ins, user, n_data_item);
+        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(ip_bound_ins, rank_bound_ins, rank_ins, disk_ins,
+                                                                   user, n_data_item);
         return index_ptr;
     }
 
 }
-#endif //REVERSE_KRANKS_RANKSAMPLEPGM_HPP
+#endif //REVERSE_K_RANKS_QUERYRANKSAMPLEMINMAXINTLR_HPP

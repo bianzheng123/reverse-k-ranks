@@ -39,34 +39,57 @@ def run():
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
-    for ds in dataset_l:
-        # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
-        #     dataset_dir, ds, index_dir))
-        os.system(
-            'cd build && ./qdi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
-                dataset_dir, ds, index_amazon_dir, 5000, 600
-            ))
-        # TODO
-        # os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {}'.format(
-        #     dataset_dir, ds, index_amazon_dir))
-        # n_sample = compute_n_sample_by_memory_index(ds, 64)
-        # os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {}'.format(
-        #     dataset_dir, ds, index_amazon_dir, n_sample))
-
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
-        #         dataset_dir, ds, 'false', index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
-        #         dataset_dir, ds, 'false', index_dir, "Simpfer", 35))
-
-    # dataset_l = ['yahoomusic_big', 'yelp']
     # for ds in dataset_l:
-    #     for memory_capacity in [16]:
-    #         n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
-    #         os.system(
-    #             'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {}'.format(
-    #                 dataset_dir, ds, 'false', index_dir, 'RankSample', n_sample))
+    #     # os.system('cd build && ./bst --dataset_dir {} --dataset_name {} --index_dir {}'.format(
+    #     #     dataset_dir, ds, index_dir))
+    #     # os.system(
+    #     #     'cd build && ./qdi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_item {} --sample_topk {}'.format(
+    #     #         dataset_dir, ds, index_amazon_dir, 5000, 600
+    #     #     ))
+    #     # TODO
+    #     os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {}'.format(
+    #         dataset_dir, ds, index_amazon_dir))
+    #     n_sample = compute_n_sample_by_memory_index(ds, 64)
+    #     os.system('cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample {}'.format(
+    #         dataset_dir, ds, index_amazon_dir, n_sample))
+    #
+    #     # os.system(
+    #     #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --sample_topk {}'.format(
+    #     #         dataset_dir, ds, index_dir, 'QueryRankSampleSearchKthRank', n_sample, 5000, 600))
+    #     # os.system(
+    #     #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
+    #     #         dataset_dir, ds, index_dir, "Simpfer", 35))
+
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    for ds in dataset_l:
+        for memory_capacity in [16]:
+            n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
+            os.system(
+                'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {}'.format(
+                    dataset_dir, ds, 'false', index_dir, 'RankSample', n_sample))
+
+    dataset_l = ['amazon-home-kitchen']
+    for ds in dataset_l:
+        for memory_capacity in [16]:
+            n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
+            os.system(
+                'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {}'.format(
+                    dataset_dir, ds, 'false', index_amazon_dir, 'RankSample', n_sample))
+
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    for ds in dataset_l:
+        n_sample_query = 5000
+        sample_topk = 600
+        memory_capacity = 16
+        n_sample = compute_n_sample_by_memory_index(ds, memory_capacity)
+        os.system(
+            "cd build && ./bqrsi --dataset_dir {} --dataset_name {} --index_dir {} --n_sample_query {} --sample_topk {}".format(
+                dataset_dir, ds, index_dir, n_sample_query, sample_topk
+            ))
+        os.system(
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {} --n_sample_query {} --n_sample_topk {}'.format(
+                dataset_dir, ds, 'false', index_dir, 'QueryRankSampleSearchKthRank', n_sample, n_sample_query,
+                n_sample))
 
 
 if __name__ == '__main__':

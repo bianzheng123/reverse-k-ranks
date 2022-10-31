@@ -1,12 +1,14 @@
 //
-// Created by BianZheng on 2022/10/14.
+// Created by BianZheng on 2022/10/29.
 //
 
-#ifndef REVERSE_K_RANKS_HEADLINEARREGRESSION_HPP
-#define REVERSE_K_RANKS_HEADLINEARREGRESSION_HPP
+#ifndef REVERSE_K_RANKS_MINMAXHEADLINEARREGRESSION_HPP
+#define REVERSE_K_RANKS_MINMAXHEADLINEARREGRESSION_HPP
 
 #include "struct/DistancePair.hpp"
 #include "util/MathUtil.hpp"
+#include "sdlp/sdlp.hpp"
+
 #include <iostream>
 #include <memory>
 #include <Eigen/Dense>
@@ -14,7 +16,7 @@
 
 namespace ReverseMIPS {
 
-    class HeadLinearRegression {
+    class MinMaxHeadLinearRegression {
 
         size_t n_data_item_, n_user_;
         static constexpr int n_predict_parameter_ = 2; // (a, b) for linear estimation
@@ -27,29 +29,38 @@ namespace ReverseMIPS {
         std::unique_ptr<int[]> error_l_; //n_user_
 
         //used for loading
-        double *preprocess_cache_X_; // n_sample_rank * n_predict_parameter_, store queryIP in the sampled rank
-        double *preprocess_cache_Y_; // n_sample_rank, store the double type of sampled rank value
+        double *preprocess_cache_A_; // (2 * n_sample_rank) * (n_predict_parameter_ + 1), constraint matrix
+        double *preprocess_cache_b_; // (2 * n_sample_rank), constraint bound
+        double *preprocess_cache_c_; // 3, objective coefficients
     public:
 
-        inline HeadLinearRegression() {}
+        inline MinMaxHeadLinearRegression() {}
 
-        inline HeadLinearRegression(const int &n_data_item, const int &n_user) {
+        inline MinMaxHeadLinearRegression(const int &n_data_item, const int &n_user) {
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
             this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
             this->distribution_para_l_ = std::make_unique<double[]>(n_user * n_distribution_parameter_);
             this->error_l_ = std::make_unique<int[]>(n_user);
+            static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
         }
 
         void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) {
             this->n_sample_rank_ = n_sample_rank;
             this->sample_rank_l_ = std::make_unique<int[]>(n_sample_rank);
-            this->preprocess_cache_X_ = new double[n_sample_rank * n_predict_parameter_];
-            this->preprocess_cache_Y_ = new double[n_sample_rank];
+            this->preprocess_cache_A_ = new double[(2 * n_sample_rank) * (n_predict_parameter_ + 1)];
+            this->preprocess_cache_b_ = new double[2 * n_sample_rank];
+            this->preprocess_cache_c_ = new double[3];
             for (int sampleID = 0; sampleID < n_sample_rank; sampleID++) {
-                preprocess_cache_Y_[sampleID] = sampleID;
                 sample_rank_l_[sampleID] = sample_rank_l[sampleID];
+
+                preprocess_cache_b_[2 * sampleID] = -sampleID;
+                preprocess_cache_b_[2 * sampleID + 1] = sampleID;
             }
+
+            preprocess_cache_c_[0] = 0;
+            preprocess_cache_c_[1] = 0;
+            preprocess_cache_c_[2] = 1;
 
         }
 
@@ -103,12 +114,19 @@ namespace ReverseMIPS {
 
 #pragma omp parallel for default(none) shared(sampleIP_l, mu, sigma)
             for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
-                preprocess_cache_X_[sampleID * n_predict_parameter_] = 1;
                 const double normal_num = (sampleIP_l[sampleID] - mu) / sigma;
-                preprocess_cache_X_[sampleID * n_predict_parameter_ + 1] = CDFPhi(normal_num);
+                const double cdf = CDFPhi(normal_num);
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1)] = -cdf;
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 1] = -1;
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 2] = -1;
+
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 3] = cdf;
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 4] = 1;
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 5] = -1;
+
             }
-            using RowMatrixXd = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-            Eigen::Map<RowMatrixXd> X(preprocess_cache_X_, n_sample_rank_, (int64_t) n_predict_parameter_);
+            using RowMatrixXd = Eigen::Matrix<double, Eigen::Dynamic, n_predict_parameter_ + 1, Eigen::RowMajor>;
+            Eigen::Map<RowMatrixXd> A(preprocess_cache_A_, 2 * n_sample_rank_, (int64_t) n_predict_parameter_ + 1);
 
 //    printf("%.3f %.3f %.3f %.3f\n", X_cache[0], X_cache[1], X_cache[2], X_cache[3]);
 //    std::cout << X.row(1) << std::endl;
@@ -116,26 +134,31 @@ namespace ReverseMIPS {
 //    printf("X rows %ld, cols %ld\n", X.MapBase<Eigen::Map<Eigen::Matrix<double, -1, -1, 1>, 0>, 0>::rows(),
 //           X.MapBase<Eigen::Map<Eigen::Matrix<double, -1, -1, 1>, 0>, 0>::cols());
 
-            Eigen::Map<Eigen::VectorXd> Y(preprocess_cache_Y_, n_sample_rank_);
-            Eigen::VectorXd res = (X.transpose() * X).ldlt().solve(X.transpose() * Y);
-            assert(res.rows() == n_predict_parameter_);
+            Eigen::Map<Eigen::VectorXd> b(preprocess_cache_b_, 2 * n_sample_rank_);
+
+            Eigen::Map<Eigen::Matrix<double, n_predict_parameter_ + 1, 1>> c(preprocess_cache_c_,
+                                                                             n_predict_parameter_ + 1);
+            Eigen::Matrix<double, n_predict_parameter_ + 1, 1> x;
+
+            double min_obj = sdlp::linprog<3>(c, A, b, x);
+
+            assert(x.rows() == n_predict_parameter_ + 1);
 //            printf("res rows %ld, cols %ld\n", res.rows(), res.cols());
 //            printf("res [0]: %.3f, [1]: %.3f\n", res[0], res[1]);
 
             //assign parameter
             for (int paraID = 0; paraID < n_predict_parameter_; paraID++) {
-                predict_para_l_[userID * n_predict_parameter_ + paraID] = res[paraID];
+                predict_para_l_[userID * n_predict_parameter_ + paraID] = x[paraID];
             }
 
             //assign error
             int error = -1;
 #pragma omp parallel for default(none) shared(userID, error)
             for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
-                double pred_rank = 0;
-                for (int paraID = 0; paraID < n_predict_parameter_; paraID++) {
-                    pred_rank += predict_para_l_[userID * n_predict_parameter_ + paraID] *
-                                 preprocess_cache_X_[sampleID * n_predict_parameter_ + paraID];
-                }
+                const double tmp_a = predict_para_l_[userID * n_predict_parameter_];
+                const double tmp_b = predict_para_l_[userID * n_predict_parameter_ + 1];
+                const double tmp_x = preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 3];
+                double pred_rank = tmp_x * tmp_a + tmp_b;
                 const int real_rank = sampleID;
                 const int tmp_error = std::abs(std::floor(pred_rank) - real_rank);
 #pragma omp critical
@@ -147,10 +170,12 @@ namespace ReverseMIPS {
         }
 
         void FinishPreprocess() {
-            delete[] preprocess_cache_X_;
-            delete[] preprocess_cache_Y_;
-            preprocess_cache_X_ = nullptr;
-            preprocess_cache_Y_ = nullptr;
+            delete[] preprocess_cache_A_;
+            delete[] preprocess_cache_b_;
+            delete[] preprocess_cache_c_;
+            preprocess_cache_A_ = nullptr;
+            preprocess_cache_b_ = nullptr;
+            preprocess_cache_c_ = nullptr;
         }
 
         inline void
@@ -164,7 +189,7 @@ namespace ReverseMIPS {
             const double input_x = CDFPhi(normalize_x);
 
             const size_t pred_pos = userID * n_predict_parameter_;
-            const double pred_rank = predict_para_l_[pred_pos] + input_x * predict_para_l_[pred_pos + 1];
+            const double pred_rank = input_x * predict_para_l_[pred_pos] + predict_para_l_[pred_pos + 1];
             const int pred_int_rank = std::floor(pred_rank);
             const int pred_sample_rank_lb = pred_int_rank + error_l_[userID];
             const int pred_sample_rank_ub = pred_int_rank - error_l_[userID];
@@ -254,4 +279,4 @@ namespace ReverseMIPS {
 
     };
 }
-#endif //REVERSE_K_RANKS_HEADLINEARREGRESSION_HPP
+#endif //REVERSE_K_RANKS_MINMAXHEADLINEARREGRESSION_HPP

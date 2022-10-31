@@ -72,8 +72,8 @@ def run():
     dataset_l = ['movielens-27m']
     # dataset_l = ['yahoomusic_big', 'yelp', 'goodreads']
 
-    for ds in dataset_l:
-        os.system('cd build/attribution && ./ibc --dataset_name {} --dataset_dir {}'.format(ds, dataset_dir))
+    # for ds in dataset_l:
+    #     os.system('cd build/attribution && ./ibc --dataset_name {} --dataset_dir {}'.format(ds, dataset_dir))
 
     dataset_l = ['movielens-27m', 'netflix']
     for ds in dataset_l:

@@ -68,6 +68,7 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
         'RSTopTIP': 'n_sample_20-index_size_gb_50',
 
         'QueryRankSampleIntLR': 'n_sample_20',
+        'QueryRankSampleMinMaxIntLR': 'n_sample_20',
         'QueryRankSampleScoreDistribution': 'n_sample_20',
         'QueryRankSampleSearchAllRank': 'n_sample_20',
         'QueryRankSampleSearchKthRank': 'n_sample_20',
@@ -111,7 +112,8 @@ def run():
 
         # 'GridIndex',
         # 'LinearModel',
-        'QueryRankSampleIntLR',
+        # 'QueryRankSampleIntLR',
+        # 'QueryRankSampleMinMaxIntLR',
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
         'QueryRankSampleSearchKthRank',
@@ -158,9 +160,12 @@ def run():
                 ds, 'true', 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
             ))
 
-        os.system(
-            'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 'true', 'QueryRankSampleIntLR', n_sample_item, sample_topk))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 'true', 'QueryRankSampleIntLR', n_sample_item, sample_topk))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
+        #         ds, 'true', 'QueryRankSampleMinMaxIntLR', n_sample_item, sample_topk))
         # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
         #     ds, 'true', 'QueryRankSampleScoreDistribution', 150, 60))
 
