@@ -202,11 +202,6 @@ int main(int argc, char **argv) {
         topk_l = {600, 500, 200, 100, 50, 20, 10, 1};
     }
 
-//    vector<int> topk_l{600, 500, 200, 100, 50, 20, 10, 1};
-//    vector<int> topk_l{60, 50, 40, 30, 20, 10};
-//    vector<int> topk_l{30, 20, 10};
-//    vector<int> topk_l{10};
-//    vector<int> topk_l{10000, 8192, 4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8};
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     vector<vector<SingleQueryPerformance>> query_performance_topk_l;

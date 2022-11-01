@@ -66,7 +66,6 @@ namespace ReverseMIPS {
             if (tmp_lb <= min_topk_ub_rank) {
                 result_l[userID] = true;
                 n_result_user++;
-                continue;
             }
             if (n_result_user == topk) {
                 for (int tmp_userID = userID + 1; tmp_userID < n_user; tmp_userID++) {
@@ -81,12 +80,11 @@ namespace ReverseMIPS {
             }
 
             const int &tmp_ub = rank_ub_l[userID];
-            if (min_topk_lb_rank <= tmp_ub) {
+            if (min_topk_lb_rank <= tmp_ub && min_topk_lb_rank != min_topk_ub_rank) {
                 prune_l[userID] = true;
                 n_prune_user++;
-                continue;
             }
-            assert(!prune_l[userID] && !result_l[userID]);
+            assert((prune_l[userID] ^ result_l[userID]) || (!prune_l[userID] && !result_l[userID]));
 
             if (!prune_l[userID] && !result_l[userID]) {
                 refine_seq_l[refine_user_size] = userID;
