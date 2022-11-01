@@ -86,11 +86,13 @@ int main(int argc, char **argv) {
     spdlog::info("{} dataset_name {}, dataset_dir {}", method_name, dataset_name, dataset_dir);
     spdlog::info("index_dir {}", index_dir);
 
-    int n_data_item, n_user, vec_dim;
-    vector<VectorMatrix> data = readIndexData(dataset_dir, dataset_name, n_data_item, n_user, vec_dim);
+    int n_data_item, n_query_item, n_user, vec_dim;
+    vector<VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
     VectorMatrix &user = data[0];
     VectorMatrix &data_item = data[1];
-    spdlog::info("n_data_item {}, n_user {}, vec_dim {}", n_data_item, n_user, vec_dim);
+    VectorMatrix &query_item = data[2];
+    spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
     char index_path[256];
     sprintf(index_path, "%s/%s.index", index_dir, dataset_name);
@@ -208,12 +210,8 @@ int main(int argc, char **argv) {
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     vector<vector<SingleQueryPerformance>> query_performance_topk_l;
-    int n_execute_query;
+    const int n_execute_query = n_query_item;
     for (int topk: topk_l) {
-        int n_query_item;
-        VectorMatrix &query_item = readQueryData(dataset_dir, dataset_name, vec_dim, n_query_item);
-        n_execute_query = n_query_item;
-
         vector<SingleQueryPerformance> query_performance_l(n_execute_query);
         vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,
                                                                      query_performance_l);

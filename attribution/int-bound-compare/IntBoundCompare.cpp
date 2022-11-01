@@ -53,13 +53,13 @@ int main(int argc, char **argv) {
     const char *dataset_dir = para.dataset_dir.c_str();
     spdlog::info("IntBoundCompare dataset_name {}, dataset_dir {}", dataset_name, dataset_dir);
 
-    int n_data_item, n_user, vec_dim;
-    vector<VectorMatrix> data = readIndexData(dataset_dir, dataset_name, n_data_item, n_user,
-                                              vec_dim);
+    int n_data_item, n_query_item, n_user, vec_dim;
+    vector<VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
     VectorMatrix &user = data[0];
     VectorMatrix &data_item = data[1];
     VectorMatrix &query_item = data[2];
-    spdlog::info("n_data_item {}, n_user {}, vec_dim {}", n_data_item, n_user, vec_dim);
+    spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
     user.vectorNormalize();
 

@@ -37,9 +37,10 @@ namespace ReverseMIPS {
     }
 
     std::vector<VectorMatrix>
-    readIndexData(const char *basic_dir, const char *dataset_name, int &n_data_item, int &n_user,
-                  int &vec_dim) {
+    readData(const char *basic_dir, const char *dataset_name, int &n_data_item, int &n_query_item, int &n_user,
+             int &vec_dim) {
         n_data_item = 0;
+        n_query_item = 0;
         n_user = 0;
         vec_dim = 0;
 
@@ -50,31 +51,19 @@ namespace ReverseMIPS {
         sprintf(path, "%s/%s/%s_user.dvecs", basic_dir, dataset_name, dataset_name);
         std::unique_ptr<double[]> user_ptr = loadVector<double>(path, n_user, vec_dim);
 
-        static VectorMatrix user, data_item;
+        sprintf(path, "%s/%s/%s_query_item.dvecs", basic_dir, dataset_name, dataset_name);
+        std::unique_ptr<double[]> query_item_ptr = loadVector<double>(path, n_query_item, vec_dim);
+
+        static VectorMatrix user, data_item, query_item;
         user.init(user_ptr, n_user, vec_dim);
         data_item.init(data_item_ptr, n_data_item, vec_dim);
-
-        std::vector<VectorMatrix> res(2);
-        res[0] = std::move(user);
-        res[1] = std::move(data_item);
-        return res;
-    }
-
-    VectorMatrix &
-    readQueryData(const char *basic_dir, const char *dataset_name, const int &vec_dim, int &n_query_item) {
-        n_query_item = 0;
-
-        char path[256];
-
-        sprintf(path, "%s/%s/%s_query_item.dvecs", basic_dir, dataset_name, dataset_name);
-        int read_vec_dim;
-        std::unique_ptr<double[]> query_item_ptr = loadVector<double>(path, n_query_item, read_vec_dim);
-        assert(read_vec_dim == vec_dim);
-
-        static VectorMatrix query_item;
         query_item.init(query_item_ptr, n_query_item, vec_dim);
 
-        return query_item;
+        std::vector<VectorMatrix> res(3);
+        res[0] = std::move(user);
+        res[1] = std::move(data_item);
+        res[2] = std::move(query_item);
+        return res;
     }
 }
 #endif //REVERSE_KRANKS_VECTORIO_HPP

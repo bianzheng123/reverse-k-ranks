@@ -105,13 +105,13 @@ int main(int argc, char **argv) {
     spdlog::info("BuildRankSampleIndex dataset_name {}, dataset_dir {}", dataset_name, dataset_dir);
     spdlog::info("index_dir {}", index_dir);
 
-    int n_data_item, n_user, vec_dim;
-    vector<VectorMatrix> data = readIndexData(dataset_dir, dataset_name, n_data_item, n_user,
-                                              vec_dim);
+    int n_data_item, n_query_item, n_user, vec_dim;
+    vector<VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
     VectorMatrix &user = data[0];
     VectorMatrix &data_item = data[1];
     VectorMatrix &query_item = data[2];
-    spdlog::info("n_data_item {}, n_user {}, vec_dim {}", n_data_item, n_user, vec_dim);
+    spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
     std::vector<int> memory_capacity_l = {2, 4, 8, 16, 32};
     std::vector<int64_t> n_sample_l(memory_capacity_l.size());
