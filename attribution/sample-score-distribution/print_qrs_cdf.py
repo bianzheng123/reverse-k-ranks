@@ -44,7 +44,7 @@ def get_sample_ip_l():
 
 def plot(x_l, y_l, fname):
     plt.plot(x_l, y_l,
-             color='#3D0DFF', linewidth=2.5, linestyle='-',
+             color='#b2b2b2', linewidth=2.5, linestyle='-',
              label='Query Rank Sample',
              marker='H', markersize=2)
     plt.xlabel('sampled rank')
@@ -53,7 +53,7 @@ def plot(x_l, y_l, fname):
     # plt.yscale('log')
     plt.ylabel('IP')
     plt.title('ip_plot')
-    plt.savefig(fname, dpi=600)
+    plt.savefig(fname, dpi=600, bbox_inches='tight')
     plt.close()
 
 
