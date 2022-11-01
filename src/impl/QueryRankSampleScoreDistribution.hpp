@@ -113,10 +113,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
             //coarse binary search
             const int n_query_item = n_execute_query;
 
-            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
-            for (int qID = 0; qID < n_query_item; qID++) {
-                query_heap_l[qID].resize(topk);
-            }
+            std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
 
             // for binary search, check the number
             for (int queryID = 0; queryID < n_query_item; queryID++) {
