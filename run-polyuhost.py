@@ -92,9 +92,9 @@ def run():
         # os.system(
         #     'cd build && ./brsi --dataset_dir {} --dataset_name {} --index_dir {}'.format(
         #         dataset_dir, ds, index_dir))
-        # os.system(
-        #     'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {}'.format(
-        #         dataset_dir, ds, 'false', index_dir, 'RankSample', n_sample))
+        os.system(
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --test_topk {} --index_dir {} --method_name {} --n_sample {}'.format(
+                dataset_dir, ds, 'false', index_dir, 'RankSample', n_sample))
         n_sample_query = 5000
         sample_topk = 600
         n_data_item = dataset_m[ds][0]
