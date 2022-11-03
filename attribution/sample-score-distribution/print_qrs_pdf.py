@@ -42,28 +42,27 @@ def get_sample_ip_l():
     return sample_arr_m
 
 
-def plot(x_l, y_l, fname):
-    plt.plot(x_l, y_l,
-             color='#3D0DFF', linewidth=2.5, linestyle='-',
-             label='Query Rank Sample',
-             marker='H', markersize=2)
-    plt.xlabel('sampled scores')
-    # ax.set_ylabel('Running Time (ms)')
-    # ax.set_ylim(0)
-    # plt.yscale('log')
-    plt.ylabel('rank')
-    # plt.title('ip_plot')
-    plt.savefig(fname, dpi=600)
+def show_hist(bins, dataset_name, name):
+    # 直方图会进行统计各个区间的数值
+    fig, ax = plt.subplots()
+    ax.hist(bins, color='#b2b2b2', bins=100, width=0.1)
+    # ax.bar(bins, hist, color='#b2b2b2', width=30)  # alpha设置透明度，0为完全透明
+
+    # ax.set(xlim=(-5, 10), xticks=np.arange(-5, 10),   #)
+    # ylim=(0, 1e8), yticks=np.arange(10000000, 90000000))
+    # n_user = dataset_m[dataset_name][0]
+    # n_data_item = dataset_m[dataset_name][1]
+    # ax.set_yscale('log')
+    ax.set_title(
+        'Advanced Sample IP Score Distribution, dataset: {}'.format(dataset_name))
+    ax.set_xlabel('IP')
+    ax.set_ylabel('frequency')
+    # plt.xlim(0, 100)  # 设置x轴分布范围
+    plt.savefig(name, dpi=600, bbox_inches='tight')
     plt.close()
 
 
 sample_userID_ip_m = get_sample_ip_l()
 for i, userID in enumerate(sample_userID_ip_m.keys(), 0):
     ip_l = sample_userID_ip_m[userID]
-    rank_l = np.arange(len(ip_l)) + 1
-    plot(ip_l, rank_l, 'sample-ip-sample_user_{}.jpg'.format(i))
-    mu = np.average(ip_l)
-    std = np.std(ip_l)
-    new_ip_l = [norm.cdf((x-mu) / std) for x in ip_l]
-    new_rank_l = [(x - 1) / len(rank_l) for x in rank_l]
-    plot(new_ip_l, rank_l, 'sample-ip-erf-sample_user_{}.jpg'.format(i))
+    show_hist(ip_l, 'Movielens', 'pdf_query_rank_sample_user_{}.jpg'.format(i))

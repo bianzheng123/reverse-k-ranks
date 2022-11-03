@@ -85,12 +85,12 @@ namespace ReverseMIPS {
 
         double CDFPhi(double x) const {
             // constants
-            double a1 = 0.254829592;
-            double a2 = -0.284496736;
-            double a3 = 1.421413741;
-            double a4 = -1.453152027;
-            double a5 = 1.061405429;
-            double p = 0.3275911;
+            constexpr double a1 = 0.254829592;
+            constexpr double a2 = -0.284496736;
+            constexpr double a3 = 1.421413741;
+            constexpr double a4 = -1.453152027;
+            constexpr double a5 = 1.061405429;
+            constexpr double p = 0.3275911;
 
             // Save the sign of x
             int sign = 1;
