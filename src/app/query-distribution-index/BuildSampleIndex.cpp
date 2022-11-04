@@ -1,6 +1,8 @@
 //
-// Created by BianZheng on 2022/10/20.
+// Created by BianZheng on 2022/10/21.
 //
+
+///given the sampled rank, build the QueryRankSample index
 
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
@@ -8,7 +10,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "alg/DiskIndex/ReadAll.hpp"
-#include "alg/RankBoundRefinement/RankSearch.hpp"
+#include "alg/RankBoundRefinement/SampleSearch.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -18,8 +20,8 @@
 
 class Parameter {
 public:
-    std::string dataset_dir, dataset_name, index_dir;
-    int n_sample;
+    std::string dataset_dir, dataset_name, method_name, index_dir;
+    int n_sample, n_sample_query, sample_topk;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -31,13 +33,21 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("dataset_dir,dd",
              po::value<std::string>(&para.dataset_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
              "the basic directory of dataset")
-            ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
+            ("dataset_name, dn", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
              "dataset_name")
             ("index_dir, id",
              po::value<std::string>(&para.index_dir)->default_value("/home/bianzheng/reverse-k-ranks/index"),
              "the directory of the index")
+            ("method_name, mn",
+             po::value<std::string>(&para.method_name)->default_value("QueryRankSampleSearchKthRank"),
+             "method_name")
+
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(-1),
-             "number of sample of a rank bound");
+             "number of sample of a rank bound")
+            ("n_sample_query, nsq", po::value<int>(&para.n_sample_query)->default_value(9000),
+             "number of sampled query")
+            ("sample_topk, st", po::value<int>(&para.sample_topk)->default_value(600),
+             "topk of sampled query");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -53,16 +63,21 @@ using namespace std;
 using namespace ReverseMIPS;
 
 void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
-                const std::vector<int64_t> &n_sample_l,
-                const char *score_table_path, const char *dataset_name, const char *basic_index_dir) {
+                const std::vector<int64_t> &n_sample_l, const int &n_sample_query, const int &sample_topk,
+                const char *score_table_path, const char *dataset_name, const string &method_name,
+                const char *basic_index_dir) {
     const int n_user = user.n_vector_;
     const int n_data_item = data_item.n_vector_;
 
     //rank search
     const int n_rs_ins = (int) n_sample_l.size();
-    std::vector<RankSearch> rank_search_l(n_rs_ins);
+    std::vector<SampleSearch> rank_search_l(n_rs_ins);
+    const bool load_sample_score = false;
+    const bool is_query_distribution = method_name != "RankSample";
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
-        rank_search_l[rsID] = RankSearch(n_sample_l[rsID], n_data_item, n_user);
+        rank_search_l[rsID] = SampleSearch(
+                basic_index_dir, dataset_name, method_name.c_str(),
+                n_sample_l[rsID], load_sample_score, is_query_distribution, n_sample_query, sample_topk);
     }
 
     ReadAll read_ins(n_user, n_data_item, score_table_path);
@@ -87,11 +102,11 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
         }
     }
 
+    const bool save_sample_score = true;
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
-        char rank_search_path[256];
-        sprintf(rank_search_path, "%s/memory_index/RankSample-%s-n_sample_%ld.index",
-                basic_index_dir, dataset_name, n_sample_l[rsID]);
-        rank_search_l[rsID].SaveIndex(rank_search_path);
+        rank_search_l[rsID].SaveIndex(basic_index_dir, dataset_name, method_name.c_str(),
+                                      save_sample_score, is_query_distribution,
+                                      n_sample_query, sample_topk);
     }
     read_ins.FinishRetrieval();
 }
@@ -102,7 +117,9 @@ int main(int argc, char **argv) {
     const char *dataset_name = para.dataset_name.c_str();
     const char *dataset_dir = para.dataset_dir.c_str();
     string index_dir = para.index_dir;
-    spdlog::info("BuildRankSampleIndex dataset_name {}, dataset_dir {}", dataset_name, dataset_dir);
+    const char *method_name = para.method_name.c_str();
+    spdlog::info("BuildSampleIndex dataset_name {}, method_name {}, dataset_dir {}",
+                 dataset_name, method_name, dataset_dir);
     spdlog::info("index_dir {}", index_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
@@ -115,18 +132,25 @@ int main(int argc, char **argv) {
 
     std::vector<int> memory_capacity_l = {2, 4, 8, 16, 32};
     std::vector<int64_t> n_sample_l(memory_capacity_l.size());
-    const int n_capacity = (int) memory_capacity_l.size();
+    int n_capacity = (int) memory_capacity_l.size();
     for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
         const int64_t memory_capacity = memory_capacity_l[capacityID];
         const int64_t n_sample = memory_capacity * 1024 * 1024 * 1024 / 8 / n_user;
         n_sample_l[capacityID] = n_sample;
-        printf("memory_capacity %ld, n_sample %ld\n", memory_capacity, n_sample);
     }
 
     if (para.n_sample != -1) {
         n_sample_l.clear();
         n_sample_l.push_back(para.n_sample);
+        n_capacity = (int) memory_capacity_l.size();
+        spdlog::info("n_sample {}", n_sample_l[0]);
+    } else {
+        for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
+            spdlog::info("memory_capacity {}, n_sample {}",
+                         memory_capacity_l[capacityID], n_sample_l[capacityID]);
+        }
     }
+
     std::string n_sample_info = "n_sample: ";
     const int sample_length = (int) n_sample_l.size();
     for (int sampleID = 0; sampleID < sample_length; sampleID++) {
@@ -140,20 +164,21 @@ int main(int argc, char **argv) {
     TimeRecord record;
     record.reset();
 
-    BuildIndex(data_item, user, n_sample_l,
-               score_table_path, dataset_name, index_dir.c_str());
+    BuildIndex(data_item, user,
+               n_sample_l, para.n_sample_query, para.sample_topk,
+               score_table_path, dataset_name, method_name, index_dir.c_str());
 
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
     RetrievalResult config;
 
-    spdlog::info("BuildRankSampleIndex build index time: total {}s", build_index_time);
+    spdlog::info("BuildSampleIndex build index time: total {}s", build_index_time);
 
+    char parameter_name[128];
+    sprintf(parameter_name, "%s", method_name);
     config.AddInfo(n_sample_info);
     config.AddBuildIndexTime(build_index_time);
-    char parameter_name[256];
-    sprintf(parameter_name, "n_sample_%d", para.n_sample);
-    config.WritePerformance(dataset_name, "BuildRankSampleIndex", parameter_name);
+    config.WritePerformance(dataset_name, "BuildSampleIndex", parameter_name);
     return 0;
 }

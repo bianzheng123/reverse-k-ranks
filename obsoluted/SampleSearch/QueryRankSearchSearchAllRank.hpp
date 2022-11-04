@@ -8,6 +8,8 @@
 #include "struct/DistancePair.hpp"
 #include <iostream>
 #include <memory>
+#include <set>
+#include <numeric>
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
@@ -301,8 +303,9 @@ namespace ReverseMIPS {
 
         inline QueryRankSearchSearchAllRank(const char *index_path, const char *dataset_name,
                                             const size_t &n_sample, const size_t &n_sample_query,
-                                            const size_t &sample_topk) {
-            LoadIndex(index_path, dataset_name, n_sample, n_sample_query, sample_topk);
+                                            const size_t &sample_topk, const bool &load_sample_score) {
+            LoadIndex(index_path, dataset_name, n_sample, n_sample_query, sample_topk,
+                      load_sample_score);
         }
 
         void Preprocess(const char *dataset_name, const int &n_sample_query, const int &sample_topk,
@@ -534,11 +537,18 @@ namespace ReverseMIPS {
             }
         }
 
-        void SaveIndex(const char *index_basic_dir, const char *dataset_name) {
+        void SaveIndex(const char *index_basic_dir, const char *dataset_name, const bool &save_sample_score) {
             char index_path[256];
-            sprintf(index_path,
-                    "%s/memory_index/QueryRankSearchAllRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
-                    index_basic_dir, dataset_name, n_sample_, n_sample_query_, sample_topk_);
+            if (save_sample_score) {
+                sprintf(index_path,
+                        "%s/memory_index/QueryRankSampleSearchAllRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample_, n_sample_query_, sample_topk_);
+            } else {
+                sprintf(index_path,
+                        "%s/qrs_to_sample_index/QueryRankSampleSearchAllRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample_, n_sample_query_, sample_topk_);
+            }
+
             std::ofstream out_stream_ = std::ofstream(index_path, std::ios::binary | std::ios::out);
             if (!out_stream_) {
                 spdlog::error("error in write result, not found index");
@@ -551,17 +561,28 @@ namespace ReverseMIPS {
             out_stream_.write((char *) &sample_topk_, sizeof(size_t));
 
             out_stream_.write((char *) known_rank_idx_l_.get(), (int64_t) (n_sample_ * sizeof(int)));
-            out_stream_.write((char *) bound_distance_table_.get(), (int64_t) (n_user_ * n_sample_ * sizeof(double)));
+            if (save_sample_score) {
+                out_stream_.write((char *) bound_distance_table_.get(),
+                                  (int64_t) (n_user_ * n_sample_ * sizeof(double)));
+            }
 
             out_stream_.close();
         }
 
         void LoadIndex(const char *index_basic_dir, const char *dataset_name,
-                       const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk) {
+                       const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk,
+                       const bool &load_sample_score) {
             char index_path[256];
-            sprintf(index_path,
-                    "%s/memory_index/QueryRankSearchAllRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
-                    index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
+            if (load_sample_score) {
+                sprintf(index_path,
+                        "%s/memory_index/QueryRankSampleSearchAllRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
+            } else {
+                sprintf(index_path,
+                        "%s/qrs_to_sample_index/QueryRankSampleSearchAllRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
+            }
+
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
             if (!index_stream) {
                 spdlog::error("error in reading index");
@@ -579,7 +600,10 @@ namespace ReverseMIPS {
             index_stream.read((char *) known_rank_idx_l_.get(), (int64_t) (sizeof(int) * n_sample_));
 
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
-            index_stream.read((char *) bound_distance_table_.get(), (int64_t) (sizeof(double) * n_user_ * n_sample_));
+            if (load_sample_score) {
+                index_stream.read((char *) bound_distance_table_.get(),
+                                  (int64_t) (sizeof(double) * n_user_ * n_sample_));
+            }
 
             index_stream.close();
         }

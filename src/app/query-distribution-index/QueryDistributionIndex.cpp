@@ -37,14 +37,14 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
     po::options_description opts("Allowed options");
     opts.add_options()
             ("help,h", "help info")
+            ("index_dir, ds",
+             po::value<std::string>(&para.index_dir)->default_value("/home/bianzheng/reverse-k-ranks/index"),
+             "the basic directory of index")
             ("dataset_dir,dd",
              po::value<std::string>(&para.dataset_dir)->default_value("/home/bianzheng/Dataset/ReverseMIPS"),
              "the basic directory of dataset")
             ("dataset_name, ds", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
              "dataset_name")
-            ("index_dir, ds",
-             po::value<std::string>(&para.index_dir)->default_value("/home/bianzheng/reverse-k-ranks/index"),
-             "the basic directory of index")
 
             ("n_sample_item, ns", po::value<int>(&para.n_sample_item)->default_value(150),
              "number of sample of a rank bound")

@@ -1,9 +1,12 @@
 #pragma once
 
+#include "struct/UserRankElement.hpp"
+#include <spdlog/spdlog.h>
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include "struct/UserRankElement.hpp"
+#include <cstring>
 #include <vector>
 #include <ostream>
 #include <string>

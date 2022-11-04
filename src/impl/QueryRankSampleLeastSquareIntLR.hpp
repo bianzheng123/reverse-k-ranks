@@ -1,18 +1,18 @@
 //
-// Created by BianZheng on 2022/10/29.
+// Created by BianZheng on 2022/10/14.
 //
 
-#ifndef REVERSE_K_RANKS_QUERYRANKSAMPLEMINMAXINTLR_HPP
-#define REVERSE_K_RANKS_QUERYRANKSAMPLEMINMAXINTLR_HPP
+#ifndef REVERSE_K_RANKS_QUERYRANKSAMPLELEASTSQUAREINTLR_HPP
+#define REVERSE_K_RANKS_QUERYRANKSAMPLELEASTSQUAREINTLR_HPP
 
 #include "alg/SpaceInnerProduct.hpp"
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
 #include "alg/QueryIPBound/FullInt.hpp"
-#include "alg/RankBoundRefinement/MinMaxHeadLinearRegression.hpp"
+#include "alg/RankBoundRefinement/HeadLinearRegression.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QueryRankSearchSearchKthRank.hpp"
+#include "alg/RankBoundRefinement/SampleSearch.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -30,7 +30,7 @@
 #include <cassert>
 #include <spdlog/spdlog.h>
 
-namespace ReverseMIPS::QueryRankSampleMinMaxIntLR {
+namespace ReverseMIPS::QueryRankSampleLeastSquareIntLR {
 
     class Index : public BaseIndex {
         void ResetTimer() {
@@ -49,9 +49,9 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLR {
         // IP Bound
         FullInt ip_bound_ins_;
         //rank bound search
-        MinMaxHeadLinearRegression rank_bound_ins_;
+        HeadLinearRegression rank_bound_ins_;
         //rank search
-        QueryRankSearchSearchKthRank rank_ins_;
+        SampleSearch rank_ins_;
         //read disk
         ReadAllDirectIO disk_ins_;
 
@@ -77,9 +77,9 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLR {
                 //ip bound ins
                 FullInt &ip_bound_ins,
                 //rank search for compute loose rank bound
-                MinMaxHeadLinearRegression &rank_bound_ins,
+                HeadLinearRegression &rank_bound_ins,
                 //rank search
-                QueryRankSearchSearchKthRank &rank_ins,
+                SampleSearch &rank_ins,
                 //disk index
                 ReadAllDirectIO &disk_ins,
                 //general retrieval
@@ -273,10 +273,11 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLR {
         ip_bound_ins.Preprocess(user, data_item);
 
         //rank search
-        QueryRankSearchSearchKthRank rank_ins(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk,
-                                              true);
+        SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleLeastSquareIntLR",
+                              n_sample, true, true,
+                              n_sample_query, sample_topk);
 
-        MinMaxHeadLinearRegression rank_bound_ins(n_data_item, n_user);
+        HeadLinearRegression rank_bound_ins(n_data_item, n_user);
         rank_bound_ins.StartPreprocess(rank_ins.known_rank_idx_l_.get(), n_sample);
 
         //disk index
@@ -310,4 +311,4 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLR {
     }
 
 }
-#endif //REVERSE_K_RANKS_QUERYRANKSAMPLEMINMAXINTLR_HPP
+#endif //REVERSE_K_RANKS_QUERYRANKSAMPLELEASTSQUAREINTLR_HPP

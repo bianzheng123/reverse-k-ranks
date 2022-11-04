@@ -10,7 +10,7 @@
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/RankSearch.hpp"
+#include "alg/RankBoundRefinement/SampleSearch.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -44,7 +44,7 @@ namespace ReverseMIPS::RankSample {
         }
 
         //rank search
-        RankSearch rank_ins_;
+        SampleSearch rank_ins_;
         //read disk
         ReadAllDirectIO disk_ins_;
 
@@ -66,7 +66,7 @@ namespace ReverseMIPS::RankSample {
         std::vector<int> rank_ub_l_;
 
         Index(//rank search
-                RankSearch &rank_ins,
+                SampleSearch &rank_ins,
                 //disk index
                 ReadAllDirectIO &disk_ins,
                 //general retrieval
@@ -234,10 +234,8 @@ namespace ReverseMIPS::RankSample {
         user.vectorNormalize();
 
         //rank search
-        char rank_sample_index_path[256];
-        sprintf(rank_sample_index_path, "%s/memory_index/RankSample-%s-n_sample_%d.index",
-                basic_index_path, dataset_name, n_sample);
-        RankSearch rank_ins(rank_sample_index_path);
+        SampleSearch rank_ins(basic_index_path, dataset_name, "RankSample",
+                              n_sample, true, false);
 
         //disk index
         ReadAllDirectIO disk_ins(n_user, n_data_item, disk_index_path);

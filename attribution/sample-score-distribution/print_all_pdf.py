@@ -26,7 +26,8 @@ def get_sample_ip_l(dataset):
 
     print("{} n_data_item {}, n_user {}".format(dataset, n_data_item, n_user))
 
-    userid_l = np.random.choice(n_user, 20, replace=False)
+    # userid_l = np.random.choice(n_user, 20, replace=False)
+    userid_l = np.arange(20)
 
     sample_arr_m = {}
 
@@ -63,4 +64,4 @@ def show_hist(bins, dataset_name, name):
 sample_userID_ip_m = get_sample_ip_l('movielens-27m')
 for i, userID in enumerate(sample_userID_ip_m.keys(), 0):
     ip_l = sample_userID_ip_m[userID]
-    show_hist(ip_l, 'Movielens', 'pdf_rank_sample_user_{}.jpg'.format(i))
+    show_hist(ip_l, 'Movielens', 'pdf_all_sample_user_{}.jpg'.format(i))

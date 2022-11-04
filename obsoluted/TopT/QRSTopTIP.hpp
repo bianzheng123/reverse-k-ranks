@@ -9,7 +9,7 @@
 #include "alg/TopkMaxHeap.hpp"
 #include "TopTIP.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QueryRankSearchSearchAllRank.hpp"
+#include "../SampleSearch/QueryRankSearchSearchAllRank.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"

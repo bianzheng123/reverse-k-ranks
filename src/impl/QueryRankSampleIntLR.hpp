@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/10/14.
+// Created by BianZheng on 2022/10/29.
 //
 
 #ifndef REVERSE_K_RANKS_QUERYRANKSAMPLEINTLR_HPP
@@ -10,9 +10,9 @@
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
 #include "alg/QueryIPBound/FullInt.hpp"
-#include "alg/RankBoundRefinement/HeadLinearRegression.hpp"
+#include "alg/RankBoundRefinement/MinMaxHeadLinearRegression.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QueryRankSearchSearchKthRank.hpp"
+#include "alg/RankBoundRefinement/SampleSearch.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -49,9 +49,9 @@ namespace ReverseMIPS::QueryRankSampleIntLR {
         // IP Bound
         FullInt ip_bound_ins_;
         //rank bound search
-        HeadLinearRegression rank_bound_ins_;
+        MinMaxHeadLinearRegression rank_bound_ins_;
         //rank search
-        QueryRankSearchSearchKthRank rank_ins_;
+        SampleSearch rank_ins_;
         //read disk
         ReadAllDirectIO disk_ins_;
 
@@ -77,9 +77,9 @@ namespace ReverseMIPS::QueryRankSampleIntLR {
                 //ip bound ins
                 FullInt &ip_bound_ins,
                 //rank search for compute loose rank bound
-                HeadLinearRegression &rank_bound_ins,
+                MinMaxHeadLinearRegression &rank_bound_ins,
                 //rank search
-                QueryRankSearchSearchKthRank &rank_ins,
+                SampleSearch &rank_ins,
                 //disk index
                 ReadAllDirectIO &disk_ins,
                 //general retrieval
@@ -273,10 +273,11 @@ namespace ReverseMIPS::QueryRankSampleIntLR {
         ip_bound_ins.Preprocess(user, data_item);
 
         //rank search
-        QueryRankSearchSearchKthRank rank_ins(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk,
-                                              true);
+        SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleIntLR",
+                              n_sample, true, true,
+                              n_sample_query, sample_topk);
 
-        HeadLinearRegression rank_bound_ins(n_data_item, n_user);
+        MinMaxHeadLinearRegression rank_bound_ins(n_data_item, n_user);
         rank_bound_ins.StartPreprocess(rank_ins.known_rank_idx_l_.get(), n_sample);
 
         //disk index

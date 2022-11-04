@@ -64,11 +64,8 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
     flag = True
     suffix_m = {
 
-        'QRSTopTIP': 'n_sample_20-index_size_gb_50',
-        'RSTopTIP': 'n_sample_20-index_size_gb_50',
-
         'QueryRankSampleIntLR': 'n_sample_20',
-        'QueryRankSampleMinMaxIntLR': 'n_sample_20',
+        'QueryRankSampleLeastSquareIntLR': 'n_sample_20',
         'QueryRankSampleScoreDistribution': 'n_sample_20',
         'QueryRankSampleSearchAllRank': 'n_sample_20',
         'QueryRankSampleSearchKthRank': 'n_sample_20',
@@ -104,6 +101,27 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
         print("no error, no bug")
 
 
+def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, n_sample_item, sample_topk):
+    sample_name_m = {
+        'QueryRankSampleIntLR': 'OptimalPart',
+        'QueryRankSampleLeastSquareIntLR': 'OptimalPart',
+        'QueryRankSampleScoreDistribution': 'OptimalPart',
+        'QueryRankSampleSearchAllRank': 'OptimalAll',
+        'QueryRankSampleSearchKthRank': 'OptimalPart',
+        'RankSample': 'Uniform',
+    }
+    sample_name = sample_name_m[method_name]
+
+    os.system(
+        f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --sample_name {sample_name} --method_name {method_name} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+    )
+    os.system(
+        f"cd build && ./bsi --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+    os.system(
+        f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --test_topk {'true'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+    )
+
+
 def run():
     method_name_l = [
         'BatchDiskBruteForce',
@@ -111,9 +129,9 @@ def run():
         'MemoryBruteForce',
 
         # 'GridIndex',
-        'LinearModel',
+        # 'LinearModel',
         'QueryRankSampleIntLR',
-        'QueryRankSampleMinMaxIntLR',
+        'QueryRankSampleLeastSquareIntLR',
         'QueryRankSampleScoreDistribution',
         'QueryRankSampleSearchAllRank',
         'QueryRankSampleSearchKthRank',
@@ -123,6 +141,7 @@ def run():
     os.system('cd result/rank && rm *')
     os.system('cd result/single_query_performance && rm *')
     os.system('cd result/vis_performance && rm *')
+    os.system('cd index/memory_index && rm *')
 
     # os.system('cd build && ./{} --dataset_name {}'.format('rb', ds))
     # os.system('cd build && ./{} {}'.format('bbfdi', ds))
@@ -136,47 +155,27 @@ def run():
         # os.system('cd build && ./bst --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'GridIndex'))
-        os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'LinearModel'))
+        # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'LinearModel'))
 
         n_sample_item = 150
-        sample_topk = 60
+        sample_topk = 30
         n_data_item = dataset_m[ds][0]
         n_user = dataset_m[ds][2]
         n_sample = 20
         os.system(
-            "cd build && ./qdi --dataset_name {} --n_sample_item {} --sample_topk {}".format(
-                ds, n_sample_item, sample_topk
-            ))
-        os.system(
-            "cd build && ./fsr --dataset_name {} --n_data_item {} --n_user {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
-                ds, n_data_item, n_user, n_sample, n_sample_item, sample_topk
-            ))
-        os.system(
-            "cd build && ./bqrsi --dataset_name {} --n_sample {} --n_sample_query {} --sample_topk {}".format(
-                ds, n_sample, n_sample_item, sample_topk
-            ))
-        os.system(
-            "cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}".format(
-                ds, 'true', 'QueryRankSampleSearchKthRank', n_sample_item, sample_topk
-            ))
-        os.system(
-            "cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}".format(
-                ds, 'true', 'QueryRankSampleSearchAllRank', n_sample_item, sample_topk
+            "cd build && ./qdi --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
+                index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
-        os.system(
-            'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 'true', 'QueryRankSampleIntLR', n_sample_item, sample_topk))
-        os.system(
-            'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 'true', 'QueryRankSampleMinMaxIntLR', n_sample_item, sample_topk))
-        os.system(
-            'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --n_sample_query {} --sample_topk {}'.format(
-                ds, 'true', 'QueryRankSampleScoreDistribution', 150, 60))
+        run_sample_method('QueryRankSampleIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
-        os.system('cd build && ./brsi --dataset_name {} --n_sample {}'.format(ds, 20))
-        os.system(
-            'cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'RankSample'))
     # send_email.send('test complete')
 
     # topk_l = [10, 20, 30, 40, 50]
@@ -185,9 +184,11 @@ def run():
 
 
 if __name__ == '__main__':
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    index_dir = "/home/bianzheng/reverse-k-ranks/index"
+    dataset_dir = "/home/bianzheng/Dataset/ReverseMIPS"
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-normal', 'fake-uniform']
-    dataset_l = ['fake-normal']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 

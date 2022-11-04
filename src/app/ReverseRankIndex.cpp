@@ -11,7 +11,7 @@
 #include "GridIndex.hpp"
 #include "LinearModel.hpp"
 #include "QueryRankSampleIntLR.hpp"
-#include "QueryRankSampleMinMaxIntLR.hpp"
+#include "QueryRankSampleLeastSquareIntLR.hpp"
 #include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
@@ -120,14 +120,14 @@ int main(int argc, char **argv) {
                                                  n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
-    } else if (method_name == "QueryRankSampleMinMaxIntLR") {
+    } else if (method_name == "QueryRankSampleLeastSquareIntLR") {
         const int n_sample = para.n_sample;
         const int n_sample_query = para.n_sample_query;
         const int sample_topk = para.sample_topk;
         spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
                      n_sample, n_sample_query, sample_topk);
-        index = QueryRankSampleMinMaxIntLR::BuildIndex(data_item, user, index_path, dataset_name,
-                                                       n_sample, n_sample_query, sample_topk, index_dir);
+        index = QueryRankSampleLeastSquareIntLR::BuildIndex(data_item, user, index_path, dataset_name,
+                                                            n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else if (method_name == "QueryRankSampleScoreDistribution") {
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
 
     vector<int> topk_l;
     if (para.test_topk) {
-        topk_l = {30, 20, 10};
+        topk_l = {10};
     } else {
         topk_l = {600, 500, 200, 100, 50, 20, 10, 1};
     }

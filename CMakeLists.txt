@@ -84,10 +84,6 @@ add_executable(bst src/app/BuildScoreTable.cpp)
 target_include_directories(bst PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(bst PRIVATE armadillo pthread spdlog::spdlog OpenMP::OpenMP_CXX ${Boost_LIBRARIES} fexiprolib)
 
-add_executable(brsi src/app/BuildRankSampleIndex.cpp)
-target_include_directories(brsi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(brsi PRIVATE armadillo pthread spdlog::spdlog OpenMP::OpenMP_CXX ${Boost_LIBRARIES} fexiprolib)
-
 add_executable(rri src/app/ReverseRankIndex.cpp)
 target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(rri PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} fexiprolib)
@@ -100,9 +96,13 @@ add_executable(fsr src/app/query-distribution-index/FindSampleRank.cpp)
 target_include_directories(fsr PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(fsr PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
-add_executable(bqrsi src/app/query-distribution-index/BuildQueryRankSampleIndex.cpp)
-target_include_directories(bqrsi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(bqrsi PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
+add_executable(bsi src/app/query-distribution-index/BuildSampleIndex.cpp)
+target_include_directories(bsi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(bsi PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
+
+add_executable(ti src/app/TransformIndex.cpp)
+target_include_directories(ti PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(ti PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
 ##set_source_files_properties(src/app/BatchRunTopT.cpp PROPERTIES LANGUAGE CUDA)
 #add_executable(brtt src/app/BatchRunTopT.cpp)

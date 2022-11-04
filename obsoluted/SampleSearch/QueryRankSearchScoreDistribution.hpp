@@ -255,7 +255,7 @@ namespace ReverseMIPS {
                        const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk) {
             char index_path[256];
             sprintf(index_path,
-                    "%s/memory_index/QueryRankSearchKthRank-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                    "%s/memory_index/QueryRankSampleScoreDistribution-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
                     index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
             if (!index_stream) {

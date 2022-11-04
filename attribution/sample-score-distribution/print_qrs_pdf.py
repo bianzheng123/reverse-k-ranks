@@ -28,7 +28,8 @@ def get_sample_ip_l():
     print(n_sample)
     print(n_data_item, n_user, n_sample_query, sample_topk)
 
-    userid_l = np.random.choice(n_user, 20, replace=False)
+    # userid_l = np.random.choice(n_user, 20, replace=False)
+    userid_l = np.arange(20)
 
     sample_arr_m = {}
 

@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_QRSVALUEDISTRIBUTION_HPP
 #define REVERSE_KRANKS_QRSVALUEDISTRIBUTION_HPP
 
-#include "alg/RankBoundRefinement/QueryRankSearchSearchAllRank.hpp"
+#include "../SampleSearch/QueryRankSearchSearchAllRank.hpp"
 #include "struct/DistancePair.hpp"
 
 #include <iostream>

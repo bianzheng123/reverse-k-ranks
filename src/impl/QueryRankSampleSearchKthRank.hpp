@@ -10,7 +10,7 @@
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QueryRankSearchSearchKthRank.hpp"
+#include "alg/RankBoundRefinement/SampleSearch.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -45,7 +45,7 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
         }
 
         //rank search
-        QueryRankSearchSearchKthRank rank_ins_;
+        SampleSearch rank_ins_;
         //read disk
         ReadAllDirectIO disk_ins_;
 
@@ -67,7 +67,7 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
         std::vector<int> rank_ub_l_;
 
         Index(//rank search
-                QueryRankSearchSearchKthRank &rank_ins,
+                SampleSearch &rank_ins,
                 //disk index
                 ReadAllDirectIO &disk_ins,
                 //general retrieval
@@ -233,8 +233,9 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
         user.vectorNormalize();
 
         //rank search
-        QueryRankSearchSearchKthRank rank_ins(index_basic_dir, dataset_name,
-                                              n_sample, n_sample_query, sample_topk, true);
+        SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleSearchKthRank",
+                              n_sample, true, true,
+                              n_sample_query, sample_topk);
 
         ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
 

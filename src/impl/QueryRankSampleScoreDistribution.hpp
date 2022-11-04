@@ -9,8 +9,9 @@
 #include "alg/TopkMaxHeap.hpp"
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
+#include "alg/RankBoundRefinement/BitIndex.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
-#include "alg/RankBoundRefinement/QueryRankSearchScoreDistribution.hpp"
+#include "alg/RankBoundRefinement/SampleSearch.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 #include "struct/VectorMatrix.hpp"
@@ -45,7 +46,9 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         }
 
         //rank search
-        QueryRankSearchScoreDistribution rank_ins_;
+        SampleSearch rank_ins_;
+        //rank search
+        BitIndex bit_index_;
         //read disk
         ReadAllDirectIO disk_ins_;
 
@@ -63,12 +66,14 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         std::vector<bool> result_l_;
         std::vector<int> refine_seq_l_;
         std::vector<double> queryIP_l_;
+        std::vector<std::pair<double, double>> IPbound_l_;
         std::vector<int> rank_lb_l_;
         std::vector<int> rank_ub_l_;
         std::vector<int> bucketID_l_;
 
         Index(//rank search
-                QueryRankSearchScoreDistribution &rank_ins,
+                SampleSearch &rank_ins,
+                BitIndex &bit_index,
                 //disk index
                 ReadAllDirectIO &disk_ins,
                 //general retrieval
@@ -76,6 +81,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         ) {
             //rank search
             this->rank_ins_ = std::move(rank_ins);
+            this->bit_index_ = std::move(bit_index);
             //read disk
             this->disk_ins_ = std::move(disk_ins);
 
@@ -89,6 +95,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
             this->result_l_.resize(n_user_);
             this->refine_seq_l_.resize(n_user_);
             this->queryIP_l_.resize(n_user_);
+            this->IPbound_l_.resize(n_user_);
             this->rank_lb_l_.resize(n_user_);
             this->rank_ub_l_.resize(n_user_);
             this->bucketID_l_.resize(n_user_);
@@ -138,7 +145,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
                 int n_result_user = 0;
                 int n_prune_user = 0;
                 rank_bound_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, prune_l_, result_l_, rank_lb_l_, rank_ub_l_, bucketID_l_);
+                rank_ins_.RankBound(queryIP_l_, prune_l_, result_l_, IPbound_l_, bucketID_l_, rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       refine_seq_l_, refine_user_size,
@@ -152,8 +159,9 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
 
                 //rank search
                 rank_bound_record_.reset();
-                rank_ins_.ScoreDistributionRankBound(queryIP_l_, prune_l_, result_l_, bucketID_l_,
-                                                     rank_lb_l_, rank_ub_l_);
+                bit_index_.ScoreDistributionRankBound(queryIP_l_, prune_l_, result_l_, bucketID_l_,
+                                                      IPbound_l_,
+                                                      rank_lb_l_, rank_ub_l_);
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       refine_seq_l_, refine_user_size,
@@ -249,8 +257,9 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         user.vectorNormalize();
 
         //rank search
-        QueryRankSearchScoreDistribution rank_ins(index_basic_dir, dataset_name,
-                                                  n_sample, n_sample_query, sample_topk);
+        SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleScoreDistribution",
+                              n_sample, true, true, n_sample_query, sample_topk);
+        BitIndex bit_index(n_data_item, n_user, n_sample);
 
         ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
 
@@ -265,7 +274,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         for (int userID = 0; userID < n_user; userID++) {
             read_ins.ReadDiskNoCache(userID, distance_l);
 
-            rank_ins.LoopPreprocess(distance_l.data(), userID);
+            bit_index.LoopPreprocess(distance_l.data(), rank_ins.known_rank_idx_l_.get(), userID);
 
             if (userID % report_every == 0) {
                 std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
@@ -274,10 +283,9 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
                 record.reset();
             }
         }
-        rank_ins.SaveIndex(index_basic_dir, dataset_name);
         read_ins.FinishRetrieval();
 
-        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, disk_ins, user, n_data_item);
+        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(rank_ins, bit_index, disk_ins, user, n_data_item);
         return index_ptr;
     }
 
