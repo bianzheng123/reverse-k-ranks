@@ -30,6 +30,8 @@ public:
     bool test_topk;
     int n_sample, n_sample_query, sample_topk;
     int simpfer_k_max;
+    size_t stop_time;
+    int n_bit;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -60,7 +62,12 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "topk in training query distribution")
             // reverse top-k adaption
             ("simpfer_k_max, skm", po::value<int>(&para.simpfer_k_max)->default_value(25),
-             "k_max in simpfer");
+             "k_max in simpfer")
+            ("stop_time, st", po::value<size_t>(&para.stop_time)->default_value(60),
+             "stop time, in unit of second")
+            // score distribution parameter
+            ("n_bit, nb", po::value<int>(&para.n_bit)->default_value(8),
+             "number of bit");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -134,11 +141,13 @@ int main(int argc, char **argv) {
         const int n_sample = para.n_sample;
         const int n_sample_query = para.n_sample_query;
         const int sample_topk = para.sample_topk;
-        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
-                     n_sample, n_sample_query, sample_topk);
-        index = QueryRankSampleScoreDistribution::BuildIndex(data_item, user, index_path, dataset_name,
-                                                             n_sample, n_sample_query, sample_topk, index_dir);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
+        const int n_bit = para.n_bit;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {} n_bit {}",
+                     n_sample, n_sample_query, sample_topk, n_bit);
+        index = QueryRankSampleScoreDistribution::BuildIndex(data_item, user,
+                                                             index_path, dataset_name, index_dir,
+                                                             n_sample, n_sample_query, sample_topk, n_bit);
+        sprintf(parameter_name, "n_sample_%d-n_bit_%d", n_sample, n_bit);
 
     } else if (method_name == "QueryRankSampleSearchAllRank") {
         const int n_sample = para.n_sample;
@@ -168,9 +177,10 @@ int main(int argc, char **argv) {
 
     } else if (method_name == "Simpfer") {
         const int simpfer_k_max = para.simpfer_k_max;
-        spdlog::info("input parameter: simpfer_k_max {}",
-                     simpfer_k_max);
-        index = Simpfer::BuildIndex(data_item, user, simpfer_k_max);
+        const size_t stop_time = para.stop_time;
+        spdlog::info("input parameter: simpfer_k_max {}, stop_time {}s",
+                     simpfer_k_max, stop_time);
+        index = Simpfer::BuildIndex(data_item, user, simpfer_k_max, stop_time);
         sprintf(parameter_name, "simpfer_k_max_%d", simpfer_k_max);
 
     } else {
@@ -197,7 +207,7 @@ int main(int argc, char **argv) {
 
     vector<int> topk_l;
     if (para.test_topk) {
-        topk_l = {10};
+        topk_l = {30, 20, 10};
     } else {
         topk_l = {600, 500, 200, 100, 50, 20, 10, 1};
     }

@@ -18,19 +18,19 @@ namespace ReverseMIPS {
 
     class BitIndex {
 
-        size_t n_sample_, n_data_item_, n_user_, n_sample_score_;
-        std::vector<bool> score_distribution_l_; // n_user * (n_sample_ - 1) * n_sample_score_
+        size_t n_sample_, n_data_item_, n_user_, n_bit_;
+        std::vector<bool> score_distribution_l_; // n_user * (n_sample_ - 1) * n_bit_
     public:
 
         inline BitIndex() {}
 
-        inline BitIndex(const size_t &n_data_item, const size_t &n_user, const size_t &n_sample) {
+        inline BitIndex(const size_t &n_data_item, const size_t &n_user, const size_t &n_sample, const int& n_bit) {
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
             this->n_sample_ = n_sample;
 
-            n_sample_score_ = 8;
-            score_distribution_l_.resize(n_user_ * (n_sample_ - 1) * n_sample_score_);
+            n_bit_ = n_bit;
+            score_distribution_l_.resize(n_user_ * (n_sample_ - 1) * n_bit_);
         }
 
         void LoopPreprocess(const double *distance_ptr, const int *sample_rank_l, const int &userID) {
@@ -44,13 +44,13 @@ namespace ReverseMIPS {
 
                 assert(0 <= rank_ub && rank_ub <= rank_lb && rank_lb < n_data_item_);
 
-                const double distribution_distance = (IP_ub - IP_lb) / (double) (n_sample_score_ + 1);
-                const int64_t offset = userID * (n_sample_ - 1) * n_sample_score_ + crankID * n_sample_score_;
+                const double distribution_distance = (IP_ub - IP_lb) / (double) (n_bit_ + 1);
+                const int64_t offset = userID * (n_sample_ - 1) * n_bit_ + crankID * n_bit_;
 
-                for (int scoreID = 0; scoreID < n_sample_score_; scoreID++) {
+                for (int scoreID = 0; scoreID < n_bit_; scoreID++) {
                     double sample_IP = IP_ub - (scoreID + 1) * distribution_distance;
                     const uint64_t pred_sample_rank =
-                            (rank_lb - rank_ub) * (scoreID + 1) / (n_sample_score_ + 1) + rank_ub;
+                            (rank_lb - rank_ub) * (scoreID + 1) / (n_bit_ + 1) + rank_ub;
                     const double *iter_begin = distance_ptr;
                     const double *iter_end = distance_ptr + n_data_item_;
 
@@ -76,16 +76,16 @@ namespace ReverseMIPS {
                 return;
             } else { // lies between the middle
                 assert(IP_ub >= queryIP && queryIP >= IP_lb);
-                const double distribution_distance = (IP_ub - IP_lb) / (double) (n_sample_score_ + 1);
+                const double distribution_distance = (IP_ub - IP_lb) / (double) (n_bit_ + 1);
                 const int itvID_ub = std::floor((IP_ub - queryIP) / distribution_distance);
-                assert(0 <= itvID_ub && itvID_ub <= n_sample_score_);
+                assert(0 <= itvID_ub && itvID_ub <= n_bit_);
                 const int itvID_lb = itvID_ub + 1;
 
                 unsigned int sample_rank_lb = rank_lb;
                 unsigned int sample_rank_ub = rank_ub;
 
                 const uint64_t sample_score_offset =
-                        userID * (n_sample_ - 1) * n_sample_score_ + (bucketID - 1) * n_sample_score_;
+                        userID * (n_sample_ - 1) * n_bit_ + (bucketID - 1) * n_bit_;
                 if (itvID_ub != 0) {
                     int first_true_idx = -1;
                     for (int sample_scoreID = itvID_ub - 1; sample_scoreID >= 0; sample_scoreID--) {
@@ -96,7 +96,7 @@ namespace ReverseMIPS {
                     }
                     if (first_true_idx != -1) {
                         const uint64_t pred_sample_rank =
-                                (sample_rank_lb - sample_rank_ub) * (first_true_idx + 1) / (n_sample_score_ + 1) +
+                                (sample_rank_lb - sample_rank_ub) * (first_true_idx + 1) / (n_bit_ + 1) +
                                 sample_rank_ub;
                         rank_ub = (int) pred_sample_rank;
 
@@ -106,9 +106,9 @@ namespace ReverseMIPS {
                            (0 <= first_true_idx && first_true_idx <= itvID_ub - 1));
                 }
 
-                if (itvID_lb != n_sample_score_ + 1) {
+                if (itvID_lb != n_bit_ + 1) {
                     int first_false_idx = -1;
-                    for (int sample_scoreID = itvID_lb - 1; sample_scoreID < n_sample_score_; sample_scoreID++) {
+                    for (int sample_scoreID = itvID_lb - 1; sample_scoreID < n_bit_; sample_scoreID++) {
                         if (!score_distribution_l_[sample_score_offset + sample_scoreID]) {
                             first_false_idx = sample_scoreID;
                             break;
@@ -116,14 +116,14 @@ namespace ReverseMIPS {
                     }
                     if (first_false_idx != -1) {
                         const uint64_t pred_sample_rank =
-                                (sample_rank_lb - sample_rank_ub) * (first_false_idx + 1) / (n_sample_score_ + 1) +
+                                (sample_rank_lb - sample_rank_ub) * (first_false_idx + 1) / (n_bit_ + 1) +
                                 sample_rank_ub;
                         rank_lb = (int) pred_sample_rank;
 
                         assert(IP_ub - (first_false_idx + 1) * distribution_distance <= queryIP);
                     }
                     assert(first_false_idx == -1 ||
-                           (itvID_lb - 1 <= first_false_idx && first_false_idx <= n_sample_score_ - 1));
+                           (itvID_lb - 1 <= first_false_idx && first_false_idx <= n_bit_ - 1));
                 }
 
             }
@@ -168,7 +168,7 @@ namespace ReverseMIPS {
         uint64_t IndexSizeByte() const {
             const uint64_t known_rank_idx_size = sizeof(int) * n_sample_;
             const uint64_t bound_distance_table_size = sizeof(double) * n_user_ * n_sample_;
-            const uint64_t score_distribution_size = n_user_ * (n_sample_ - 1) * n_sample_score_ / 8;
+            const uint64_t score_distribution_size = n_user_ * (n_sample_ - 1) * n_bit_ / 8;
             return known_rank_idx_size + bound_distance_table_size + score_distribution_size;
         }
 

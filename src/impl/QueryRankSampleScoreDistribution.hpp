@@ -249,8 +249,9 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const char *dataset_name,
-               const int &n_sample, const int &n_sample_query, const int &sample_topk, const char *index_basic_dir) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path,
+               const char *dataset_name, const char *index_basic_dir,
+               const int &n_sample, const int &n_sample_query, const int &sample_topk, const int &n_bit) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
 
@@ -259,7 +260,7 @@ namespace ReverseMIPS::QueryRankSampleScoreDistribution {
         //rank search
         SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleScoreDistribution",
                               n_sample, true, true, n_sample_query, sample_topk);
-        BitIndex bit_index(n_data_item, n_user, n_sample);
+        BitIndex bit_index(n_data_item, n_user, n_sample, n_bit);
 
         ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
 

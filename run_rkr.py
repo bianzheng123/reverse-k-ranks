@@ -66,7 +66,7 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
 
         'QueryRankSampleIntLR': 'n_sample_20',
         'QueryRankSampleLeastSquareIntLR': 'n_sample_20',
-        'QueryRankSampleScoreDistribution': 'n_sample_20',
+        'QueryRankSampleScoreDistribution': 'n_sample_20-n_bit_8',
         'QueryRankSampleSearchAllRank': 'n_sample_20',
         'QueryRankSampleSearchKthRank': 'n_sample_20',
         'RankSample': 'n_sample_20',
@@ -130,12 +130,12 @@ def run():
 
         # 'GridIndex',
         # 'LinearModel',
-        'QueryRankSampleIntLR',
-        'QueryRankSampleLeastSquareIntLR',
+        # 'QueryRankSampleIntLR',
+        # 'QueryRankSampleLeastSquareIntLR',
         'QueryRankSampleScoreDistribution',
-        'QueryRankSampleSearchAllRank',
-        'QueryRankSampleSearchKthRank',
-        'RankSample',
+        # 'QueryRankSampleSearchAllRank',
+        # 'QueryRankSampleSearchKthRank',
+        # 'RankSample',
     ]
 
     os.system('cd result/rank && rm *')
@@ -167,14 +167,14 @@ def run():
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
-        run_sample_method('QueryRankSampleIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-                          sample_topk)
+        # run_sample_method('QueryRankSampleIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        # run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+        #                   sample_topk)
         run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,
                           sample_topk)
-        run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        # run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        # run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
     # send_email.send('test complete')
 

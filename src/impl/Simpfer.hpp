@@ -46,13 +46,14 @@ namespace ReverseMIPS::Simpfer {
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
+        size_t stop_time_;
         double total_retrieval_time_;
         TimeRecord total_retrieval_record_;
 
         Index(
                 SimpferIndex &&simpfer_index, Matrix &&user_matrix,
                 //general retrieval
-                VectorMatrix &user, VectorMatrix &data_item)
+                VectorMatrix &user, VectorMatrix &data_item, const size_t &stop_time)
                 : simpfer_index_(std::move(simpfer_index)), user_matrix_(std::move(user_matrix)) {
             //index for reverseMIPS
             //general retrieval
@@ -61,6 +62,7 @@ namespace ReverseMIPS::Simpfer {
             this->user_ = std::move(user);
             this->n_data_item_ = data_item.n_vector_;
             this->data_item_ = std::move(data_item);
+            this->stop_time_ = stop_time;
             assert(0 < this->user_.vec_dim_);
 
         }
@@ -111,13 +113,19 @@ namespace ReverseMIPS::Simpfer {
 
                 const double query_time = total_retrieval_record_.get_elapsed_time_second();
                 total_retrieval_time_ += query_time;
-                spdlog::info("queryID {}, result_size {}, rtk_topk {}, query_time {:.2f}s",
-                             queryID, result_size, rtk_topk, query_time);
+                spdlog::info(
+                        "queryID {}, result_size {}, rtk_topk {}, query_time {:.2f}s, total_retrieval_time {:.2f}s",
+                        queryID, result_size, rtk_topk, query_time, total_retrieval_time_);
                 assert(result_userID_l.size() == result_size);
 
                 for (int resultID = 0; resultID < result_size; resultID++) {
                     const int userID = result_userID_l[resultID];
                     query_heap_l[queryID].push_back(UserRankElement(userID));
+                }
+
+                if (total_retrieval_time_ > (double) stop_time_) {
+                    spdlog::info("total retrieval time larger than stop time, retrieval exit");
+                    break;
                 }
             }
 
@@ -153,7 +161,8 @@ namespace ReverseMIPS::Simpfer {
      * shape: n_user * n_data_item, type: double, the distance pair for each user
      */
 
-    std::unique_ptr<Index> BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const int &simpfer_k_max) {
+    std::unique_ptr<Index>
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const int &simpfer_k_max, const size_t &stop_time) {
         const int n_data_item = data_item.n_vector_;
         const int vec_dim = data_item.vec_dim_;
         const int n_user = user.n_vector_;
@@ -200,7 +209,8 @@ namespace ReverseMIPS::Simpfer {
                 std::move(simpfer_index),
                 std::move(user_matrix),
                 //general retrieval
-                user, data_item);
+                user, data_item,
+                stop_time);
         return index_ptr;
     }
 
