@@ -33,32 +33,28 @@ def run():
     #     #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --method_name {} --simpfer_k_max {}'.format(
     #     #         dataset_dir, ds, index_dir, "Simpfer", 35))
 
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
     n_sample_query = 5000
     sample_topk = 600
-    for ds in dataset_l:
-        for memory_capacity in [2, 4, 8, 16, 32]:
-            n_sample = polyu.compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
-            os.system(
-                f'cd build && ./ti --index_dir {index_dir} --dataset_name {ds} --old_method_name {"RankSample"} --new_method_name {"RankSample"} --index_type {"RankSample"} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk} --has_sample_score {"true"}'
-            )
-            os.system(
-                f'cd build && ./ti --index_dir {index_dir} --dataset_name {ds} --old_method_name {"QueryRankSearchKthRank"} --new_method_name {"QueryRankSampleSearchKthRank"} --index_type {"QueryRankSearchKthRank"} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk} --has_sample_score {"true"}'
-            )
-            os.system(
-                f'cd build && ./ti --index_dir {index_dir} --dataset_name {ds} --old_method_name {"QueryRankSearchKthRank"} --new_method_name {"QueryRankSampleSearchKthRank"} --index_type {"QueryRankSearchKthRank"} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk} --has_sample_score {"false"}'
-            )
-
     dataset_l = ['amazon-home-kitchen']
     for ds in dataset_l:
-        for memory_capacity in [2, 4, 8, 16, 32]:
-            n_sample = polyu.compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
-            os.system(
-                f'cd build && ./ti --index_dir {index_amazon_dir} --dataset_name {ds} --old_method_name {"RankSample"} --new_method_name {"RankSample"} --index_type {"RankSample"} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk} --has_sample_score {"true"}'
-            )
-            os.system(
-                f'cd build && ./ti --index_dir {index_amazon_dir} --dataset_name {ds} --old_method_name {"QueryRankSearchKthRank"} --new_method_name {"QueryRankSampleSearchKthRank"} --index_type {"QueryRankSearchKthRank"} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk} --has_sample_score {"false"}'
-            )
+        os.system(
+            f"cd build && ./bsi --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_amazon_dir} --method_name {'QueryRankSampleSearchKthRank'} --n_sample {-1} --n_sample_query {n_sample_query} --sample_topk {sample_topk}")
+
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    for ds in dataset_l:
+        memory_capacity = 8
+        n_sample = polyu.compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
+        os.system(
+            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'false'} --method_name {'RankSample'} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk}"
+        )
+
+    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    for ds in dataset_l:
+        memory_capacity = 8
+        n_sample = polyu.compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
+        os.system(
+            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'false'} --method_name {'QueryRankSampleSearchKthRank'} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk}"
+        )
 
 
 if __name__ == '__main__':
