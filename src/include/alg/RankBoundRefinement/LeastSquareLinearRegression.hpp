@@ -12,9 +12,10 @@
 #include <Eigen/Dense>
 #include <spdlog/spdlog.h>
 
+
 namespace ReverseMIPS {
 
-    class HeadLinearRegression {
+    class LeastSquareLinearRegression {
 
         size_t n_data_item_, n_user_;
         static constexpr int n_predict_parameter_ = 2; // (a, b) for linear estimation
@@ -31,14 +32,19 @@ namespace ReverseMIPS {
         double *preprocess_cache_Y_; // n_sample_rank, store the double type of sampled rank value
     public:
 
-        inline HeadLinearRegression() {}
+        inline LeastSquareLinearRegression() {}
 
-        inline HeadLinearRegression(const int &n_data_item, const int &n_user) {
+        inline LeastSquareLinearRegression(const int &n_data_item, const int &n_user) {
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
             this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
             this->distribution_para_l_ = std::make_unique<double[]>(n_user * n_distribution_parameter_);
             this->error_l_ = std::make_unique<int[]>(n_user);
+        }
+
+        inline LeastSquareLinearRegression(const char *index_basic_dir, const char *dataset_name,
+                                           const size_t &n_sample) {
+            LoadIndex(index_basic_dir, dataset_name, n_sample);
         }
 
         void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) {
@@ -244,6 +250,67 @@ namespace ReverseMIPS {
                 assert(qIP_ub_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
             }
         }
+
+        void SaveIndex(const char *index_basic_dir, const char *dataset_name) {
+            char index_path[256];
+            sprintf(index_path,
+                    "%s/memory_index/LeastSquareLinearRegression-%s-n_sample_%d.index",
+                    index_basic_dir, dataset_name, n_sample_rank_);
+
+            std::ofstream out_stream_ = std::ofstream(index_path, std::ios::binary | std::ios::out);
+            if (!out_stream_) {
+                spdlog::error("error in write result, not found index");
+                exit(-1);
+            }
+            out_stream_.write((char *) &n_data_item_, sizeof(size_t));
+            out_stream_.write((char *) &n_user_, sizeof(size_t));
+            out_stream_.write((char *) &n_sample_rank_, sizeof(int));
+
+            out_stream_.write((char *) sample_rank_l_.get(), (int64_t) (n_sample_rank_ * sizeof(int)));
+            out_stream_.write((char *) predict_para_l_.get(),
+                              (int64_t) (n_user_ * n_predict_parameter_ * sizeof(double)));
+            out_stream_.write((char *) distribution_para_l_.get(),
+                              (int64_t) (n_user_ * n_distribution_parameter_ * sizeof(double)));
+            out_stream_.write((char *) error_l_.get(), (int64_t) (n_user_ * sizeof(int)));
+
+            out_stream_.close();
+        }
+
+        void LoadIndex(const char *index_basic_dir, const char *dataset_name,
+                       const size_t &n_sample) {
+            char index_path[256];
+            sprintf(index_path,
+                    "%s/memory_index/LeastSquareLinearRegression-%s-n_sample_%ld.index",
+                    index_basic_dir, dataset_name, n_sample);
+
+            std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
+            if (!index_stream) {
+                spdlog::error("error in reading index");
+                exit(-1);
+            }
+
+            index_stream.read((char *) &n_data_item_, sizeof(size_t));
+            index_stream.read((char *) &n_user_, sizeof(size_t));
+            index_stream.read((char *) &n_sample_rank_, sizeof(int));
+
+            sample_rank_l_ = std::make_unique<int[]>(n_sample_rank_);
+            index_stream.read((char *) sample_rank_l_.get(), (int64_t) (sizeof(int) * n_sample_rank_));
+
+            predict_para_l_ = std::make_unique<double[]>(n_user_ * n_predict_parameter_);
+            index_stream.read((char *) predict_para_l_.get(),
+                              (int64_t) (sizeof(double) * n_user_ * n_predict_parameter_));
+
+            distribution_para_l_ = std::make_unique<double[]>(n_user_ * n_distribution_parameter_);
+            index_stream.read((char *) distribution_para_l_.get(),
+                              (int64_t) (sizeof(double) * n_user_ * n_distribution_parameter_));
+
+            error_l_ = std::make_unique<int[]>(n_user_);
+            index_stream.read((char *) error_l_.get(),
+                              (int64_t) (sizeof(int) * n_user_));
+
+            index_stream.close();
+        }
+
 
         uint64_t IndexSizeByte() const {
             const uint64_t sample_rank_size = sizeof(int) * n_sample_rank_;

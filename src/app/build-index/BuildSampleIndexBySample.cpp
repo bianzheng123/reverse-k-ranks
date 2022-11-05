@@ -62,9 +62,26 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 using namespace std;
 using namespace ReverseMIPS;
 
+std::string IndexName(const std::string &method_name) {
+    if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR") {
+        return "QueryRankSampleIntLR";
+    } else if (method_name == "QueryRankSampleScoreDistribution") {
+        return "QueryRankSampleScoreDistribution";
+    } else if (method_name == "QueryRankSampleSearchAllRank") {
+        return "QueryRankSampleSearchAllRank";
+    } else if (method_name == "QueryRankSampleSearchKthRank") {
+        return "QueryRankSampleSearchKthRank";
+    } else if (method_name == "RankSample") {
+        return "RankSample";
+    } else {
+        spdlog::error("not find method name, program exit");
+        exit(-1);
+    }
+}
+
 void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
                 const std::vector<int64_t> &n_sample_l, const int &n_sample_query, const int &sample_topk,
-                const char *score_table_path, const char *dataset_name, const string &method_name,
+                const char *score_table_path, const char *dataset_name, const string &index_name,
                 const char *basic_index_dir) {
     const int n_user = user.n_vector_;
     const int n_data_item = data_item.n_vector_;
@@ -73,10 +90,10 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
     const int n_rs_ins = (int) n_sample_l.size();
     std::vector<SampleSearch> rank_search_l(n_rs_ins);
     const bool load_sample_score = false;
-    const bool is_query_distribution = method_name != "RankSample";
+    const bool is_query_distribution = index_name != "RankSample";
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
         rank_search_l[rsID] = SampleSearch(
-                basic_index_dir, dataset_name, method_name.c_str(),
+                basic_index_dir, dataset_name, index_name.c_str(),
                 n_sample_l[rsID], load_sample_score, is_query_distribution, n_sample_query, sample_topk);
     }
 
@@ -104,7 +121,7 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
     const bool save_sample_score = true;
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
-        rank_search_l[rsID].SaveIndex(basic_index_dir, dataset_name, method_name.c_str(),
+        rank_search_l[rsID].SaveIndex(basic_index_dir, dataset_name, index_name.c_str(),
                                       save_sample_score, is_query_distribution,
                                       n_sample_query, sample_topk);
     }
@@ -118,9 +135,10 @@ int main(int argc, char **argv) {
     const char *dataset_dir = para.dataset_dir.c_str();
     string index_dir = para.index_dir;
     const char *method_name = para.method_name.c_str();
-    spdlog::info("BuildSampleIndex dataset_name {}, method_name {}, dataset_dir {}",
+    const std::string index_name = IndexName(method_name);
+    spdlog::info("BuildSampleIndexBySample dataset_name {}, method_name {}, dataset_dir {}",
                  dataset_name, method_name, dataset_dir);
-    spdlog::info("index_dir {}", index_dir);
+    spdlog::info("index_name {}, index_dir {}", index_name, index_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
     vector<VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
@@ -143,7 +161,6 @@ int main(int argc, char **argv) {
         n_sample_l.clear();
         n_sample_l.push_back(para.n_sample);
         n_capacity = (int) memory_capacity_l.size();
-        spdlog::info("n_sample {}", n_sample_l[0]);
     } else {
         for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
             spdlog::info("memory_capacity {}, n_sample {}",
@@ -166,19 +183,19 @@ int main(int argc, char **argv) {
 
     BuildIndex(data_item, user,
                n_sample_l, para.n_sample_query, para.sample_topk,
-               score_table_path, dataset_name, method_name, index_dir.c_str());
+               score_table_path, dataset_name, index_name, index_dir.c_str());
 
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");
 
     RetrievalResult config;
 
-    spdlog::info("BuildSampleIndex build index time: total {}s", build_index_time);
+    spdlog::info("BuildSampleIndexBySample build index time: total {}s", build_index_time);
 
     char parameter_name[128];
     sprintf(parameter_name, "%s", method_name);
     config.AddInfo(n_sample_info);
     config.AddBuildIndexTime(build_index_time);
-    config.WritePerformance(dataset_name, "BuildSampleIndex", parameter_name);
+    config.WritePerformance(dataset_name, "BuildSampleIndexBySample", parameter_name);
     return 0;
 }

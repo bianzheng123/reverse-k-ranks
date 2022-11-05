@@ -10,7 +10,7 @@
 
 #include "GridIndex.hpp"
 #include "LinearModel.hpp"
-#include "QueryRankSampleIntLR.hpp"
+#include "QueryRankSampleMinMaxIntLR.hpp"
 #include "QueryRankSampleLeastSquareIntLR.hpp"
 #include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSampleSearchAllRank.hpp"
@@ -117,16 +117,6 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: none");
         index = LinearModel::BuildIndex(data_item, user, index_path);
 
-    } else if (method_name == "QueryRankSampleIntLR") {
-        const int n_sample = para.n_sample;
-        const int n_sample_query = para.n_sample_query;
-        const int sample_topk = para.sample_topk;
-        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
-                     n_sample, n_sample_query, sample_topk);
-        index = QueryRankSampleIntLR::BuildIndex(data_item, user, index_path, dataset_name,
-                                                 n_sample, n_sample_query, sample_topk, index_dir);
-        sprintf(parameter_name, "n_sample_%d", n_sample);
-
     } else if (method_name == "QueryRankSampleLeastSquareIntLR") {
         const int n_sample = para.n_sample;
         const int n_sample_query = para.n_sample_query;
@@ -135,6 +125,16 @@ int main(int argc, char **argv) {
                      n_sample, n_sample_query, sample_topk);
         index = QueryRankSampleLeastSquareIntLR::BuildIndex(data_item, user, index_path, dataset_name,
                                                             n_sample, n_sample_query, sample_topk, index_dir);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
+
+    } else if (method_name == "QueryRankSampleMinMaxIntLR") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleMinMaxIntLR::BuildIndex(data_item, user, index_path, dataset_name,
+                                                       n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else if (method_name == "QueryRankSampleScoreDistribution") {

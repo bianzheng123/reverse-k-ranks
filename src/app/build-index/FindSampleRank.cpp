@@ -19,7 +19,7 @@
 class Parameter {
 public:
     int n_sample, n_data_item, n_user;
-    std::string index_dir, dataset_name, sample_name, method_name;
+    std::string index_dir, dataset_name, method_name;
     int n_sample_query, sample_topk;
 };
 
@@ -35,9 +35,6 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("dataset_name, id",
              po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
              "dataset_name")
-            ("sample_name, sn",
-             po::value<std::string>(&para.sample_name)->default_value("Uniform"),
-             "sample_name")
             ("method_name, mn",
              po::value<std::string>(&para.method_name)->default_value("QueryRankSearchKthRank"),
              "method_name")
@@ -67,15 +64,50 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 using namespace std;
 using namespace ReverseMIPS;
 
+std::string IndexName(const std::string &method_name) {
+    if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR") {
+        return "QueryRankSampleIntLR";
+    } else if (method_name == "QueryRankSampleScoreDistribution") {
+        return "QueryRankSampleScoreDistribution";
+    } else if (method_name == "QueryRankSampleSearchAllRank") {
+        return "QueryRankSampleSearchAllRank";
+    } else if (method_name == "QueryRankSampleSearchKthRank") {
+        return "QueryRankSampleSearchKthRank";
+    } else if (method_name == "RankSample") {
+        return "RankSample";
+    } else {
+        spdlog::error("not find method name, program exit");
+        exit(-1);
+    }
+}
+
+std::string SampleName(const std::string &method_name) {
+    if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR" ||
+        method_name == "QueryRankSampleScoreDistribution" || method_name == "QueryRankSampleSearchKthRank") {
+        return "OptimalPart";
+    } else if (method_name == "QueryRankSampleSearchAllRank") {
+        return "OptimalAll";
+    } else if (method_name == "RankSample") {
+        return "Uniform";
+    } else {
+        spdlog::error("not find method name, program exit");
+        exit(-1);
+    }
+}
+
 int main(int argc, char **argv) {
     Parameter para;
     LoadOptions(argc, argv, para);
     const char *index_dir = para.index_dir.c_str();
     const char *dataset_name = para.dataset_name.c_str();
-    const string sample_name = para.sample_name;
     const char *method_name = para.method_name.c_str();
+
+    const std::string sample_name = SampleName(method_name);
+    const std::string index_name = IndexName(method_name);
+
     spdlog::info("FindSampleRank index_dir {}, dataset_name {}, sample_name {}, method_name {}",
                  index_dir, dataset_name, sample_name, method_name);
+    spdlog::info("index_name {}", index_name);
 
     const int n_sample = para.n_sample;
     const int n_data_item = para.n_data_item;
@@ -109,7 +141,7 @@ int main(int argc, char **argv) {
     SampleSearch rank_ins(n_data_item, n_user, sample_rank_l, n_sample);
     const bool save_sample_score = false;
     const bool is_query_distribution = sample_name != "Uniform";
-    rank_ins.SaveIndex(index_dir, dataset_name, method_name,
+    rank_ins.SaveIndex(index_dir, dataset_name, index_name.c_str(),
                        save_sample_score, is_query_distribution,
                        n_sample_query, sample_topk);
 
@@ -123,9 +155,10 @@ int main(int argc, char **argv) {
     config.AddBuildIndexTime(build_index_time);
     char parameter_name[256];
     if (sample_name == "Uniform") {
-        sprintf(parameter_name, "%s-n_sample_%d", method_name, n_sample);
+        sprintf(parameter_name, "%s-n_sample_%d", index_name.c_str(), n_sample);
     } else {
-        sprintf(parameter_name, "%s-n_sample_%d-n_sample_query_%d-sample_topk_%d", method_name, n_sample, n_sample_query, sample_topk);
+        sprintf(parameter_name, "%s-n_sample_%d-n_sample_query_%d-sample_topk_%d", index_name.c_str(), n_sample,
+                n_sample_query, sample_topk);
     }
     config.WritePerformance(dataset_name, "FindSampleRank", parameter_name);
     spdlog::info("FindSampleRank finish");

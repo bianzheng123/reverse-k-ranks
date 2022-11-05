@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import run_polyuhost as polyu
 
 
 class CMDcolors:
@@ -64,8 +65,8 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
     flag = True
     suffix_m = {
 
-        'QueryRankSampleIntLR': 'n_sample_20',
         'QueryRankSampleLeastSquareIntLR': 'n_sample_20',
+        'QueryRankSampleMinMaxIntLR': 'n_sample_20',
         'QueryRankSampleScoreDistribution': 'n_sample_20-n_bit_8',
         'QueryRankSampleSearchAllRank': 'n_sample_20',
         'QueryRankSampleSearchKthRank': 'n_sample_20',
@@ -101,24 +102,22 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
         print("no error, no bug")
 
 
-def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, n_sample_item, sample_topk):
-    sample_name_m = {
-        'QueryRankSampleIntLR': 'OptimalPart',
-        'QueryRankSampleLeastSquareIntLR': 'OptimalPart',
-        'QueryRankSampleScoreDistribution': 'OptimalPart',
-        'QueryRankSampleSearchAllRank': 'OptimalAll',
-        'QueryRankSampleSearchKthRank': 'OptimalPart',
-        'RankSample': 'Uniform',
-    }
-    sample_name = sample_name_m[method_name]
+def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, n_sample_item, sample_topk,
+                      other_config=""):
+    os.system(
+        f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+    )
+    # os.system(
+    #     f"cd build && ./bsibs --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+    os.system(
+        f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+
+    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR':
+        os.system(
+            f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
     os.system(
-        f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --sample_name {sample_name} --method_name {method_name} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-    )
-    os.system(
-        f"cd build && ./bsi --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
-    os.system(
-        f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --test_topk {'true'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+        f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --test_topk {'true'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk} {other_config}"
     )
 
 
@@ -130,11 +129,11 @@ def run():
 
         # 'GridIndex',
         # 'LinearModel',
-        # 'QueryRankSampleIntLR',
         # 'QueryRankSampleLeastSquareIntLR',
+        # 'QueryRankSampleMinMaxIntLR',
         'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
-        # 'QueryRankSampleSearchKthRank',
+        'QueryRankSampleSearchKthRank',
         # 'RankSample',
     ]
 
@@ -167,13 +166,14 @@ def run():
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
-        # run_sample_method('QueryRankSampleIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+        #                   sample_topk)
+        # run_sample_method('QueryRankSampleMinMaxIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)
         run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,
                           sample_topk)
         # run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
     # send_email.send('test complete')

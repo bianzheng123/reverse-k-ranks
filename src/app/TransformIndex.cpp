@@ -2,13 +2,10 @@
 // Created by BianZheng on 2022/11/4.
 //
 
-
 #include "util/TimeMemory.hpp"
-#include "util/FileIO.hpp"
 
 #include "alg/RankBoundRefinement/QueryRankSearchSearchKthRank.hpp"
 #include "alg/RankBoundRefinement/RankSearch.hpp"
-#include "alg/RankBoundRefinement/SampleSearch.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -38,19 +35,19 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              po::value<std::string>(&para.old_method_name)->default_value("QueryRankSearchKthRank"),
              "old method name")
             ("new_method_name, dn",
-             po::value<std::string>(&para.new_method_name)->default_value("QueryRankSearchKthRank"),
+             po::value<std::string>(&para.new_method_name)->default_value("QueryRankSearchLinearRegression"),
              "new method name")
             ("index_type, it",
              po::value<std::string>(&para.index_type)->default_value("QueryRankSearchKthRank"),
              "the new index path")
 
-            ("n_sample, dn",
+            ("n_sample, ns",
              po::value<int>(&para.n_sample)->default_value(20),
              "new method name")
-            ("n_sample_query, dn",
+            ("n_sample_query, nsq",
              po::value<int>(&para.n_sample_query)->default_value(150),
              "new method name")
-            ("sample_topk, dn",
+            ("sample_topk, st",
              po::value<int>(&para.sample_topk)->default_value(60),
              "new method name")
 

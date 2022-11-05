@@ -10,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
+#include <map>
 #include <spdlog/spdlog.h>
 #include <set>
 #include <numeric>
@@ -656,8 +657,8 @@ namespace ReverseMIPS {
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             index_stream.read((char *) known_rank_idx_l_.get(), (int64_t) (sizeof(int) * n_sample_));
 
-            bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
             if (load_sample_score) {
+                bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
                 index_stream.read((char *) bound_distance_table_.get(),
                                   (int64_t) (sizeof(double) * n_user_ * n_sample_));
             }

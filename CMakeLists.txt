@@ -88,17 +88,25 @@ add_executable(rri src/app/ReverseRankIndex.cpp)
 target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(rri PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} fexiprolib)
 
-add_executable(qdi src/app/query-distribution-index/QueryDistributionIndex.cpp)
+add_executable(qdi src/app/build-index/QueryDistributionIndex.cpp)
 target_include_directories(qdi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(qdi PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
-add_executable(fsr src/app/query-distribution-index/FindSampleRank.cpp)
+add_executable(fsr src/app/build-index/FindSampleRank.cpp)
 target_include_directories(fsr PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(fsr PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
-add_executable(bsi src/app/query-distribution-index/BuildSampleIndex.cpp)
-target_include_directories(bsi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(bsi PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
+add_executable(bsibs src/app/build-index/BuildSampleIndexBySample.cpp)
+target_include_directories(bsibs PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(bsibs PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
+
+add_executable(bsibc src/app/build-index/BuildSampleIndexByComputation.cpp)
+target_include_directories(bsibc PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(bsibc PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
+
+add_executable(bilrbc src/app/build-index/BuildIntLRByComputation.cpp)
+target_include_directories(bilrbc PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(bilrbc PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} fexiprolib)
 
 add_executable(ti src/app/TransformIndex.cpp)
 target_include_directories(ti PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})

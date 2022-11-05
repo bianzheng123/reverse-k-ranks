@@ -10,7 +10,7 @@
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
 #include "alg/QueryIPBound/FullInt.hpp"
-#include "alg/RankBoundRefinement/HeadLinearRegression.hpp"
+#include "alg/RankBoundRefinement/LeastSquareLinearRegression.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/SampleSearch.hpp"
 
@@ -49,7 +49,7 @@ namespace ReverseMIPS::QueryRankSampleLeastSquareIntLR {
         // IP Bound
         FullInt ip_bound_ins_;
         //rank bound search
-        HeadLinearRegression rank_bound_ins_;
+        LeastSquareLinearRegression rank_bound_ins_;
         //rank search
         SampleSearch rank_ins_;
         //read disk
@@ -77,7 +77,7 @@ namespace ReverseMIPS::QueryRankSampleLeastSquareIntLR {
                 //ip bound ins
                 FullInt &ip_bound_ins,
                 //rank search for compute loose rank bound
-                HeadLinearRegression &rank_bound_ins,
+                LeastSquareLinearRegression &rank_bound_ins,
                 //rank search
                 SampleSearch &rank_ins,
                 //disk index
@@ -261,7 +261,7 @@ namespace ReverseMIPS::QueryRankSampleLeastSquareIntLR {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *index_path, const char *dataset_name,
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const char *disk_index_path, const char *dataset_name,
                const int &n_sample, const int &n_sample_query, const int &sample_topk, const char *index_basic_dir) {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
@@ -273,37 +273,14 @@ namespace ReverseMIPS::QueryRankSampleLeastSquareIntLR {
         ip_bound_ins.Preprocess(user, data_item);
 
         //rank search
-        SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleLeastSquareIntLR",
+        SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleIntLR",
                               n_sample, true, true,
                               n_sample_query, sample_topk);
 
-        HeadLinearRegression rank_bound_ins(n_data_item, n_user);
-        rank_bound_ins.StartPreprocess(rank_ins.known_rank_idx_l_.get(), n_sample);
+        LeastSquareLinearRegression rank_bound_ins(index_basic_dir, dataset_name, n_sample);
 
         //disk index
-        ReadAllDirectIO disk_ins(n_user, n_data_item, index_path);
-
-        ReadAll read_ins(n_user, n_data_item, index_path);
-        read_ins.RetrievalPreprocess();
-
-        const int report_every = 10000;
-        TimeRecord record;
-        record.reset();
-        std::vector<double> distance_l(n_data_item);
-        for (int userID = 0; userID < n_user; userID++) {
-            read_ins.ReadDiskNoCache(userID, distance_l);
-
-            rank_bound_ins.LoopPreprocess(rank_ins.SampleData(userID), userID);
-
-            if (userID % report_every == 0) {
-                std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
-                          << record.get_elapsed_time_second() << " s/iter" << " Mem: "
-                          << get_current_RSS() / 1000000 << " Mb \n";
-                record.reset();
-            }
-        }
-        read_ins.FinishRetrieval();
-        rank_bound_ins.FinishPreprocess();
+        ReadAllDirectIO disk_ins(n_user, n_data_item, disk_index_path);
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(ip_bound_ins, rank_bound_ins, rank_ins, disk_ins,
                                                                    user, n_data_item);
