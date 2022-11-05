@@ -126,7 +126,12 @@ int main(int argc, char **argv) {
     int n_capacity = (int) memory_capacity_l.size();
     for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
         const int64_t memory_capacity = memory_capacity_l[capacityID];
-        const int64_t n_sample = memory_capacity * 1024 * 1024 * 1024 / 8 / n_user;
+
+        //n_sample is computed as the int linear regression
+        const int64_t n_sample = (memory_capacity * 1024 * 1024 * 1024 -
+                                  n_user * 4 * sizeof(double) -
+                                  n_user * vec_dim * sizeof(int) - n_data_item * vec_dim * sizeof(int)) /
+                                 sizeof(double) / n_user;
         n_sample_l[capacityID] = n_sample;
     }
 

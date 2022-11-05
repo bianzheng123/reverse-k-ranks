@@ -130,6 +130,25 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
     cst.FinishCompute();
 }
 
+int64_t ComputeNSample(const std::string &index_name, const int64_t &memory_capacity,
+                                   const int64_t &n_user, const int64_t &n_data_item, const int64_t &vec_dim) {
+    if (index_name == "QueryRankSampleIntLR") {
+        return (memory_capacity * 1024 * 1024 * 1024 -
+                n_user * 4 * sizeof(double) -
+                n_user * vec_dim * sizeof(int) - n_data_item * vec_dim * sizeof(int)) /
+               sizeof(double) / n_user;
+    } else if (index_name == "QueryRankSampleScoreDistribution") {
+        return (memory_capacity * 1024 * 1024 * 1024 + n_user * sizeof(char)) / (sizeof(double) + sizeof(char)) /
+               n_user;
+    } else if (index_name == "QueryRankSampleSearchAllRank" || index_name == "QueryRankSampleSearchKthRank" ||
+               index_name == "RankSample") {
+        return memory_capacity * 1024 * 1024 * 1024 / sizeof(double) / n_user;
+    } else {
+        spdlog::error("no such index name, program exit");
+        exit(-1);
+    }
+}
+
 int main(int argc, char **argv) {
     Parameter para;
     LoadOptions(argc, argv, para);
@@ -157,7 +176,8 @@ int main(int argc, char **argv) {
     int n_capacity = (int) memory_capacity_l.size();
     for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
         const int64_t memory_capacity = memory_capacity_l[capacityID];
-        const int64_t n_sample = memory_capacity * 1024 * 1024 * 1024 / 8 / n_user;
+        const int64_t n_sample = ComputeNSample(index_name, memory_capacity,
+                                                n_user, n_data_item, vec_dim);
         n_sample_l[capacityID] = n_sample;
     }
 
