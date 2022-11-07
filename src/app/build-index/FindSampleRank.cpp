@@ -4,9 +4,12 @@
 
 ///given the query distribution index, find the sampled rank
 
+#include "NameTranslation.hpp"
+
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
 
+#include "alg/RankBoundRefinement/FindSampleRank/OptimalBruteForce.hpp"
 #include "alg/RankBoundRefinement/FindSampleRank/OptimalSampleRank.hpp"
 #include "alg/RankBoundRefinement/FindSampleRank/UniformSample.hpp"
 #include "alg/RankBoundRefinement/SampleSearch.hpp"
@@ -64,37 +67,6 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 using namespace std;
 using namespace ReverseMIPS;
 
-std::string IndexName(const std::string &method_name) {
-    if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR") {
-        return "QueryRankSampleIntLR";
-    } else if (method_name == "QueryRankSampleScoreDistribution") {
-        return "QueryRankSampleScoreDistribution";
-    } else if (method_name == "QueryRankSampleSearchAllRank") {
-        return "QueryRankSampleSearchAllRank";
-    } else if (method_name == "QueryRankSampleSearchKthRank") {
-        return "QueryRankSampleSearchKthRank";
-    } else if (method_name == "RankSample") {
-        return "RankSample";
-    } else {
-        spdlog::error("not find method name, program exit");
-        exit(-1);
-    }
-}
-
-std::string SampleName(const std::string &method_name) {
-    if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR" ||
-        method_name == "QueryRankSampleScoreDistribution" || method_name == "QueryRankSampleSearchKthRank") {
-        return "OptimalPart";
-    } else if (method_name == "QueryRankSampleSearchAllRank") {
-        return "OptimalAll";
-    } else if (method_name == "RankSample") {
-        return "Uniform";
-    } else {
-        spdlog::error("not find method name, program exit");
-        exit(-1);
-    }
-}
-
 int main(int argc, char **argv) {
     Parameter para;
     LoadOptions(argc, argv, para);
@@ -132,6 +104,13 @@ int main(int argc, char **argv) {
 
     } else if (sample_name == "Uniform") {
         FindUniformSample(n_data_item, n_sample, sample_rank_l);
+
+    } else if (sample_name == "OptimalBruteForce") {
+        FindOptimalSampleBruteForce(n_user, n_data_item, n_sample,
+                                    sample_rank_l,
+                                    n_sample_query, sample_topk,
+                                    dataset_name, sample_name.c_str(), index_dir,
+                                    train_io_cost);
 
     } else {
         spdlog::error("not such sample method");

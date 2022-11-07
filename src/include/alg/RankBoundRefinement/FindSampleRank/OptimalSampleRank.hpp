@@ -237,20 +237,24 @@ namespace ReverseMIPS {
             const int &queryID_end = rankID_this_last_pos_m_[rankID_lb];
             assert(0 <= queryID_begin && queryID_begin <= n_sample_query_);
             assert(0 <= queryID_end && queryID_end <= n_sample_query_);
-            if (queryID_begin == n_sample_query_) {
+            if (queryID_begin >= n_sample_query_) {
                 return 0;
             }
             if (queryID_begin > queryID_end) {
+                assert(rank_ub >= rank_lb);
                 return 0;
             }
             assert(0 <= queryID_begin && queryID_begin <= queryID_end && queryID_end <= n_sample_query_);
 
             int64_t n_unprune_user = 0;
-            for (int queryID = std::min((int) n_sample_query_ - 1, queryID_begin); queryID < queryID_end; queryID++) {
+            for (int queryID = queryID_begin; queryID < queryID_end; queryID++) {
+
                 int64_t n_user_candidate = accu_user_rank_l_[queryID * (n_data_item_ + 1) + rank_lb] -
                                            accu_user_rank_l_[queryID * (n_data_item_ + 1) + rank_ub - 1];
+                assert(n_user_candidate >= 0);
                 n_unprune_user += n_user_candidate;
             }
+            assert(sample_rank_l_[rankID_lb] - sample_rank_l_[rankID_ub] > 0);
             n_unprune_user *= (sample_rank_l_[rankID_lb] - sample_rank_l_[rankID_ub]);
 
             return n_unprune_user;
@@ -264,7 +268,7 @@ namespace ReverseMIPS {
 
             assert(0 <= queryID_start & queryID_start <= n_sample_query_);
             assert(1 <= rank && rank <= n_data_item_);
-            if (queryID_start == n_sample_query_) {
+            if (queryID_start >= n_sample_query_) {
                 return 0;
             }
 
@@ -276,6 +280,7 @@ namespace ReverseMIPS {
                 assert(n_user_candidate >= 0);
                 n_unprune_user += n_user_candidate;
             }
+            assert(n_data_item_ - sample_rank_l_[rankID] > 0);
             n_unprune_user *= ((int64_t) n_data_item_ - sample_rank_l_[rankID]);
 
             return n_unprune_user;
@@ -294,6 +299,7 @@ namespace ReverseMIPS {
                 assert(n_user_candidate >= 0);
                 n_unprune_user += n_user_candidate;
             }
+            assert(rank + 1 > 0);
             n_unprune_user *= (rank + 1);
 
             return n_unprune_user;

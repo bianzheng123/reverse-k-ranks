@@ -56,11 +56,11 @@ if __name__ == '__main__':
     # reverse k ranks是给定item, 需要输出user
     n_query_item = 30
     n_dim = 30
-    n_data_item = 5000
-    n_user = 1000
+    n_data_item = 50
+    n_user = 200
 
-    gen_data_normal(n_user, n_data_item, n_query_item, n_dim, "fake-normal-query-distribution")
-    gen_data_uniform(n_user, n_data_item, n_query_item, n_dim, "fake-uniform-query-distribution")
+    gen_data_normal(n_user, n_data_item, n_query_item, n_dim, "fake-normal-tiny")
+    gen_data_uniform(n_user, n_data_item, n_query_item, n_dim, "fake-uniform-tiny")
     # gen_data_uniform(n_user, n_data_item, n_query_item, n_dim, "fake-uniform")
     # gen_data_uniform(100, 500, 10, 10, "fake-small")
     # gen_data_independent(n_user, n_data_item, n_query_item, n_dim, "fake-independent")

@@ -11,6 +11,7 @@
 #include "Progress/BatchDiskBruteForce.hpp"
 #include "Progress/DiskBruteForce.hpp"
 #include "Progress/MemoryBruteForce.hpp"
+#include "QueryRankSampleSearchBruteForce.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -20,10 +21,8 @@
 
 class Parameter {
 public:
-    std::string basic_dir, dataset_name, method_name;
-    int n_sample, n_sample_score_distribution, n_sample_query, sample_topk;
-    uint64_t index_size_gb;
-    int simpfer_k_max;
+    std::string basic_dir, dataset_name, method_name, index_dir;
+    int n_sample, n_sample_query, sample_topk;
 };
 
 void LoadOptions(int argc, char **argv, Parameter &para) {
@@ -39,20 +38,16 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
              "dataset_name")
             ("method_name, mn", po::value<std::string>(&para.method_name)->default_value("BatchDiskBruteForce"),
              "method_name")
+            ("index_dir, id",
+             po::value<std::string>(&para.index_dir)->default_value("/home/bianzheng/reverse-k-ranks/index"),
+             "the directory of the index")
 
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(20),
              "number of sample of a rank bound")
-            ("n_sample_score_distribution, nssd", po::value<int>(&para.n_sample_score_distribution)->default_value(8),
-             "number of sample of the score distribution in a rank bound")
-            ("index_size_gb, tt", po::value<uint64_t>(&para.index_size_gb)->default_value(50),
-             "index size, in unit of GB")
             ("n_sample_query, nsq", po::value<int>(&para.n_sample_query)->default_value(150),
              "the numer of sample query in training query distribution")
             ("sample_topk, st", po::value<int>(&para.sample_topk)->default_value(50),
-             "topk in training query distribution")
-
-            ("simpfer_k_max, skm", po::value<int>(&para.simpfer_k_max)->default_value(25),
-             "k_max in simpfer");
+             "topk in training query distribution");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, opts), vm);
@@ -74,6 +69,7 @@ int main(int argc, char **argv) {
     const char *dataset_name = para.dataset_name.c_str();
     const char *basic_dir = para.basic_dir.c_str();
     string method_name = para.method_name;
+    const char* index_dir = para.index_dir.c_str();
     spdlog::info("{} dataset_name {}, basic_dir {}", method_name, dataset_name, basic_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
@@ -103,6 +99,16 @@ int main(int argc, char **argv) {
     } else if (method_name == "MemoryBruteForce") {
         spdlog::info("input parameter: none");
         index = MemoryBruteForce::BuildIndex(data_item, user);
+
+    } else if (method_name == "QueryRankSampleSearchBruteForce") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleSearchBruteForce::BuildIndex(data_item, user, index_path, dataset_name,
+                                                            n_sample, n_sample_query, sample_topk, index_dir);
+        sprintf(parameter_name, "n_sample_%d", n_sample);
 
     } else {
         spdlog::error("not such method");

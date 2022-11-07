@@ -4,6 +4,8 @@
 
 ///given the sampled rank, build the QueryRankSample index
 
+#include "NameTranslation.hpp"
+
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
@@ -63,23 +65,6 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 using namespace std;
 using namespace ReverseMIPS;
 
-std::string IndexName(const std::string &method_name) {
-    if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR") {
-        return "QueryRankSampleIntLR";
-    } else if (method_name == "QueryRankSampleScoreDistribution") {
-        return "QueryRankSampleScoreDistribution";
-    } else if (method_name == "QueryRankSampleSearchAllRank") {
-        return "QueryRankSampleSearchAllRank";
-    } else if (method_name == "QueryRankSampleSearchKthRank") {
-        return "QueryRankSampleSearchKthRank";
-    } else if (method_name == "RankSample") {
-        return "RankSample";
-    } else {
-        spdlog::error("not find method name, program exit");
-        exit(-1);
-    }
-}
-
 void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
                 const std::vector<int64_t> &n_sample_l, const int &n_sample_query, const int &sample_topk,
                 const char *dataset_name, const string &index_name, const char *basic_index_dir) {
@@ -131,7 +116,7 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 }
 
 int64_t ComputeNSample(const std::string &index_name, const int64_t &memory_capacity,
-                                   const int64_t &n_user, const int64_t &n_data_item, const int64_t &vec_dim) {
+                       const int64_t &n_user, const int64_t &n_data_item, const int64_t &vec_dim) {
     if (index_name == "QueryRankSampleIntLR") {
         return (memory_capacity * 1024 * 1024 * 1024 -
                 n_user * 4 * sizeof(double) -
@@ -173,19 +158,18 @@ int main(int argc, char **argv) {
 
     std::vector<int> memory_capacity_l = {2, 4, 8, 16, 32};
     std::vector<int64_t> n_sample_l(memory_capacity_l.size());
-    int n_capacity = (int) memory_capacity_l.size();
-    for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
-        const int64_t memory_capacity = memory_capacity_l[capacityID];
-        const int64_t n_sample = ComputeNSample(index_name, memory_capacity,
-                                                n_user, n_data_item, vec_dim);
-        n_sample_l[capacityID] = n_sample;
-    }
 
     if (para.n_sample != -1) {
         n_sample_l.clear();
         n_sample_l.push_back(para.n_sample);
-        n_capacity = (int) memory_capacity_l.size();
     } else {
+        int n_capacity = (int) memory_capacity_l.size();
+        for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
+            const int64_t memory_capacity = memory_capacity_l[capacityID];
+            const int64_t n_sample = ComputeNSample(index_name, memory_capacity,
+                                                    n_user, n_data_item, vec_dim);
+            n_sample_l[capacityID] = n_sample;
+        }
         for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
             spdlog::info("memory_capacity {}, n_sample {}",
                          memory_capacity_l[capacityID], n_sample_l[capacityID]);
