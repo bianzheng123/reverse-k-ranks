@@ -38,6 +38,7 @@ namespace ReverseMIPS::Simpfer {
     class Index : public BaseIndex {
         void ResetTimer() {
             total_retrieval_time_ = 0;
+            total_ip_cost_ = 0;
         }
 
     public:
@@ -49,6 +50,7 @@ namespace ReverseMIPS::Simpfer {
         size_t stop_time_;
         double total_retrieval_time_;
         TimeRecord total_retrieval_record_;
+        size_t total_ip_cost_;
 
         Index(
                 SimpferIndex &&simpfer_index, Matrix &&user_matrix,
@@ -96,8 +98,9 @@ namespace ReverseMIPS::Simpfer {
                 int n_block_prune = 0;
                 int n_sample_prune = 0;
                 int n_norm_prune = 0;
-                int64_t ip_count = 0;
+                size_t ip_count = 0;
                 int result_size = 0;
+
                 while (rtk_topk < n_data_item_) {
                     simpfer_index_.RTopKRetrieval(query_sd_l[queryID], user_matrix_, rtk_topk,
                                                   result_userID_l,
@@ -113,9 +116,11 @@ namespace ReverseMIPS::Simpfer {
 
                 const double query_time = total_retrieval_record_.get_elapsed_time_second();
                 total_retrieval_time_ += query_time;
+                total_ip_cost_ += ip_count;
+
                 spdlog::info(
-                        "queryID {}, result_size {}, rtk_topk {}, query_time {:.2f}s, total_retrieval_time {:.2f}s",
-                        queryID, result_size, rtk_topk, query_time, total_retrieval_time_);
+                        "queryID {}, result_size {}, rtk_topk {}, ip_cost {}, query_time {:.2f}s, total_ip_cost {}, total_retrieval_time {:.2f}s",
+                        queryID, result_size, rtk_topk, ip_count, query_time, total_ip_cost_, total_retrieval_time_);
                 assert(result_userID_l.size() == result_size);
 
                 for (int resultID = 0; resultID < result_size; resultID++) {
@@ -135,17 +140,14 @@ namespace ReverseMIPS::Simpfer {
         std::string
         PerformanceStatistics(const int &topk) override {
             // int topk;
+            //size_t total_ip_cost;
             //double total_time,
-            //          inner_product_time, memory_index_search_time_
-            //          read_disk_time_, exact_rank_time_,
-            //          rank_bound_prune_ratio_
-            //double ms_per_query;
             //unit: second
 
             char buff[1024];
             sprintf(buff,
-                    "top%d retrieval time:\n\ttotal %.3fs",
-                    topk, total_retrieval_time_);
+                    "top%d retrieval:\n\ttotal IP cost %ld, total time %.3fs",
+                    topk, total_ip_cost_, total_retrieval_time_);
             std::string str(buff);
             return str;
         }

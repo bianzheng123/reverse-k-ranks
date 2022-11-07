@@ -31,7 +31,7 @@ def cmp_rtk(baseline_method, rtk_method, dataset_l, topk_l):
             with open(rtk_dir, 'r') as f:
                 rtk_result_l = []
                 for line in f:
-                    res = set(map(int, line.split(",")))
+                    res = set(map(int, [_ for _ in line.split(",") if _ != '\n']))
                     rtk_result_l.append(res)
 
             baseline_result_l = np.loadtxt(baseline_dir, delimiter=',')
@@ -51,9 +51,9 @@ def cmp_rtk(baseline_method, rtk_method, dataset_l, topk_l):
 def run():
     for ds in dataset_l:
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'BatchDiskBruteForce'))
-    #     # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
+        # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
-        os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'Simpfer'))
+        os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time {}'.format(ds, 'true', 'Simpfer', 100000000))
 
     # topk_l = [10, 20, 30, 40, 50]
     topk_l = [10]

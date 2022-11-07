@@ -310,7 +310,8 @@ namespace ReverseMIPS {
                            std::vector<int> &sample_rank_l,
                            const size_t &n_sample_query, const size_t &sample_topk,
                            const char *dataset_name, const char *sample_name,
-                           const char *index_basic_dir) {
+                           const char *index_basic_dir,
+                           size_t &train_io_cost) {
         assert(sample_rank_l.size() == n_sample);
 
         QueryDistribution query_distribution_ins(n_user, n_data_item, dataset_name, sample_name,
@@ -426,6 +427,7 @@ namespace ReverseMIPS {
                 }
             }
             spdlog::info("min IO cost {}, idx {}", min_cost, min_cost_idx);
+            train_io_cost = min_cost;
             assert(min_cost_idx != -1);
             std::vector<int> sample_idx_l(n_sample);
             for (int sampleID = (int) n_sample - 1; sampleID >= 0; sampleID--) {

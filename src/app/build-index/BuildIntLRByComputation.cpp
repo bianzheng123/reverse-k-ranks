@@ -85,10 +85,20 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
         min_max_lr_l[rsID].StartPreprocess(rs_ins_l[rsID].known_rank_idx_l_.get(), n_sample);
     }
 
+    TimeRecord record;
+    record.reset();
+    const int report_every = 4000;
+
     for (int userID = 0; userID < n_user; userID++) {
         for (int rsID = 0; rsID < n_rs_ins; rsID++) {
             least_square_lr_l[rsID].LoopPreprocess(rs_ins_l[rsID].SampleData(userID), userID);
             min_max_lr_l[rsID].LoopPreprocess(rs_ins_l[rsID].SampleData(userID), userID);
+        }
+        if (userID % report_every == 0) {
+            std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
+                      << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                      << get_current_RSS() / 1000000 << " Mb \n";
+            record.reset();
         }
     }
 

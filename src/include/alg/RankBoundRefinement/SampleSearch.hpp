@@ -41,11 +41,6 @@ namespace ReverseMIPS {
                 known_rank_idx_l_[sampleID] = known_rank_l[sampleID];
             }
 
-            for (int rankID = 0; rankID < n_sample_; rankID++) {
-                std::cout << known_rank_idx_l_[rankID] << " ";
-            }
-            std::cout << std::endl;
-
         }
 
         inline SampleSearch(const char *index_path, const char *dataset_name, const char *method_name,
@@ -56,6 +51,11 @@ namespace ReverseMIPS {
                       n_sample,
                       load_sample_score, is_query_distribution,
                       n_sample_query, sample_topk);
+
+            for (int rankID = 0; rankID < n_sample_; rankID++) {
+                std::cout << known_rank_idx_l_[rankID] << " ";
+            }
+            std::cout << std::endl;
         }
 
         void LoopPreprocess(const DistancePair *distance_ptr, const int &userID) {

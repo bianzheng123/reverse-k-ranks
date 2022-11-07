@@ -19,7 +19,7 @@ namespace ReverseMIPS {
     class SimpferIndex {
         // verification by sequential scan
         // return value is whether contains in the reverse top-k result
-        bool SequentialScan(SimpferData &user, const double &ip_, const int &rtk_topk, int64_t &ip_count) {
+        bool SequentialScan(SimpferData &user, const double &ip_, const int &rtk_topk, size_t &ip_count) {
 
             for (unsigned int itemID = 0; itemID < n_data_item_; ++itemID) {
                 const double item_norm_ub = user.norm_ * data_item_sd_l_[itemID].norm_;
@@ -73,7 +73,7 @@ namespace ReverseMIPS {
 
         void ComputeByIndex(const SimpferData &query_item, const int &rtk_topk,
                             std::vector<int> &result_userID_l,
-                            int &n_block_prune, int &sample_prune, int &norm_prune, int64_t &ip_count,
+                            int &n_block_prune, int &sample_prune, int &norm_prune, size_t &ip_count,
                             int &result_size) {
             // init
             for (unsigned int userID = 0; userID < n_user_; ++userID) {
@@ -130,7 +130,7 @@ namespace ReverseMIPS {
         void ComputeByBruteforce(const SimpferData &query_item, const Matrix &user_matrix,
                                  const int &rtk_topk,
                                  std::vector<int> &result_userID_l,
-                                 int64_t &ip_count,
+                                 size_t &ip_count,
                                  int &result_size) {
 
             std::vector<VectorElement> topk_res_l(n_user_);
@@ -154,7 +154,7 @@ namespace ReverseMIPS {
         // main operation
         void RTopKRetrieval(const SimpferData &query_item, Matrix &user_matrix, const int &rtk_topk,
                             std::vector<int> &result_userID_l,
-                            int &n_block_prune, int &sample_prune, int &norm_prune, int64_t &ip_count,
+                            int &n_block_prune, int &sample_prune, int &norm_prune, size_t &ip_count,
                             int &result_size) {
 
             result_userID_l.clear();

@@ -122,12 +122,13 @@ int main(int argc, char **argv) {
     record.reset();
 
     std::vector<int> sample_rank_l(n_sample);
+    size_t train_io_cost;
     if (sample_name == "OptimalPart" || sample_name == "OptimalAll") {
         FindOptimalSample(n_user, n_data_item, n_sample,
                           sample_rank_l,
                           n_sample_query, sample_topk,
-                          dataset_name, sample_name.c_str(),
-                          index_dir);
+                          dataset_name, sample_name.c_str(), index_dir,
+                          train_io_cost);
 
     } else if (sample_name == "Uniform") {
         FindUniformSample(n_data_item, n_sample, sample_rank_l);
@@ -153,6 +154,13 @@ int main(int argc, char **argv) {
     spdlog::info("FindSampleRank build index time: total {}s", build_index_time);
 
     config.AddBuildIndexTime(build_index_time);
+
+    if (sample_name == "OptimalPart" || sample_name == "OptimalAll") {
+        char train_info[256];
+        sprintf(train_info, "train io cost: %ld", train_io_cost);
+        config.AddInfo(train_info);
+    }
+
     char parameter_name[256];
     if (sample_name == "Uniform") {
         sprintf(parameter_name, "%s-n_sample_%d", index_name.c_str(), n_sample);

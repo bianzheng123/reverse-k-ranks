@@ -34,12 +34,12 @@ private:
                    double &sumOfCoordinate, double &leftPartialSumOfCoordinate, const double *qPtr,
                    double *newQ,
                    int *qIntPtr, int &qSumOfCoordinate1, int &qSumOfCoordinate2, double &qRatio1,
-                   double &qRatio2, int64_t &ip_count);
+                   double &qRatio2, size_t &ip_count);
 
     void refine(const Matrix &q, const int &k, VectorElement *heap, const double qNorm, double *newQ,
                 const double subQNorm, const int *newQIntPtr, int qSumOfCoordinate1, int qSumOfCoordinate2,
                 double ratio1, double ratio2, const double newSVDQNorm, const double subTransformQNorm,
-                const double sumOfQCoordinate, const double leftPartialQSumOfCoordinate, int64_t &ip_count);
+                const double sumOfQCoordinate, const double leftPartialQSumOfCoordinate, size_t &ip_count);
 
 public:
     SIRPrune(const int scalingValue, const double SIGMA, const Matrix *p);
@@ -70,7 +70,7 @@ public:
 
     ~SIRPrune();
 
-    void topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector_element_l, int64_t &ip_count);
+    void topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector_element_l, size_t &ip_count);
 
 };
 
@@ -79,7 +79,7 @@ inline void SIRPrune::transferQ(const Matrix &q, const int &k, double &qNorm, do
                                 double &sumOfCoordinate, double &leftPartialSumOfCoordinate, const double *qPtr,
                                 double *newQ,
                                 int *qIntPtr, int &qSumOfCoordinate1, int &qSumOfCoordinate2, double &qRatio1,
-                                double &qRatio2, int64_t &ip_count) {
+                                double &qRatio2, size_t &ip_count) {
 
     double minValue = DBL_MAX;
     double maxValue = -DBL_MAX;
@@ -201,7 +201,7 @@ inline void SIRPrune::refine(const Matrix &q, const int &k, VectorElement *heap,
                              const double subQNorm, const int *newQIntPtr, int qSumOfCoordinate1, int qSumOfCoordinate2,
                              double ratio1, double ratio2, const double newSVDQNorm, const double subTransformQNorm,
                              const double sumOfQCoordinate, const double leftPartialQSumOfCoordinate,
-                             int64_t &ip_count) {
+                             size_t &ip_count) {
 
     int heapCount = 0;
     for (int rowIndex = 0; rowIndex < k; rowIndex++) {
@@ -322,7 +322,7 @@ inline SIRPrune::~SIRPrune() {
 }
 
 inline void
-SIRPrune::topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector_element_l, int64_t &ip_count) {
+SIRPrune::topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector_element_l, size_t &ip_count) {
 
     assert(vector_element_l.size() == q.rowNum);
 
