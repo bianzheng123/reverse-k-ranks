@@ -50,12 +50,12 @@ def compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity):
     return int(n_sample)
 
 
-def compute_n_sample_by_memory_index_score_distribution(dataset_name, memory_capacity):
+def compute_n_sample_by_memory_index_score_distribution(dataset_name, memory_capacity, n_bit):
     n_user = dataset_m[dataset_name][2]
     sizeof_char = 1
     sizeof_double = 8
-    n_sample = 1.0 * (memory_capacity * 1024 * 1024 * 1024 + n_user * sizeof_char) / (
-            sizeof_double + sizeof_char) / n_user
+    n_sample = 1.0 * (memory_capacity * 1024 * 1024 * 1024 + n_user * n_bit / 8) / (
+            sizeof_double + n_bit / 8) / n_user
     return int(n_sample)
 
 
@@ -76,10 +76,10 @@ def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, 
     os.system(
         f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
     )
-    # os.system(
-    #     f"cd build && ./bsibs --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
     os.system(
-        f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+        f"cd build && ./bsibs --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+    # os.system(
+    #     f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
     if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR':
         os.system(
@@ -108,7 +108,7 @@ def run():
 
         n_sample_item = 5000
         sample_topk = 600
-        memory_capacity = 16
+        memory_capacity = 1
         n_data_item = dataset_m[ds][0]
         n_user = dataset_m[ds][2]
         os.system(
@@ -127,9 +127,9 @@ def run():
 
         for n_bit in [2, 4, 8, 16, 32, 64]:
             parameter_name = f"--n_bit {n_bit}"
-            n_sample_score_distribution = compute_n_sample_by_memory_index_score_distribution(ds, memory_capacity)
+            n_sample_score_distribution = compute_n_sample_by_memory_index_score_distribution(ds, memory_capacity, n_bit)
             run_sample_method('QueryRankSampleScoreDistribution',
-                              ds, 128,
+                              ds, n_sample_score_distribution,
                               n_data_item, n_user,
                               n_sample_item, sample_topk, parameter_name)
 
