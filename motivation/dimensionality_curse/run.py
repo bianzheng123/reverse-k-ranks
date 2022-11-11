@@ -2,10 +2,13 @@ import argparse
 import json
 
 from recbole.quick_start import run_recbole
+import ssl
 
 if __name__ == '__main__':
+    # This restores the same behavior as before.
+    ssl._create_default_https_context = ssl._create_unverified_context
     model = 'ENMF'
-    dataset = ['lastfm', 'ml-1m']
+    dataset_l = ['lastfm', 'ml-1m', ]
     ebd_l = [4, 8, 16, 32, 64, 128, 256]
     # ebd_l = [2]
     res_l = {}
@@ -21,9 +24,14 @@ if __name__ == '__main__':
                        'metrics': ['Recall', 'NDCG', 'Hit', 'Precision'],
                        'eval_args': {'split': {'LS': 'valid_and_test'}, 'group_by': 'user', 'order': 'RO',
                                      'mode': 'full'}}
-        # config_dict=None
-
-        res = run_recbole(model=model, dataset=dataset, config_dict=config_dict)
+        # config_dict = {
+        #     'use_gpu': False, }
+        for dataset in dataset_l:
+            if dataset == 'lastfm':
+                config_dict['USER_ID_FIELD'] = 'user_id'
+                config_dict['ITEM_ID_FIELD'] = 'artist_id'
+                config_dict['load_col'] = {'inter': ['user_id', 'artist_id']}
+            res = run_recbole(model=model, dataset=dataset, config_dict=config_dict)
 
         with open('result/hitting_rate-%d-new.json' % (ebd), 'w') as f:
             json.dump(res, f)

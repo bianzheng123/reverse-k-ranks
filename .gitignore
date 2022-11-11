@@ -35,3 +35,8 @@ cmake-build-release/
 /script/plot/*.jpg
 /script/plot/*.pdf
 /obsoluted/ScoreSample/theory/*.jpg
+/motivation/dimensionality_curse/dataset/
+/motivation/dimensionality_curse/log/
+/motivation/dimensionality_curse/log_tensorboard/
+/motivation/dimensionality_curse/result/
+/motivation/dimensionality_curse/saved/
