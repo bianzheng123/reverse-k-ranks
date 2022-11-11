@@ -9,9 +9,12 @@
 
 #include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
 #include "alg/RankBoundRefinement/DirectLinearRegression.hpp"
+#include "alg/RankBoundRefinement/GlobalLinearRegression.hpp"
 #include "alg/RankBoundRefinement/LeastSquareLinearRegression.hpp"
 #include "alg/RankBoundRefinement/MinMaxLinearRegression.hpp"
 #include "alg/RankBoundRefinement/SampleSearch.hpp"
+
+#include "score_computation/ComputeScoreTable.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -63,17 +66,17 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
 using namespace std;
 using namespace ReverseMIPS;
 
-void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
-                const std::vector <int64_t> &n_sample_l, const int &n_sample_query, const int &sample_topk,
-                const char *dataset_name, const char *basic_index_dir, const std::string &method_name) {
+void BuildLocalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
+                     const std::vector<int64_t> &n_sample_l, const int &n_sample_query, const int &sample_topk,
+                     const char *dataset_name, const char *basic_index_dir, const std::string &method_name) {
     const int n_user = user.n_vector_;
     const int n_data_item = data_item.n_vector_;
 
     //rank search
     const int n_rs_ins = (int) n_sample_l.size();
-    std::vector <std::unique_ptr<BaseLinearRegression>> lr_l;
+    std::vector<std::unique_ptr<BaseLinearRegression>> lr_l;
 
-    std::vector <SampleSearch> rs_ins_l(n_rs_ins);
+    std::vector<SampleSearch> rs_ins_l(n_rs_ins);
     const bool load_sample_score = true;
     const bool is_query_distribution = true;
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
@@ -123,6 +126,58 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
 }
 
+void BuildGlobalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
+                      const std::vector<int64_t> &n_sample_l, const int &n_sample_query, const int &sample_topk,
+                      const char *dataset_name, const char *basic_index_dir, const std::string &method_name) {
+    const int n_user = user.n_vector_;
+    const int n_data_item = data_item.n_vector_;
+
+    //rank search
+    const int n_rs_ins = (int) n_sample_l.size();
+    std::vector<GlobalLinearRegression> lr_l;
+
+    const bool load_sample_score = true;
+    const bool is_query_distribution = true;
+    for (int rsID = 0; rsID < n_rs_ins; rsID++) {
+
+        lr_l.emplace_back(GlobalLinearRegression(n_data_item, n_user));
+
+        lr_l[rsID].StartPreprocess();
+
+    }
+
+    TimeRecord record;
+    record.reset();
+    const int report_every = 4000;
+
+    //Compute Score Table
+    ComputeScoreTable cst(user, data_item);
+    cst.compute_time_ = 0;
+    cst.sort_time_ = 0;
+    std::vector<double> distance_l(n_data_item);
+
+    for (int userID = 0; userID < n_user; userID++) {
+        cst.ComputeSortItems(userID, distance_l.data());
+
+        for (int rsID = 0; rsID < n_rs_ins; rsID++) {
+            lr_l[rsID].LoopPreprocess(distance_l.data(), userID);
+        }
+        if (userID % report_every == 0) {
+            std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
+                      << record.get_elapsed_time_second() << " s/iter" << " Mem: "
+                      << get_current_RSS() / 1000000 << " Mb \n";
+            record.reset();
+        }
+    }
+    cst.FinishCompute();
+
+    for (int rsID = 0; rsID < n_rs_ins; rsID++) {
+        lr_l[rsID].FinishPreprocess();
+        lr_l[rsID].SaveIndex(basic_index_dir, dataset_name);
+    }
+
+}
+
 int main(int argc, char **argv) {
     Parameter para;
     LoadOptions(argc, argv, para);
@@ -136,15 +191,17 @@ int main(int argc, char **argv) {
     spdlog::info("n_sample_query {}, sample_topk {}", para.n_sample_query, para.sample_topk);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector <VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                          vec_dim);
+    vector<VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
     VectorMatrix &user = data[0];
     VectorMatrix &data_item = data[1];
     VectorMatrix &query_item = data[2];
+
+    user.vectorNormalize();
     spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
     std::vector<int> memory_capacity_l = {2, 4, 8, 16, 32};
-    std::vector <int64_t> n_sample_l(memory_capacity_l.size());
+    std::vector<int64_t> n_sample_l(memory_capacity_l.size());
     int n_capacity = (int) memory_capacity_l.size();
     for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
         const int64_t memory_capacity = memory_capacity_l[capacityID];
@@ -178,9 +235,15 @@ int main(int argc, char **argv) {
     TimeRecord record;
     record.reset();
 
-    BuildIndex(data_item, user,
-               n_sample_l, para.n_sample_query, para.sample_topk,
-               dataset_name, index_dir.c_str(), method_name);
+    if (method_name == "QueryRankSampleGlobalIntLR") {
+        BuildGlobalIndex(data_item, user,
+                         n_sample_l, para.n_sample_query, para.sample_topk,
+                         dataset_name, index_dir.c_str(), method_name);
+    } else {
+        BuildLocalIndex(data_item, user,
+                        n_sample_l, para.n_sample_query, para.sample_topk,
+                        dataset_name, index_dir.c_str(), method_name);
+    }
 
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");

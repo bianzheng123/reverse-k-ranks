@@ -16,21 +16,34 @@ if __name__ == '__main__':
         # config_dict = {'embedding_size': 64, 'epochs': 100, 'neg_sampling': None}
         # config_dict = {'embedding_size': 64, 'epochs': 100, 'topk': [10], 'valid_metric': 'MRR@10',
         #                'metrics': ['Recall', 'NDCG', 'Hit', 'Precision']}
-        config_dict = {'embedding_size': ebd, 'epochs': 200, 'topk': [50, 100, 200], 'neg_sampling': None,
-                       'use_gpu': False,
-                       'train_batch_size': 512, 'learning_rate': 0.05, 'weight_decay': 0.5, 'learner': 'adagrad',
-                       'eval_step': 20,
-                       'valid_metric': 'hit@200',
-                       'metrics': ['Recall', 'NDCG', 'Hit', 'Precision'],
-                       'eval_args': {'split': {'LS': 'valid_and_test'}, 'group_by': 'user', 'order': 'RO',
-                                     'mode': 'full'}}
         # config_dict = {
         #     'use_gpu': False, }
         for dataset in dataset_l:
             if dataset == 'lastfm':
-                config_dict['USER_ID_FIELD'] = 'user_id'
-                config_dict['ITEM_ID_FIELD'] = 'artist_id'
-                config_dict['load_col'] = {'inter': ['user_id', 'artist_id']}
+                config_dict = {'embedding_size': ebd, 'epochs': 200, 'topk': [50, 100, 200], 'neg_sampling': None,
+                               'use_gpu': False,
+                               'train_batch_size': 512, 'learning_rate': 0.05, 'weight_decay': 0.5,
+                               'learner': 'adagrad',
+                               'eval_step': 20,
+                               'valid_metric': 'hit@200',
+                               'metrics': ['Recall', 'NDCG', 'Hit', 'Precision'],
+                               'eval_args': {'split': {'LS': 'valid_and_test'}, 'group_by': 'user', 'order': 'RO',
+                                             'mode': 'full'},
+                               'USER_ID_FIELD': 'user_id',
+                               'ITEM_ID_FIELD': 'artist_id',
+                               'load_col': {'inter': ['user_id', 'artist_id']}
+                               }
+            elif dataset == 'ml-1m':
+                config_dict = {'embedding_size': ebd, 'epochs': 200, 'topk': [50, 100, 200], 'neg_sampling': None,
+                               'use_gpu': False,
+                               'train_batch_size': 512, 'learning_rate': 0.05, 'weight_decay': 0.5,
+                               'learner': 'adagrad',
+                               'eval_step': 20,
+                               'valid_metric': 'hit@200',
+                               'metrics': ['Recall', 'NDCG', 'Hit', 'Precision'],
+                               'eval_args': {'split': {'LS': 'valid_and_test'}, 'group_by': 'user', 'order': 'RO',
+                                             'mode': 'full'}}
+
             res = run_recbole(model=model, dataset=dataset, config_dict=config_dict)
             with open('result/hitting_rate-{}-{}-new.json'.format(dataset, ebd), 'w') as f:
                 json.dump(res, f)

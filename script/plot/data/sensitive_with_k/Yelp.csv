@@ -1,4 +1,4 @@
-topk,RankSampleTime,QueryRankSampleTime,RankSampleIOCost,QueryRankSampleIOCost
+topk,RankSampleRunningTime,QueryRankSampleRunningTime,RankSampleIOCost,QueryRankSampleIOCost
 10,6.35068,0.54335,906045.44,2048
 20,6.36929,0.55766,908462.08,2508.8
 30,6.39707,0.57191,911887.36,3988.48

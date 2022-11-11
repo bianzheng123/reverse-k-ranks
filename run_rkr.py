@@ -67,8 +67,9 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
     flag = True
     suffix_m = {
 
-        'QueryRankSampleLeastSquareIntLR': 'n_sample_20-n_sample_query_150-sample_topk_30',
         'QueryRankSampleDirectIntLR': 'n_sample_20-n_sample_query_150-sample_topk_30',
+        'QueryRankSampleGlobalIntLR': 'n_sample_20-n_sample_query_150-sample_topk_30',
+        'QueryRankSampleLeastSquareIntLR': 'n_sample_20-n_sample_query_150-sample_topk_30',
         'QueryRankSampleMinMaxIntLR': 'n_sample_20-n_sample_query_150-sample_topk_30',
         'QueryRankSampleScoreDistribution': 'n_sample_20-n_bit_8',
         'QueryRankSampleSearchAllRank': 'n_sample_20-n_sample_query_150-sample_topk_30',
@@ -116,7 +117,7 @@ def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, 
     # os.system(
     #     f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
-    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or method_name == "QueryRankSampleDirectIntLR":
+    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or method_name == "QueryRankSampleDirectIntLR" or method_name == "QueryRankSampleGlobalIntLR":
         os.system(
             f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
@@ -138,7 +139,8 @@ def run():
 
         # 'GridIndex',
         # 'LinearModel',
-        'QueryRankSampleDirectIntLR',
+        # 'QueryRankSampleDirectIntLR',
+        'QueryRankSampleGlobalIntLR',
         # 'QueryRankSampleLeastSquareIntLR',
         'QueryRankSampleMinMaxIntLR',
         # 'QueryRankSampleScoreDistribution',
@@ -177,7 +179,9 @@ def run():
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
-        run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+        # run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+        #                   sample_topk)
+        run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
                           sample_topk)
         # run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)

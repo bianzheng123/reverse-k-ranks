@@ -81,7 +81,8 @@ def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, 
     # os.system(
     #     f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
-    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or method_name == "QueryRankSampleDirectIntLR":
+    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or \
+            method_name == "QueryRankSampleDirectIntLR" or method_name == "QueryRankSampleGlobalIntLR":
         os.system(
             f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
@@ -116,23 +117,23 @@ def run():
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
-        # n_sample_intlr = compute_n_sample_by_memory_index_intlr(ds, memory_capacity)
-        # run_sample_method('QueryRankSampleIntLR',
-        #                   ds, n_sample_intlr,
-        #                   n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample_intlr,
-        #                   n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
+        n_sample_intlr = compute_n_sample_by_memory_index_intlr(ds, memory_capacity)
+        run_sample_method('QueryRankSampleMinMaxIntLR',
+                          ds, n_sample_intlr,
+                          n_data_item, n_user,
+                          n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample_intlr,
+                          n_data_item, n_user,
+                          n_sample_item, sample_topk)
 
-        for n_bit in [2, 4, 8, 16, 32, 64]:
-            parameter_name = f"--n_bit {n_bit}"
-            n_sample_score_distribution = compute_n_sample_by_memory_index_score_distribution(ds, memory_capacity,
-                                                                                              n_bit)
-            run_sample_method('QueryRankSampleScoreDistribution',
-                              ds, n_sample_score_distribution,
-                              n_data_item, n_user,
-                              n_sample_item, sample_topk, parameter_name)
+        # for n_bit in [2, 4, 8, 16, 32, 64]:
+        #     parameter_name = f"--n_bit {n_bit}"
+        #     n_sample_score_distribution = compute_n_sample_by_memory_index_score_distribution(ds, memory_capacity,
+        #                                                                                       n_bit)
+        #     run_sample_method('QueryRankSampleScoreDistribution',
+        #                       ds, n_sample_score_distribution,
+        #                       n_data_item, n_user,
+        #                       n_sample_item, sample_topk, parameter_name)
 
         # n_sample_sample_only = compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
         # run_sample_method('QueryRankSampleSearchAllRank',
