@@ -32,8 +32,7 @@ if __name__ == '__main__':
                 config_dict['ITEM_ID_FIELD'] = 'artist_id'
                 config_dict['load_col'] = {'inter': ['user_id', 'artist_id']}
             res = run_recbole(model=model, dataset=dataset, config_dict=config_dict)
-
-        with open('result/hitting_rate-%d-new.json' % (ebd), 'w') as f:
-            json.dump(res, f)
-        res_l[ebd] = res
+            with open('result/hitting_rate-{}-{}-new.json'.format(dataset, ebd), 'w') as f:
+                json.dump(res, f)
+            res_l[ebd] = res
     print(res_l)
