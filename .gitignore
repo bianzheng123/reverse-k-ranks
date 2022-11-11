@@ -20,7 +20,9 @@ cmake-build-release/
 /attribution/sample-score-distribution/*.jpg
 /attribution/*.txt
 *.eps
-/attribution/disk-index-compression/ignore-fig
+/obsoluted/disk-index-compression/ignore-fig
+/obsoluted/disk-index-compression/*.jpg
+/obsoluted/disk-index-compression/*.txt
 /attribution/score-distribution/*.csv
 /attribution/score-distribution/*.jpg
 /attribution/disk-index-compression/*.jpg

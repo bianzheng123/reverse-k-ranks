@@ -81,9 +81,9 @@ def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, 
     # os.system(
     #     f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
-    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR':
+    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or method_name == "QueryRankSampleDirectIntLR":
         os.system(
-            f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+            f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
     os.system(
         f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --test_topk {'false'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk} {other_config}"
@@ -127,7 +127,8 @@ def run():
 
         for n_bit in [2, 4, 8, 16, 32, 64]:
             parameter_name = f"--n_bit {n_bit}"
-            n_sample_score_distribution = compute_n_sample_by_memory_index_score_distribution(ds, memory_capacity, n_bit)
+            n_sample_score_distribution = compute_n_sample_by_memory_index_score_distribution(ds, memory_capacity,
+                                                                                              n_bit)
             run_sample_method('QueryRankSampleScoreDistribution',
                               ds, n_sample_score_distribution,
                               n_data_item, n_user,

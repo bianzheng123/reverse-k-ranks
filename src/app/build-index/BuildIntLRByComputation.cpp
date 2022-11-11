@@ -7,9 +7,11 @@
 #include "util/FileIO.hpp"
 #include "struct/VectorMatrix.hpp"
 
-#include "alg/RankBoundRefinement/SampleSearch.hpp"
+#include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
+#include "alg/RankBoundRefinement/DirectLinearRegression.hpp"
 #include "alg/RankBoundRefinement/LeastSquareLinearRegression.hpp"
 #include "alg/RankBoundRefinement/MinMaxLinearRegression.hpp"
+#include "alg/RankBoundRefinement/SampleSearch.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -19,7 +21,7 @@
 
 class Parameter {
 public:
-    std::string dataset_dir, dataset_name, index_dir;
+    std::string dataset_dir, dataset_name, index_dir, method_name;
     int n_sample, n_sample_query, sample_topk;
 };
 
@@ -37,6 +39,9 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("index_dir, id",
              po::value<std::string>(&para.index_dir)->default_value("/home/bianzheng/reverse-k-ranks/index"),
              "the directory of the index")
+            ("method_name, tm",
+             po::value<std::string>(&para.method_name)->default_value("QueryRankSampleDirectIntLR"),
+             "method name")
 
             ("n_sample, ns", po::value<int>(&para.n_sample)->default_value(-1),
              "number of sample of a rank bound")
@@ -59,17 +64,16 @@ using namespace std;
 using namespace ReverseMIPS;
 
 void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
-                const std::vector<int64_t> &n_sample_l, const int &n_sample_query, const int &sample_topk,
-                const char *dataset_name, const char *basic_index_dir) {
+                const std::vector <int64_t> &n_sample_l, const int &n_sample_query, const int &sample_topk,
+                const char *dataset_name, const char *basic_index_dir, const std::string &method_name) {
     const int n_user = user.n_vector_;
     const int n_data_item = data_item.n_vector_;
 
     //rank search
     const int n_rs_ins = (int) n_sample_l.size();
-    std::vector<LeastSquareLinearRegression> least_square_lr_l(n_rs_ins);
-    std::vector<MinMaxLinearRegression> min_max_lr_l(n_rs_ins);
+    std::vector <std::unique_ptr<BaseLinearRegression>> lr_l;
 
-    std::vector<SampleSearch> rs_ins_l(n_rs_ins);
+    std::vector <SampleSearch> rs_ins_l(n_rs_ins);
     const bool load_sample_score = true;
     const bool is_query_distribution = true;
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
@@ -78,11 +82,22 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
         rs_ins_l[rsID] = SampleSearch(basic_index_dir, dataset_name, "QueryRankSampleIntLR",
                                       n_sample, load_sample_score, is_query_distribution,
                                       n_sample_query, sample_topk);
-        least_square_lr_l[rsID] = LeastSquareLinearRegression(n_data_item, n_user);
-        least_square_lr_l[rsID].StartPreprocess(rs_ins_l[rsID].known_rank_idx_l_.get(), n_sample);
+        if (method_name == "QueryRankSampleDirectIntLR") {
+            lr_l.push_back(std::make_unique<DirectLinearRegression>(n_data_item, n_user));
 
-        min_max_lr_l[rsID] = MinMaxLinearRegression(n_data_item, n_user);
-        min_max_lr_l[rsID].StartPreprocess(rs_ins_l[rsID].known_rank_idx_l_.get(), n_sample);
+        } else if (method_name == "QueryRankSampleLeastSquareIntLR") {
+            lr_l.push_back(std::make_unique<LeastSquareLinearRegression>(n_data_item, n_user));
+
+        } else if (method_name == "QueryRankSampleMinMaxIntLR") {
+            lr_l.push_back(std::make_unique<MinMaxLinearRegression>(n_data_item, n_user));
+//            lr_l.emplace_back(MinMaxLinearRegression(n_data_item, n_user));
+
+        } else {
+            spdlog::error("no such training method, program exit");
+            exit(-1);
+        }
+        lr_l[rsID]->StartPreprocess(rs_ins_l[rsID].known_rank_idx_l_.get(), n_sample);
+
     }
 
     TimeRecord record;
@@ -91,8 +106,7 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
     for (int userID = 0; userID < n_user; userID++) {
         for (int rsID = 0; rsID < n_rs_ins; rsID++) {
-            least_square_lr_l[rsID].LoopPreprocess(rs_ins_l[rsID].SampleData(userID), userID);
-            min_max_lr_l[rsID].LoopPreprocess(rs_ins_l[rsID].SampleData(userID), userID);
+            lr_l[rsID]->LoopPreprocess(rs_ins_l[rsID].SampleData(userID), userID);
         }
         if (userID % report_every == 0) {
             std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
@@ -103,11 +117,8 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
     }
 
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
-        least_square_lr_l[rsID].FinishPreprocess();
-        min_max_lr_l[rsID].FinishPreprocess();
-
-        least_square_lr_l[rsID].SaveIndex(basic_index_dir, dataset_name);
-        min_max_lr_l[rsID].SaveIndex(basic_index_dir, dataset_name);
+        lr_l[rsID]->FinishPreprocess();
+        lr_l[rsID]->SaveIndex(basic_index_dir, dataset_name);
     }
 
 }
@@ -118,21 +129,22 @@ int main(int argc, char **argv) {
     const char *dataset_name = para.dataset_name.c_str();
     const char *dataset_dir = para.dataset_dir.c_str();
     string index_dir = para.index_dir;
+    const string method_name = para.method_name;
     spdlog::info("BuildIntLRByComputation dataset_name {}, dataset_dir {}",
                  dataset_name, dataset_dir);
-    spdlog::info("index_dir {}", index_dir);
+    spdlog::info("index_dir {}, method_name {}", index_dir, method_name);
     spdlog::info("n_sample_query {}, sample_topk {}", para.n_sample_query, para.sample_topk);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector<VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                         vec_dim);
+    vector <VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                          vec_dim);
     VectorMatrix &user = data[0];
     VectorMatrix &data_item = data[1];
     VectorMatrix &query_item = data[2];
     spdlog::info("n_data_item {}, n_query_item {}, n_user {}, vec_dim {}", n_data_item, n_query_item, n_user, vec_dim);
 
     std::vector<int> memory_capacity_l = {2, 4, 8, 16, 32};
-    std::vector<int64_t> n_sample_l(memory_capacity_l.size());
+    std::vector <int64_t> n_sample_l(memory_capacity_l.size());
     int n_capacity = (int) memory_capacity_l.size();
     for (int capacityID = 0; capacityID < n_capacity; capacityID++) {
         const int64_t memory_capacity = memory_capacity_l[capacityID];
@@ -168,7 +180,7 @@ int main(int argc, char **argv) {
 
     BuildIndex(data_item, user,
                n_sample_l, para.n_sample_query, para.sample_topk,
-               dataset_name, index_dir.c_str());
+               dataset_name, index_dir.c_str(), method_name);
 
     double build_index_time = record.get_elapsed_time_second();
     spdlog::info("finish preprocess and save the index");

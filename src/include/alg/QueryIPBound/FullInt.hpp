@@ -104,6 +104,12 @@ namespace ReverseMIPS {
 
         }
 
+        uint64_t IndexSizeByte() const {
+            const uint64_t user_int_size = sizeof(int) * n_user_ * vec_dim_;
+            const uint64_t user_int_sum_size = sizeof(int) * n_user_;
+            return user_int_size + user_int_sum_size;
+        }
+
     };
 
 }

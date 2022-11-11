@@ -1,14 +1,14 @@
 //
-// Created by BianZheng on 2022/10/29.
+// Created by BianZheng on 2022/11/11.
 //
 
-#ifndef REVERSE_K_RANKS_MINMAXHEADLINEARREGRESSION_HPP
-#define REVERSE_K_RANKS_MINMAXHEADLINEARREGRESSION_HPP
+#ifndef REVERSE_K_RANKS_DIRECTLINEARREGRESSION_HPP
+#define REVERSE_K_RANKS_DIRECTLINEARREGRESSION_HPP
 
-#include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
 #include "struct/DistancePair.hpp"
 #include "util/MathUtil.hpp"
 #include "sdlp/sdlp.hpp"
+#include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
 
 #include <iostream>
 #include <memory>
@@ -17,7 +17,7 @@
 
 namespace ReverseMIPS {
 
-    class MinMaxLinearRegression : public BaseLinearRegression {
+    class DirectLinearRegression : public BaseLinearRegression {
 
         size_t n_data_item_, n_user_;
         static constexpr int n_predict_parameter_ = 2; // (a, b) for linear estimation
@@ -35,9 +35,9 @@ namespace ReverseMIPS {
         double *preprocess_cache_c_; // 3, objective coefficients
     public:
 
-        inline MinMaxLinearRegression() {}
+        inline DirectLinearRegression() {}
 
-        inline MinMaxLinearRegression(const int &n_data_item, const int &n_user) {
+        inline DirectLinearRegression(const int &n_data_item, const int &n_user) {
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
             this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
@@ -46,7 +46,7 @@ namespace ReverseMIPS {
             static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
         }
 
-        inline MinMaxLinearRegression(const char *index_basic_dir, const char *dataset_name,
+        inline DirectLinearRegression(const char *index_basic_dir, const char *dataset_name,
                                       const size_t &n_sample) {
             LoadIndex(index_basic_dir, dataset_name, n_sample);
         }
@@ -89,28 +89,6 @@ namespace ReverseMIPS {
             return std::sqrt(sigma);
         }
 
-        double CDFPhi(double x) const {
-            // constants
-            constexpr double a1 = 0.254829592;
-            constexpr double a2 = -0.284496736;
-            constexpr double a3 = 1.421413741;
-            constexpr double a4 = -1.453152027;
-            constexpr double a5 = 1.061405429;
-            constexpr double p = 0.3275911;
-
-            // Save the sign of x
-            int sign = 1;
-            if (x < 0)
-                sign = -1;
-            x = fabs(x) / sqrt_2_;
-
-            // A&S formula 7.1.26
-            double t = 1.0 / (1.0 + p * x);
-            double y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x);
-
-            return 0.5 * (1.0 + sign * y);
-        }
-
         void LoopPreprocess(const double *sampleIP_l, const int &userID) override {
             //compute average, std
             const double mu = ComputeAverage(sampleIP_l);
@@ -120,13 +98,12 @@ namespace ReverseMIPS {
 
 #pragma omp parallel for default(none) shared(sampleIP_l, mu, sigma)
             for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
-                const double normal_num = (sampleIP_l[sampleID] - mu) / sigma;
-                const double cdf = CDFPhi(normal_num);
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1)] = -cdf;
+                const double input_x = sampleIP_l[sampleID];
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1)] = -input_x;
                 preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 1] = -1;
                 preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 2] = -1;
 
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 3] = cdf;
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 3] = input_x;
                 preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 4] = 1;
                 preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 5] = -1;
 
@@ -191,8 +168,7 @@ namespace ReverseMIPS {
             const size_t distribution_pos = userID * n_distribution_parameter_;
             const double mu = distribution_para_l_[distribution_pos];
             const double sigma = distribution_para_l_[distribution_pos + 1];
-            const double normalize_x = (queryIP - mu) / sigma;
-            const double input_x = CDFPhi(normalize_x);
+            const double input_x = queryIP;
 
             const size_t pred_pos = userID * n_predict_parameter_;
             const double pred_rank = input_x * predict_para_l_[pred_pos] + predict_para_l_[pred_pos + 1];
@@ -265,11 +241,6 @@ namespace ReverseMIPS {
                 rank_lb_l[userID] = qIP_lb_tmp_lower_rank;
                 rank_ub_l[userID] = qIP_ub_tmp_upper_rank;
 
-//                if (queryID == 3 && userID == 865) {
-//                    printf("queryID %d, userID %d, queryIP_lb %.3f, queryIP_ub %.3f, rank_lb %d, rank_ub %d\n",
-//                           queryID, userID, queryIP_lb, queryIP_ub, rank_lb_l[userID], rank_ub_l[userID]);
-//                }
-
                 assert(qIP_lb_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
                 assert(qIP_ub_tmp_upper_rank <= qIP_ub_tmp_lower_rank);
                 assert(qIP_ub_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
@@ -279,7 +250,7 @@ namespace ReverseMIPS {
         void SaveIndex(const char *index_basic_dir, const char *dataset_name) override {
             char index_path[256];
             sprintf(index_path,
-                    "%s/memory_index/MinMaxLinearRegression-%s-n_sample_%d.index",
+                    "%s/memory_index/DirectLinearRegression-%s-n_sample_%d.index",
                     index_basic_dir, dataset_name, n_sample_rank_);
 
             std::ofstream out_stream_ = std::ofstream(index_path, std::ios::binary | std::ios::out);
@@ -305,7 +276,7 @@ namespace ReverseMIPS {
                        const size_t &n_sample) {
             char index_path[256];
             sprintf(index_path,
-                    "%s/memory_index/MinMaxLinearRegression-%s-n_sample_%ld.index",
+                    "%s/memory_index/DirectLinearRegression-%s-n_sample_%ld.index",
                     index_basic_dir, dataset_name, n_sample);
 
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
@@ -345,4 +316,4 @@ namespace ReverseMIPS {
 
     };
 }
-#endif //REVERSE_K_RANKS_MINMAXHEADLINEARREGRESSION_HPP
+#endif //REVERSE_K_RANKS_DIRECTLINEARREGRESSION_HPP

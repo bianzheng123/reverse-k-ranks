@@ -21,9 +21,9 @@ def run():
     #     os.system(
     #         f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {-1} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
     #
-    #     if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR':
+    #     if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or method_name == "QueryRankSampleDirectIntLR":
     #         os.system(
-    #             f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --n_sample {-1} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+    #             f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {-1} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
     dataset_name = 'amazon-home-kitchen'
     n_data_item = polyu.dataset_m[dataset_name][0]

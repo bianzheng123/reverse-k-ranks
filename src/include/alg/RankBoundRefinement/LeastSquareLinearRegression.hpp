@@ -5,8 +5,10 @@
 #ifndef REVERSE_K_RANKS_HEADLINEARREGRESSION_HPP
 #define REVERSE_K_RANKS_HEADLINEARREGRESSION_HPP
 
+#include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
 #include "struct/DistancePair.hpp"
 #include "util/MathUtil.hpp"
+
 #include <iostream>
 #include <memory>
 #include <Eigen/Dense>
@@ -15,7 +17,7 @@
 
 namespace ReverseMIPS {
 
-    class LeastSquareLinearRegression {
+    class LeastSquareLinearRegression : public BaseLinearRegression {
 
         size_t n_data_item_, n_user_;
         static constexpr int n_predict_parameter_ = 2; // (a, b) for linear estimation
@@ -47,7 +49,7 @@ namespace ReverseMIPS {
             LoadIndex(index_basic_dir, dataset_name, n_sample);
         }
 
-        void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) {
+        void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) override {
             this->n_sample_rank_ = n_sample_rank;
             this->sample_rank_l_ = std::make_unique<int[]>(n_sample_rank);
             this->preprocess_cache_X_ = new double[n_sample_rank * n_predict_parameter_];
@@ -59,7 +61,7 @@ namespace ReverseMIPS {
 
         }
 
-        double ComputeAverage(const double *sampleIP_l) {
+        double ComputeAverage(const double *sampleIP_l) const {
             double average = 0;
             for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
                 average += sampleIP_l[sampleID];
@@ -67,7 +69,7 @@ namespace ReverseMIPS {
             return average / n_sample_rank_;
         }
 
-        double ComputeStd(const double *sampleIP_l, const double average) {
+        double ComputeStd(const double *sampleIP_l, const double average) const {
             double sigma = 0;
             for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
                 const double minus = sampleIP_l[sampleID] - average;
@@ -100,7 +102,7 @@ namespace ReverseMIPS {
             return 0.5 * (1.0 + sign * y);
         }
 
-        void LoopPreprocess(const double *sampleIP_l, const int &userID) {
+        void LoopPreprocess(const double *sampleIP_l, const int &userID) override {
             //compute average, std
             const double mu = ComputeAverage(sampleIP_l);
             const double sigma = ComputeStd(sampleIP_l, mu);
@@ -152,7 +154,7 @@ namespace ReverseMIPS {
             assert(-1 < error && error < n_sample_rank_);
         }
 
-        void FinishPreprocess() {
+        void FinishPreprocess() override {
             delete[] preprocess_cache_X_;
             delete[] preprocess_cache_Y_;
             preprocess_cache_X_ = nullptr;
@@ -251,7 +253,7 @@ namespace ReverseMIPS {
             }
         }
 
-        void SaveIndex(const char *index_basic_dir, const char *dataset_name) {
+        void SaveIndex(const char *index_basic_dir, const char *dataset_name) override {
             char index_path[256];
             sprintf(index_path,
                     "%s/memory_index/LeastSquareLinearRegression-%s-n_sample_%d.index",
