@@ -8,24 +8,23 @@ import run_polyuhost as polyu
 def run():
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
-    dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
+    compute_time_rs = {
+        'movielens-27m': 387.406,
+        'yahoomusic_big': 13904.212,
+        'yelp': 19473.305,
+    }
+    times = 11
 
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
+    dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp']
     for ds in dataset_l:
         memory_capacity = 8
-        n_sample = polyu.compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
+        stop_time = int(compute_time_rs[ds] * times)
+        k_max = polyu.compute_k_max_in_reverse_mips(ds, memory_capacity)
         os.system(
-            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'false'} --method_name {'RankSample'} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk}"
-        )
-
-    dataset_l = ['movielens-27m', 'netflix', 'yahoomusic_big', 'yelp']
-    for ds in dataset_l:
-        memory_capacity = 8
-        n_sample = polyu.compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
-        os.system(
-            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'false'} --method_name {'QueryRankSampleSearchKthRank'} --n_sample {n_sample} --n_sample_query {n_sample_query} --sample_topk {sample_topk}"
+            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} " +
+            f"--test_topk {'false'} --method_name {'Simpfer'} --simpfer_k_max {k_max} --stop_time {stop_time}"
         )
 
 

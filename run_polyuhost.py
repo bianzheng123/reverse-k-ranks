@@ -71,6 +71,16 @@ def compute_n_sample_by_memory_index_intlr(dataset_name, memory_capacity):
     return int(n_sample)
 
 
+def compute_k_max_in_reverse_mips(dataset_name, memory_capacity):
+    n_user = dataset_m[dataset_name][2]
+    n_data_item = dataset_m[dataset_name][0]
+    sizeof_double = 8
+    k_max = 1.0 * (
+            memory_capacity * 1024 * 1024 * 1024) / (n_user * 2 * sizeof_double)
+    k_max = min(n_data_item, k_max)
+    return int(k_max)
+
+
 def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, n_sample_item, sample_topk,
                       other_config=""):
     os.system(
