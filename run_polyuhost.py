@@ -66,7 +66,7 @@ def compute_n_sample_by_memory_index_intlr(dataset_name, memory_capacity):
     sizeof_double = 8
     sizeof_int = 4
     n_sample = 1.0 * (
-            memory_capacity * 1024 * 1024 * 1024 - n_user * 4 * sizeof_double - n_user * dimension * sizeof_int - n_data_item * dimension * sizeof_int
+            memory_capacity * 1024 * 1024 * 1024 - n_user * 4 * sizeof_double - n_user * dimension * sizeof_int
     ) / sizeof_double / n_user
     return int(n_sample)
 

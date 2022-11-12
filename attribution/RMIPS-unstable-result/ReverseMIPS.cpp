@@ -2,10 +2,6 @@
 // Created by BianZheng on 2022/11/11.
 //
 
-//
-// Created by bianzheng on 2022/4/29.
-//
-
 #include "util/VectorIO.hpp"
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
@@ -13,6 +9,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "ReverseMIPS.hpp"
+#include "AttributionFileIO.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -82,16 +79,15 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l;
-    topk_l = {600, 500, 200, 100, 50, 20, 10, 1};
+    topk_l = {200, 100, 50, 20, 10};
+//    topk_l = {10};
 
-    RetrievalResult config;
     vector<vector<int>> result_rank_l;
     const int n_execute_query = n_query_item;
     for (int topk: topk_l) {
         vector<int> result_rk = index->Retrieval(query_item, topk, n_execute_query);
 
         string performance_str = index->PerformanceStatistics(topk);
-        config.AddRetrievalInfo(performance_str);
 
         result_rank_l.emplace_back(result_rk);
         spdlog::info("finish top-{}", topk);
@@ -102,14 +98,8 @@ int main(int argc, char **argv) {
     int n_topk = (int) topk_l.size();
 
     for (int i = 0; i < n_topk; i++) {
-        cout << config.GetConfig(i) << endl;
         const int topk = topk_l[i];
-        WriteRankResult(result_rank_l[i], topk, dataset_name, method_name.c_str(), parameter_name);
+        AttributionWriteRankResult(result_rank_l[i], topk, dataset_name, parameter_name);
     }
-
-    config.AddMemoryInfo(index->IndexSizeByte());
-    config.AddBuildIndexTime(build_index_time);
-    config.AddExecuteQuery(n_execute_query);
-    config.WritePerformance(dataset_name, method_name.c_str(), parameter_name);
     return 0;
 }
