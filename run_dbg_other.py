@@ -12,28 +12,27 @@ def run():
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
-    os.system(
-        f"cd build/attribution && ./rmips --dataset_dir {dataset_dir} --dataset_name {'movielens-27m'} --simpfer_k_max {1000}"
-    )
+    # os.system(
+    #     f"cd build/attribution && ./rmips --dataset_dir {dataset_dir} --dataset_name {'movielens-27m'} --simpfer_k_max {1000}"
+    # )
 
     n_sample_item = 5000
     sample_topk = 600
 
-    dataset_name = 'amazon-home-kitchen'
+    dataset_name = 'movielens-27m'
     n_data_item = polyu.dataset_m[dataset_name][0]
     n_user = polyu.dataset_m[dataset_name][2]
+    method_name = 'QueryRankSampleSearchKthRank'  # 'QueryRankSampleSearchKthRank'
 
-    # for memory_capacity in [16]:  # TODO specify the memory capacity
-    #     n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
-    #     os.system(
-    #         f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {'QueryRankSampleSearchKthRank'} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-    #     )
-    #     os.system(
-    #         f"cd build && ./bsibs --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
-    #
-    #     os.system(
-    #         f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --test_topk {'false'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-    #     )
+    for memory_capacity in [0.1, 0.2, 0.5, 1, 2]:  # TODO specify the memory capacity
+        n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
+        os.system(
+            f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} " +
+            f"--n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+        )
+        os.system(
+            f"cd build && ./bsibs --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} " +
+            f"--method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
 
 if __name__ == '__main__':

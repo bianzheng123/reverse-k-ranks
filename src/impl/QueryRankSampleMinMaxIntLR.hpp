@@ -250,7 +250,7 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLR {
         }
 
         uint64_t IndexSizeByte() override {
-            return rank_ins_.IndexSizeByte() + rank_bound_ins_.IndexSizeByte();
+            return rank_ins_.IndexSizeByte() + rank_bound_ins_.IndexSizeByte() + ip_bound_ins_.IndexSizeByte();
         }
 
     };
