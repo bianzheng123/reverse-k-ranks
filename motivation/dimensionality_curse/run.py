@@ -8,7 +8,7 @@ if __name__ == '__main__':
     # This restores the same behavior as before.
     ssl._create_default_https_context = ssl._create_unverified_context
     model = 'ENMF'
-    dataset_l = ['lastfm', 'ml-1m', ]
+    dataset_l = ['epinions', 'lastfm', 'pinterest']
     ebd_l = [4, 8, 16, 32, 64, 128, 256]
     # ebd_l = [2]
     res_l = {}
@@ -21,8 +21,8 @@ if __name__ == '__main__':
         for dataset in dataset_l:
             if dataset == 'lastfm':
                 config_dict = {'embedding_size': ebd, 'epochs': 200, 'topk': [50, 100, 200], 'neg_sampling': None,
-                               'use_gpu': False,
-                               'train_batch_size': 512, 'learning_rate': 0.05, 'weight_decay': 0.5,
+                               'use_gpu': True,
+                               'train_batch_size': 32, 'learning_rate': 0.03, 'weight_decay': 0.5,
                                'learner': 'adagrad',
                                'eval_step': 20,
                                'valid_metric': 'hit@200',
@@ -33,10 +33,31 @@ if __name__ == '__main__':
                                'ITEM_ID_FIELD': 'artist_id',
                                'load_col': {'inter': ['user_id', 'artist_id']}
                                }
-            elif dataset == 'ml-1m':
+            elif dataset == 'ml-1m':  # dataset == 'ml-1m'
                 config_dict = {'embedding_size': ebd, 'epochs': 200, 'topk': [50, 100, 200], 'neg_sampling': None,
-                               'use_gpu': False,
+                               'use_gpu': True,
                                'train_batch_size': 512, 'learning_rate': 0.05, 'weight_decay': 0.5,
+                               'learner': 'adagrad',
+                               'eval_step': 20,
+                               'valid_metric': 'hit@200',
+                               'metrics': ['Recall', 'NDCG', 'Hit', 'Precision'],
+                               'eval_args': {'split': {'LS': 'valid_and_test'}, 'group_by': 'user', 'order': 'RO',
+                                             'mode': 'full'}}
+            elif dataset == 'epinions':
+                config_dict = {'embedding_size': ebd, 'epochs': 200, 'topk': [50, 100, 200], 'neg_sampling': None,
+                               'use_gpu': True,
+                               'train_batch_size': 512, 'learning_rate': 0.1, 'weight_decay': 0.5,
+                               'learner': 'adagrad',
+                               'eval_step': 20,
+                               'valid_metric': 'hit@200',
+                               'metrics': ['Recall', 'NDCG', 'Hit', 'Precision'],
+                               'eval_args': {'split': {'LS': 'valid_and_test'}, 'group_by': 'user', 'order': 'RO',
+                                             'mode': 'full'},
+                               'load_col': {'inter': ['user_id', 'item_id', 'rating', 'timestamp']}}
+            elif dataset == 'pinterest':
+                config_dict = {'embedding_size': ebd, 'epochs': 200, 'topk': [50, 100, 200], 'neg_sampling': None,
+                               'use_gpu': True,
+                               'train_batch_size': 256, 'learning_rate': 0.03, 'weight_decay': 0.5,
                                'learner': 'adagrad',
                                'eval_step': 20,
                                'valid_metric': 'hit@200',
