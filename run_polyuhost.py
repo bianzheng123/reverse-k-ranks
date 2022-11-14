@@ -167,4 +167,7 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    run()
+    os.system(
+        f"cd build/attribution && ./rmips --dataset_dir {dataset_dir} --dataset_name {'movielens-27m'} --simpfer_k_max {1000}"
+    )
+    # run()
