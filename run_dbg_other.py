@@ -22,16 +22,22 @@ def run():
     dataset_name = 'movielens-27m'
     n_data_item = polyu.dataset_m[dataset_name][0]
     n_user = polyu.dataset_m[dataset_name][2]
-    method_name = 'QueryRankSampleSearchKthRank'  # 'QueryRankSampleSearchKthRank'
+    method_name = 'QueryRankSampleSearchKthRank'  # QueryRankSampleSearchAllRank QueryRankSampleSearchKthRank
 
-    for memory_capacity in [0.1, 0.2, 0.5, 1, 2]:  # TODO specify the memory capacity
+    # memory capacity input in unit of MB
+    memory_capacity_l = np.array([20, 40, 60, 80, 100]) / 1024
+
+    for memory_capacity in memory_capacity_l:  # TODO specify the memory capacity
         n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
         os.system(
             f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} " +
             f"--n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
         )
+        # os.system(
+        #     f"cd build && ./bsibs --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} " +
+        #     f"--method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
         os.system(
-            f"cd build && ./bsibs --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} " +
+            f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} " +
             f"--method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
 

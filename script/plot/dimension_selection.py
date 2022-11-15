@@ -1,61 +1,78 @@
 import json
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-import os
+import pandas as pd
 
-params = {
-    'axes.labelsize': 8,
-    'font.size': 8,
-    'legend.fontsize': 10,
-    'xtick.labelsize': 10,
-    'ytick.labelsize': 10,
-    'text.usetex': False,
-    'figure.figsize': [4.5, 4.5]
-}
 linestyle_l = ['_', '-', '--', ':']
 color_l = ['#3D0DFF', '#6BFF00', '#00E8E2', '#EB0225', '#FF9E03']
-marker_l = ['H', 'D', 'P', '>', '*', 'X', 's', '<', '^', 'p', 'v']
-markersize = 10
-matplotlib.RcParams.update(params)
+marker_l = ['x', "v", "o", "D", "s"]
+markersize = 20
+
+matplotlib.rcParams.update({'font.size': 20})
 
 
-def plot():
-    fig, ax = plt.subplots()
+def plot_figure(*, fname_l: list, dataset_l: list,
+                name_m: dict, method_m: dict, result_fname: str, test: bool):
+    assert len(fname_l) == len(dataset_l)
+    n_fig = len(fname_l)
+    # fig = plt.figure(figsize=(25, 4))
+    fig = plt.figure(figsize=(len(dataset_l) * 4 + 1, 4))
+    fig.text(0.04, 0.5, name_m['fig_y'], va='center', rotation='vertical')
+    for fig_i in range(n_fig):
+        subplot_str = int('1' + str(n_fig) + str(fig_i + 1))
+        ax = fig.add_subplot(subplot_str)
+        df = pd.read_csv(fname_l[fig_i])
+        for method_i, key in enumerate(method_m.keys()):
+            x_name = name_m['csv_x']
+            y_name = key + name_m['csv_y']
+            ax.plot(df[x_name], df[y_name],
+                    color='#000000', linewidth=2.5, linestyle='-',
+                    label=method_m[key],
+                    marker=marker_l[method_i], fillstyle='none', markersize=markersize)
 
-    ax.plot(dim_l, hit_50_l,
-            color=color_l[0], linewidth=2.5, linestyle='-',
-            label='HR@50',
-            marker=marker_l[0], markersize=markersize)
-    ax.plot(dim_l, hit_100_l,
-            color=color_l[1], linewidth=2.5, linestyle='-',
-            label='HR@100',
-            marker=marker_l[1], markersize=markersize)
-    ax.plot(dim_l, hit_200_l,
-            color=color_l[2], linewidth=2.5, linestyle='-',
-            label='HR@200',
-            marker=marker_l[2], markersize=markersize)
-    ax.set_xlabel('dimensionality')
-    ax.set_ylabel('Hitting Ratio')
-    ax.legend(frameon=False, loc='lower right')
+        ax.set_xlabel(name_m['fig_x'])
+        ax.set_title(dataset_l[fig_i])
+        if fig_i == n_fig - 1:
+            ax.legend(frameon=True, loc='lower right')
+        pass
+    pass
+    if test:
+        plt.savefig("{}.jpg".format(result_fname), bbox_inches='tight', dpi=600)
+    else:
+        plt.savefig("{}.pdf".format(result_fname), bbox_inches='tight')
 
-    plt.savefig("dimensionality_selection.jpg", bbox_inches='tight')
-    plt.savefig("dimensionality_selection.pdf", bbox_inches='tight')
-    plt.close()
+
+def transform_data(*, dataset_l: list, dim_l: list):
+    for dataset in dataset_l:
+        hit_50_l = []
+        hit_100_l = []
+        hit_200_l = []
+        for dim in dim_l:
+            with open('data/dimension_selection/raw_data/hitting_rate-{}-{}-new.json'.format(dataset, dim), 'r') as f:
+                json_ins = json.load(f)
+            hit_50_l.append(json_ins['test_result']['hit@50'])
+            hit_100_l.append(json_ins['test_result']['hit@100'])
+            hit_200_l.append(json_ins['test_result']['hit@200'])
+        df = pd.DataFrame({'dimension': dim_l, 'HR@50': hit_50_l, 'HR@100': hit_100_l, 'HR@200': hit_200_l})
+        df.to_csv("data/dimension_selection/{}.csv".format(dataset), index=False)
+
+
+def plot_data():
+    fname_l = ['./data/dimension_selection/lastfm.csv',
+               './data/dimension_selection/ml-1m.csv']
+    dataset_l = ['Last.fm', 'Movielens-1m']
+    name_m = {'csv_x': 'dimension', 'fig_x': 'Dimension',
+              'csv_y': '', 'fig_y': 'Hitting ratio'}
+    method_m = {'HR@50': 'HR@50', 'HR@100': 'HR@100', 'HR@200': 'HR@200'}
+    result_fname = 'DimensionSelection'
+    is_test = False
+    plot_figure(fname_l=fname_l, dataset_l=dataset_l,
+                name_m=name_m, method_m=method_m,
+                result_fname=result_fname, test=is_test)
 
 
 if __name__ == "__main__":
-    dim_l = [4, 8, 16, 32, 64, 128, 256]
-    hit_50_l = []
-    hit_100_l = []
-    hit_200_l = []
-    for dim in dim_l:
-        with open('data/dimension_selection/hitting_rate-{}-new.json'.format(dim), 'r') as f:
-            json_ins = json.load(f)
-        hit_50_l.append(json_ins['test_result']['hit@50'])
-        hit_100_l.append(json_ins['test_result']['hit@100'])
-        hit_200_l.append(json_ins['test_result']['hit@200'])
-    plot()
-    print(hit_50_l)
-    print(hit_100_l)
+    dim_l = [4, 16, 64, 256]
+    dataset_l = ['lastfm', 'ml-1m']
+    # transform_data(dataset_l=dataset_l, dim_l=dim_l)
+    plot_data()
