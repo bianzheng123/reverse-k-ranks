@@ -138,13 +138,8 @@ void BuildGlobalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
     const bool load_sample_score = true;
     const bool is_query_distribution = true;
-    for (int rsID = 0; rsID < n_rs_ins; rsID++) {
-
-        lr_l.emplace_back(GlobalLinearRegression(n_data_item, n_user));
-
-        lr_l[rsID].StartPreprocess();
-
-    }
+    lr_l.emplace_back(GlobalLinearRegression(n_data_item, n_user));
+    lr_l[0].StartPreprocess();
 
     TimeRecord record;
     record.reset();
@@ -159,9 +154,7 @@ void BuildGlobalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
     for (int userID = 0; userID < n_user; userID++) {
         cst.ComputeSortItems(userID, distance_l.data());
 
-        for (int rsID = 0; rsID < n_rs_ins; rsID++) {
-            lr_l[rsID].LoopPreprocess(distance_l.data(), userID);
-        }
+        lr_l[0].LoopPreprocess(distance_l.data(), userID);
         if (userID % report_every == 0) {
             std::cout << "preprocessed " << userID / (0.01 * n_user) << " %, "
                       << record.get_elapsed_time_second() << " s/iter" << " Mem: "
@@ -171,10 +164,8 @@ void BuildGlobalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
     }
     cst.FinishCompute();
 
-    for (int rsID = 0; rsID < n_rs_ins; rsID++) {
-        lr_l[rsID].FinishPreprocess();
-        lr_l[rsID].SaveIndex(basic_index_dir, dataset_name);
-    }
+    lr_l[0].FinishPreprocess();
+    lr_l[0].SaveIndex(basic_index_dir, dataset_name);
 
 }
 

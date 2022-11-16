@@ -70,10 +70,10 @@ def plot_figure(*, dataset_l: list,
     assert len(io_time_l) == len(position_l)
 
     ip_time_ins = ax.bar(position_l, ip_time_perc_l, width - 0.1, color='#080604', edgecolor='#000000',
-           hatch='//', label='Memory Index Time')
+           hatch='//', label='CPU Time')
     io_time_ins = ax.bar(position_l, io_time_perc_l, width - 0.1, bottom=ip_time_perc_l, color='#ffffff',
            edgecolor='#000000',
-           hatch='', label='Disk IO Time')
+           hatch='', label='IO Time')
     # ax.set_xlabel(dataset_l[fig_i])
     # ax.set_ylabel('')
     # ax.set_title(dataset_l[fig_i])
