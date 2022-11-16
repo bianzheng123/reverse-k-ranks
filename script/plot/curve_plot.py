@@ -44,9 +44,9 @@ def plot_figure(*, fname_l: list, dataset_l: list,
 
 
 if __name__ == "__main__":
-    fname_l = ['./data/sensitive_with_k/Movielens-27m.csv',
-               './data/sensitive_with_k/Yahoomusic.csv',
-               './data/sensitive_with_k/Yelp.csv']
+    fname_l = ['./data/k_curve/Movielens-27m.csv',
+               './data/k_curve/Yahoomusic.csv',
+               './data/k_curve/Yelp.csv']
     dataset_l = ['Movielens', 'Yahoomusic', 'Yelp']
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'RunningTime', 'fig_y': 'Running Time (Seconds)'}

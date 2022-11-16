@@ -182,6 +182,9 @@ namespace ReverseMIPS::RankSample {
                                                                       memory_index_time, read_disk_time);
 //                spdlog::info("queryID {}, topk {}, n_refine_users {}, io_cost {}, total_time {}", queryID, topk,
 //                             refine_user_size, io_cost, total_time);
+                spdlog::info(
+                        "queryID {}, query_time {:.2f}s, total_io_cost {}, total_retrieval_time {:.2f}s",
+                        queryID, total_time, total_io_cost_, total_retrieval_time_);
             }
             disk_ins_.FinishRetrieval();
 

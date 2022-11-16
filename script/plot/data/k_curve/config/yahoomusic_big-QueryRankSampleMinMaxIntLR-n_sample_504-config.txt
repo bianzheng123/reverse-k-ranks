@@ -1,0 +1,27 @@
+number of query item 1000
+build index time 5.899s
+Estimated memory 6.907GB, Peak memory 10.244GB, Current memory 10.244GB
+top1 retrieval time: total 229.122s
+	inner product 90.233s, rank bound 133.674s, read disk 3.843s, compute rank 0.000s
+	total ip cost 9476871, total io cost 23872, total refine user 337, IP bound prune ratio 0.9948, rank prune ratio 1.0000
+top10 retrieval time: total 261.091s
+	inner product 96.611s, rank bound 135.810s, read disk 27.287s, compute rank 0.001s
+	total ip cost 17037230, total io cost 227328, total refine user 2730, IP bound prune ratio 0.9907, rank prune ratio 1.0000
+top20 retrieval time: total 279.405s
+	inner product 100.704s, rank bound 137.272s, read disk 40.049s, compute rank 0.002s
+	total ip cost 20674962, total io cost 354880, total refine user 4277, IP bound prune ratio 0.9887, rank prune ratio 1.0000
+top50 retrieval time: total 320.571s
+	inner product 103.164s, rank bound 138.332s, read disk 77.671s, compute rank 0.005s
+	total ip cost 25933580, total io cost 820416, total refine user 8767, IP bound prune ratio 0.9858, rank prune ratio 1.0000
+top100 retrieval time: total 366.666s
+	inner product 105.573s, rank bound 139.226s, read disk 120.460s, compute rank 0.010s
+	total ip cost 30323434, total io cost 1463104, total refine user 14256, IP bound prune ratio 0.9834, rank prune ratio 1.0000
+top200 retrieval time: total 441.239s
+	inner product 110.517s, rank bound 141.259s, read disk 188.027s, compute rank 0.018s
+	total ip cost 35258368, total io cost 2642432, total refine user 23453, IP bound prune ratio 0.9807, rank prune ratio 1.0000
+top500 retrieval time: total 613.862s
+	inner product 117.097s, rank bound 144.192s, read disk 351.063s, compute rank 0.041s
+	total ip cost 44594650, total io cost 6221120, total refine user 46081, IP bound prune ratio 0.9755, rank prune ratio 1.0000
+top600 retrieval time: total 658.515s
+	inner product 120.657s, rank bound 145.378s, read disk 390.956s, compute rank 0.048s
+	total ip cost 47473166, total io cost 6125440, total refine user 51582, IP bound prune ratio 0.9740, rank prune ratio 1.0000
