@@ -17,7 +17,7 @@ def run():
     # )
 
     n_sample_item = 5000
-    dataset_name = 'yahoomusic_big'
+    dataset_name = 'yahoomusic_big'  # yelp, yahoomusic_big
     n_data_item = polyu.dataset_m[dataset_name][0]
     n_user = polyu.dataset_m[dataset_name][2]
     memory_capacity = 8
@@ -33,7 +33,7 @@ def run():
             f"--method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
     sample_topk = 600
-    dataset_name = 'yahoomusic_big'
+    dataset_name = 'yahoomusic_big'  # yelp, yahoomusic_big
     n_data_item = polyu.dataset_m[dataset_name][0]
     n_user = polyu.dataset_m[dataset_name][2]
     memory_capacity = 8
