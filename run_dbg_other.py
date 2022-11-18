@@ -25,6 +25,9 @@ def run():
     for sample_topk in [50, 100, 200, 400, 600]:
         n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
         os.system(
+            f"cd build && ./qdi --index_dir {index_dir} --dataset_dir {dataset_dir} --dataset_name {dataset_name} " +
+            f"--n_sample_item {n_sample_item} --sample_topk {sample_topk}")
+        os.system(
             f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} " +
             f"--n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
         )
@@ -40,6 +43,9 @@ def run():
     method_name = "QueryRankSampleSearchKthRank"
     for n_sample_item in [3000, 4000, 5000, 6000]:
         n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
+        os.system(
+            f"cd build && ./qdi --index_dir {index_dir} --dataset_dir {dataset_dir} --dataset_name {dataset_name} " +
+            f"--n_sample_item {n_sample_item} --sample_topk {sample_topk}")
         os.system(
             f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} " +
             f"--n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
