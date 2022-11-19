@@ -326,29 +326,31 @@ SIRPrune::topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector
 
     assert(vector_element_l.size() == q.rowNum);
 
-    std::vector<double> newQ(q.colNum);
-    std::vector<int> newQIntPtr(q.colNum);
-    int qSumOfCoordinate1 = 0;
-    int qSumOfCoordinate2 = 0;
-
-    double subQNorm = 0;
-    double transformSubQNorm = 0;
-    double newSVDQNorm = 0;
-    double qNorm = 0;
-    double sumOfQCoordinate = 0;
-    double leftPartialQSumOfCoordinate = 0;
-
-    double qRatio1;
-    double qRatio2;
-    double ratio1;
-    double ratio2;
-
     const double pRatio1 = preprocessedP->ratio1;
     const double pRatio2 = preprocessedP->ratio2;
 
-    std::vector<VectorElement> heap_ele_l(k);
-
+//#pragma omp parallel for default(none) private(newQ, newQIntPtr, qSumOfCoordinate1, qSumOfCoordinate2, subQNorm, transformSubQNorm, newSVDQNorm, qNorm, sumOfQCoordinate, leftPartialQSumOfCoordinate, qRatio1, qRatio2, ratio1, ratio2) shared(q, heap_ele_l, k, ip_count, vector_element_l, pRatio1, pRatio2)
+#pragma omp parallel for default(none) shared(q, k, ip_count, vector_element_l, pRatio1, pRatio2)
     for (int qID = 0; qID < q.rowNum; qID++) {
+
+        std::vector<VectorElement> heap_ele_l(k);
+
+        std::vector<double> newQ(q.colNum);
+        std::vector<int> newQIntPtr(q.colNum);
+        int qSumOfCoordinate1 = 0;
+        int qSumOfCoordinate2 = 0;
+
+        double subQNorm = 0;
+        double transformSubQNorm = 0;
+        double newSVDQNorm = 0;
+        double qNorm = 0;
+        double sumOfQCoordinate = 0;
+        double leftPartialQSumOfCoordinate = 0;
+
+        double qRatio1;
+        double qRatio2;
+        double ratio1;
+        double ratio2;
 
         VectorElement *heap = heap_ele_l.data();
 
