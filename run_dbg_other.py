@@ -35,6 +35,45 @@ def run():
     #         f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} " +
     #         f"--method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
 
+    sample_topk = 600
+    n_sample_item = 5000
+    dataset_name = 'amazon-home-kitchen'  # yelp, yahoomusic_big
+    n_data_item = polyu.dataset_m[dataset_name][0]
+    n_user = polyu.dataset_m[dataset_name][2]
+    memory_capacity = 8
+    method_name = "QueryRankSampleSearchKthRank"
+    n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
+    os.system(
+        f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+    )
+    os.system(
+        f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+
+    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or \
+            method_name == "QueryRankSampleDirectIntLR" or method_name == "QueryRankSampleGlobalIntLR":
+        os.system(
+            f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+
+    method_name = "QueryRankSampleMinMaxIntLR"
+    n_sample = polyu.compute_n_sample_by_memory_index_intlr(dataset_name, memory_capacity)
+    os.system(
+        f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+    )
+    os.system(
+        f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+
+    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or \
+            method_name == "QueryRankSampleDirectIntLR" or method_name == "QueryRankSampleGlobalIntLR":
+        os.system(
+            f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+
+    method_name = "QueryRankSampleDirectIntLR"
+
+    if method_name == 'QueryRankSampleLeastSquareIntLR' or method_name == 'QueryRankSampleMinMaxIntLR' or \
+            method_name == "QueryRankSampleDirectIntLR" or method_name == "QueryRankSampleGlobalIntLR":
+        os.system(
+            f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+
 
 if __name__ == '__main__':
     index_dir = os.path.join('/home', 'zhengbian', 'reverse-k-ranks', 'index')

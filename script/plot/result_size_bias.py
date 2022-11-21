@@ -20,10 +20,12 @@ def plot_figure(*, topk_l: list, non0_l: list,
     ax = fig.add_subplot(111)
     ax.plot(topk_l, non0_l,
             color='#000000', linewidth=2.5, linestyle='-',
-            marker=marker_l[0], fillstyle='none', markersize=markersize)
+            marker=marker_l[2], fillstyle='none', markersize=markersize)
 
     ax.set_xlabel(name_m['fig_x'])
     ax.set_ylabel(name_m['fig_y'])
+    ax.set_xlim([0, 210])
+    ax.set_ylim([0, 0.27])
     ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1, decimals=0))
     if test:
         plt.savefig("{}.jpg".format(result_fname), bbox_inches='tight', dpi=600)
@@ -52,6 +54,3 @@ if __name__ == "__main__":
     topk_l, non0_l = transform_data()
     plot_figure(topk_l=topk_l, non0_l=non0_l,
                 name_m=name_m, result_fname=result_fname, test=is_test)
-    # plot_figure(fname_l=fname_l, dataset_l=dataset_l,
-    #             name_m=name_m, method_m=method_m,
-    #             result_fname='curve_plot', test=True, set_ylog=True)

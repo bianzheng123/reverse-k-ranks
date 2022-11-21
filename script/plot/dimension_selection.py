@@ -5,8 +5,8 @@ import pandas as pd
 
 linestyle_l = ['_', '-', '--', ':']
 color_l = ['#3D0DFF', '#6BFF00', '#00E8E2', '#EB0225', '#FF9E03']
-marker_l = ['x', "v", "o", "D", "s"]
-markersize = 20
+marker_l = ['D', "v", "o", "x", "s"]
+markersize = 15
 
 matplotlib.rcParams.update({'font.size': 20})
 
@@ -17,7 +17,7 @@ def plot_figure(*, fname_l: list, dataset_l: list,
     n_fig = len(fname_l)
     # fig = plt.figure(figsize=(25, 4))
     fig = plt.figure(figsize=(len(dataset_l) * 4 + 1, 4))
-    fig.text(0.04, 0.5, name_m['fig_y'], va='center', rotation='vertical')
+    fig.text(0.03, 0.5, name_m['fig_y'], va='center', rotation='vertical')
     for fig_i in range(n_fig):
         subplot_str = int('1' + str(n_fig) + str(fig_i + 1))
         ax = fig.add_subplot(subplot_str)
@@ -29,11 +29,13 @@ def plot_figure(*, fname_l: list, dataset_l: list,
                     color='#000000', linewidth=2.5, linestyle='-',
                     label=method_m[key],
                     marker=marker_l[method_i], fillstyle='none', markersize=markersize)
+        if fig_i == 0:
+            ax.set_ylim([0.2, 0.6])
 
         ax.set_xlabel(name_m['fig_x'])
         ax.set_title(dataset_l[fig_i])
         if fig_i == n_fig - 1:
-            ax.legend(frameon=True, loc='lower right')
+            ax.legend(frameon=False, loc='best', borderaxespad=-0)
         pass
     pass
     if test:

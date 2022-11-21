@@ -34,7 +34,7 @@ if __name__ == '__main__':
     fname_l = [
         './data/single_query_performance/yahoomusic_big-RankSample-top50-n_sample_588-single-query-performance.csv',
         './data/single_query_performance/yahoomusic_big-QueryRankSampleSearchKthRank-top50-n_sample_588-single-query-performance.csv']
-    title_l = ['US', 'AS']
+    title_l = ['Uniform Sample', 'Query Aware Sample']
     data_l = []
     for fname in fname_l:
         data_l.append(pd.read_csv(fname)['total_time'])
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     name_m = {'csv_x': 'total_time', 'fig_x': 'Running Time (Second)',
               'fig_y': 'Frequency'}
     result_fname = 'query_response_time_distribution'
-    is_test = False
+    is_test = True
     label_pos_l = [0.03, 0.5]
     set_xlog_l = [True, False]
     plot_figure(title_l=title_l, data_l=data_l,
