@@ -121,12 +121,12 @@ namespace ReverseMIPS::Simpfer {
                 spdlog::info(
                         "queryID {}, result_size {}, rtk_topk {}, ip_cost {}, query_time {:.2f}s, total_ip_cost {}, total_retrieval_time {:.2f}s",
                         queryID, result_size, rtk_topk, ip_count, query_time, total_ip_cost_, total_retrieval_time_);
-                assert(result_userID_l.size() == result_size);
+//                assert(result_userID_l.size() == result_size);
 
-                for (int resultID = 0; resultID < result_size; resultID++) {
-                    const int userID = result_userID_l[resultID];
-                    query_heap_l[queryID].push_back(UserRankElement(userID));
-                }
+//                for (int resultID = 0; resultID < result_size; resultID++) {
+//                    const int userID = result_userID_l[resultID];
+//                    query_heap_l[queryID].push_back(UserRankElement(userID));
+//                }
 
                 if (total_retrieval_time_ > (double) stop_time_) {
                     spdlog::info("total retrieval time larger than stop time, retrieval exit");
