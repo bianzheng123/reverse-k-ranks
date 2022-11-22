@@ -84,7 +84,7 @@ namespace ReverseMIPS {
             double query_norm = InnerProduct(query_item.vec_.data(), query_item.vec_.data(), (int) vec_dim_);
             query_norm = std::sqrt(query_norm);
 
-#pragma omp parallel for default(none) reduction(+:ip_count, result_size, norm_prune, sample_prune, n_block_prune) shared(query_norm, rtk_topk, query_item, result_userID_l)
+#pragma omp parallel for default(none) reduction(+:ip_count, norm_prune, sample_prune, n_block_prune) reduction(+:result_size) shared(query_norm, rtk_topk, query_item, result_userID_l)
             for (unsigned int blockID = 0; blockID < block_l_.size(); ++blockID) {
                 // compute upper-bound in this block
                 const SimpferBlock block = block_l_[blockID];
@@ -145,7 +145,6 @@ namespace ReverseMIPS {
 
             sir_prune_.topK(user_matrix, rtk_topk, topk_res_l, ip_count);
 
-#pragma omp parallel for default(none) reduction(+:ip_count, result_size) shared(topk_res_l, query_item, user_matrix, result_userID_l)
             for (int64_t userID = 0; userID < n_user_; userID++) {
                 double topk_IP = topk_res_l[userID].data;
                 const double queryIP = InnerProduct(query_item.vec_.data(), user_matrix.getRowPtr(userID),
@@ -154,10 +153,7 @@ namespace ReverseMIPS {
                 ip_count++;
                 if (queryIP > topk_IP) {
                     result_size++;
-#pragma omp critical
-                    {
-                        result_userID_l.push_back((int) userID);
-                    };
+                    result_userID_l.push_back((int) userID);
                 }
 
             }
