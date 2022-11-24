@@ -8,7 +8,7 @@ color_l = ['#3D0DFF', '#6BFF00', '#00E8E2', '#EB0225', '#FF9E03']
 marker_l = ['D', "v", "o", "x", "s"]
 markersize = 15
 
-matplotlib.rcParams.update({'font.size': 20})
+matplotlib.rcParams.update({'font.size': 15})
 
 
 def plot_figure(*, fname_l: list, dataset_l: list,

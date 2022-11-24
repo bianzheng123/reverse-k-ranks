@@ -10,8 +10,8 @@ class Matrix {
 
 public:
     double *rawData;
-    int rowNum;
-    int colNum;
+    size_t rowNum;
+    size_t colNum;
 
     inline Matrix() {
         this->rawData = NULL;

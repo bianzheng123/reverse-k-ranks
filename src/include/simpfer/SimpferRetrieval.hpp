@@ -145,19 +145,19 @@ namespace ReverseMIPS {
 
             sir_prune_.topK(user_matrix, rtk_topk, topk_res_l, ip_count);
 
-#pragma omp parallel for default(none) reduction(+:ip_count) reduction(+:result_size) shared(topk_res_l, query_item, user_matrix)
+#pragma omp parallel for default(none) reduction(+:result_size) shared(topk_res_l, query_item, user_matrix)
             for (int64_t userID = 0; userID < n_user_; userID++) {
                 double topk_IP = topk_res_l[userID].data;
                 const double queryIP = InnerProduct(query_item.vec_.data(), user_matrix.getRowPtr(userID),
                                                     (int) vec_dim_);
 
-                ip_count++;
                 if (queryIP > topk_IP) {
                     result_size++;
 //                    result_userID_l.push_back((int) userID);
                 }
 
             }
+            ip_count += n_user_;
         }
 
 

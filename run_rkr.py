@@ -146,8 +146,8 @@ def run():
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
         # 'QueryRankSampleSearchBruteForce',
-        # 'QueryRankSampleSearchKthRank',
-        'RankSample',
+        'QueryRankSampleSearchKthRank',
+        # 'RankSample',
     ]
 
     os.system('cd result/rank && rm *')
@@ -175,7 +175,7 @@ def run():
         n_user = dataset_m[ds][2]
         n_sample = 20
         os.system(
-            "cd build && ./qdi --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
+            "cd build && ./qdibc --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
@@ -192,8 +192,8 @@ def run():
         # run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleSearchBruteForce', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)
-        # run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
     # send_email.send('test complete')
 
@@ -211,11 +211,5 @@ if __name__ == '__main__':
     # dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
-
-    # for ds in dataset_l:
-    #     for bound_name in ['Grid', 'FullDim', 'FullNorm', 'FullInt', 'PartDimPartInt', 'PartDimPartNorm',
-    #                        'PartIntPartNorm']:
-    #         os.system(
-    #             'cd build/attribution && ./biipb --dataset_name {} --bound_name {}'.format(ds, bound_name))
 
     run()

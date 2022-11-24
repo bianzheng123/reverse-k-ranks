@@ -237,8 +237,7 @@ int main(int argc, char **argv) {
     if (para.test_topk) {
         topk_l = {30, 20, 10};
     } else {
-        topk_l = {200, 100, 50, 20, 10};
-//        topk_l = {50};
+        topk_l = {150};
     }
 
     RetrievalResult config;

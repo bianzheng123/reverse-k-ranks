@@ -83,7 +83,7 @@ namespace ReverseMIPS::Simpfer {
                 exit(-1);
             }
 
-            const int n_query_item = n_execute_query;
+            const int n_query_item = 5;
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item);
 
             std::vector<SimpferData> query_sd_l;

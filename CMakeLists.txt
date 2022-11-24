@@ -92,6 +92,10 @@ add_executable(qdi src/app/build-index/QueryDistributionIndex.cpp)
 target_include_directories(qdi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(qdi PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
+add_executable(qdibc src/app/build-index/QueryDistributionIndexByComputation.cpp)
+target_include_directories(qdibc PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+target_link_libraries(qdibc PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
+
 add_executable(fsr src/app/build-index/FindSampleRank.cpp)
 target_include_directories(fsr PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(fsr PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
