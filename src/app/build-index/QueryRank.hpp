@@ -63,6 +63,7 @@ namespace ReverseMIPS {
             cis.ComputeItems(sample_itemID_l.data(), (int) n_sample_item, userID, sample_item_score_l.data());
 
             //compute the rank of each sampled item
+#pragma omp parallel for default(none) shared(n_sample_item, sample_item_score_l, accu_n_user_rank_l, n_data_item, itemIP_l)
             for (int64_t sampleID = 0; sampleID < n_sample_item; sampleID++) {
                 const double sampleIP = sample_item_score_l[sampleID];
                 double *rank_ptr = std::lower_bound(itemIP_l.data(), itemIP_l.data() + n_data_item, sampleIP,

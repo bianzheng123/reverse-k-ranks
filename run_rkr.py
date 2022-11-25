@@ -175,7 +175,7 @@ def run():
         n_user = dataset_m[ds][2]
         n_sample = 20
         os.system(
-            "cd build && ./qdibc --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
+            "cd build && ./qdi --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 

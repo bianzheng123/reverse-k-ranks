@@ -63,6 +63,7 @@ namespace ReverseMIPS {
             cis.ComputeItems(sample_itemID_l.data(), (int) n_sample_item, userID, sample_item_score_l.data());
 
             //compute the rank of each sampled item
+#pragma omp parallel for default(none) shared(n_sample_item, sample_item_score_l, accu_n_user_rank_l, n_data_item, itemIP_l)
             for (int64_t sampleID = 0; sampleID < n_sample_item; sampleID++) {
                 const double sampleIP = sample_item_score_l[sampleID];
                 double *rank_ptr = std::lower_bound(itemIP_l.data(), itemIP_l.data() + n_data_item, sampleIP,
@@ -87,6 +88,7 @@ namespace ReverseMIPS {
         }
         cst.FinishCompute();
 
+#pragma omp parallel for default(none) shared(n_user, n_sample_item, accu_n_user_rank_l, n_data_item)
         for (int64_t sampleID = 0; sampleID < n_sample_item; sampleID++) {
             const int n_rank = n_data_item + 1;
             for (int rank = 1; rank < n_rank; rank++) {
@@ -108,6 +110,7 @@ namespace ReverseMIPS {
         assert(0 <= sample_topk);
 
         std::vector<int> kth_rank_l(n_sample_item);
+#pragma omp parallel for default(none) shared(kth_rank_l, n_sample_item, accu_n_user_rank_l, n_data_item, sample_topk)
         for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
             //binary search
             const int *user_rank_ptr = accu_n_user_rank_l.data() + sampleID * (n_data_item + 1);
