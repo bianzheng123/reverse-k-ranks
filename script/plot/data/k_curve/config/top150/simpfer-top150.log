@@ -1,0 +1,63 @@
+nohup: ignoring input
+[2022-11-26 09:46:46.208] [info] Simpfer dataset_name movielens-27m, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-11-26 09:46:46.208] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-11-26 09:46:46.969] [info] n_data_item 52889, n_query_item 1000, n_user 283228, vec_dim 150
+[2022-11-26 09:46:46.969] [info] input parameter: simpfer_k_max 3791, stop_time 14400s
+[2022-11-26 10:01:12.478] [info] finish preprocess and save the index
+[2022-11-26 10:03:24.448] [info] queryID 0, result_size 1882, rtk_topk 256, ip_cost 43580243, query_time 131.97s, total_ip_cost 43580243, total_retrieval_time 131.97s
+[2022-11-26 10:05:21.722] [info] queryID 1, result_size 1211, rtk_topk 4096, ip_cost 1202869316, query_time 117.27s, total_ip_cost 1246449559, total_retrieval_time 249.24s
+[2022-11-26 10:10:15.641] [info] queryID 2, result_size 1026, rtk_topk 8192, ip_cost 2362971204, query_time 293.92s, total_ip_cost 3609420763, total_retrieval_time 543.16s
+[2022-11-26 10:10:35.820] [info] queryID 3, result_size 2543, rtk_topk 2048, ip_cost 518720539, query_time 20.18s, total_ip_cost 4128141302, total_retrieval_time 563.34s
+[2022-11-26 10:10:37.201] [info] queryID 4, result_size 214, rtk_topk 512, ip_cost 17247726, query_time 1.38s, total_ip_cost 4145389028, total_retrieval_time 564.72s
+[2022-11-26 10:10:37.201] [info] finish top-150
+[2022-11-26 10:10:37.201] [info] top150 retrieval:
+	total IP cost 4145389028, total time 564.722s
+[2022-11-26 10:10:37.201] [info] build index time: total 865.508309913s
+top150 retrieval:
+	total IP cost 4145389028, total time 564.722s
+[2022-11-25 10:18:11.375] [info] Simpfer dataset_name yahoomusic_big, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-11-25 10:18:11.375] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-11-25 10:18:20.743] [info] n_data_item 135736, n_query_item 1000, n_user 1823179, vec_dim 150
+[2022-11-25 10:18:20.743] [info] input parameter: simpfer_k_max 588, stop_time 14400s
+[2022-11-25 10:30:02.529] [info] finish preprocess and save the index
+[2022-11-25 11:19:20.468] [info] queryID 0, result_size 37595, rtk_topk 1024, ip_cost 2142235325, query_time 2957.94s, total_ip_cost 2142235325, total_retrieval_time 2957.94s
+[2022-11-25 11:19:27.696] [info] queryID 1, result_size 458, rtk_topk 128, ip_cost 114982201, query_time 7.23s, total_ip_cost 2257217526, total_retrieval_time 2965.17s
+[2022-11-25 11:19:38.300] [info] queryID 2, result_size 287, rtk_topk 256, ip_cost 221236419, query_time 10.60s, total_ip_cost 2478453945, total_retrieval_time 2975.77s
+[2022-11-25 12:09:21.266] [info] queryID 3, result_size 59800, rtk_topk 1024, ip_cost 2142235325, query_time 2982.97s, total_ip_cost 4620689270, total_retrieval_time 5958.74s
+[2022-11-25 12:59:45.014] [info] queryID 4, result_size 100111, rtk_topk 1024, ip_cost 2142235325, query_time 3023.75s, total_ip_cost 6762924595, total_retrieval_time 8982.48s
+[2022-11-25 12:59:45.015] [info] finish top-150
+[2022-11-25 12:59:45.015] [info] top150 retrieval:
+	total IP cost 6762924595, total time 8982.484s
+[2022-11-25 12:59:45.015] [info] build index time: total 701.785850175s
+top150 retrieval:
+	total IP cost 6762924595, total time 8982.484s
+[2022-11-25 12:59:55.159] [info] Simpfer dataset_name yelp, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-11-25 12:59:55.159] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-11-25 13:00:05.999] [info] n_data_item 159585, n_query_item 1000, n_user 2189457, vec_dim 150
+[2022-11-25 13:00:05.999] [info] input parameter: simpfer_k_max 588, stop_time 14400s
+[2022-11-25 13:14:35.805] [info] finish preprocess and save the index
+[2022-11-25 13:51:49.408] [info] queryID 0, result_size 351, rtk_topk 1024, ip_cost 2572611975, query_time 2233.60s, total_ip_cost 2572611975, total_retrieval_time 2233.60s
+[2022-11-25 13:52:05.923] [info] queryID 1, result_size 360, rtk_topk 512, ip_cost 186781376, query_time 16.51s, total_ip_cost 2759393351, total_retrieval_time 2250.12s
+[2022-11-25 15:10:15.791] [info] queryID 2, result_size 273431, rtk_topk 1024, ip_cost 2572611975, query_time 4689.87s, total_ip_cost 5332005326, total_retrieval_time 6939.99s
+[2022-11-25 16:24:51.126] [info] queryID 3, result_size 136934, rtk_topk 1024, ip_cost 2572611975, query_time 4475.34s, total_ip_cost 7904617301, total_retrieval_time 11415.32s
+[2022-11-25 16:24:58.557] [info] queryID 4, result_size 163, rtk_topk 128, ip_cost 40085775, query_time 7.43s, total_ip_cost 7944703076, total_retrieval_time 11422.75s
+[2022-11-25 16:24:58.561] [info] finish top-150
+[2022-11-25 16:24:58.561] [info] top150 retrieval:
+	total IP cost 7944703076, total time 11422.751s
+[2022-11-25 16:24:58.561] [info] build index time: total 869.806107669s
+top150 retrieval:
+	total IP cost 7944703076, total time 11422.751s
+[2022-11-25 16:25:04.693] [info] Simpfer dataset_name amazon-home-kitchen, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-11-25 16:25:04.693] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-11-25 16:25:11.484] [info] n_data_item 409243, n_query_item 1000, n_user 2511610, vec_dim 150
+[2022-11-25 16:25:11.484] [info] input parameter: simpfer_k_max 588, stop_time 14400s
+[2022-11-25 16:41:35.835] [info] finish preprocess and save the index
+[2022-11-25 19:51:25.754] [info] queryID 0, result_size 605793, rtk_topk 2048, ip_cost 5523030390, query_time 11389.90s, total_ip_cost 5523030390, total_retrieval_time 11389.90s
+[2022-11-25 22:50:42.408] [info] queryID 1, result_size 458530, rtk_topk 1024, ip_cost 2951141750, query_time 10756.65s, total_ip_cost 8474172140, total_retrieval_time 22146.56s
+[2022-11-25 22:50:42.408] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-25 22:50:42.409] [info] finish top-150
+[2022-11-25 22:50:42.409] [info] top150 retrieval:
+	total IP cost 8474172140, total time 22146.559s
+[2022-11-25 22:50:42.409] [info] build index time: total 984.351066573s
+top150 retrieval:
+	total IP cost 8474172140, total time 22146.559s

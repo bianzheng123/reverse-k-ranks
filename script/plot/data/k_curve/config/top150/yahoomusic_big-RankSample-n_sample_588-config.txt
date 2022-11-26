@@ -1,0 +1,6 @@
+number of query item 1000
+build index time 50.232s
+Estimated memory 7.987GB, Peak memory 10.251GB, Current memory 10.251GB
+top150 retrieval time: total 13375.317s
+	inner product 285.250s, rank bound 312.309s, read disk 12770.376s, compute rank 3.430s
+	total ip cost 1823179000, total io cost 650365568, total refine user 2256158, rank prune ratio 0.9988
