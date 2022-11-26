@@ -111,7 +111,7 @@ namespace ReverseMIPS {
 
         std::vector<int> kth_rank_l(n_sample_item);
 #pragma omp parallel for default(none) shared(kth_rank_l, n_sample_item, accu_n_user_rank_l, n_data_item, sample_topk)
-        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+        for (uint64_t sampleID = 0; sampleID < n_sample_item; sampleID++) {
             //binary search
             const int *user_rank_ptr = accu_n_user_rank_l.data() + sampleID * (n_data_item + 1);
             const int *rank_ptr = std::lower_bound(user_rank_ptr, user_rank_ptr + (n_data_item + 1), sample_topk,
@@ -144,7 +144,8 @@ namespace ReverseMIPS {
         std::vector<int> sample_itemID_l(n_sample_item);
         SampleItem(n_data_item, n_sample_item, sample_itemID_l);
 
-        std::vector<int> accu_n_user_rank_l(n_sample_item * (n_data_item + 1));
+        const size_t size_t_n_sample_item = n_sample_item;
+        std::vector<int> accu_n_user_rank_l(size_t_n_sample_item * (n_data_item + 1));
         ComputeQueryRank(user, data_item,
                          sample_itemID_l, n_sample_item,
                          accu_n_user_rank_l, index_path);

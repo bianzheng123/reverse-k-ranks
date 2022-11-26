@@ -110,7 +110,7 @@ namespace ReverseMIPS {
         assert(0 <= sample_topk);
 
         std::vector<int> kth_rank_l(n_sample_item);
-        for (int sampleID = 0; sampleID < n_sample_item; sampleID++) {
+        for (uint64_t sampleID = 0; sampleID < n_sample_item; sampleID++) {
             //binary search
             const int *user_rank_ptr = accu_n_user_rank_l.data() + sampleID * (n_data_item + 1);
             const int *rank_ptr = std::lower_bound(user_rank_ptr, user_rank_ptr + (n_data_item + 1), sample_topk,
