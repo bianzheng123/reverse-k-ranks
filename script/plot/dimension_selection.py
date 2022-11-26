@@ -11,39 +11,6 @@ markersize = 15
 matplotlib.rcParams.update({'font.size': 15})
 
 
-def plot_figure(*, fname_l: list, dataset_l: list,
-                name_m: dict, method_m: dict, result_fname: str, test: bool):
-    assert len(fname_l) == len(dataset_l)
-    n_fig = len(fname_l)
-    # fig = plt.figure(figsize=(25, 4))
-    fig = plt.figure(figsize=(len(dataset_l) * 4 + 1, 4))
-    fig.text(0.03, 0.5, name_m['fig_y'], va='center', rotation='vertical')
-    for fig_i in range(n_fig):
-        subplot_str = int('1' + str(n_fig) + str(fig_i + 1))
-        ax = fig.add_subplot(subplot_str)
-        df = pd.read_csv(fname_l[fig_i])
-        for method_i, key in enumerate(method_m.keys()):
-            x_name = name_m['csv_x']
-            y_name = key + name_m['csv_y']
-            ax.plot(df[x_name], df[y_name],
-                    color='#000000', linewidth=2.5, linestyle='-',
-                    label=method_m[key],
-                    marker=marker_l[method_i], fillstyle='none', markersize=markersize)
-        if fig_i == 0:
-            ax.set_ylim([0.2, 0.6])
-
-        ax.set_xlabel(name_m['fig_x'])
-        ax.set_title(dataset_l[fig_i])
-        if fig_i == n_fig - 1:
-            ax.legend(frameon=False, loc='best', borderaxespad=-0)
-        pass
-    pass
-    if test:
-        plt.savefig("{}.jpg".format(result_fname), bbox_inches='tight', dpi=600)
-    else:
-        plt.savefig("{}.pdf".format(result_fname), bbox_inches='tight')
-
-
 def transform_data(*, dataset_l: list, dim_l: list):
     for dataset in dataset_l:
         hit_50_l = []
@@ -59,22 +26,45 @@ def transform_data(*, dataset_l: list, dim_l: list):
         df.to_csv("data/dimension_selection/{}.csv".format(dataset), index=False)
 
 
-def plot_data():
-    fname_l = ['./data/dimension_selection/lastfm.csv',
-               './data/dimension_selection/ml-1m.csv']
-    dataset_l = ['Last.fm', 'Movielens-1m']
-    name_m = {'csv_x': 'dimension', 'fig_x': 'Dimension',
-              'csv_y': '', 'fig_y': 'Hitting ratio'}
-    method_m = {'HR@50': 'HR@50', 'HR@100': 'HR@100', 'HR@200': 'HR@200'}
-    result_fname = 'DimensionSelection'
-    is_test = False
-    plot_figure(fname_l=fname_l, dataset_l=dataset_l,
-                name_m=name_m, method_m=method_m,
-                result_fname=result_fname, test=is_test)
+def plot_figure(*, fname: str, result_fname: str,
+                name_m: dict, method_m: dict, ylim: list, test: bool):
+    # fig = plt.figure(figsize=(25, 4))
+    fig = plt.figure(figsize=(5, 4))
+    subplot_str = 111
+    ax = fig.add_subplot(subplot_str)
+    df = pd.read_csv(fname)
+    for method_i, key in enumerate(method_m.keys()):
+        x_name = name_m['csv_x']
+        y_name = key + name_m['csv_y']
+        ax.plot(df[x_name], df[y_name],
+                color='#000000', linewidth=2.5, linestyle='-',
+                label=method_m[key],
+                marker=marker_l[method_i], fillstyle='none', markersize=markersize)
+    ax.set_ylim(ylim)
+
+    ax.set_xlabel(name_m['fig_x'])
+    ax.set_ylabel(name_m['fig_y'])
+    ax.legend(frameon=False, loc='best', borderaxespad=-0)
+    # fig.tight_layout(rect=(0, 0.1, 1, 1))
+    if test:
+        plt.savefig("{}_{}.jpg".format('DimensionSelection', result_fname), bbox_inches='tight', dpi=600)
+    else:
+        plt.savefig("{}_{}.pdf".format('DimensionSelection', result_fname), bbox_inches='tight')
 
 
 if __name__ == "__main__":
     dim_l = [4, 16, 64, 256]
-    dataset_l = ['lastfm', 'ml-1m']
     # transform_data(dataset_l=dataset_l, dim_l=dim_l)
-    plot_data()
+    fname_l = ['./data/dimension_selection/lastfm.csv',
+               './data/dimension_selection/ml-1m.csv']
+    result_fname_l = ['1_lastfm', '2_movielens-1m']
+    ylim_l = [[0.2, 0.6], None]
+
+    name_m = {'csv_x': 'dimension', 'fig_x': 'Dimension',
+              'csv_y': '', 'fig_y': 'Hitting Ratio'}
+    method_m = {'HR@200': 'HR@200', 'HR@100': 'HR@100', 'HR@50': 'HR@50'}
+    is_test = False
+    for fname, result_fname, ylim in zip(fname_l, result_fname_l, ylim_l):
+        plot_figure(fname=fname, result_fname=result_fname,
+                    name_m=name_m, method_m=method_m,
+                    ylim=ylim, test=is_test)

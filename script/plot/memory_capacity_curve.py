@@ -10,50 +10,45 @@ markersize = 15
 matplotlib.rcParams.update({'font.size': 20})
 
 
-def plot_figure(*, fname_l: list, dataset_l: list, ylim_l: list,
-                name_m: dict, method_m: dict, result_fname: str, test: bool, label_pos_l: list):
-    assert len(fname_l) == len(dataset_l)
-    n_fig = len(fname_l)
+def plot_figure(*, fname: str, dataset_name: str, ylim: list,
+                name_m: dict, method_m: dict, test: bool):
     # fig = plt.figure(figsize=(25, 4))
-    fig = plt.figure(figsize=(len(dataset_l) * 4 + 2, 4))
-    fig.text(label_pos_l[0], label_pos_l[1], name_m['fig_y'], va='center', rotation='vertical')
-    for fig_i in range(n_fig):
-        subplot_str = int('1' + str(n_fig) + str(fig_i + 1))
-        ax = fig.add_subplot(subplot_str)
-        df = pd.read_csv(fname_l[fig_i])
-        for method_i, key in enumerate(method_m.keys()):
-            x_name = name_m['csv_x']
-            y_name = key + name_m['csv_y']
-            ax.plot(df[x_name], df[y_name] / 1000,
-                    color='#000000', linewidth=2.5, linestyle='-',
-                    label=method_m[key],
-                    marker=marker_l[method_i], fillstyle='none', markersize=markersize)
-        ax.set_xlim([0, 35])
-        ax.set_ylim(ylim_l[fig_i])
-        ax.set_xlabel(name_m['fig_x'])
-        ax.set_title(dataset_l[fig_i])
-        # if fig_i == n_fig - 1:
-        ax.legend(frameon=False, loc='best')
+    fig = plt.figure(figsize=(6, 4))
+    subplot_str = 111
+    ax = fig.add_subplot(subplot_str)
+    df = pd.read_csv(fname)
+    for method_i, key in enumerate(method_m.keys()):
+        x_name = name_m['csv_x']
+        y_name = key + name_m['csv_y']
+        ax.plot(df[x_name], df[y_name] / 1000,
+                color='#000000', linewidth=2.5, linestyle='-',
+                label=method_m[key],
+                marker=marker_l[method_i], fillstyle='none', markersize=markersize)
+    ax.set_xlim([1.8, 35])
+    ax.set_ylim(ylim)
+    ax.set_xlabel(name_m['fig_x'])
+    ax.set_ylabel(name_m['fig_y'])
+    ax.set_xscale('log', base=2)
+    ax.set_xticks([2, 4, 8, 16, 32])
+    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax.legend(frameon=False, loc='best')
     if test:
-        plt.savefig("{}.jpg".format(result_fname), bbox_inches='tight', dpi=600)
+        plt.savefig("memory_capacity_running_time_{}.jpg".format(dataset_name), bbox_inches='tight', dpi=600)
     else:
-        plt.savefig("{}.pdf".format(result_fname), bbox_inches='tight')
+        plt.savefig("memory_capacity_running_time_{}.pdf".format(dataset_name), bbox_inches='tight')
 
 
 if __name__ == "__main__":
+    name_m = {'csv_x': 'MemoryCapacity', 'fig_x': 'Memory capacity (GB)',
+              'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
+    method_m = {'QRS': 'AS', 'QRSMinMaxLR': 'ASLR'}
+    is_test = False
+
     fname_l = ['./data/memory_capacity_curve/Yahoomusic.csv',
                './data/memory_capacity_curve/Yelp.csv']
-    dataset_l = ['Yahoomusic', 'Yelp']
-    # RS QRS QRSMinMaxIntLR QRSLSIntLR
-
-    name_m = {'csv_x': 'MemoryCapacity', 'fig_x': 'Memory capacity (GB)',
-              'csv_y': 'RunningTime', 'fig_y': 'Running Time (Second)'}
-    method_m = {'QRS': 'AS', 'QRSMinMaxLR': 'ASLR'}
-    result_fname = 'memory_capacity_running_time'
-    is_test = True
-    label_pos_l = [0.04, 0.5]
+    dataset_name_l = ['1_yahoomusic', '2_yelp']
     # ylim_l = [None, None]
     ylim_l = [[0, 1.5], [0, 5]]
-    plot_figure(fname_l=fname_l, dataset_l=dataset_l, ylim_l=ylim_l,
-                name_m=name_m, method_m=method_m,
-                result_fname=result_fname, test=is_test, label_pos_l=label_pos_l)
+    for fname, dataset_name, ylim in zip(fname_l, dataset_name_l, ylim_l):
+        plot_figure(fname=fname, dataset_name=dataset_name, ylim=ylim,
+                    name_m=name_m, method_m=method_m, test=is_test)

@@ -44,7 +44,8 @@ namespace ReverseMIPS {
         const int n_user = user.n_vector_;
         const int n_data_item = data_item.n_vector_;
 
-        int64_t accu_n_element = n_sample_item * (n_data_item + 1);
+        const int64_t n_sample_item_size_t = n_sample_item;
+        int64_t accu_n_element = n_sample_item_size_t * (n_data_item + 1);
         assert(accu_n_user_rank_l.size() == accu_n_element);
         accu_n_user_rank_l.assign(accu_n_element, 0);
 
@@ -76,7 +77,7 @@ namespace ReverseMIPS {
                 accu_n_user_rank_l[sampleID * (n_data_item + 1) + rank]++;
             }
 
-            if(userID != 0 && userID % 100000 == 0){
+            if (userID != 0 && userID % 100000 == 0) {
                 spdlog::info(
                         "ComputeQueryRank {:.1f}%, Mem: {} Mb, {} s/iter",
                         userID / (0.01 * n_user), get_current_RSS() / 1000000,
@@ -142,7 +143,8 @@ namespace ReverseMIPS {
         std::vector<int> sample_itemID_l(n_sample_item);
         SampleItem(n_data_item, n_sample_item, sample_itemID_l);
 
-        std::vector<int> accu_n_user_rank_l(n_sample_item * (n_data_item + 1));
+        const size_t size_t_n_sample_item = n_sample_item;
+        std::vector<int> accu_n_user_rank_l(size_t_n_sample_item * (n_data_item + 1));
         ComputeQueryRank(user, data_item,
                          sample_itemID_l, n_sample_item,
                          accu_n_user_rank_l, index_path);
