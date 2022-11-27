@@ -236,6 +236,7 @@ int main(int argc, char **argv) {
     vector<int> topk_l;
     if (para.test_topk) {
         topk_l = {30, 20, 10};
+//        topk_l = {10};
     } else {
         topk_l = {200, 150, 100, 50, 20, 10};
     }

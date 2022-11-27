@@ -330,7 +330,7 @@ SIRPrune::topK(const Matrix &q, const int &k, std::vector<VectorElement> &vector
     const double pRatio2 = preprocessedP->ratio2;
 
 //#pragma omp parallel for default(none) private(newQ, newQIntPtr, qSumOfCoordinate1, qSumOfCoordinate2, subQNorm, transformSubQNorm, newSVDQNorm, qNorm, sumOfQCoordinate, leftPartialQSumOfCoordinate, qRatio1, qRatio2, ratio1, ratio2) shared(q, heap_ele_l, k, ip_count, vector_element_l, pRatio1, pRatio2)
-//#pragma omp parallel for default(none) reduction(+:ip_count) shared(q, k, vector_element_l, pRatio1, pRatio2)
+#pragma omp parallel for default(none) reduction(+:ip_count) shared(q, k, vector_element_l, pRatio1, pRatio2)
     for (int qID = 0; qID < q.rowNum; qID++) {
 
         std::vector<VectorElement> heap_ele_l(k);

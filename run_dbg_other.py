@@ -14,11 +14,10 @@ def run():
 
     dataset_name = "movielens-27m"  # yahoomusic_big yelp amazon-home-kitchen
     k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 20)
-    for dataset_name in ["movielens-27m", "yahoomusic_big", "yelp", "amazon-home-kitchen"]:
-        os.system(
-            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
-            f"--test_topk {'false'} --method_name {'Simpfer'} --simpfer_k_max {k_max} --stop_time {3600} "
-        )
+    os.system(
+        f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
+        f"--test_topk {'false'} --method_name {'Simpfer'} --simpfer_k_max {k_max} --stop_time {3600} "
+    )
 
     # n_sample_item = 5000
     # dataset_name = 'yelp'  # yelp, yahoomusic_big
