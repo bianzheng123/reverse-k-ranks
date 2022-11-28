@@ -50,14 +50,14 @@ if __name__ == "__main__":
     dataset_l = ['1_Movielens', '2_Yahoomusic', '3_Yelp', '4_Amazon']
     set_log_l = [True, True, True, True]
     # ylim_l = [[0.01, 1], [0.1, 100], [0.1, 100], [1, 100001]]
-    ylim_l = [[0.01, 10000], [0.1, 100000], [0.1, 100000], [1, 100001]]
+    ylim_l = [[0.01, 10000], [0.1, 100000], [0.1, 100000], [1, 7e7]]
     legend_loc_l = [('best', None), ('center right', (1, 0.6)), ('center right', (1, 0.6)), ('center right', (1, 0.7))]
     labelpad_l = [0, -5, -5, 0]
     # labelpad_l = [0, 0, 0, 0]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'RunningTime', 'fig_y': 'Running Time (Second)'}
-    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMaxLR': 'ASLR'}
+    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_running_time_overall_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'IOCost', 'fig_y': 'IO Cost'}
-    method_m = {'RS': 'US', 'QRSMinMaxLR': 'ASLR'}
+    method_m = {'RS': 'US', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_io_cost_overall_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,
@@ -94,14 +94,14 @@ if __name__ == "__main__":
                './data/k_curve/Amazon.csv']
     dataset_l = ['1_Movielens', '2_Yahoomusic', '3_Yelp', '4_Amazon']
     set_log_l = [True, True, True, True]
-    ylim_l = [[1e4, 1e10], [1e4, 1e11], [1e4, 1e10], [1e5, 1e10]]
+    ylim_l = [[1e4, 1e10], [1e4, 1e11], [1e4, 1e10], [1e5, 3.6e12]]
     # ylim_l = [None, None, None, None]
     legend_loc_l = [('best', None), ('best', None), ('center right', (1, 0.6)), ('best', None)]
     labelpad_l = [-5, -5, -7, -5]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'IPCost', 'fig_y': 'IP Cost'}
-    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMaxLR': 'ASLR'}
+    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_ip_cost_overall_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'RunningTime', 'fig_y': 'Running Time (Second)'}
-    method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMaxLR': 'ASLR'}
+    method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_running_time_component_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,
@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'IOCost', 'fig_y': 'IO Cost'}
-    method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMaxLR': 'ASLR'}
+    method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_io_cost_component_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,
@@ -161,7 +161,7 @@ if __name__ == "__main__":
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'IPCost', 'fig_y': 'IPCost'}
-    method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMaxLR': 'ASLR'}
+    method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_ip_cost_component_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,

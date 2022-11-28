@@ -66,6 +66,17 @@ namespace ReverseMIPS {
             } else if (sample_name == "OptimalAll") {
                 sample_rank_l.resize(n_data_item_);
                 std::iota(sample_rank_l.begin(), sample_rank_l.end(), 0);
+
+            } else if (sample_name == "OptimalUniform") {
+
+                const int end_sample_rank = (int) n_data_item - 1;
+                const double delta = (end_sample_rank - 0) * 1.0 / n_sample_query_;
+                sample_rank_l.resize(n_sample_query_);
+                for (int sampleID = 0; sampleID < n_sample_query_; sampleID++) {
+                    sample_rank_l[sampleID] = std::floor(sampleID * delta);
+                }
+                std::sort(sample_rank_l.data(), sample_rank_l.data() + n_sample_query_);
+
             } else {
                 spdlog::error("not find sample name, program exit");
                 exit(-1);

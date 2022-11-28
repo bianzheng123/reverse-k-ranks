@@ -1,0 +1,59 @@
+nohup: 忽略输入
+[2022-11-26 16:45:53.089] [info] Simpfer dataset_name yelp, dataset_dir /run/media/hdd/ReverseMIPS
+[2022-11-26 16:45:53.089] [info] index_dir /home/bianzheng/CLionProjects/reverse-k-ranks/index
+[2022-11-26 16:45:59.617] [info] n_data_item 159585, n_query_item 1000, n_user 2189457, vec_dim 150
+[2022-11-26 16:45:59.617] [info] input parameter: simpfer_k_max 490, stop_time 3600s
+[2022-11-26 17:03:20.670] [info] finish preprocess and save the index
+[2022-11-26 23:20:56.607] [info] queryID 0, result_size 350, rtk_topk 1024, ip_cost 2572611975, query_time 22655.69s, total_ip_cost 2572611975, total_retrieval_time 22655.69s
+[2022-11-26 23:20:56.614] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-26 23:20:56.633] [info] finish top-200
+[2022-11-26 23:20:56.633] [info] top200 retrieval:
+	total IP cost 2572611975, total time 22655.687s
+[2022-11-27 04:17:21.627] [info] queryID 0, result_size 350, rtk_topk 1024, ip_cost 2572611975, query_time 17784.79s, total_ip_cost 2572611975, total_retrieval_time 17784.79s
+[2022-11-27 04:17:21.628] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-27 04:17:21.628] [info] finish top-150
+[2022-11-27 04:17:21.628] [info] top150 retrieval:
+	total IP cost 2572611975, total time 17784.794s
+[2022-11-27 09:14:29.547] [info] queryID 0, result_size 350, rtk_topk 1024, ip_cost 2572611975, query_time 17827.26s, total_ip_cost 2572611975, total_retrieval_time 17827.26s
+[2022-11-27 09:14:29.547] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-27 09:14:29.547] [info] finish top-100
+[2022-11-27 09:14:29.547] [info] top100 retrieval:
+	total IP cost 2572611975, total time 17827.258s
+[2022-11-27 11:21:24.817] [info] queryID 0, result_size 98, rtk_topk 512, ip_cost 1451609991, query_time 7615.27s, total_ip_cost 1451609991, total_retrieval_time 7615.27s
+[2022-11-27 11:21:24.817] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-27 11:21:24.817] [info] finish top-50
+[2022-11-27 11:21:24.817] [info] top50 retrieval:
+	total IP cost 1451609991, total time 7615.269s
+[2022-11-27 11:21:42.798] [info] queryID 0, result_size 34, rtk_topk 256, ip_cost 21391089, query_time 17.98s, total_ip_cost 21391089, total_retrieval_time 17.98s
+[2022-11-27 11:21:54.236] [info] queryID 1, result_size 20, rtk_topk 64, ip_cost 5858870, query_time 11.44s, total_ip_cost 27249959, total_retrieval_time 29.42s
+[2022-11-27 13:28:46.449] [info] queryID 2, result_size 29, rtk_topk 512, ip_cost 1451609991, query_time 7612.21s, total_ip_cost 1478859950, total_retrieval_time 7641.63s
+[2022-11-27 13:28:46.449] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-27 13:28:46.450] [info] finish top-20
+[2022-11-27 13:28:46.450] [info] top20 retrieval:
+	total IP cost 1478859950, total time 7641.631s
+[2022-11-27 13:28:57.266] [info] queryID 0, result_size 10, rtk_topk 64, ip_cost 3588141, query_time 10.82s, total_ip_cost 3588141, total_retrieval_time 10.82s
+[2022-11-27 13:29:08.731] [info] queryID 1, result_size 20, rtk_topk 64, ip_cost 5858870, query_time 11.46s, total_ip_cost 9447011, total_retrieval_time 22.28s
+[2022-11-27 13:29:24.219] [info] queryID 2, result_size 12, rtk_topk 256, ip_cost 14079430, query_time 15.49s, total_ip_cost 23526441, total_retrieval_time 37.77s
+[2022-11-27 15:36:18.321] [info] queryID 3, result_size 22, rtk_topk 512, ip_cost 1451609991, query_time 7614.10s, total_ip_cost 1475136432, total_retrieval_time 7651.87s
+[2022-11-27 15:36:18.321] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-27 15:36:18.322] [info] finish top-10
+[2022-11-27 15:36:18.322] [info] top10 retrieval:
+	total IP cost 1475136432, total time 7651.870s
+[2022-11-27 15:36:18.322] [info] build index time: total 1041.053527014s
+top200 retrieval:
+	total IP cost 2572611975, total time 22655.687s
+top150 retrieval:
+	total IP cost 2572611975, total time 17784.794s
+top100 retrieval:
+	total IP cost 2572611975, total time 17827.258s
+top50 retrieval:
+	total IP cost 1451609991, total time 7615.269s
+top20 retrieval:
+	total IP cost 1478859950, total time 7641.631s
+top10 retrieval:
+	total IP cost 1475136432, total time 7651.870s
+[2022-11-27 15:36:26.791] [info] Simpfer dataset_name amazon-home-kitchen, dataset_dir /run/media/hdd/ReverseMIPS
+[2022-11-27 15:36:26.791] [info] index_dir /home/bianzheng/CLionProjects/reverse-k-ranks/index
+[2022-11-27 15:36:44.654] [info] n_data_item 409243, n_query_item 1000, n_user 2511610, vec_dim 150
+[2022-11-27 15:36:44.654] [info] input parameter: simpfer_k_max 427, stop_time 3600s
+[2022-11-27 15:54:51.848] [info] finish preprocess and save the index

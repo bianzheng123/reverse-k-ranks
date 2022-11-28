@@ -1,0 +1,26 @@
+nohup: 忽略输入
+[2022-11-27 16:58:03.113] [info] Simpfer dataset_name yahoomusic_big, dataset_dir /run/media/hdd/ReverseMIPS
+[2022-11-27 16:58:03.113] [info] index_dir /home/bianzheng/CLionProjects/reverse-k-ranks/index
+[2022-11-27 17:01:18.367] [info] n_data_item 135736, n_query_item 1000, n_user 1823179, vec_dim 150
+[2022-11-27 17:01:18.367] [info] input parameter: simpfer_k_max 588, stop_time 3600s
+[2022-11-27 17:20:52.763] [info] finish preprocess and save the index
+[2022-11-27 22:40:18.479] [info] queryID 0, result_size 876, rtk_topk 16384, ip_cost 30146264765, query_time 19165.71s, total_ip_cost 30146264765, total_retrieval_time 19165.71s
+[2022-11-27 22:40:18.713] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-27 22:40:18.738] [info] finish top-200
+[2022-11-27 22:40:18.738] [info] top200 retrieval:
+	total IP cost 30146264765, total time 19165.711s
+[2022-11-28 01:51:58.404] [info] queryID 0, result_size 876, rtk_topk 16384, ip_cost 30146264765, query_time 11499.51s, total_ip_cost 30146264765, total_retrieval_time 11499.51s
+[2022-11-28 01:51:58.611] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 01:51:58.612] [info] finish top-150
+[2022-11-28 01:51:58.612] [info] top150 retrieval:
+	total IP cost 30146264765, total time 11499.506s
+[2022-11-28 05:04:21.668] [info] queryID 0, result_size 876, rtk_topk 16384, ip_cost 30146264765, query_time 11542.98s, total_ip_cost 30146264765, total_retrieval_time 11542.98s
+[2022-11-28 05:04:21.668] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 05:04:21.668] [info] finish top-100
+[2022-11-28 05:04:21.668] [info] top100 retrieval:
+	total IP cost 30146264765, total time 11542.975s
+[2022-11-28 07:24:45.864] [info] queryID 0, result_size 87, rtk_topk 8192, ip_cost 15210782397, query_time 8424.20s, total_ip_cost 15210782397, total_retrieval_time 8424.20s
+[2022-11-28 07:24:45.864] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 07:24:45.864] [info] finish top-50
+[2022-11-28 07:24:45.864] [info] top50 retrieval:
+	total IP cost 15210782397, total time 8424.196s

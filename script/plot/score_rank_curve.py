@@ -78,7 +78,13 @@ def get_sample_lr(file_name, userid_l):
                + userID * 2 * sizeof_double, 0)
         distribution_para_l_b = f.read(2 * sizeof_double)
         distribution_para_l = struct.unpack("d" * 2, distribution_para_l_b)
-        sample_arr_m[userID] = [pred_para_l, distribution_para_l]
+
+        f.seek(sizeof_size_t * 2 + sizeof_int + sizeof_int * n_sample_rank + n_user * 4 * sizeof_double
+               + userID * sizeof_int, 0)
+        error_b = f.read(sizeof_int)
+        error = struct.unpack("i", error_b)
+
+        sample_arr_m[userID] = [pred_para_l, distribution_para_l, error]
 
     f.close()
     return sample_arr_m
@@ -96,6 +102,7 @@ def plot_figure(*, method_name: str,
 
     ax.scatter(x=score_l_l[0], y=rank_l_l[0], s=2, label='sampled score')
     ax.plot(score_l_l[1], rank_l_l[1], color='#b2b2b2', label='fitting curve')
+    ax.plot(score_l_l[2], rank_l_l[2], color='#b2b2b2', label='fitting curve error')
 
     ax.legend()
 
@@ -117,8 +124,8 @@ def plot_figure(*, method_name: str,
         plt.savefig("ScoreRankCurve_{}.pdf".format(method_name), bbox_inches='tight')
 
 
-yahoomusic_id = 4
-yelp_id = 23
+yahoomusic_id = 1200
+yelp_id = 1200
 
 yahoomusic_pre_m = get_sample_lr('DirectLinearRegression-yahoomusic_big-n_sample_504',
                                  [yahoomusic_id])
@@ -142,14 +149,21 @@ score_l = score_l_l[0]
 method_name = method_l[0]
 rank_l = np.arange(len(score_l))
 yahoomusic_pre = yahoomusic_pre_m[yahoomusic_id]
+print("first error {}".format(yahoomusic_pre[2]))
 rank_pred_l = [yahoomusic_pre[0][0] * _ + yahoomusic_pre[0][1] for _ in score_l]
-plot_figure(method_name=method_name, score_l_l=[score_l, score_l], rank_l_l=[rank_l, rank_pred_l], is_test=is_test)
+rank_pred_error_l = [yahoomusic_pre[0][0] * _ + yahoomusic_pre[0][1] + yahoomusic_pre[2][0] for _ in score_l]
+plot_figure(method_name=method_name, score_l_l=[score_l, score_l, score_l], rank_l_l=[rank_l, rank_pred_l, rank_pred_error_l], is_test=is_test)
 
 score_l = score_l_l[1]
 method_name = method_l[1]
 rank_l = np.arange(len(score_l))
 yelp_pre = yelp_pre_m[yelp_id]
+print("second error {}".format(yelp_pre[2]))
 rank_pred_l = [
     yelp_pre[0][0] * stats.norm.cdf((_ - yelp_pre[1][0]) / yelp_pre[1][1]) + yelp_pre[0][1]
     for _ in score_l]
-plot_figure(method_name=method_name, score_l_l=[score_l, score_l], rank_l_l=[rank_l, rank_pred_l], is_test=is_test)
+rank_pred_error_l = [
+    yelp_pre[0][0] * stats.norm.cdf((_ - yelp_pre[1][0]) / yelp_pre[1][1]) + yelp_pre[0][1] + yelp_pre[2][0]
+    for _ in score_l
+]
+plot_figure(method_name=method_name, score_l_l=[score_l, score_l, score_l], rank_l_l=[rank_l, rank_pred_l, rank_pred_error_l], is_test=is_test)

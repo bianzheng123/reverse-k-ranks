@@ -123,7 +123,7 @@ namespace ReverseMIPS {
                                                                              n_predict_parameter_ + 1);
             Eigen::Matrix<double, n_predict_parameter_ + 1, 1> x;
 
-            double min_obj = sdlp::linprog<3>(c, A, b, x);
+            sdlp::linprog<3>(c, A, b, x);
 
             assert(x.rows() == n_predict_parameter_ + 1);
 //            printf("res rows %ld, cols %ld\n", res.rows(), res.cols());

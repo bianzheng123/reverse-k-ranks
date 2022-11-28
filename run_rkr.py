@@ -75,6 +75,7 @@ def cmp_file_all(baseline_method, compare_method_l, dataset_l, topk_l):
         'QueryRankSampleSearchAllRank': 'n_sample_20-n_sample_query_150-sample_topk_30',
         'QueryRankSampleSearchBruteForce': 'n_sample_5',
         'QueryRankSampleSearchKthRank': 'n_sample_20-n_sample_query_150-sample_topk_30',
+        'QueryRankSampleSearchUniformRank': 'n_sample_20-n_sample_query_150-sample_topk_30',
         'RankSample': 'n_sample_20',
     }
     for ds in dataset_l:
@@ -146,7 +147,8 @@ def run():
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
         # 'QueryRankSampleSearchBruteForce',
-        'QueryRankSampleSearchKthRank',
+        # 'QueryRankSampleSearchKthRank',
+        'QueryRankSampleSearchUniformRank',
         # 'RankSample',
     ]
 
@@ -192,7 +194,8 @@ def run():
         # run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleSearchBruteForce', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)
-        run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        # run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchUniformRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
     # send_email.send('test complete')

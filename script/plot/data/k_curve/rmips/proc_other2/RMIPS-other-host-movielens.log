@@ -1,0 +1,162 @@
+[2022-11-28 01:01:10.577] [info] Simpfer dataset_name movielens-27m, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-11-28 01:01:10.577] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-11-28 01:01:12.962] [info] n_data_item 52889, n_query_item 1000, n_user 283228, vec_dim 150
+[2022-11-28 01:01:12.962] [info] input parameter: simpfer_k_max 4738, stop_time 3600s
+[2022-11-28 01:25:59.012] [info] finish preprocess and save the index
+[2022-11-28 01:30:27.874] [info] queryID 0, result_size 1882, rtk_topk 256, ip_cost 43139093, query_time 268.86s, total_ip_cost 43139093, total_retrieval_time 268.86s
+[2022-11-28 01:38:01.719] [info] queryID 1, result_size 1944, rtk_topk 4096, ip_cost 748467513, query_time 453.84s, total_ip_cost 791606606, total_retrieval_time 722.71s
+[2022-11-28 01:41:08.124] [info] queryID 2, result_size 1026, rtk_topk 8192, ip_cost 2362971204, query_time 186.41s, total_ip_cost 3154577810, total_retrieval_time 909.11s
+[2022-11-28 01:44:18.888] [info] queryID 3, result_size 2543, rtk_topk 2048, ip_cost 320087696, query_time 190.76s, total_ip_cost 3474665506, total_retrieval_time 1099.87s
+[2022-11-28 01:44:36.520] [info] queryID 4, result_size 214, rtk_topk 512, ip_cost 15204514, query_time 17.63s, total_ip_cost 3489870020, total_retrieval_time 1117.51s
+[2022-11-28 01:46:37.637] [info] queryID 5, result_size 448, rtk_topk 4096, ip_cost 189138785, query_time 121.12s, total_ip_cost 3679008805, total_retrieval_time 1238.62s
+[2022-11-28 01:47:13.719] [info] queryID 6, result_size 1059, rtk_topk 1024, ip_cost 52436226, query_time 36.08s, total_ip_cost 3731445031, total_retrieval_time 1274.71s
+[2022-11-28 01:48:45.362] [info] queryID 7, result_size 1360, rtk_topk 2048, ip_cost 161411016, query_time 91.64s, total_ip_cost 3892856047, total_retrieval_time 1366.35s
+[2022-11-28 01:49:05.158] [info] queryID 8, result_size 572, rtk_topk 512, ip_cost 12277157, query_time 19.80s, total_ip_cost 3905133204, total_retrieval_time 1386.14s
+[2022-11-28 02:20:40.047] [info] queryID 9, result_size 43303, rtk_topk 4096, ip_cost 3531431029, query_time 1894.89s, total_ip_cost 7436564233, total_retrieval_time 3281.03s
+[2022-11-28 02:22:09.154] [info] queryID 10, result_size 6778, rtk_topk 1024, ip_cost 174506972, query_time 89.11s, total_ip_cost 7611071205, total_retrieval_time 3370.14s
+[2022-11-28 02:26:15.055] [info] queryID 11, result_size 693, rtk_topk 16384, ip_cost 4683174980, query_time 245.90s, total_ip_cost 12294246185, total_retrieval_time 3616.04s
+[2022-11-28 02:26:15.055] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 02:26:15.057] [info] finish top-200
+[2022-11-28 02:26:15.057] [info] top200 retrieval:
+	total IP cost 12294246185, total time 3616.040s
+[2022-11-28 02:26:57.000] [info] queryID 0, result_size 1882, rtk_topk 256, ip_cost 43139093, query_time 41.94s, total_ip_cost 43139093, total_retrieval_time 41.94s
+[2022-11-28 02:34:08.397] [info] queryID 1, result_size 1944, rtk_topk 4096, ip_cost 748467513, query_time 431.40s, total_ip_cost 791606606, total_retrieval_time 473.34s
+[2022-11-28 02:36:55.656] [info] queryID 2, result_size 1026, rtk_topk 8192, ip_cost 2362971204, query_time 167.26s, total_ip_cost 3154577810, total_retrieval_time 640.60s
+[2022-11-28 02:39:41.331] [info] queryID 3, result_size 2543, rtk_topk 2048, ip_cost 320087696, query_time 165.67s, total_ip_cost 3474665506, total_retrieval_time 806.27s
+[2022-11-28 02:39:57.057] [info] queryID 4, result_size 214, rtk_topk 512, ip_cost 15204514, query_time 15.73s, total_ip_cost 3489870020, total_retrieval_time 822.00s
+[2022-11-28 02:41:58.355] [info] queryID 5, result_size 448, rtk_topk 4096, ip_cost 189138785, query_time 121.30s, total_ip_cost 3679008805, total_retrieval_time 943.30s
+[2022-11-28 02:42:34.193] [info] queryID 6, result_size 1059, rtk_topk 1024, ip_cost 52436226, query_time 35.84s, total_ip_cost 3731445031, total_retrieval_time 979.14s
+[2022-11-28 02:44:08.239] [info] queryID 7, result_size 1360, rtk_topk 2048, ip_cost 161411016, query_time 94.05s, total_ip_cost 3892856047, total_retrieval_time 1073.18s
+[2022-11-28 02:44:25.174] [info] queryID 8, result_size 572, rtk_topk 512, ip_cost 12277157, query_time 16.94s, total_ip_cost 3905133204, total_retrieval_time 1090.12s
+[2022-11-28 03:15:53.755] [info] queryID 9, result_size 43303, rtk_topk 4096, ip_cost 3531431029, query_time 1888.58s, total_ip_cost 7436564233, total_retrieval_time 2978.70s
+[2022-11-28 03:16:09.001] [info] queryID 10, result_size 196, rtk_topk 512, ip_cost 6057951, query_time 15.24s, total_ip_cost 7442622184, total_retrieval_time 2993.94s
+[2022-11-28 03:20:11.275] [info] queryID 11, result_size 693, rtk_topk 16384, ip_cost 4683174980, query_time 242.27s, total_ip_cost 12125797164, total_retrieval_time 3236.22s
+[2022-11-28 03:20:57.130] [info] queryID 12, result_size 3088, rtk_topk 1024, ip_cost 71109202, query_time 45.85s, total_ip_cost 12196906366, total_retrieval_time 3282.07s
+[2022-11-28 03:26:01.807] [info] queryID 13, result_size 2831, rtk_topk 8192, ip_cost 2362971204, query_time 304.68s, total_ip_cost 14559877570, total_retrieval_time 3586.75s
+[2022-11-28 03:28:39.661] [info] queryID 14, result_size 1797, rtk_topk 2048, ip_cost 297055164, query_time 157.85s, total_ip_cost 14856932734, total_retrieval_time 3744.60s
+[2022-11-28 03:28:39.661] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 03:28:39.662] [info] finish top-150
+[2022-11-28 03:28:39.662] [info] top150 retrieval:
+	total IP cost 14856932734, total time 3744.601s
+[2022-11-28 03:28:52.884] [info] queryID 0, result_size 149, rtk_topk 128, ip_cost 3898108, query_time 13.22s, total_ip_cost 3898108, total_retrieval_time 13.22s
+[2022-11-28 03:36:23.887] [info] queryID 1, result_size 1944, rtk_topk 4096, ip_cost 748467513, query_time 451.00s, total_ip_cost 752365621, total_retrieval_time 464.22s
+[2022-11-28 03:37:42.521] [info] queryID 2, result_size 120, rtk_topk 4096, ip_cost 116247350, query_time 78.63s, total_ip_cost 868612971, total_retrieval_time 542.86s
+[2022-11-28 03:40:27.351] [info] queryID 3, result_size 2543, rtk_topk 2048, ip_cost 320087696, query_time 164.83s, total_ip_cost 1188700667, total_retrieval_time 707.69s
+[2022-11-28 03:40:43.438] [info] queryID 4, result_size 214, rtk_topk 512, ip_cost 15204514, query_time 16.09s, total_ip_cost 1203905181, total_retrieval_time 723.78s
+[2022-11-28 03:42:46.480] [info] queryID 5, result_size 448, rtk_topk 4096, ip_cost 189138785, query_time 123.04s, total_ip_cost 1393043966, total_retrieval_time 846.82s
+[2022-11-28 03:43:00.797] [info] queryID 6, result_size 101, rtk_topk 512, ip_cost 5284252, query_time 14.32s, total_ip_cost 1398328218, total_retrieval_time 861.13s
+[2022-11-28 03:43:15.381] [info] queryID 7, result_size 102, rtk_topk 1024, ip_cost 16911699, query_time 14.58s, total_ip_cost 1415239917, total_retrieval_time 875.72s
+[2022-11-28 03:43:31.781] [info] queryID 8, result_size 572, rtk_topk 512, ip_cost 12277157, query_time 16.40s, total_ip_cost 1427517074, total_retrieval_time 892.12s
+[2022-11-28 04:17:44.988] [info] queryID 9, result_size 43303, rtk_topk 4096, ip_cost 3531431029, query_time 2053.21s, total_ip_cost 4958948103, total_retrieval_time 2945.32s
+[2022-11-28 04:18:01.525] [info] queryID 10, result_size 196, rtk_topk 512, ip_cost 6057951, query_time 16.54s, total_ip_cost 4965006054, total_retrieval_time 2961.86s
+[2022-11-28 04:22:10.884] [info] queryID 11, result_size 693, rtk_topk 16384, ip_cost 4683174980, query_time 249.36s, total_ip_cost 9648181034, total_retrieval_time 3211.22s
+[2022-11-28 04:23:04.705] [info] queryID 12, result_size 3088, rtk_topk 1024, ip_cost 71109202, query_time 53.82s, total_ip_cost 9719290236, total_retrieval_time 3265.04s
+[2022-11-28 04:28:54.596] [info] queryID 13, result_size 2831, rtk_topk 8192, ip_cost 2362971204, query_time 349.89s, total_ip_cost 12082261440, total_retrieval_time 3614.93s
+[2022-11-28 04:28:54.596] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 04:28:54.598] [info] finish top-100
+[2022-11-28 04:28:54.598] [info] top100 retrieval:
+	total IP cost 12082261440, total time 3614.932s
+[2022-11-28 04:29:08.465] [info] queryID 0, result_size 149, rtk_topk 128, ip_cost 3898108, query_time 13.87s, total_ip_cost 3898108, total_retrieval_time 13.87s
+[2022-11-28 04:37:44.982] [info] queryID 1, result_size 1944, rtk_topk 4096, ip_cost 748467513, query_time 516.52s, total_ip_cost 752365621, total_retrieval_time 530.38s
+[2022-11-28 04:39:14.319] [info] queryID 2, result_size 120, rtk_topk 4096, ip_cost 116247350, query_time 89.34s, total_ip_cost 868612971, total_retrieval_time 619.72s
+[2022-11-28 04:42:23.824] [info] queryID 3, result_size 2543, rtk_topk 2048, ip_cost 320087696, query_time 189.50s, total_ip_cost 1188700667, total_retrieval_time 809.22s
+[2022-11-28 04:42:38.997] [info] queryID 4, result_size 214, rtk_topk 512, ip_cost 15204514, query_time 15.17s, total_ip_cost 1203905181, total_retrieval_time 824.40s
+[2022-11-28 04:44:59.129] [info] queryID 5, result_size 448, rtk_topk 4096, ip_cost 189138785, query_time 140.13s, total_ip_cost 1393043966, total_retrieval_time 964.53s
+[2022-11-28 04:45:13.793] [info] queryID 6, result_size 101, rtk_topk 512, ip_cost 5284252, query_time 14.66s, total_ip_cost 1398328218, total_retrieval_time 979.19s
+[2022-11-28 04:45:29.449] [info] queryID 7, result_size 102, rtk_topk 1024, ip_cost 16911699, query_time 15.66s, total_ip_cost 1415239917, total_retrieval_time 994.85s
+[2022-11-28 04:45:46.645] [info] queryID 8, result_size 572, rtk_topk 512, ip_cost 12277157, query_time 17.20s, total_ip_cost 1427517074, total_retrieval_time 1012.04s
+[2022-11-28 04:46:10.701] [info] queryID 9, result_size 81, rtk_topk 2048, ip_cost 22392478, query_time 24.06s, total_ip_cost 1449909552, total_retrieval_time 1036.10s
+[2022-11-28 04:46:23.577] [info] queryID 10, result_size 196, rtk_topk 512, ip_cost 6057951, query_time 12.88s, total_ip_cost 1455967503, total_retrieval_time 1048.98s
+[2022-11-28 04:50:44.490] [info] queryID 11, result_size 693, rtk_topk 16384, ip_cost 4683174980, query_time 260.91s, total_ip_cost 6139142483, total_retrieval_time 1309.89s
+[2022-11-28 04:51:00.108] [info] queryID 12, result_size 77, rtk_topk 512, ip_cost 2757057, query_time 15.62s, total_ip_cost 6141899540, total_retrieval_time 1325.51s
+[2022-11-28 04:55:07.736] [info] queryID 13, result_size 91, rtk_topk 4096, ip_cost 364857788, query_time 247.63s, total_ip_cost 6506757328, total_retrieval_time 1573.14s
+[2022-11-28 04:58:00.334] [info] queryID 14, result_size 1797, rtk_topk 2048, ip_cost 297055164, query_time 172.60s, total_ip_cost 6803812492, total_retrieval_time 1745.73s
+[2022-11-28 04:58:51.217] [info] queryID 15, result_size 2096, rtk_topk 2048, ip_cost 70784830, query_time 50.88s, total_ip_cost 6874597322, total_retrieval_time 1796.62s
+[2022-11-28 05:40:24.692] [info] queryID 16, result_size 90624, rtk_topk 4096, ip_cost 4133646098, query_time 2493.48s, total_ip_cost 11008243420, total_retrieval_time 4290.09s
+[2022-11-28 05:40:24.694] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 05:40:24.695] [info] finish top-50
+[2022-11-28 05:40:24.695] [info] top50 retrieval:
+	total IP cost 11008243420, total time 4290.091s
+[2022-11-28 05:40:37.490] [info] queryID 0, result_size 149, rtk_topk 128, ip_cost 3898108, query_time 12.79s, total_ip_cost 3898108, total_retrieval_time 12.79s
+[2022-11-28 05:41:14.009] [info] queryID 1, result_size 37, rtk_topk 2048, ip_cost 55724192, query_time 36.52s, total_ip_cost 59622300, total_retrieval_time 49.31s
+[2022-11-28 05:42:37.311] [info] queryID 2, result_size 120, rtk_topk 4096, ip_cost 116247350, query_time 83.30s, total_ip_cost 175869650, total_retrieval_time 132.61s
+[2022-11-28 05:42:48.625] [info] queryID 3, result_size 41, rtk_topk 1024, ip_cost 4907339, query_time 11.31s, total_ip_cost 180776989, total_retrieval_time 143.93s
+[2022-11-28 05:43:01.886] [info] queryID 4, result_size 214, rtk_topk 512, ip_cost 15204514, query_time 13.26s, total_ip_cost 195981503, total_retrieval_time 157.19s
+[2022-11-28 05:43:16.862] [info] queryID 5, result_size 36, rtk_topk 2048, ip_cost 16770259, query_time 14.98s, total_ip_cost 212751762, total_retrieval_time 172.17s
+[2022-11-28 05:43:26.768] [info] queryID 6, result_size 101, rtk_topk 512, ip_cost 5284252, query_time 9.91s, total_ip_cost 218036014, total_retrieval_time 182.07s
+[2022-11-28 05:43:41.561] [info] queryID 7, result_size 102, rtk_topk 1024, ip_cost 16911699, query_time 14.79s, total_ip_cost 234947713, total_retrieval_time 196.87s
+[2022-11-28 05:43:57.173] [info] queryID 8, result_size 572, rtk_topk 512, ip_cost 12277157, query_time 15.61s, total_ip_cost 247224870, total_retrieval_time 212.48s
+[2022-11-28 05:44:19.177] [info] queryID 9, result_size 81, rtk_topk 2048, ip_cost 22392478, query_time 22.00s, total_ip_cost 269617348, total_retrieval_time 234.48s
+[2022-11-28 05:44:31.185] [info] queryID 10, result_size 196, rtk_topk 512, ip_cost 6057951, query_time 12.01s, total_ip_cost 275675299, total_retrieval_time 246.49s
+[2022-11-28 05:46:48.977] [info] queryID 11, result_size 5927, rtk_topk 8192, ip_cost 2362971204, query_time 137.79s, total_ip_cost 2638646503, total_retrieval_time 384.28s
+[2022-11-28 05:47:03.884] [info] queryID 12, result_size 77, rtk_topk 512, ip_cost 2757057, query_time 14.91s, total_ip_cost 2641403560, total_retrieval_time 399.19s
+[2022-11-28 05:50:58.901] [info] queryID 13, result_size 91, rtk_topk 4096, ip_cost 364857788, query_time 235.02s, total_ip_cost 3006261348, total_retrieval_time 634.20s
+[2022-11-28 05:53:44.311] [info] queryID 14, result_size 1797, rtk_topk 2048, ip_cost 297055164, query_time 165.41s, total_ip_cost 3303316512, total_retrieval_time 799.61s
+[2022-11-28 05:53:55.849] [info] queryID 15, result_size 46, rtk_topk 1024, ip_cost 1934500, query_time 11.54s, total_ip_cost 3305251012, total_retrieval_time 811.15s
+[2022-11-28 06:34:42.790] [info] queryID 16, result_size 90624, rtk_topk 4096, ip_cost 4133646098, query_time 2446.94s, total_ip_cost 7438897110, total_retrieval_time 3258.09s
+[2022-11-28 06:35:11.081] [info] queryID 17, result_size 763, rtk_topk 1024, ip_cost 27635323, query_time 28.29s, total_ip_cost 7466532433, total_retrieval_time 3286.38s
+[2022-11-28 06:35:43.791] [info] queryID 18, result_size 103, rtk_topk 4096, ip_cost 38737282, query_time 32.71s, total_ip_cost 7505269715, total_retrieval_time 3319.09s
+[2022-11-28 06:37:41.961] [info] queryID 19, result_size 1034, rtk_topk 2048, ip_cost 194024679, query_time 118.17s, total_ip_cost 7699294394, total_retrieval_time 3437.26s
+[2022-11-28 06:39:29.487] [info] queryID 20, result_size 763, rtk_topk 2048, ip_cost 175816750, query_time 107.53s, total_ip_cost 7875111144, total_retrieval_time 3544.79s
+[2022-11-28 06:40:13.346] [info] queryID 21, result_size 155, rtk_topk 4096, ip_cost 54060720, query_time 43.86s, total_ip_cost 7929171864, total_retrieval_time 3588.65s
+[2022-11-28 06:40:26.024] [info] queryID 22, result_size 119, rtk_topk 1024, ip_cost 7444584, query_time 12.68s, total_ip_cost 7936616448, total_retrieval_time 3601.32s
+[2022-11-28 06:40:26.024] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 06:40:26.025] [info] finish top-20
+[2022-11-28 06:40:26.025] [info] top20 retrieval:
+	total IP cost 7936616448, total time 3601.325s
+[2022-11-28 06:40:35.024] [info] queryID 0, result_size 149, rtk_topk 128, ip_cost 3898108, query_time 9.00s, total_ip_cost 3898108, total_retrieval_time 9.00s
+[2022-11-28 06:41:12.092] [info] queryID 1, result_size 37, rtk_topk 2048, ip_cost 55724192, query_time 37.07s, total_ip_cost 59622300, total_retrieval_time 46.07s
+[2022-11-28 06:42:36.240] [info] queryID 2, result_size 120, rtk_topk 4096, ip_cost 116247350, query_time 84.15s, total_ip_cost 175869650, total_retrieval_time 130.21s
+[2022-11-28 06:42:47.205] [info] queryID 3, result_size 41, rtk_topk 1024, ip_cost 4907339, query_time 10.96s, total_ip_cost 180776989, total_retrieval_time 141.18s
+[2022-11-28 06:43:00.602] [info] queryID 4, result_size 214, rtk_topk 512, ip_cost 15204514, query_time 13.40s, total_ip_cost 195981503, total_retrieval_time 154.58s
+[2022-11-28 06:43:15.664] [info] queryID 5, result_size 36, rtk_topk 2048, ip_cost 16770259, query_time 15.06s, total_ip_cost 212751762, total_retrieval_time 169.64s
+[2022-11-28 06:43:25.776] [info] queryID 6, result_size 101, rtk_topk 512, ip_cost 5284252, query_time 10.11s, total_ip_cost 218036014, total_retrieval_time 179.75s
+[2022-11-28 06:43:40.769] [info] queryID 7, result_size 102, rtk_topk 1024, ip_cost 16911699, query_time 14.99s, total_ip_cost 234947713, total_retrieval_time 194.74s
+[2022-11-28 06:43:56.491] [info] queryID 8, result_size 572, rtk_topk 512, ip_cost 12277157, query_time 15.72s, total_ip_cost 247224870, total_retrieval_time 210.47s
+[2022-11-28 06:44:18.650] [info] queryID 9, result_size 81, rtk_topk 2048, ip_cost 22392478, query_time 22.16s, total_ip_cost 269617348, total_retrieval_time 232.62s
+[2022-11-28 06:44:30.984] [info] queryID 10, result_size 196, rtk_topk 512, ip_cost 6057951, query_time 12.33s, total_ip_cost 275675299, total_retrieval_time 244.96s
+[2022-11-28 06:46:22.046] [info] queryID 11, result_size 26, rtk_topk 8192, ip_cost 2362971204, query_time 111.06s, total_ip_cost 2638646503, total_retrieval_time 356.02s
+[2022-11-28 06:46:37.766] [info] queryID 12, result_size 77, rtk_topk 512, ip_cost 2757057, query_time 15.72s, total_ip_cost 2641403560, total_retrieval_time 371.74s
+[2022-11-28 06:50:36.924] [info] queryID 13, result_size 91, rtk_topk 4096, ip_cost 364857788, query_time 239.16s, total_ip_cost 3006261348, total_retrieval_time 610.90s
+[2022-11-28 06:53:29.592] [info] queryID 14, result_size 1797, rtk_topk 2048, ip_cost 297055164, query_time 172.67s, total_ip_cost 3303316512, total_retrieval_time 783.57s
+[2022-11-28 06:53:42.801] [info] queryID 15, result_size 46, rtk_topk 1024, ip_cost 1934500, query_time 13.21s, total_ip_cost 3305251012, total_retrieval_time 796.78s
+[2022-11-28 06:53:56.732] [info] queryID 16, result_size 11, rtk_topk 2048, ip_cost 4677012, query_time 13.93s, total_ip_cost 3309928024, total_retrieval_time 810.71s
+[2022-11-28 06:54:21.549] [info] queryID 17, result_size 763, rtk_topk 1024, ip_cost 27635323, query_time 24.82s, total_ip_cost 3337563347, total_retrieval_time 835.52s
+[2022-11-28 06:54:54.950] [info] queryID 18, result_size 103, rtk_topk 4096, ip_cost 38737282, query_time 33.40s, total_ip_cost 3376300629, total_retrieval_time 868.92s
+[2022-11-28 06:55:06.907] [info] queryID 19, result_size 17, rtk_topk 1024, ip_cost 9870787, query_time 11.96s, total_ip_cost 3386171416, total_retrieval_time 880.88s
+[2022-11-28 06:56:57.123] [info] queryID 20, result_size 763, rtk_topk 2048, ip_cost 175816750, query_time 110.22s, total_ip_cost 3561988166, total_retrieval_time 991.10s
+[2022-11-28 06:57:09.054] [info] queryID 21, result_size 19, rtk_topk 2048, ip_cost 3400376, query_time 11.93s, total_ip_cost 3565388542, total_retrieval_time 1003.03s
+[2022-11-28 06:57:22.297] [info] queryID 22, result_size 119, rtk_topk 1024, ip_cost 7444584, query_time 13.24s, total_ip_cost 3572833126, total_retrieval_time 1016.27s
+[2022-11-28 06:57:33.712] [info] queryID 23, result_size 11, rtk_topk 1024, ip_cost 1262938, query_time 11.42s, total_ip_cost 3574096064, total_retrieval_time 1027.69s
+[2022-11-28 06:57:46.582] [info] queryID 24, result_size 57, rtk_topk 1024, ip_cost 4146058, query_time 12.87s, total_ip_cost 3578242122, total_retrieval_time 1040.56s
+[2022-11-28 06:57:55.255] [info] queryID 25, result_size 10, rtk_topk 1024, ip_cost 1472376, query_time 8.67s, total_ip_cost 3579714498, total_retrieval_time 1049.23s
+[2022-11-28 07:00:33.193] [info] queryID 26, result_size 1231, rtk_topk 8192, ip_cost 2362971204, query_time 157.94s, total_ip_cost 5942685702, total_retrieval_time 1207.17s
+[2022-11-28 07:07:14.735] [info] queryID 27, result_size 598, rtk_topk 4096, ip_cost 620130345, query_time 401.54s, total_ip_cost 6562816047, total_retrieval_time 1608.71s
+[2022-11-28 07:07:34.914] [info] queryID 28, result_size 411, rtk_topk 1024, ip_cost 15132331, query_time 20.18s, total_ip_cost 6577948378, total_retrieval_time 1628.89s
+[2022-11-28 07:11:16.502] [info] queryID 29, result_size 68, rtk_topk 4096, ip_cost 326454421, query_time 221.59s, total_ip_cost 6904402799, total_retrieval_time 1850.47s
+[2022-11-28 07:11:30.902] [info] queryID 30, result_size 789, rtk_topk 256, ip_cost 5445097, query_time 14.40s, total_ip_cost 6909847896, total_retrieval_time 1864.87s
+[2022-11-28 07:11:56.464] [info] queryID 31, result_size 569, rtk_topk 1024, ip_cost 30320537, query_time 25.56s, total_ip_cost 6940168433, total_retrieval_time 1890.44s
+[2022-11-28 07:12:23.375] [info] queryID 32, result_size 48, rtk_topk 2048, ip_cost 35697733, query_time 26.91s, total_ip_cost 6975866166, total_retrieval_time 1917.35s
+[2022-11-28 07:32:11.547] [info] queryID 33, result_size 24681, rtk_topk 4096, ip_cost 1927157484, query_time 1188.17s, total_ip_cost 8903023650, total_retrieval_time 3105.52s
+[2022-11-28 07:32:28.306] [info] queryID 34, result_size 243, rtk_topk 512, ip_cost 5153701, query_time 16.76s, total_ip_cost 8908177351, total_retrieval_time 3122.28s
+[2022-11-28 07:32:47.850] [info] queryID 35, result_size 258, rtk_topk 1024, ip_cost 19079754, query_time 19.54s, total_ip_cost 8927257105, total_retrieval_time 3141.82s
+[2022-11-28 07:36:35.061] [info] queryID 36, result_size 4185, rtk_topk 8192, ip_cost 2362971204, query_time 227.21s, total_ip_cost 11290228309, total_retrieval_time 3369.03s
+[2022-11-28 07:38:47.096] [info] queryID 37, result_size 128, rtk_topk 8192, ip_cost 2362971204, query_time 132.03s, total_ip_cost 13653199513, total_retrieval_time 3501.07s
+[2022-11-28 07:43:20.625] [info] queryID 38, result_size 115, rtk_topk 16384, ip_cost 4683174980, query_time 273.53s, total_ip_cost 18336374493, total_retrieval_time 3774.60s
+[2022-11-28 07:43:20.625] [info] total retrieval time larger than stop time, retrieval exit
+[2022-11-28 07:43:20.626] [info] finish top-10
+[2022-11-28 07:43:20.626] [info] top10 retrieval:
+	total IP cost 18336374493, total time 3774.596s
+[2022-11-28 07:43:20.626] [info] build index time: total 1486.049827962s
+top200 retrieval:
+	total IP cost 12294246185, total time 3616.040s
+top150 retrieval:
+	total IP cost 14856932734, total time 3744.601s
+top100 retrieval:
+	total IP cost 12082261440, total time 3614.932s
+top50 retrieval:
+	total IP cost 11008243420, total time 4290.091s
+top20 retrieval:
+	total IP cost 7936616448, total time 3601.325s
+top10 retrieval:
+	total IP cost 18336374493, total time 3774.596s

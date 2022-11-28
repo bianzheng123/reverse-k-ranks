@@ -17,6 +17,7 @@
 #include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
+#include "QueryRankSampleSearchUniformRank.hpp"
 #include "RankSample.hpp"
 #include "Simpfer.hpp"
 
@@ -193,6 +194,17 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
                      n_sample, n_sample_query, sample_topk);
         index = QueryRankSampleSearchKthRank::BuildIndex(data_item, user, index_path, dataset_name,
+                                                         n_sample, n_sample_query, sample_topk, index_dir);
+        sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
+                n_sample, n_sample_query, sample_topk);
+
+    } else if (method_name == "QueryRankSampleSearchUniformRank") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleSearchUniformRank::BuildIndex(data_item, user, index_path, dataset_name,
                                                          n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
                 n_sample, n_sample_query, sample_topk);

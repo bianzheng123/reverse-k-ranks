@@ -10,11 +10,11 @@ def ip_gnd(base, query, k):
     return gnd_idx, gnd_distance
 
 
-# def compute_rank(user, item, query):
-#     score_table = np.dot(user, item.T)  # 行是user * item_l
-#     queryIP_l = np.dot(query, user.T)
-#     query_rank_l = [(queryIP_l[0][userID] <= np.array(score_table[userID])).sum() + 1 for userID in range(len(user_l))]
-#     return query_rank_l, queryIP_l[0], score_table
+def compute_rank(user, item, query):
+    score_table = np.dot(user, item.T)  # 行是user * item_l
+    queryIP_l = np.dot(query, user.T)
+    query_rank_l = [(queryIP_l[0][userID] <= np.array(score_table[userID])).sum() + 1 for userID in range(len(user_l))]
+    return query_rank_l, queryIP_l[0], score_table
 
 
 def compute_rank_IP(score_table, queryIP_l):
@@ -23,35 +23,12 @@ def compute_rank_IP(score_table, queryIP_l):
     return query_rank_l, queryIP_l, score_table
 
 
-def rank_appear(query_rank_l, k):
-    k_rank = np.sort(query_rank_l)[k - 1]
+def rank_appear_count(query_rank_l, rank_min, rank_max):
     count = 0
     for rank in query_rank_l:
-        if k_rank == rank:
+        if rank_min <= rank <= rank_max:
             count += 1
-    n_appear = len(np.unique(query_rank_l))
-    return n_appear > 3 and count == 1
-
-
-def rank_sample(query_rank_l, n_sample, topt, n_refine, k):
-    # 经过rank sample之后的refinement ratio要尽可能地高
-    sample_every = np.ceil(topt / n_sample)
-    query_rb_l = np.zeros(dtype=np.int32, shape=len(query_rank_l))
-    for i in range(len(query_rank_l)):
-        if query_rank_l[i] == 1:
-            query_rb_l[i] = 0
-        elif query_rank_l[i] > topt:
-            query_rb_l[i] = n_sample + 1
-        else:
-            query_rb_l[i] = (query_rank_l[i] - 2) // (sample_every - 1) + 1
-    sort_query_rb_l = np.sort(query_rb_l)
-    n_actual_refine = (sort_query_rb_l[k - 1] >= sort_query_rb_l).sum()
-    return n_actual_refine == n_refine
-
-
-def larger_topt(query_rank_l, topt):
-    n_large_topt = np.array([rank > topt for rank in query_rank_l]).sum()
-    return n_large_topt == 1
+    return count
 
 
 def score_sample(score_table, queryIP_l, query_rank_l, n_sample, n_refine, k):
@@ -114,27 +91,26 @@ def score_sample(score_table, queryIP_l, query_rank_l, n_sample, n_refine, k):
 if __name__ == '__main__':
     # np.random.seed(0)
     d = 2
-    n_item = 11  # 规定最后一个ID是query
+    n_item = 7  # 规定最后一个ID是query
     n_user = 5
     k = 2
-    topt = 8
-    n_sample = 3
-    n_rank_sample_refine = 2
-    n_score_sample_refine = 4
+    topt = n_item
+    n_sample = 2
+    n_rank_sample_refine = 3
     for i in range(10000000):
-        # query = (np.random.rand(d).reshape(-1, d) * 10).astype(np.int32) / 10 * 4
-        # item_l = (np.random.rand(n_item * d).reshape(-1, d) * 10).astype(np.int32) / 10 * 4
-        # user_l = (np.random.rand(n_user * d).reshape(-1, d) * 10).astype(np.int32)
+        query = (np.random.rand(d).reshape(-1, d) * 10).astype(np.int32) / 10 * 3
+        item_l = (np.random.rand(n_item * d).reshape(-1, d) * 10).astype(np.int32) / 10 * 3
+        user_l = (np.random.rand(n_user * d).reshape(-1, d) * 10).astype(np.int32) / 10 * 3
         # print("query\n", query)
         # print("user_l\n", user_l)
         # print("item_l\n", item_l)
-        # query_rank_l, queryIP_l, score_table = compute_rank(user_l, item_l, query)
+        query_rank_l, queryIP_l, score_table = compute_rank(user_l, item_l, query)
 
-        score_table = ((np.random.rand(n_user * n_item).reshape(n_user, n_item) * 50) * 10).astype(np.int32).astype(
-            np.float32) / 10
-        queryIP_l = ((np.random.rand(n_user) * 50) * 10).astype(np.int32).astype(np.float32) / 10
-
-        query_rank_l, queryIP_l, score_table = compute_rank_IP(score_table, queryIP_l)
+        # score_table = ((np.random.rand(n_user * n_item).reshape(n_user, n_item) * 50) * 10).astype(np.int32).astype(
+        #     np.float32) / 10
+        # queryIP_l = ((np.random.rand(n_user) * 50) * 10).astype(np.int32).astype(np.float32) / 10
+        #
+        # query_rank_l, queryIP_l, score_table = compute_rank_IP(score_table, queryIP_l)
         continue_flag = False
         for i, score_list in enumerate(score_table, 0):
             if len(np.unique(score_list)) != len(score_list) and queryIP_l[i] in score_list:
@@ -142,13 +118,14 @@ if __name__ == '__main__':
                 break
         if continue_flag:
             continue
-        if rank_appear(query_rank_l, k) and \
-                rank_sample(query_rank_l, n_sample, topt, n_rank_sample_refine, k) and \
-                larger_topt(query_rank_l, topt) and \
-                score_sample(score_table, queryIP_l, query_rank_l, n_sample, n_score_sample_refine, k):
-            # print("query\n", query)
-            # print("item_l\n", item_l)
-            # print("user_l\n", user_l)
+        print("query_rank_l", query_rank_l)
+        if rank_appear_count(query_rank_l, 1, 1) == 1 and \
+                rank_appear_count(query_rank_l, 2, 5) == 3 and \
+                len(np.unique(query_rank_l)) == len(query_rank_l) and \
+                rank_appear_count(query_rank_l, 6, 7) == 1:
+            print("query\n", query)
+            print("item_l\n", item_l)
+            print("user_l\n", user_l)
             print("score_table\n", score_table)
             print("queryIP_l\n", queryIP_l)
             print("query_rank_l\n", query_rank_l)

@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 
     std::vector<int> sample_rank_l(n_sample);
     size_t train_io_cost;
-    if (sample_name == "OptimalPart" || sample_name == "OptimalAll") {
+    if (sample_name == "OptimalPart" || sample_name == "OptimalAll" || sample_name == "OptimalUniform") {
         FindOptimalSample(n_user, n_data_item, n_sample,
                           sample_rank_l,
                           n_sample_query, sample_topk,

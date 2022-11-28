@@ -44,23 +44,40 @@ def q_norm():
     norm_q = np.linalg.norm(q)
     print(norm_q)
 
+def compute_rank(user, item, query):
+    score_table = np.dot(user, item.T)  # 行是user * item_l
+    queryIP_l = np.dot(query, user.T)
+    query_rank_l = [(queryIP_l[0][userID] <= np.array(score_table[userID])).sum() + 1 for userID in range(len(user_l))]
+    return query_rank_l, queryIP_l[0], score_table
 
 if __name__ == '__main__':
     item_l = np.array(
-        [[0.8, 1.6],
-         [1.7, 2.4],
-         [3.1, 0.1],
-         [1.9, 3.3],
-         [3.1, 1.1]], dtype=np.float32
+        [[0.6, 0.9],
+         [0.2, 2.7],
+         [2.1, 1.8],
+         [1.8, 2.7],
+         [0.3, 0.6],
+         [2.4, 0.9],
+         [0.9, 0.]], dtype=np.float32
     )
+    query_l = np.array([[2.7, 0.6]], dtype=np.float32)
 
     user_l = np.array(
-        [[0.1, 2.2],
-         [3.0, 2.9],
-         [0.7, 0.2],
-         [1.7, 2.0]],
+        [[1.5, 0.9],
+         [2.7, 1.2],
+         [0.3, 2.7],
+         [1.2, 0.],
+         [0.9, 1.2]],
         dtype=np.float32)
-    gnd_id, gnd_dist = gen_example.ip_gnd(item_l, user_l, len(item_l))
-    gnd_id = gnd_id + 1
-    print(gnd_id)
-    print(gnd_dist)
+
+    query_rank_l, queryIP_l, score_table = compute_rank(user_l, item_l, query_l)
+    print(query_rank_l)
+    print(queryIP_l)
+    print(score_table)
+    sort_list = np.array([np.sort(score_list) for score_list in score_table])
+    print("sort_score_table\n", sort_list)
+
+    # gnd_id, gnd_dist = gen_example.ip_gnd(item_l, user_l, len(item_l))
+    # gnd_id = gnd_id + 1
+    # print(gnd_id)
+    # print(gnd_dist)
