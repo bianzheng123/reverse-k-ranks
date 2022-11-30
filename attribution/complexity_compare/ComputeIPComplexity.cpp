@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
 
     const int n_try_dim = 15;
 
-    const size_t n_user = 10000;
+    const size_t n_user = 1000000;
     const size_t n_query = 1000;
 
     std::vector<std::pair<size_t, double>> time_use_l(n_try_dim);
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
         unique_ptr<double[]> user_vecs_l = GenRandom(n_user, vec_dim);
         unique_ptr<double[]> query_vecs_l = GenRandom(n_query, vec_dim);
 
-        spdlog::info("n_user {}, n_query {}, vec_dim {}", n_user, n_query, vec_dim);
+        spdlog::info("ComputeIP, n_user {}, n_query {}, vec_dim {}", n_user, n_query, vec_dim);
 
         int64_t sum = 0;
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
         time_use_l[try_dim - 1] = std::make_pair(try_dim, ip_compute_time);
     }
 
-    WritePerformance(time_use_l, "ComputeIP");
+    WritePerformance(time_use_l, "ComputeIP", n_user, n_query);
 
     return 0;
 }

@@ -36,10 +36,11 @@ namespace ReverseMIPS {
     }
 
     void WritePerformance(const std::vector<std::pair<size_t, double>> &time_use_l,
-                          const char *method_name) {
+                          const char *method_name, const size_t& n_user, const size_t& n_query) {
 
         char resPath[256];
-        std::sprintf(resPath, "../../result/attribution/complexity-compare-%s.txt", method_name);
+        std::sprintf(resPath, "../../result/attribution/complexity-compare-%s-n_user_%ld-n_query_%ld.txt",
+                     method_name, n_user, n_query);
         std::ofstream file(resPath);
         if (!file) {
             std::printf("error in write result\n");

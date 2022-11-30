@@ -14,7 +14,7 @@ using namespace ReverseMIPS;
 
 int main(int argc, char **argv) {
 
-    const size_t n_user = 10000;
+    const size_t n_user = 1000000;
     const size_t n_query = 1000;
     const int n_try_dim = 15;
 
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
         SortArray(data_ip_l.get(), n_user, tau);
         unique_ptr<double[]> query_ip_l = GenRandom(n_query, 1);
 
-        spdlog::info("n_user {}, n_query {}, tau {}", n_user, n_query, tau);
+        spdlog::info("BinarySearch, n_user {}, n_query {}, tau {}", n_user, n_query, tau);
 
         int64_t sum = 0;
 
@@ -47,6 +47,6 @@ int main(int argc, char **argv) {
 
     }
 
-    WritePerformance(time_use_l, "BinarySearch");
+    WritePerformance(time_use_l, "BinarySearch", n_user, n_query);
     return 0;
 }

@@ -113,67 +113,70 @@ def run():
     # for ds in dataset_l:
     #     os.system('cd build/attribution && ./ibc --dataset_name {} --dataset_dir {}'.format(ds, dataset_dir))
 
+    n_sample_item = 5000
+    sample_topk = 600
+    dataset_name = 'movielens-27m'
+    method_name = 'QueryRankSampleSearchKthRank'
+    n_sample = 473
+    os.system(
+        f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --test_topk {'false'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+    )
+
+    os.system(
+        f"cd build/attribution && ./bsc"
+    )
+    os.system(
+        f"cd build/attribution && ./cc"
+    )
+
     dataset_l = ['movielens-27m', 'netflix']
-    for ds in dataset_l:
-        # os.system('cd build && ./bst --dataset_name {}'.format(ds))
-
-        # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'GridIndex'))
-        # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'LinearModel'))
-
-        n_sample_item = 5000
-        sample_topk = 600
-        memory_capacity = 1
-        n_data_item = dataset_m[ds][0]
-        n_user = dataset_m[ds][2]
-        # os.system(
-        #     "cd build && ./qdi --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
-        #         index_dir, dataset_dir, ds, n_sample_item, sample_topk
-        #     ))
-
-        # n_sample_intlr = compute_n_sample_by_memory_index_intlr(ds, memory_capacity)
-        # run_sample_method('QueryRankSampleMinMaxIntLR',
-        #                   ds, n_sample_intlr,
-        #                   n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample_intlr,
-        #                   n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
-        dataset_name = 'movielens-27m'
-        method_name = 'QueryRankSampleSearchKthRank'
-        n_sample = 842
-        os.system(
-            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --test_topk {'false'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-        )
-
-        os.system(
-            f"cd build/attribution && ./bsc"
-        )
-        os.system(
-            f"cd build/attribution && ./cc"
-        )
-
-        # for n_bit in [2, 4, 8, 16, 32, 64]:
-        #     parameter_name = f"--n_bit {n_bit}"
-        #     n_sample_score_distribution = compute_n_sample_by_memory_index_score_distribution(ds, memory_capacity,
-        #                                                                                       n_bit)
-        #     run_sample_method('QueryRankSampleScoreDistribution',
-        #                       ds, n_sample_score_distribution,
-        #                       n_data_item, n_user,
-        #                       n_sample_item, sample_topk, parameter_name)
-
-        # n_sample_sample_only = compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
-        # run_sample_method('QueryRankSampleSearchAllRank',
-        #                   ds, n_sample_sample_only,
-        #                   n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleSearchKthRank',
-        #                   ds, n_sample_sample_only,
-        #                   n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
-        # run_sample_method('RankSample',
-        #                   ds, n_sample_sample_only,
-        #                   n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
+    # for ds in dataset_l:
+    #     # os.system('cd build && ./bst --dataset_name {}'.format(ds))
+    #
+    #     # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'GridIndex'))
+    #     # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'LinearModel'))
+    #
+    #     n_sample_item = 5000
+    #     sample_topk = 600
+    #     memory_capacity = 1
+    #     n_data_item = dataset_m[ds][0]
+    #     n_user = dataset_m[ds][2]
+    #     # os.system(
+    #     #     "cd build && ./qdi --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
+    #     #         index_dir, dataset_dir, ds, n_sample_item, sample_topk
+    #     #     ))
+    #
+    #     # n_sample_intlr = compute_n_sample_by_memory_index_intlr(ds, memory_capacity)
+    #     # run_sample_method('QueryRankSampleMinMaxIntLR',
+    #     #                   ds, n_sample_intlr,
+    #     #                   n_data_item, n_user,
+    #     #                   n_sample_item, sample_topk)
+    #     # run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample_intlr,
+    #     #                   n_data_item, n_user,
+    #     #                   n_sample_item, sample_topk)
+    #
+    #     # for n_bit in [2, 4, 8, 16, 32, 64]:
+    #     #     parameter_name = f"--n_bit {n_bit}"
+    #     #     n_sample_score_distribution = compute_n_sample_by_memory_index_score_distribution(ds, memory_capacity,
+    #     #                                                                                       n_bit)
+    #     #     run_sample_method('QueryRankSampleScoreDistribution',
+    #     #                       ds, n_sample_score_distribution,
+    #     #                       n_data_item, n_user,
+    #     #                       n_sample_item, sample_topk, parameter_name)
+    #
+    #     # n_sample_sample_only = compute_n_sample_by_memory_index_sample_only(ds, memory_capacity)
+    #     # run_sample_method('QueryRankSampleSearchAllRank',
+    #     #                   ds, n_sample_sample_only,
+    #     #                   n_data_item, n_user,
+    #     #                   n_sample_item, sample_topk)
+    #     # run_sample_method('QueryRankSampleSearchKthRank',
+    #     #                   ds, n_sample_sample_only,
+    #     #                   n_data_item, n_user,
+    #     #                   n_sample_item, sample_topk)
+    #     # run_sample_method('RankSample',
+    #     #                   ds, n_sample_sample_only,
+    #     #                   n_data_item, n_user,
+    #     #                   n_sample_item, sample_topk)
 
 
 if __name__ == '__main__':
@@ -183,7 +186,7 @@ if __name__ == '__main__':
     # dataset_l = ['movielens-27m', 'netflix', 'yahoomusic', 'yelp']
     # dataset_l = ['netflix-small', 'movielens-27m-small']
 
-    os.system(
-        f"cd build/attribution && ./rmips --dataset_dir {dataset_dir} --dataset_name {'movielens-27m'} --simpfer_k_max {1000}"
-    )
-    # run()
+    # os.system(
+    #     f"cd build/attribution && ./rmips --dataset_dir {dataset_dir} --dataset_name {'movielens-27m'} --simpfer_k_max {1000}"
+    # )
+    run()
