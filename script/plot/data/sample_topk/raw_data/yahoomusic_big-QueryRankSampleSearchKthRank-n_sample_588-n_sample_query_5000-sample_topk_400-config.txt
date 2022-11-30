@@ -1,0 +1,15 @@
+number of query item 1000
+build index time 5.233s
+Estimated memory 7.987GB, Peak memory 10.250GB, Current memory 10.250GB
+top10 retrieval time: total 545.990s
+	inner product 266.877s, rank bound 253.488s, read disk 24.324s, compute rank 0.002s
+	total ip cost 1823179000, total io cost 186176, sample refine user 10367117, total refine user 2194, rank prune ratio 1.0000
+top20 retrieval time: total 560.157s
+	inner product 267.537s, rank bound 254.716s, read disk 36.579s, compute rank 0.003s
+	total ip cost 1823179000, total io cost 303168, sample refine user 16044954, total refine user 3437, rank prune ratio 1.0000
+top50 retrieval time: total 590.411s
+	inner product 268.930s, rank bound 254.590s, read disk 65.529s, compute rank 0.008s
+	total ip cost 1823179000, total io cost 742080, sample refine user 6775618, total refine user 6870, rank prune ratio 1.0000
+top100 retrieval time: total 629.091s
+	inner product 272.190s, rank bound 256.105s, read disk 99.399s, compute rank 0.017s
+	total ip cost 1823179000, total io cost 1227840, sample refine user 3601698, total refine user 11132, rank prune ratio 1.0000

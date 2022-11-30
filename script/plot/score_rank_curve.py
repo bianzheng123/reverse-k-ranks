@@ -93,6 +93,7 @@ def get_sample_lr(file_name, userid_l):
 def plot_figure(*, method_name: str,
                 score_l_l: list,
                 rank_l_l: list,
+                ylim_l: list,
                 is_test: bool):
     # fig = plt.figure(figsize=(25, 4))
     fig = plt.figure(figsize=(6, 4))
@@ -100,11 +101,11 @@ def plot_figure(*, method_name: str,
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
 
-    ax.scatter(x=score_l_l[0], y=rank_l_l[0], s=2, label='sampled score')
-    ax.plot(score_l_l[1], rank_l_l[1], color='#b2b2b2', label='fitting curve')
-    ax.plot(score_l_l[2], rank_l_l[2], color='#b2b2b2', label='fitting curve error')
+    ax.plot(score_l_l[0], rank_l_l[0], color='#000000', linestyle='solid', label='Sampled Score')
+    # ax.scatter(x=score_l_l[0], y=rank_l_l[0], s=2, label='sampled score')
+    ax.plot(score_l_l[1], rank_l_l[1], color='#000000', linestyle='dashed', label='Fitting Curve')
 
-    ax.legend()
+    ax.legend(frameon=False, loc='best')
 
     # for score_l, rank_l, i in zip(score_l_l, rank_l_l, np.arange(len(score_l_l))):
     #     ax.plot(score_l, rank_l, color='#b2b2b2', marker=marker_l[i], fillstyle='none', markersize=markersize)
@@ -114,9 +115,9 @@ def plot_figure(*, method_name: str,
     # ax.legend(frameon=False, bbox_to_anchor=(0.5, 1), loc="center", ncol=len(dataset_l), borderaxespad=5)
     # ax.set_xticks(np.arange(n_dataset), dataset_l)
     # ax.set_xlim([0, 2.5])
-    ax.set_ylim([0, 600])
+    ax.set_ylim(ylim_l)
 
-    ax.margins(y=0.3)
+    # ax.margins(y=0.3)
     # fig.tight_layout(rect=(0.01, -0.07, 1.02, 1.05))
     if is_test:
         plt.savefig("ScoreRankCurve_{}.jpg".format(method_name), bbox_inches='tight', dpi=600)
@@ -131,39 +132,44 @@ yahoomusic_pre_m = get_sample_lr('DirectLinearRegression-yahoomusic_big-n_sample
                                  [yahoomusic_id])
 
 yahoomusic_qrs_m = get_sample_ip_l(
-    'QueryRankSampleSearchKthRank-yahoomusic_big-n_sample_588-n_sample_query_5000-sample_topk_600',
+    'QueryRankSampleIntLR-yahoomusic_big-n_sample_504-n_sample_query_5000-sample_topk_600',
     [yahoomusic_id])
 # 3
 
 yelp_pre_m = get_sample_lr('MinMaxLinearRegression-yelp-n_sample_405',
                            [yelp_id])
 yelp_qrs_m = get_sample_ip_l(
-    'QueryRankSampleSearchKthRank-yelp-n_sample_490-n_sample_query_5000-sample_topk_600',
+    'QueryRankSampleIntLR-yelp-n_sample_405-n_sample_query_5000-sample_topk_600',
     [yelp_id])
 
 score_l_l = [yahoomusic_qrs_m[yahoomusic_id], yelp_qrs_m[yelp_id]]
-method_l = ['Yahoomusic', 'Yelp']
-is_test = True
+method_l = ['1_Yahoomusic', '2_Yelp']
+is_test = False
 
 score_l = score_l_l[0]
 method_name = method_l[0]
 rank_l = np.arange(len(score_l))
 yahoomusic_pre = yahoomusic_pre_m[yahoomusic_id]
+ylim_l = [0, 520]
 print("first error {}".format(yahoomusic_pre[2]))
 rank_pred_l = [yahoomusic_pre[0][0] * _ + yahoomusic_pre[0][1] for _ in score_l]
-rank_pred_error_l = [yahoomusic_pre[0][0] * _ + yahoomusic_pre[0][1] + yahoomusic_pre[2][0] for _ in score_l]
-plot_figure(method_name=method_name, score_l_l=[score_l, score_l, score_l], rank_l_l=[rank_l, rank_pred_l, rank_pred_error_l], is_test=is_test)
+# rank_pred_error_l = [yahoomusic_pre[0][0] * _ + yahoomusic_pre[0][1] + yahoomusic_pre[2][0] for _ in score_l]
+plot_figure(method_name=method_name, score_l_l=[score_l, score_l], rank_l_l=[rank_l, rank_pred_l],
+            ylim_l=ylim_l, is_test=is_test)
 
 score_l = score_l_l[1]
 method_name = method_l[1]
 rank_l = np.arange(len(score_l))
 yelp_pre = yelp_pre_m[yelp_id]
+ylim_l = [0, 420]
 print("second error {}".format(yelp_pre[2]))
 rank_pred_l = [
     yelp_pre[0][0] * stats.norm.cdf((_ - yelp_pre[1][0]) / yelp_pre[1][1]) + yelp_pre[0][1]
-    for _ in score_l]
-rank_pred_error_l = [
-    yelp_pre[0][0] * stats.norm.cdf((_ - yelp_pre[1][0]) / yelp_pre[1][1]) + yelp_pre[0][1] + yelp_pre[2][0]
     for _ in score_l
 ]
-plot_figure(method_name=method_name, score_l_l=[score_l, score_l, score_l], rank_l_l=[rank_l, rank_pred_l, rank_pred_error_l], is_test=is_test)
+# rank_pred_error_l = [
+#     yelp_pre[0][0] * stats.norm.cdf((_ - yelp_pre[1][0]) / yelp_pre[1][1]) + yelp_pre[0][1] + yelp_pre[2][0]
+#     for _ in score_l
+# ]
+plot_figure(method_name=method_name, score_l_l=[score_l, score_l], rank_l_l=[rank_l, rank_pred_l],
+            ylim_l=ylim_l, is_test=is_test)

@@ -35,6 +35,7 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
             total_retrieval_time_ = 0;
             inner_product_time_ = 0;
             rank_bound_time_ = 0;
+            prune_user_time_ = 0;
             read_disk_time_ = 0;
             compute_rank_time_ = 0;
             rank_prune_ratio_ = 0;
@@ -51,8 +52,8 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
 
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
-        double total_retrieval_time_, inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_;
-        TimeRecord total_retrieval_record_, inner_product_record_, rank_bound_record_;
+        double total_retrieval_time_, inner_product_time_, rank_bound_time_, prune_user_time_, read_disk_time_, compute_rank_time_;
+        TimeRecord total_retrieval_record_, inner_product_record_, rank_bound_record_, prune_user_record_;
         uint64_t total_ip_cost_, total_io_cost_, sample_refine_user_, total_refine_user_;
         double rank_prune_ratio_;
 
@@ -131,19 +132,24 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
                 const int ip_cost = n_user_;
                 this->total_ip_cost_ += ip_cost;
 
+                //prune rank bound
+                rank_bound_record_.reset();
+                rank_ins_.RankBound(queryIP_l_, prune_l_, result_l_, rank_lb_l_, rank_ub_l_);
+                const double tmp_rank_bound_time = rank_bound_record_.get_elapsed_time_second();
+                rank_bound_time_ += tmp_rank_bound_time;
+
                 //rank search
                 int refine_user_size = n_user_;
                 int n_result_user = 0;
                 int n_prune_user = 0;
-                rank_bound_record_.reset();
-                rank_ins_.RankBound(queryIP_l_, prune_l_, result_l_, rank_lb_l_, rank_ub_l_);
+                prune_user_record_.reset();
                 PruneCandidateByBound(rank_lb_l_, rank_ub_l_,
                                       n_user_, topk,
                                       refine_seq_l_, refine_user_size,
                                       n_result_user, n_prune_user,
                                       prune_l_, result_l_);
-                const double tmp_rank_bound_time = rank_bound_record_.get_elapsed_time_second();
-                rank_bound_time_ += tmp_rank_bound_time;
+                const double tmp_prune_user_time = prune_user_record_.get_elapsed_time_second();
+                prune_user_time_ += tmp_prune_user_time;
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
                 assert(0 <= n_result_user && n_result_user <= topk);
                 sample_refine_user_ += refine_user_size;
@@ -205,9 +211,9 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal ip cost %ld, total io cost %ld, sample refine user %ld, total refine user %ld, rank prune ratio %.4f",
+                    "top%d retrieval time: total %.3fs\n\tinner product %.3fs, rank bound %.3fs, prune user %.3fs, read disk %.3fs, compute rank %.3fs\n\ttotal ip cost %ld, total io cost %ld, sample refine user %ld, total refine user %ld, rank prune ratio %.4f",
                     topk, total_retrieval_time_,
-                    inner_product_time_, rank_bound_time_, read_disk_time_, compute_rank_time_,
+                    inner_product_time_, rank_bound_time_, prune_user_time_, read_disk_time_, compute_rank_time_,
                     total_ip_cost_, total_io_cost_, sample_refine_user_, total_refine_user_, rank_prune_ratio_);
             std::string str(buff);
             return str;

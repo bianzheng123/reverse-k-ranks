@@ -21,10 +21,22 @@ def plot_figure(*, fname: str, dataset: str, set_log: bool, ylim: list, legend_l
     for method_i, key in enumerate(method_m.keys()):
         x_name = name_m['csv_x']
         y_name = key + name_m['csv_y']
-        ax.plot(df[x_name], df[y_name] / 1000,
-                color='#000000', linewidth=2.5, linestyle='-',
-                label=method_m[key],
-                marker=marker_l[method_i], fillstyle='none', markersize=markersize)
+        y_l = df[y_name]
+        if name_m['csv_y'] == 'RunningTime' or name_m['csv_y'] == 'IPCost':
+            y_l = y_l / 1000
+        elif name_m['csv_y'] == 'IOCost':
+            y_l = y_l / 1000 * 8 / 1024
+
+        if result_fname_prefix == 'k_io_cost_overall_performance':
+            ax.plot(df[x_name], y_l,
+                    color='#000000', linewidth=2.5, linestyle='-',
+                    label=method_m[key],
+                    marker=marker_l[method_i + 1], fillstyle='none', markersize=markersize)
+        else:
+            ax.plot(df[x_name], y_l,
+                    color='#000000', linewidth=2.5, linestyle='-',
+                    label=method_m[key],
+                    marker=marker_l[method_i], fillstyle='none', markersize=markersize)
 
     ax.set_xlabel(name_m['fig_x'])
     ax.set_xlim([0, 210])
@@ -56,7 +68,7 @@ if __name__ == "__main__":
     # labelpad_l = [0, 0, 0, 0]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
-              'csv_y': 'RunningTime', 'fig_y': 'Running Time (Second)'}
+              'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
     method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_running_time_overall_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
@@ -72,13 +84,13 @@ if __name__ == "__main__":
                './data/k_curve/Amazon.csv']
     dataset_l = ['1_Movielens', '2_Yahoomusic', '3_Yelp', '4_Amazon']
     set_log_l = [True, True, True, True]
-    ylim_l = [[10, 10000], [100, 1000000], [100, 10000000], [100000, 100000000]]
+    ylim_l = [[1e-1, 4e1], [1e-1, 8e3], [1e-1, 2e4], [1e3, 3e5]]
     # ylim_l = [None, None, None, None]
-    legend_loc_l = [('lower right', None), ('best', None), ('best', None), ('lower right', None)]
+    legend_loc_l = [('lower right', None), ('lower right', None), ('lower right', None), ('lower right', None)]
     labelpad_l = [0, 0, 0, 0]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
-              'csv_y': 'IOCost', 'fig_y': 'IO Cost'}
+              'csv_y': 'IOCost', 'fig_y': 'Disk Read (KB)'}
     method_m = {'RS': 'US', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_io_cost_overall_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
@@ -100,7 +112,7 @@ if __name__ == "__main__":
     labelpad_l = [-5, -5, -7, -5]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
-              'csv_y': 'IPCost', 'fig_y': 'IP Cost'}
+              'csv_y': 'IPCost', 'fig_y': 'No.Score Computation'}
     method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_ip_cost_overall_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
@@ -120,7 +132,7 @@ if __name__ == "__main__":
     labelpad_l = [0, 0]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
-              'csv_y': 'RunningTime', 'fig_y': 'Running Time (Second)'}
+              'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
     method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_running_time_component_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
@@ -134,13 +146,13 @@ if __name__ == "__main__":
                './data/k_curve/Yelp.csv']
     dataset_l = ['1_Yahoomusic', '2_Yelp']
     set_log_l = [False, False]
-    ylim_l = [[0, 3000], [0, 4500]]
+    ylim_l = [[0, 22], [0, 35]]
     # ylim_l = [None, None, None, None]
     legend_loc_l = [('lower right', None), ('lower right', None)]
     labelpad_l = [0, 0]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
-              'csv_y': 'IOCost', 'fig_y': 'IO Cost'}
+              'csv_y': 'IOCost', 'fig_y': 'Disk Read (KB)'}
     method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_io_cost_component_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
@@ -160,7 +172,7 @@ if __name__ == "__main__":
     labelpad_l = [0, 0]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
-              'csv_y': 'IPCost', 'fig_y': 'IPCost'}
+              'csv_y': 'IPCost', 'fig_y': 'No.Score Computation'}
     method_m = {'QRS': 'AS', 'QRSDLR': 'ASDLR', 'QRSMinMax': 'ASLR'}
     result_fname_prefix = 'k_ip_cost_component_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,

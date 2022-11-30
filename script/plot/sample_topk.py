@@ -61,15 +61,16 @@ def plot_figure(*, fname: str, dataset: str, set_log: bool, ylim: list, legend_l
 
 if __name__ == "__main__":
     is_test = False
-    fname_l = ['./data/sample_topk/Yelp.csv']
-    dataset_l = ['2_Yelp']
-    set_log_l = [False]
-    ylim_l = [[0.55, 0.75]]
+    fname_l = ['./data/sample_topk/Yahoomusic.csv',
+               './data/sample_topk/Yelp.csv']
+    dataset_l = ['1_Yahoomusic', '2_Yelp']
+    set_log_l = [False, False]
+    ylim_l = [[0.49, 0.64], [0.55, 0.75]]
     # ylim_l = [None, None, None, None]
-    legend_loc_l = [('lower right', None)]
-    labelpad_l = [0]
+    legend_loc_l = [('lower right', None), ('lower right', None)]
+    labelpad_l = [0, 0]
 
-    name_m = {'csv_x': 'train_topk', 'fig_x': r'k',
+    name_m = {'csv_x': 'train_topk', 'fig_x': r'train top-k',
               'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
     method_m = {'100': 'topk@100', '50': 'topk@50', '20': 'topk@20'}
     result_fname_prefix = 'sample_topk'

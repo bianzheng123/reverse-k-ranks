@@ -30,6 +30,7 @@ def plot_figure(*, fname: str, dataset_name: str, ylim: list,
     ax.set_ylabel(name_m['fig_y'])
     ax.set_xscale('log', base=2)
     ax.set_xticks([2, 4, 8, 16, 32])
+    ax.set_yscale('log', base=10)
     ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
     ax.legend(frameon=False, loc='best')
     if test:
@@ -41,14 +42,14 @@ def plot_figure(*, fname: str, dataset_name: str, ylim: list,
 if __name__ == "__main__":
     name_m = {'csv_x': 'MemoryCapacity', 'fig_x': 'Memory capacity (GB)',
               'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
-    method_m = {'QRS': 'AS', 'QRSMinMaxLR': 'ASLR'}
+    method_m = {'RS': 'US', 'QRSMinMaxLR': 'ASLR'}
     is_test = False
 
     fname_l = ['./data/memory_capacity_curve/Yahoomusic.csv',
                './data/memory_capacity_curve/Yelp.csv']
     dataset_name_l = ['1_yahoomusic', '2_yelp']
     # ylim_l = [None, None]
-    ylim_l = [[0, 1.5], [0, 5]]
+    ylim_l = [[1e-1, 1e2], [1e-1, 1e2]]
     for fname, dataset_name, ylim in zip(fname_l, dataset_name_l, ylim_l):
         plot_figure(fname=fname, dataset_name=dataset_name, ylim=ylim,
                     name_m=name_m, method_m=method_m, test=is_test)
