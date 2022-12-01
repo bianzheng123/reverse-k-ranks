@@ -161,8 +161,8 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
                                   refine_seq_l_, refine_user_size, topk - n_result_user,
                                   io_cost, read_disk_time);
                 total_io_cost_ += io_cost;
-                total_refine_user_ += disk_ins_.n_refine_user_;
-                rank_prune_ratio_ += 1.0 * (n_user_ - disk_ins_.n_refine_user_) / n_user_;
+                total_refine_user_ += disk_ins_.n_read_disk_user_;
+                rank_prune_ratio_ += 1.0 * (n_user_ - disk_ins_.n_read_disk_user_) / n_user_;
 
                 int n_cand = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
@@ -184,7 +184,7 @@ namespace ReverseMIPS::QueryRankSampleSearchKthRank {
                 const double &memory_index_time = tmp_rank_bound_time + tmp_inner_product_time;
                 query_performance_l[queryID] = SingleQueryPerformance(queryID,
                                                                       n_prune_user, n_result_user,
-                                                                      disk_ins_.n_refine_user_,
+                                                                      disk_ins_.n_read_disk_user_,
                                                                       ip_cost, io_cost,
                                                                       total_time,
                                                                       memory_index_time, read_disk_time);

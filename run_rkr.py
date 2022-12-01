@@ -147,8 +147,8 @@ def run():
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
         # 'QueryRankSampleSearchBruteForce',
-        # 'QueryRankSampleSearchKthRank',
-        'QueryRankSampleSearchUniformRank',
+        'QueryRankSampleSearchKthRank',
+        # 'QueryRankSampleSearchUniformRank',
         # 'RankSample',
     ]
 
@@ -181,21 +181,21 @@ def run():
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
-        run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-                          sample_topk)
-        run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-                          sample_topk)
-        run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-                          sample_topk)
-        run_sample_method('QueryRankSampleMinMaxIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-                          sample_topk)
-        run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,
-                          sample_topk)
+        # run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+        #                   sample_topk)
+        # run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+        #                   sample_topk)
+        # run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+        #                   sample_topk)
+        # run_sample_method('QueryRankSampleMinMaxIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+        #                   sample_topk)
+        # run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,
+        #                   sample_topk)
         # run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleSearchBruteForce', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)
         run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        run_sample_method('QueryRankSampleSearchUniformRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        # run_sample_method('QueryRankSampleSearchUniformRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
     # send_email.send('test complete')
@@ -208,18 +208,18 @@ def run():
 if __name__ == '__main__':
     index_dir = "/home/bianzheng/reverse-k-ranks/index"
     dataset_dir = "/home/bianzheng/Dataset/ReverseMIPS"
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-normal-tiny', 'fake-uniform-tiny']
     # dataset_l = ['fake-uniform-tiny']
-    dataset_l = ['fake-normal']
+    # dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
-    os.system(
-        f"cd build/attribution && ./bsc"
-    )
-    os.system(
-        f"cd build/attribution && ./cc"
-    )
+    # os.system(
+    #     f"cd build/attribution && ./bsc"
+    # )
+    # os.system(
+    #     f"cd build/attribution && ./cc"
+    # )
 
-    # run()
+    run()

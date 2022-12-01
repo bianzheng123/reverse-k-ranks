@@ -139,6 +139,7 @@ namespace ReverseMIPS {
         DiskData disk_data_;
 
         int n_refine_user_;
+        int n_read_disk_user_;
         std::vector<UserRankElement> user_topk_cache_l_;
 
 
@@ -164,6 +165,7 @@ namespace ReverseMIPS {
                      size_t &io_cost, double &read_disk_time) {
 
             n_refine_user_ = 0;
+            n_read_disk_user_ = 0;
             io_cost = 0;
             read_disk_time = 0;
 
@@ -183,9 +185,14 @@ namespace ReverseMIPS {
                 if (heap.Front() != -1 && heap.Front() < rank_ub_l[userID]) {
                     continue;
                 }
-                const int rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
-                                               io_cost, read_disk_time);
-
+                int rank;
+                if (rank_lb_l[userID] == rank_ub_l[userID]) {
+                    rank = rank_ub_l[userID];
+                } else {
+                    rank = GetSingleRank(queryIP_l[userID], rank_lb_l[userID], rank_ub_l[userID], userID,
+                                         io_cost, read_disk_time);
+                    n_read_disk_user_++;
+                }
                 user_topk_cache_l_[n_refine_user_] = UserRankElement(userID, rank, queryIP_l[userID]);
                 n_refine_user_++;
                 heap.Update(rank);
@@ -247,10 +254,7 @@ namespace ReverseMIPS {
 
         int GetSingleRank(const double &queryIP, const int &rank_lb, const int &rank_ub, const int &userID,
                           size_t &io_cost, double &read_disk_time) {
-            if (rank_lb == rank_ub) {
-                int rank = rank_lb;
-                return rank;
-            }
+            assert(rank_lb > rank_ub);
             int end_idx = rank_lb;
             int start_idx = rank_ub;
             assert(0 <= start_idx && start_idx <= end_idx && end_idx <= n_data_item_);

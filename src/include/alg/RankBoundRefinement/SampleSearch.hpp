@@ -133,9 +133,7 @@ namespace ReverseMIPS {
                 if (prune_l[userID] || result_l[userID]) {
                     continue;
                 }
-                int lower_rank = rank_lb_l[userID];
-                int upper_rank = rank_ub_l[userID];
-                assert(upper_rank <= lower_rank);
+                int lower_rank, upper_rank;
                 double queryIP = queryIP_l[userID];
 
                 double IP_lb, IP_ub;
@@ -166,9 +164,7 @@ namespace ReverseMIPS {
                 if (prune_l[userID] || result_l[userID]) {
                     continue;
                 }
-                int lower_rank = rank_lb_l[userID];
-                int upper_rank = rank_ub_l[userID];
-                assert(upper_rank <= lower_rank);
+                int lower_rank, upper_rank;
                 double queryIP = queryIP_l[userID];
 
                 double IP_lb, IP_ub;

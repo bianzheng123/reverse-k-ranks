@@ -15,7 +15,7 @@ matplotlib.rcParams.update({'font.size': 20})
 def plot_figure(*, topk_l: list, non0_l: list,
                 name_m: dict, result_fname: str, test: bool):
     # fig = plt.figure(figsize=(25, 4))
-    fig = plt.figure(figsize=(1 * 4 + 2, 4))
+    fig = plt.figure(figsize=(6, 4))
 
     ax = fig.add_subplot(111)
     ax.plot(topk_l, non0_l,

@@ -9,7 +9,7 @@ color_l = ['#3D0DFF', '#6BFF00', '#00E8E2', '#EB0225', '#FF9E03']
 marker_l = ['x', "v", "o", "D", "s"]
 markersize = 5
 
-matplotlib.rcParams.update({'font.size': 15})
+matplotlib.rcParams.update({'font.size': 25})
 
 
 def get_sample_ip_l(file_name, userid_l):
@@ -94,6 +94,7 @@ def plot_figure(*, method_name: str,
                 score_l_l: list,
                 rank_l_l: list,
                 ylim_l: list,
+                legend_loc: list,
                 is_test: bool):
     # fig = plt.figure(figsize=(25, 4))
     fig = plt.figure(figsize=(6, 4))
@@ -101,11 +102,11 @@ def plot_figure(*, method_name: str,
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
 
-    ax.plot(score_l_l[0], rank_l_l[0], color='#000000', linestyle='solid', label='Sampled Score')
+    ax.plot(score_l_l[0], rank_l_l[0], color='#000000', linestyle='solid', linewidth=3, label='Score')
     # ax.scatter(x=score_l_l[0], y=rank_l_l[0], s=2, label='sampled score')
-    ax.plot(score_l_l[1], rank_l_l[1], color='#000000', linestyle='dashed', label='Fitting Curve')
+    ax.plot(score_l_l[1], rank_l_l[1], color='#000000', linestyle='dashed', linewidth=3, label='Fitting')
 
-    ax.legend(frameon=False, loc='best')
+    ax.legend(frameon=False, loc=legend_loc[0], bbox_to_anchor=legend_loc[1])
 
     # for score_l, rank_l, i in zip(score_l_l, rank_l_l, np.arange(len(score_l_l))):
     #     ax.plot(score_l, rank_l, color='#b2b2b2', marker=marker_l[i], fillstyle='none', markersize=markersize)
@@ -151,11 +152,12 @@ method_name = method_l[0]
 rank_l = np.arange(len(score_l))
 yahoomusic_pre = yahoomusic_pre_m[yahoomusic_id]
 ylim_l = [0, 520]
+legend_loc = ['upper right', (1.05, 1.05)]
 print("first error {}".format(yahoomusic_pre[2]))
 rank_pred_l = [yahoomusic_pre[0][0] * _ + yahoomusic_pre[0][1] for _ in score_l]
 # rank_pred_error_l = [yahoomusic_pre[0][0] * _ + yahoomusic_pre[0][1] + yahoomusic_pre[2][0] for _ in score_l]
 plot_figure(method_name=method_name, score_l_l=[score_l, score_l], rank_l_l=[rank_l, rank_pred_l],
-            ylim_l=ylim_l, is_test=is_test)
+            ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
 
 score_l = score_l_l[1]
 method_name = method_l[1]
@@ -171,5 +173,6 @@ rank_pred_l = [
 #     yelp_pre[0][0] * stats.norm.cdf((_ - yelp_pre[1][0]) / yelp_pre[1][1]) + yelp_pre[0][1] + yelp_pre[2][0]
 #     for _ in score_l
 # ]
+legend_loc = ['upper right', (1.05, 1.05)]
 plot_figure(method_name=method_name, score_l_l=[score_l, score_l], rank_l_l=[rank_l, rank_pred_l],
-            ylim_l=ylim_l, is_test=is_test)
+            ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
