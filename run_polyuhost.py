@@ -22,7 +22,9 @@ dataset_m = {'movielens-27m': [52889, 1000, 283228],
              'yahoomusic': [97213, 1000, 1948882],
              'yelp': [159585, 1000, 2189457],
              'goodreads': [2359650, 1000, 876145],
-             'amazon-home-kitchen': [409243, 1000, 2511610]}
+             'amazon-home-kitchen': [409243, 1000, 2511610],
+             'yahoomusic_big_more_query': [135736, 1000, 1823179],
+             'yelp_more_query': [159585, 1000, 2189457], }
 element_size = 8
 dimension = 150
 

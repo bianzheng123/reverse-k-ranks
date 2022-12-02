@@ -88,20 +88,20 @@ namespace ReverseMIPS {
                                               [](const double &arrIP, double queryIP) {
                                                   return arrIP > queryIP;
                                               });
-            unsigned int bucket_idx = (lb_ptr - iter_begin);
-            unsigned int tmp_rank_lb = bucket_idx == n_sample_ ? n_data_item_ : known_rank_idx_l_[bucket_idx];
-            unsigned int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
+            int bucket_idx = (lb_ptr - iter_begin);
+            int tmp_rank_lb = bucket_idx == n_sample_ ? n_data_item_ : known_rank_idx_l_[bucket_idx];
+            int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
 
 
-            if (lb_ptr == iter_end) {
-                rank_lb = (int) n_data_item_;
-                rank_ub = (int) tmp_rank_ub;
-            } else if (lb_ptr == iter_begin) {
-                rank_lb = (int) tmp_rank_lb;
-                rank_ub = (int) 0;
+            if (bucket_idx == n_sample_) {
+                rank_lb = n_data_item_;
+                rank_ub = tmp_rank_ub;
+            } else if (bucket_idx == 0) {
+                rank_lb = tmp_rank_lb;
+                rank_ub = 0;
             } else {
-                rank_lb = (int) tmp_rank_lb;
-                rank_ub = (int) tmp_rank_ub;
+                rank_lb = tmp_rank_lb;
+                rank_ub = tmp_rank_ub;
             }
 
             assert(0 <= rank_lb - rank_ub &&
