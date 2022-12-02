@@ -12,13 +12,14 @@ def delete_file_if_exist(dire):
 
 def get_sample_queryID_l(file_name, n_query, n_last_query):
     itemID_l = np.loadtxt(
-        '/home/bianzheng/reverse-k-ranks/index/query_distribution/{}/sample_itemID_l.txt'.format(file_name))
+        '/home/zhengbian/reverse-k-ranks/index/query_distribution/{}/sample_itemID_l.txt'.format(file_name))
     n_sample_item = len(itemID_l)
     last_itemID_l = itemID_l[-n_last_query:]
     n_remain_query = n_query - n_last_query
     remain_itemID_l = itemID_l[np.random.permutation(n_sample_item - n_last_query)[:n_remain_query]]
 
     sample_itemID_l = np.append(remain_itemID_l, last_itemID_l)
+    sample_itemID_l = np.array(sample_itemID_l, dtype=np.int32)
     return sample_itemID_l
 
 
@@ -39,7 +40,7 @@ if __name__ == '__main__':
         print(data_item.shape)
 
         queryID_l = get_sample_queryID_l(
-            '{}-query-distribution-n_sample_item_5000-sample_topk_600'.format(from_ds), n_query, n_last_query)
+            '{}-n_sample_item_5000-sample_topk_600'.format(from_ds), n_query, n_last_query)
         query_item = data_item[queryID_l]
         print(query_item.shape)
         # query_item = query_item[[0]]

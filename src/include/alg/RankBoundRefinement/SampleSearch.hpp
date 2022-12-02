@@ -78,6 +78,62 @@ namespace ReverseMIPS {
 
         inline void
         CoarseBinarySearch(const double &queryIP, const int &userID,
+                           int &rank_lb, int &rank_ub) const {
+            double *search_iter = bound_distance_table_.get() + n_sample_ * userID;
+
+            double *iter_begin = search_iter;
+            double *iter_end = search_iter + n_sample_;
+
+            double *lb_ptr = std::lower_bound(iter_begin, iter_end, queryIP,
+                                              [](const double &arrIP, double queryIP) {
+                                                  return arrIP > queryIP;
+                                              });
+            unsigned int bucket_idx = (lb_ptr - iter_begin);
+            unsigned int tmp_rank_lb = bucket_idx == n_sample_ ? n_data_item_ : known_rank_idx_l_[bucket_idx];
+            unsigned int tmp_rank_ub = bucket_idx == 0 ? 0 : known_rank_idx_l_[bucket_idx - 1];
+
+
+            if (lb_ptr == iter_end) {
+                rank_lb = (int) n_data_item_;
+                rank_ub = (int) tmp_rank_ub;
+            } else if (lb_ptr == iter_begin) {
+                rank_lb = (int) tmp_rank_lb;
+                rank_ub = (int) 0;
+            } else {
+                rank_lb = (int) tmp_rank_lb;
+                rank_ub = (int) tmp_rank_ub;
+            }
+
+            assert(0 <= rank_lb - rank_ub &&
+                   rank_lb - rank_ub <= std::max(known_rank_idx_l_[n_sample_ - 1],
+                                                 (int) n_data_item_ - known_rank_idx_l_[n_sample_ - 1]));
+        }
+
+        void RankBound(const std::vector<double> &queryIP_l,
+                       const std::vector<bool> &prune_l, const std::vector<bool> &result_l,
+                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) const {
+            assert(queryIP_l.size() == n_user_);
+            assert(prune_l.size() == n_user_);
+            assert(result_l.size() == n_user_);
+            assert(rank_lb_l.size() == n_user_);
+            assert(rank_ub_l.size() == n_user_);
+            for (int userID = 0; userID < n_user_; userID++) {
+                if (prune_l[userID] || result_l[userID]) {
+                    continue;
+                }
+                int lower_rank, upper_rank;
+                double queryIP = queryIP_l[userID];
+
+                CoarseBinarySearch(queryIP, userID,
+                                   lower_rank, upper_rank);
+
+                rank_lb_l[userID] = lower_rank;
+                rank_ub_l[userID] = upper_rank;
+            }
+        }
+
+        inline void
+        CoarseBinarySearch(const double &queryIP, const int &userID,
                            int &bucketID,
                            double &IP_lb, double &IP_ub,
                            int &rank_lb, int &rank_ub) const {
@@ -119,33 +175,6 @@ namespace ReverseMIPS {
             assert(0 <= rank_lb - rank_ub &&
                    rank_lb - rank_ub <= std::max(known_rank_idx_l_[n_sample_ - 1],
                                                  (int) n_data_item_ - known_rank_idx_l_[n_sample_ - 1]));
-        }
-
-        void RankBound(const std::vector<double> &queryIP_l,
-                       const std::vector<bool> &prune_l, const std::vector<bool> &result_l,
-                       std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l) const {
-            assert(queryIP_l.size() == n_user_);
-            assert(prune_l.size() == n_user_);
-            assert(result_l.size() == n_user_);
-            assert(rank_lb_l.size() == n_user_);
-            assert(rank_ub_l.size() == n_user_);
-            for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID] || result_l[userID]) {
-                    continue;
-                }
-                int lower_rank, upper_rank;
-                double queryIP = queryIP_l[userID];
-
-                double IP_lb, IP_ub;
-                int bucketID;
-                CoarseBinarySearch(queryIP, userID,
-                                   bucketID,
-                                   IP_lb, IP_ub,
-                                   lower_rank, upper_rank);
-
-                rank_lb_l[userID] = lower_rank;
-                rank_ub_l[userID] = upper_rank;
-            }
         }
 
         void RankBound(const std::vector<double> &queryIP_l,
