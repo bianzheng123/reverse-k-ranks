@@ -105,6 +105,10 @@ namespace ReverseMIPS::Simpfer {
                     simpfer_index_.RTopKRetrieval(query_sd_l[queryID], user_matrix_, rtk_topk,
                                                   result_userID_l,
                                                   n_block_prune, n_sample_prune, n_norm_prune, ip_count, result_size);
+                    const double accu_retrieval_time = total_retrieval_record_.get_elapsed_time_second();
+                    spdlog::info(
+                            "queryID {}, result_size {}, rtk_topk {}, accu_ip_cost {}, accu_query_time {:.2f}s,",
+                            queryID, result_size, rtk_topk, ip_count, accu_retrieval_time);
 
                     if (result_size >= topk) {
                         break;

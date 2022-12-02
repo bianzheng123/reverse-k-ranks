@@ -205,7 +205,7 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
                      n_sample, n_sample_query, sample_topk);
         index = QueryRankSampleSearchUniformRank::BuildIndex(data_item, user, index_path, dataset_name,
-                                                         n_sample, n_sample_query, sample_topk, index_dir);
+                                                             n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
                 n_sample, n_sample_query, sample_topk);
 
@@ -249,6 +249,8 @@ int main(int argc, char **argv) {
     if (para.test_topk) {
         topk_l = {30, 20, 10};
 //        topk_l = {10};
+    } else if (method_name == "Simpfer") {
+        topk_l = {200};
     } else {
         topk_l = {200, 150, 100, 50, 20, 10};
     }
