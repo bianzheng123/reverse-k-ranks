@@ -11,7 +11,8 @@
 namespace ReverseMIPS {
     std::string IndexName(const std::string &method_name) {
         if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR" ||
-            method_name == "QueryRankSampleDirectIntLR" || method_name == "QueryRankSampleGlobalIntLR") {
+            method_name == "QueryRankSampleDirectIntLR" || method_name == "QueryRankSampleGlobalIntLR" ||
+            method_name == "QueryRankSampleUniformIntLR") {
             return "QueryRankSampleIntLR";
         } else if (method_name == "QueryRankSampleScoreDistribution") {
             return "QueryRankSampleScoreDistribution";
@@ -19,9 +20,9 @@ namespace ReverseMIPS {
             return "QueryRankSampleSearchAllRank";
         } else if (method_name == "QueryRankSampleSearchKthRank") {
             return "QueryRankSampleSearchKthRank";
-        }  else if (method_name == "QueryRankSampleSearchUniformRank") {
+        } else if (method_name == "QueryRankSampleSearchUniformRank") {
             return "QueryRankSampleSearchUniformRank";
-        }else if (method_name == "RankSample") {
+        } else if (method_name == "RankSample") {
             return "RankSample";
         } else if (method_name == "QueryRankSampleSearchBruteForce") {
             return "QueryRankSampleSearchBruteForce";
@@ -34,7 +35,8 @@ namespace ReverseMIPS {
     std::string SampleName(const std::string &method_name) {
         if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR" ||
             method_name == "QueryRankSampleScoreDistribution" || method_name == "QueryRankSampleSearchKthRank" ||
-            method_name == "QueryRankSampleDirectIntLR" || method_name == "QueryRankSampleGlobalIntLR") {
+            method_name == "QueryRankSampleDirectIntLR" || method_name == "QueryRankSampleGlobalIntLR" ||
+            method_name == "QueryRankSampleUniformIntLR") {
             return "OptimalPart";
         } else if (method_name == "QueryRankSampleSearchAllRank") {
             return "OptimalAll";

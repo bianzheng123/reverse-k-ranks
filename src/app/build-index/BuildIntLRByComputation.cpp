@@ -13,6 +13,7 @@
 #include "alg/RankBoundRefinement/LeastSquareLinearRegression.hpp"
 #include "alg/RankBoundRefinement/MinMaxLinearRegression.hpp"
 #include "alg/RankBoundRefinement/SampleSearch.hpp"
+#include "alg/RankBoundRefinement/UniformLinearRegression.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 
@@ -93,6 +94,10 @@ void BuildLocalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
         } else if (method_name == "QueryRankSampleMinMaxIntLR") {
             lr_l.push_back(std::make_unique<MinMaxLinearRegression>(n_data_item, n_user));
+//            lr_l.emplace_back(MinMaxLinearRegression(n_data_item, n_user));
+
+        } else if (method_name == "QueryRankSampleUniformIntLR") {
+            lr_l.push_back(std::make_unique<UniformLinearRegression>(n_data_item, n_user));
 //            lr_l.emplace_back(MinMaxLinearRegression(n_data_item, n_user));
 
         } else {
