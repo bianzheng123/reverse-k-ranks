@@ -115,20 +115,11 @@ def run():
     # for ds in dataset_l:
     #     os.system('cd build/attribution && ./ibc --dataset_name {} --dataset_dir {}'.format(ds, dataset_dir))
 
-    n_sample_item = 5000
-    sample_topk = 600
-    dataset_name = 'movielens-27m'
-    method_name = 'QueryRankSampleSearchKthRank'
-    n_sample = 473
+    dataset_name = "movielens-27m"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen
+    k_max = compute_k_max_in_reverse_mips(dataset_name, 20)
     os.system(
-        f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --test_topk {'false'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-    )
-
-    os.system(
-        f"cd build/attribution && ./bsc"
-    )
-    os.system(
-        f"cd build/attribution && ./cc"
+        f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
+        f"--test_topk {'false'} --method_name {'Simpfer'} --simpfer_k_max {k_max} --stop_time {86400} "
     )
 
     dataset_l = ['movielens-27m', 'netflix']
