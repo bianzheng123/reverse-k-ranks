@@ -5,6 +5,7 @@ test.py
 /index/
 /index_amazon/
 /*.log
+/*.png
 /.idea/
 /motivation/data/
 /motivation/result/
@@ -40,3 +41,5 @@ cmake-build-release/
 /motivation/dimensionality_curse/log_tensorboard/
 /motivation/dimensionality_curse/result/
 /motivation/dimensionality_curse/saved/
+/script/plot/sample_topk_1_Yahoomusic.png
+/script/plot/sample_topk_2_Yelp.png

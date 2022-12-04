@@ -54,7 +54,7 @@ def plot_figure(*, fname: str, dataset: str, set_log: bool, ylim: list, legend_l
         ax.set_yscale('log')
     ax.legend(frameon=False, loc=legend_loc[0], bbox_to_anchor=legend_loc[1])
     if test:
-        plt.savefig("{}_{}.jpg".format(result_fname_prefix, dataset), bbox_inches='tight', dpi=600)
+        plt.savefig("{}_{}.png".format(result_fname_prefix, dataset), bbox_inches='tight', dpi=600)
     else:
         plt.savefig("{}_{}.pdf".format(result_fname_prefix, dataset), bbox_inches='tight')
 
@@ -65,7 +65,8 @@ if __name__ == "__main__":
                './data/sample_topk/Yelp.csv']
     dataset_l = ['1_Yahoomusic', '2_Yelp']
     set_log_l = [False, False]
-    ylim_l = [[0.49, 0.64], [0.55, 0.75]]
+    # ylim_l = [[0, 0.64], [0, 0.75]]
+    ylim_l = [[0, 0.7], [0, 0.8]]
     # ylim_l = [None, None, None, None]
     legend_loc_l = [('lower right', None), ('lower right', None)]
     labelpad_l = [0, 0]

@@ -2,43 +2,98 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
+import re
 
 matplotlib.rcParams.update({'font.size': 20})
 
 
+def compile_rmips(*, fname: str, require_topk: int):
+    file = open(fname)
+    lines = file.read().split("\n")
+    skip_queryID = -1
+    result_query_l = []
+    for line in lines:
+        match_obj = re.match(
+            r'\[.*\] \[info\] queryID (.*), result_size (.*), rtk_topk (.*), accu_ip_cost (.*), accu_query_time (.*)s,',
+            line)
+        if match_obj:
+            queryID = int(match_obj.group(1))
+            result_size = int(match_obj.group(2))
+            rtk_topk = int(match_obj.group(3))
+            accu_ip_cost = int(match_obj.group(4))
+            accu_query_time = float(match_obj.group(5))
+
+            if skip_queryID == queryID:
+                continue
+            else:
+                if result_size > require_topk:
+                    result_query_l.append((queryID, result_size, accu_ip_cost, accu_query_time))
+                    skip_queryID = queryID
+        # else:
+        #     print("No match!!")
+    total_ip = np.sum([_[2] for _ in result_query_l])
+    total_time = np.sum([_[3] for _ in result_query_l])
+    # print(np.setdiff1d(np.arange(670), np.array([_[0] for _ in result_query_l])))
+    print("No.total query {}, total IP {}, total time {}s".format(len(result_query_l), total_ip, total_time))
+    return result_query_l
+
+
+def scale_time_by_ip_cost(result_query_l: list, ip_cost=3933048998, total_time=5554.200):
+    pred_running_time_l = [float(_[2]) / ip_cost * total_time for _ in result_query_l]
+    print(pred_running_time_l)
+    return pred_running_time_l
+
+
 def plot_figure(*, method_name: str, total_time_l: list,
+                xlim: list, ylim: list, n_bin: int,
                 name_m: dict, is_test: bool):
     # fig = plt.figure(figsize=(25, 4))
     fig = plt.figure(figsize=(6, 4))
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
-    ax.hist(total_time_l, bins='auto', color='#828487')
+    ax.hist(total_time_l, bins=n_bin, color='#828487')
 
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_xlabel(name_m['fig_x'])
     ax.set_ylabel(name_m['fig_y'])
-    ax.set_xlim([0.4, 1e2])
-    ax.set_ylim([1, 5e2])
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
 
     if is_test:
-        plt.savefig("query_distribution_response_time_{}.jpg".format(method_name), bbox_inches='tight', dpi=600)
+        # plt.savefig("query_distribution_response_time_{}.png".format(method_name), bbox_inches='tight', dpi=600)
+        plt.savefig("query_distribution_response_time_{}.png".format(method_name), bbox_inches='tight')
     else:
         plt.savefig("query_distribution_response_time_{}.pdf".format(method_name), bbox_inches='tight')
 
 
 if __name__ == '__main__':
+    result_query_l = compile_rmips(fname='./data/single_query_performance/raw_data/rmips-movielens-27m.log',
+                                   require_topk=50)
+    rmips_running_time_l = scale_time_by_ip_cost(result_query_l=result_query_l)
+
     fname_l = [
-        './data/single_query_performance/yahoomusic_big-RankSample-top50-n_sample_588-single-query-performance.csv',
-        './data/single_query_performance/yahoomusic_big-QueryRankSampleSearchKthRank-top50-n_sample_588-single-query-performance.csv']
+        './data/single_query_performance/movielens-27m-RankSample-top50-n_sample_3791-single-query-performance.csv',
+        './data/single_query_performance/movielens-27m-QueryRankSampleSearchKthRank-top50-n_sample_3791-n_sample_query_5000-sample_topk_600-single-query-performance.csv']
+    # fname_l = [
+    #     './data/single_query_performance/yahoomusic_big-RankSample-top50-n_sample_588-single-query-performance.csv',
+    #     './data/single_query_performance/yahoomusic_big-QueryRankSampleSearchKthRank-top50-n_sample_588-single-query-performance.csv']
     data_l = []
     for fname in fname_l:
         data_l.append(pd.read_csv(fname)['total_time'])
-    method_name_l = ['1_uniform_sample', '2_query_aware_sample']
+    data_l.append(rmips_running_time_l)
+    method_name_l = ['1_uniform_sample', '2_query_aware_sample', '3_rmips']
+    xlim_l = [[0.05, 70], [0.05, 4], [0.1, 2e4]]
+    ylim_l = [None, None, None]
+    bins_l = [5000, 400, 10000]
 
     name_m = {'csv_x': 'total_time', 'fig_x': 'Running Time (Second)',
               'fig_y': 'Frequency'}
     is_test = False
-    for total_time_l, method_name in zip(data_l, method_name_l):
+    for total_time_l, method_name, xlim, ylim, n_bin in zip(data_l, method_name_l, xlim_l, ylim_l, bins_l):
+        print("method_name {}, min_time {}, max_time {}".format(method_name,
+                                                                np.min(total_time_l),
+                                                                np.max(total_time_l)))
         plot_figure(method_name=method_name, total_time_l=total_time_l,
+                    xlim=xlim, ylim=ylim, n_bin=n_bin,
                     name_m=name_m, is_test=is_test)
