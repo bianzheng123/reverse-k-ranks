@@ -354,18 +354,19 @@ namespace ReverseMIPS {
             result_size = 0;
             assert((int) result_userID_l.size() == 0);
 
-//            if (rtk_topk > k_max_) {
+            if (rtk_topk > k_max_) {
+                return;
 //                ComputeByBruteforce(query_item, user_matrix, rtk_topk,
 //                                    result_userID_l,
 //                                    ip_count,
 //                                    result_size);
-//            } else {
-            ComputeByIndex(query_item, rtk_topk,
-                           result_userID_l,
-                           n_block_prune, sample_prune, norm_prune, ip_count,
-                           result_size);
+            } else {
+                ComputeByIndex(query_item, rtk_topk,
+                               result_userID_l,
+                               n_block_prune, sample_prune, norm_prune, ip_count,
+                               result_size);
 
-//            }
+            }
 
         }
 

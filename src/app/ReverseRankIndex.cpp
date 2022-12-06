@@ -275,12 +275,14 @@ int main(int argc, char **argv) {
 //        spdlog::info("{}", performance_str);
 //    }
 
+    int n_execute_query = n_query_item;
     vector<int> topk_l;
     if (para.test_topk) {
         topk_l = {30, 20, 10};
 //        topk_l = {10};
     } else if (method_name == "Simpfer") {
-        topk_l = {200};
+        topk_l = {50};
+        n_execute_query = 100;
     } else {
         topk_l = {200, 150, 100, 50, 20, 10};
     }
@@ -288,7 +290,7 @@ int main(int argc, char **argv) {
     RetrievalResult config;
     vector<vector<vector<UserRankElement>>> result_rank_l;
     vector<vector<SingleQueryPerformance>> query_performance_topk_l;
-    const int n_execute_query = n_query_item;
+
     for (int topk: topk_l) {
         vector<SingleQueryPerformance> query_performance_l(n_execute_query);
         vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,
