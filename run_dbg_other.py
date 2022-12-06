@@ -20,10 +20,23 @@ def run():
     # )
 
     n_sample_item = 5000
+    dataset_name = 'yelp'  # yelp, yahoomusic_big
+    memory_capacity = 8
+    method_name = "QueryRankSampleMinMaxIntLR"  # QueryRankSampleUniformIntLR QueryRankSampleMinMaxIntLR
+    for sample_topk in [100, 200, 300, 400, 500]:
+        n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
+        os.system(
+            f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+        os.system(
+            f"cd index/memory_index && mv UniformLinearRegression-yahoomusic_big-n_sample_{n_sample}.index "
+            f"UniformLinearRegression-yahoomusic_big_n_sample_{n_sample}_n_sample_query_{n_sample_item}_sample_topk_{sample_topk}.index"
+        )
+
+    sample_topk = 600
     dataset_name = 'yahoomusic_big'  # yelp, yahoomusic_big
     memory_capacity = 8
-    method_name = "QueryRankSampleUniformIntLR"  # QueryRankSampleUniformIntLR QueryRankSampleMinMaxIntLR
-    for sample_topk in [10, 50, 100, 200, 300, 400, 500]:
+    method_name = "QueryRankSampleSearchUniformRankUniformIntLR"  # QueryRankSampleUniformIntLR QueryRankSampleMinMaxIntLR
+    for n_sample_item in [5000]:
         n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
         os.system(
             f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
@@ -52,17 +65,6 @@ def run():
     memory_capacity = 8
     method_name = "QueryRankSampleMinMaxIntLR"  # QueryRankSampleUniformIntLR QueryRankSampleMinMaxIntLR
     for sample_topk in [150]:
-        n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
-        os.system(
-            f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
-
-    sample_topk = 600
-    dataset_name = 'yahoomusic_big'  # yelp, yahoomusic_big
-    n_data_item = polyu.dataset_m[dataset_name][0]
-    n_user = polyu.dataset_m[dataset_name][2]
-    memory_capacity = 8
-    method_name = "QueryRankSampleSearchUniformRank"
-    for n_sample_item in [1000, 2000, 4000, 8000, 16000]:
         n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
         os.system(
             f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
