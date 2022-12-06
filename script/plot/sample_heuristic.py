@@ -69,25 +69,24 @@ def plot_curve(*, x_l_l: list, y_l_l: list, label_l: list,
 
 if __name__ == "__main__":
     is_test = False
-    label_l = ['No Heuristic', 'Heuristic']
+    label_l = ['Kth Candidate Rank', 'Uniform Candidate Rank']
+    n_sample_query_l = [1000, 2000, 3000, 4000, 5000]
+    yahoomsuic_kth_l = [0.575093, 0.55952, 0.558958, 0.561975, 0.563848]
+    yahoomusic_uniform = [5.585205, 2.794196, 1.920483, 1.471933, 1.249008]
 
-    memory_capacity_l = [100, 120, 140, 160, 180]
-    no_heuristic_build_time_l = [12565.36, 15023.8, 17482.24, 20213.84, 22672.28]
-    heuristic_build_time_l = [12.94, 15.47173913, 18.00347826, 20.81652174, 23.34826087]
-
-    x_l_l = [memory_capacity_l, memory_capacity_l]
-    y_l_l = [no_heuristic_build_time_l, heuristic_build_time_l]
-
-    plot_curve(x_l_l=x_l_l, y_l_l=y_l_l, label_l=label_l,
-               xlabel='Memory Capacity (MB)', ylabel='Find Sample Time (Second)',
-               ylim=[1e1, 5e4], log=True, is_test=is_test, fname_suffix='1_build_index')
-
-    no_heuristic_retrieval_time_l = [2140.232, 2109.198, 2003.062, 1029.629, 921.836]
-    heuristic_retrieval_time_l = [2140.564, 2109.409, 1988.466, 1027.141, 919.078]
-
-    x_l_l = [memory_capacity_l, memory_capacity_l]
-    y_l_l = [np.array(no_heuristic_retrieval_time_l) / 1000, np.array(heuristic_retrieval_time_l) / 1000]
+    x_l_l = [n_sample_query_l, n_sample_query_l]
+    y_l_l = [yahoomsuic_kth_l, yahoomusic_uniform]
 
     plot_curve(x_l_l=x_l_l, y_l_l=y_l_l, label_l=label_l,
-               xlabel='Memory Capacity (MB)', ylabel='Query Time (Second)',
-               ylim=[0.75, 2.25], log=False, is_test=is_test, fname_suffix='2_query')
+               xlabel='# Sample Query', ylabel='Query Time (Second)',
+               ylim=[0, 6], log=False, is_test=is_test, fname_suffix='1_yahoomusic_big')
+
+    yelp_kth_l = [1.604534, 0.649852, 0.649828, 0.647989, 0.647463]
+    yelp_uniform = [3.601341, 1.699676, 1.227467, 1.017598, 0.917125]
+
+    x_l_l = [n_sample_query_l, n_sample_query_l]
+    y_l_l = [yelp_kth_l, yelp_uniform]
+
+    plot_curve(x_l_l=x_l_l, y_l_l=y_l_l, label_l=label_l,
+               xlabel='# Sample Query', ylabel='Query Time (Second)',
+               ylim=[0.5, 3.7], log=False, is_test=is_test, fname_suffix='2_yelp')

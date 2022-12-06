@@ -1,0 +1,6 @@
+n_sample_query,Avg-QueryRankSampleSearchKthRank,Avg-QueryRankSampleSearchUniformRank
+1000,1.604534,3.601341
+2000,0.649852,1.699676
+3000,0.649828,1.227467
+4000,0.647989,1.017598
+5000,0.647463,0.917125

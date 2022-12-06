@@ -21,6 +21,8 @@
 #include "QueryRankSampleUniformIntLR.hpp"
 #include "RankSample.hpp"
 #include "Simpfer.hpp"
+#include "SimpferFEXIPROOnly.hpp"
+#include "SimpferOnly.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -233,6 +235,22 @@ int main(int argc, char **argv) {
         spdlog::info("input parameter: simpfer_k_max {}, stop_time {}s",
                      simpfer_k_max, stop_time);
         index = Simpfer::BuildIndex(data_item, user, simpfer_k_max, stop_time);
+        sprintf(parameter_name, "simpfer_k_max_%d", simpfer_k_max);
+
+    } else if (method_name == "SimpferFEXIPROOnly") {
+        const int simpfer_k_max = para.simpfer_k_max;
+        const size_t stop_time = para.stop_time;
+        spdlog::info("input parameter: simpfer_k_max {}, stop_time {}s",
+                     simpfer_k_max, stop_time);
+        index = SimpferFEXIPROOnly::BuildIndex(data_item, user, simpfer_k_max, stop_time);
+        sprintf(parameter_name, "simpfer_k_max_%d", simpfer_k_max);
+
+    } else if (method_name == "SimpferOnly") {
+        const int simpfer_k_max = para.simpfer_k_max;
+        const size_t stop_time = para.stop_time;
+        spdlog::info("input parameter: simpfer_k_max {}, stop_time {}s",
+                     simpfer_k_max, stop_time);
+        index = SimpferOnly::BuildIndex(data_item, user, simpfer_k_max, stop_time);
         sprintf(parameter_name, "simpfer_k_max_%d", simpfer_k_max);
 
     } else {

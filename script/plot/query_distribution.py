@@ -62,7 +62,7 @@ def plot_figure(*, method_name: str, total_time_l: list,
 
     if is_test:
         # plt.savefig("query_distribution_response_time_{}.png".format(method_name), bbox_inches='tight', dpi=600)
-        plt.savefig("query_distribution_response_time_{}.png".format(method_name), bbox_inches='tight')
+        plt.savefig("query_distribution_response_time_{}.jpg".format(method_name), bbox_inches='tight')
     else:
         plt.savefig("query_distribution_response_time_{}.pdf".format(method_name), bbox_inches='tight')
 

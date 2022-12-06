@@ -13,10 +13,10 @@ def run():
     # dataset_l = ['netflix', 'movielens-27m']
 
     dataset_name = "yahoomusic_big"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen
-    k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 20)
+    k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 1.5)
     os.system(
         f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
-        f"--test_topk {'false'} --method_name {'Simpfer'} --simpfer_k_max {k_max} --stop_time {70000} "
+        f"--test_topk {'false'} --method_name {'SimpferFEXIPROOnly'} --simpfer_k_max {k_max} --stop_time {70000} "
     )
 
     # sample_topk = 600

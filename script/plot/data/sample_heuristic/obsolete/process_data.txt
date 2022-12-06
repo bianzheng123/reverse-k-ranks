@@ -1,0 +1,8 @@
+movielens
+
+memory_capacity_l = [100, 120, 140, 160, 180]
+no_heuristic_build_time_l = [12565.36, 15023.8, 17482.24, 20213.84, 22672.28]
+heuristic_build_time_l = [12.94, 15.47173913, 18.00347826, 20.81652174, 23.34826087]
+
+no_heuristic_retrieval_time_l = [2140.232, 2109.198, 2003.062, 1029.629, 921.836]
+heuristic_retrieval_time_l = [2140.564, 2109.409, 1988.466, 1027.141, 919.078]
