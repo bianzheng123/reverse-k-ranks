@@ -117,7 +117,7 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
 int64_t ComputeNSample(const std::string &index_name, const int64_t &memory_capacity,
                        const int64_t &n_user, const int64_t &n_data_item, const int64_t &vec_dim) {
-    if (index_name == "QueryRankSampleIntLR") {
+    if (index_name == "QueryRankSampleIntLR" || index_name == "QueryRankSampleUniformRankIntLR") {
         return (memory_capacity * 1024 * 1024 * 1024 -
                 n_user * 4 * sizeof(double) -
                 n_user * vec_dim * sizeof(int) - n_data_item * vec_dim * sizeof(int)) /

@@ -19,6 +19,7 @@ namespace ReverseMIPS {
 
     class UniformLinearRegression : public BaseLinearRegression {
 
+        std::string method_name_ = "QueryRankSampleUniformIntLR";
         size_t n_data_item_, n_user_;
         static constexpr int n_predict_parameter_ = 2; // (a, b) for linear estimation
         static constexpr int n_distribution_parameter_ = 2; // mu, sigma
@@ -46,9 +47,24 @@ namespace ReverseMIPS {
             static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
         }
 
+        inline UniformLinearRegression(const int &n_data_item, const int &n_user, const std::string &method_name) {
+            method_name_ = method_name;
+            this->n_data_item_ = n_data_item;
+            this->n_user_ = n_user;
+            this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
+            this->distribution_para_l_ = std::make_unique<double[]>(n_user * n_distribution_parameter_);
+            this->error_l_ = std::make_unique<int[]>(n_user);
+            static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
+        }
+
         inline UniformLinearRegression(const char *index_basic_dir, const char *dataset_name,
                                        const size_t &n_sample) {
             LoadIndex(index_basic_dir, dataset_name, n_sample);
+        }
+
+        inline UniformLinearRegression(const char *index_basic_dir, const char *dataset_name,
+                                       const size_t &n_sample, const bool &is_uniform_rank) {
+            LoadIndex(index_basic_dir, dataset_name, n_sample, is_uniform_rank);
         }
 
         void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) override {
@@ -233,9 +249,16 @@ namespace ReverseMIPS {
 
         void SaveIndex(const char *index_basic_dir, const char *dataset_name) override {
             char index_path[256];
-            sprintf(index_path,
-                    "%s/memory_index/UniformLinearRegression-%s-n_sample_%d.index",
-                    index_basic_dir, dataset_name, n_sample_rank_);
+            if (method_name_ == "QueryRankSampleUniformIntLR") {
+                sprintf(index_path,
+                        "%s/memory_index/UniformLinearRegression-%s-n_sample_%d.index",
+                        index_basic_dir, dataset_name, n_sample_rank_);
+            } else {
+                sprintf(index_path,
+                        "%s/memory_index/UniformLinearRegression-QueryRankSampleSearchUniformRankUniformIntLR-%s-n_sample_%d.index",
+                        index_basic_dir, dataset_name, n_sample_rank_);
+            }
+
 
             std::ofstream out_stream_ = std::ofstream(index_path, std::ios::binary | std::ios::out);
             if (!out_stream_) {
@@ -257,11 +280,18 @@ namespace ReverseMIPS {
         }
 
         void LoadIndex(const char *index_basic_dir, const char *dataset_name,
-                       const size_t &n_sample) {
+                       const size_t &n_sample, const bool &is_uniform_rank = false) {
             char index_path[256];
-            sprintf(index_path,
-                    "%s/memory_index/UniformLinearRegression-%s-n_sample_%ld.index",
-                    index_basic_dir, dataset_name, n_sample);
+            if (is_uniform_rank) {
+                sprintf(index_path,
+                        "%s/memory_index/UniformLinearRegression-QueryRankSampleSearchUniformRankUniformIntLR-%s-n_sample_%ld.index",
+                        index_basic_dir, dataset_name, n_sample);
+            } else {
+                sprintf(index_path,
+                        "%s/memory_index/UniformLinearRegression-%s-n_sample_%ld.index",
+                        index_basic_dir, dataset_name, n_sample);
+            }
+
 
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
             if (!index_stream) {

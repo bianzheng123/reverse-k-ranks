@@ -6,6 +6,7 @@
 #include "util/TimeMemory.hpp"
 #include "util/FileIO.hpp"
 #include "struct/VectorMatrix.hpp"
+#include "NameTranslation.hpp"
 
 #include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
 #include "alg/RankBoundRefinement/DirectLinearRegression.hpp"
@@ -82,22 +83,33 @@ void BuildLocalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
     const bool is_query_distribution = true;
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
         const int n_sample = (int) n_sample_l[rsID];
+        const string index_name = IndexName(method_name);
 
-        rs_ins_l[rsID] = SampleSearch(basic_index_dir, dataset_name, "QueryRankSampleIntLR",
-                                      n_sample, load_sample_score, is_query_distribution,
-                                      n_sample_query, sample_topk);
+        if (index_name == "QueryRankSampleUniformRankIntLR") {
+            rs_ins_l[rsID] = SampleSearch(basic_index_dir, dataset_name, "QueryRankSampleUniformRankIntLR",
+                                          n_sample, load_sample_score, is_query_distribution,
+                                          n_sample_query, sample_topk);
+        } else if (index_name == "QueryRankSampleIntLR") {
+            rs_ins_l[rsID] = SampleSearch(basic_index_dir, dataset_name, "QueryRankSampleIntLR",
+                                          n_sample, load_sample_score, is_query_distribution,
+                                          n_sample_query, sample_topk);
+        }else{
+            spdlog::error("not such index, program exit");
+            exit(-1);
+        }
+
         if (method_name == "QueryRankSampleDirectIntLR") {
             lr_l.push_back(std::make_unique<DirectLinearRegression>(n_data_item, n_user));
 
         } else if (method_name == "QueryRankSampleLeastSquareIntLR") {
             lr_l.push_back(std::make_unique<LeastSquareLinearRegression>(n_data_item, n_user));
 
-        } else if (method_name == "QueryRankSampleMinMaxIntLR") {
-            lr_l.push_back(std::make_unique<MinMaxLinearRegression>(n_data_item, n_user));
+        } else if (method_name == "QueryRankSampleMinMaxIntLR" || method_name == "QueryRankSampleSearchUniformRankMinMaxIntLR") {
+            lr_l.push_back(std::make_unique<MinMaxLinearRegression>(n_data_item, n_user, method_name));
 //            lr_l.emplace_back(MinMaxLinearRegression(n_data_item, n_user));
 
-        } else if (method_name == "QueryRankSampleUniformIntLR") {
-            lr_l.push_back(std::make_unique<UniformLinearRegression>(n_data_item, n_user));
+        } else if (method_name == "QueryRankSampleUniformIntLR" || method_name == "QueryRankSampleSearchUniformRankUniformIntLR") {
+            lr_l.push_back(std::make_unique<UniformLinearRegression>(n_data_item, n_user, method_name));
 //            lr_l.emplace_back(MinMaxLinearRegression(n_data_item, n_user));
 
         } else {

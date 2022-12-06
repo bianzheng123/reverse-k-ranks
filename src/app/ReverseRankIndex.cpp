@@ -18,6 +18,8 @@
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
 #include "QueryRankSampleSearchUniformRank.hpp"
+#include "QueryRankSampleSearchUniformRankMinMaxIntLR.hpp"
+#include "QueryRankSampleSearchUniformRankUniformIntLR.hpp"
 #include "QueryRankSampleUniformIntLR.hpp"
 #include "RankSample.hpp"
 #include "Simpfer.hpp"
@@ -212,6 +214,30 @@ int main(int argc, char **argv) {
         sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
                 n_sample, n_sample_query, sample_topk);
 
+    } else if (method_name == "QueryRankSampleSearchUniformRankMinMaxIntLR") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleSearchUniformRankMinMaxIntLR::BuildIndex(data_item, user, index_path, dataset_name,
+                                                                        n_sample, n_sample_query, sample_topk,
+                                                                        index_dir);
+        sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
+                n_sample, n_sample_query, sample_topk);
+
+    } else if (method_name == "QueryRankSampleSearchUniformRankUniformIntLR") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleSearchUniformRankUniformIntLR::BuildIndex(data_item, user, index_path, dataset_name,
+                                                                         n_sample, n_sample_query, sample_topk,
+                                                                         index_dir);
+        sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
+                n_sample, n_sample_query, sample_topk);
+
     } else if (method_name == "QueryRankSampleUniformIntLR") {
         const int n_sample = para.n_sample;
         const int n_sample_query = para.n_sample_query;
@@ -280,11 +306,11 @@ int main(int argc, char **argv) {
     if (para.test_topk) {
         topk_l = {30, 20, 10};
 //        topk_l = {10};
-    } else if (method_name == "Simpfer") {
+    } else if (method_name == "Simpfer" || method_name == "SimpferOnly" || method_name == "SimpferFEXIPROOnly") {
         topk_l = {50};
         n_execute_query = 100;
     } else {
-        topk_l = {200, 150, 100, 50, 20, 10};
+        topk_l = {200, 150, 100, 50, 10};
     }
 
     RetrievalResult config;

@@ -14,6 +14,9 @@ namespace ReverseMIPS {
             method_name == "QueryRankSampleDirectIntLR" || method_name == "QueryRankSampleGlobalIntLR" ||
             method_name == "QueryRankSampleUniformIntLR") {
             return "QueryRankSampleIntLR";
+        } else if (method_name == "QueryRankSampleSearchUniformRankMinMaxIntLR" ||
+                   method_name == "QueryRankSampleSearchUniformRankUniformIntLR") {
+            return "QueryRankSampleUniformRankIntLR";
         } else if (method_name == "QueryRankSampleScoreDistribution") {
             return "QueryRankSampleScoreDistribution";
         } else if (method_name == "QueryRankSampleSearchAllRank") {
@@ -40,7 +43,9 @@ namespace ReverseMIPS {
             return "OptimalPart";
         } else if (method_name == "QueryRankSampleSearchAllRank") {
             return "OptimalAll";
-        } else if (method_name == "QueryRankSampleSearchUniformRank") {
+        } else if (method_name == "QueryRankSampleSearchUniformRank" ||
+                   method_name == "QueryRankSampleSearchUniformRankMinMaxIntLR" ||
+                   method_name == "QueryRankSampleSearchUniformRankUniformIntLR") {
             return "OptimalUniform";
         } else if (method_name == "RankSample") {
             return "Uniform";
