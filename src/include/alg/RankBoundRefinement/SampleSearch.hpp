@@ -300,6 +300,7 @@ namespace ReverseMIPS {
                         "%s/%s-%s-n_sample_%ld.index",
                         index_abs_dir, method_name, dataset_name, n_sample);
             }
+            spdlog::info("index path {}", index_path);
 
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
             if (!index_stream) {

@@ -291,7 +291,7 @@ namespace ReverseMIPS {
                         "%s/memory_index/UniformLinearRegression-%s-n_sample_%ld.index",
                         index_basic_dir, dataset_name, n_sample);
             }
-
+            spdlog::info("index path {}", index_path);
 
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
             if (!index_stream) {
