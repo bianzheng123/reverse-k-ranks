@@ -89,7 +89,7 @@ def count_percentile(running_time_l, percentile):
 
 
 if __name__ == '__main__':
-    result_query_l = compile_rmips(fname='./data/single_query_performance/raw_data/rmips-movielens-27m.log',
+    result_query_l = compile_rmips(fname='./data/single_query_performance/previous_raw_data/rmips-movielens-27m.log',
                                    require_topk=50)
     rmips_running_time_l = scale_time_by_ip_cost(result_query_l=result_query_l)
 

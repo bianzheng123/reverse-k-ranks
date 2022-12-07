@@ -17,7 +17,7 @@ def transform_data(*, dataset_l: list, dim_l: list):
         hit_100_l = []
         hit_200_l = []
         for dim in dim_l:
-            with open('data/dimension_selection/raw_data/hitting_rate-{}-{}-new.json'.format(dataset, dim), 'r') as f:
+            with open('data/dimension_selection/previous_raw_data/hitting_rate-{}-{}-new.json'.format(dataset, dim), 'r') as f:
                 json_ins = json.load(f)
             hit_50_l.append(json_ins['test_result']['hit@50'])
             hit_100_l.append(json_ins['test_result']['hit@100'])

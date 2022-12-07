@@ -187,6 +187,13 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
                                       refine_seq_l_, refine_user_size,
                                       n_result_user, n_prune_user,
                                       prune_l_, result_l_);
+                int tmp_refine_user_size = 0;
+                for (int userID = 0; userID < n_user_; userID++) {
+                    if (prune_l_[userID] || result_l_[userID]) {
+                        continue;
+                    }
+                    tmp_refine_user_size++;
+                }
                 const double tmp_prune_user_time2 = prune_user_record_.get_elapsed_time_second();
                 prune_user_time_ += tmp_prune_user_time2;
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
@@ -236,6 +243,9 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
                                                                       ip_cost, io_cost,
                                                                       total_time,
                                                                       memory_index_time, read_disk_time);
+                spdlog::info(
+                        "queryID {}, n_prune_user {}, n_result_user {}, total_predicite_IO_cost {}, tmp_refine_user_size {}",
+                        queryID, n_prune_user, n_result_user, total_predict_io_cost_, tmp_refine_user_size);
             }
             disk_ins_.FinishRetrieval();
 
