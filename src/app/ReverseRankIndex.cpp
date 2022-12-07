@@ -13,6 +13,7 @@
 #include "QueryRankSampleDirectIntLR.hpp"
 #include "QueryRankSampleGlobalIntLR.hpp"
 #include "QueryRankSampleMinMaxIntLR.hpp"
+#include "QueryRankSampleMinMaxIntLREstimate.hpp"
 #include "QueryRankSampleLeastSquareIntLR.hpp"
 #include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSampleSearchAllRank.hpp"
@@ -21,6 +22,7 @@
 #include "QueryRankSampleSearchUniformRankMinMaxIntLR.hpp"
 #include "QueryRankSampleSearchUniformRankUniformIntLR.hpp"
 #include "QueryRankSampleUniformIntLR.hpp"
+#include "QueryRankSampleUniformIntLREstimate.hpp"
 #include "RankSample.hpp"
 #include "Simpfer.hpp"
 #include "SimpferFEXIPROOnly.hpp"
@@ -169,6 +171,17 @@ int main(int argc, char **argv) {
         sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
                 n_sample, n_sample_query, sample_topk);
 
+    } else if (method_name == "QueryRankSampleMinMaxIntLREstimate") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleMinMaxIntLREstimate::BuildIndex(data_item, user, index_path, dataset_name,
+                                                               n_sample, n_sample_query, sample_topk, index_dir);
+        sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
+                n_sample, n_sample_query, sample_topk);
+
     } else if (method_name == "QueryRankSampleScoreDistribution") {
         const int n_sample = para.n_sample;
         const int n_sample_query = para.n_sample_query;
@@ -246,6 +259,17 @@ int main(int argc, char **argv) {
                      n_sample, n_sample_query, sample_topk);
         index = QueryRankSampleUniformIntLR::BuildIndex(data_item, user, index_path, dataset_name,
                                                         n_sample, n_sample_query, sample_topk, index_dir);
+        sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
+                n_sample, n_sample_query, sample_topk);
+
+    } else if (method_name == "QueryRankSampleUniformIntLREstimate") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleUniformIntLREstimate::BuildIndex(data_item, user, index_path, dataset_name,
+                                                                n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
                 n_sample, n_sample_query, sample_topk);
 

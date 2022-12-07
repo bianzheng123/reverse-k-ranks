@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import re
 
+linestyle_l = ['_', '-', '--', ':']
+color_l = ['#3D0DFF', '#6BFF00', '#00E8E2', '#EB0225', '#FF9E03']
+marker_l = ['x', "v", "o", "D", "s"]
+markersize = 15
+
 matplotlib.rcParams.update({'font.size': 20})
 
 
@@ -40,31 +45,47 @@ def compile_rmips(*, fname: str, require_topk: int):
 
 def scale_time_by_ip_cost(result_query_l: list, ip_cost=3933048998, total_time=5554.200):
     pred_running_time_l = [float(_[2]) / ip_cost * total_time for _ in result_query_l]
-    print(pred_running_time_l)
+    # print(pred_running_time_l)
     return pred_running_time_l
 
 
 def plot_figure(*, method_name: str, total_time_l: list,
-                xlim: list, ylim: list, n_bin: int,
+                xlim: list, ylim: list, n_bin: int, time95: float,
+                weight: float,
                 name_m: dict, is_test: bool):
     # fig = plt.figure(figsize=(25, 4))
     fig = plt.figure(figsize=(6, 4))
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
-    ax.hist(total_time_l, bins=n_bin, color='#828487')
+    # counts, bins = np.histogram(total_time_l, bins=n_bin, weights=np.ones(len(total_time_l)) * weight)
+    # print(counts)
+    # assert 1000 - 0.1 <= np.sum(counts) <= 1000 + 0.1
+    # ax.stairs(counts, bins, color='#828487', fill=True)
+    ax.hist(total_time_l, bins=n_bin, weights=np.ones(len(total_time_l)) * weight, color='#828487', density=False)
+
+    ax.plot(np.ones(3000) * time95, np.arange(3000),
+            color='#ee1c25', linewidth=1, linestyle='dotted')
+    # ax.plot(time95)
 
     ax.set_xscale('log')
     ax.set_yscale('log')
     ax.set_xlabel(name_m['fig_x'])
     ax.set_ylabel(name_m['fig_y'])
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
+    if xlim:
+        ax.set_xlim(xlim)
+    if ylim:
+        ax.set_ylim(ylim)
 
     if is_test:
-        # plt.savefig("query_distribution_response_time_{}.png".format(method_name), bbox_inches='tight', dpi=600)
-        plt.savefig("query_distribution_response_time_{}.jpg".format(method_name), bbox_inches='tight')
+        plt.savefig("query_time_{}.jpg".format(method_name), bbox_inches='tight')
     else:
-        plt.savefig("query_distribution_response_time_{}.pdf".format(method_name), bbox_inches='tight')
+        plt.savefig("query_time_{}.pdf".format(method_name), bbox_inches='tight')
+
+
+def count_percentile(running_time_l, percentile):
+    sorted_time_l = np.sort(running_time_l)
+    idx = int(len(sorted_time_l) * percentile)
+    return sorted_time_l[idx]
 
 
 if __name__ == '__main__':
@@ -74,7 +95,7 @@ if __name__ == '__main__':
 
     fname_l = [
         './data/single_query_performance/movielens-27m-RankSample-top50-n_sample_3791-single-query-performance.csv',
-        './data/single_query_performance/movielens-27m-QueryRankSampleSearchKthRank-top50-n_sample_3791-n_sample_query_5000-sample_topk_600-single-query-performance.csv']
+        './data/single_query_performance/movielens-27m-QueryRankSampleMinMaxIntLR-top50-n_sample_3698-n_sample_query_5000-sample_topk_600-single-query-performance.csv']
     # fname_l = [
     #     './data/single_query_performance/yahoomusic_big-RankSample-top50-n_sample_588-single-query-performance.csv',
     #     './data/single_query_performance/yahoomusic_big-QueryRankSampleSearchKthRank-top50-n_sample_588-single-query-performance.csv']
@@ -82,18 +103,29 @@ if __name__ == '__main__':
     for fname in fname_l:
         data_l.append(pd.read_csv(fname)['total_time'])
     data_l.append(rmips_running_time_l)
-    method_name_l = ['1_uniform_sample', '2_query_aware_sample', '3_rmips']
-    xlim_l = [[0.05, 70], [0.05, 4], [0.1, 2e4]]
-    ylim_l = [None, None, None]
-    bins_l = [5000, 400, 10000]
+
+    xlim = [0.01, 1.5e4]
+    ylim = [0.5, 1e3]
+    time95_l = [count_percentile(_, 0.95) for _ in data_l]
+
+    # method_name_l = ['1_uniform_sample', '2_query_aware_sample_regression_optimization']
+    # bins_l = [5000, 200]
+    # weights_l = [1, 1, 1000 / 659]
+
+    method_name_l = ['1_uniform_sample', '2_query_aware_sample_regression_optimization', '3_rmips']
+    bins_l = [5000, 250, 10000]
+    weights_l = [1, 1, 1000 / 659]
 
     name_m = {'csv_x': 'total_time', 'fig_x': 'Running Time (Second)',
               'fig_y': 'Frequency'}
     is_test = False
-    for total_time_l, method_name, xlim, ylim, n_bin in zip(data_l, method_name_l, xlim_l, ylim_l, bins_l):
+    for total_time_l, method_name, n_bin, time95, weight in zip(data_l, method_name_l,
+                                                                bins_l,
+                                                                time95_l, weights_l):
         print("method_name {}, min_time {}, max_time {}".format(method_name,
                                                                 np.min(total_time_l),
                                                                 np.max(total_time_l)))
         plot_figure(method_name=method_name, total_time_l=total_time_l,
-                    xlim=xlim, ylim=ylim, n_bin=n_bin,
+                    xlim=xlim, ylim=ylim, n_bin=n_bin, time95=time95,
+                    weight=weight,
                     name_m=name_m, is_test=is_test)

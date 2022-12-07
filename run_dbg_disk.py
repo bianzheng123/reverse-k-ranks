@@ -76,7 +76,7 @@ def run():
     # memory_capacity = 8
     # for sample_topk in [100, 200, 300, 400, 500]:
     #     dataset_name = 'yahoomusic_big'
-    #     method_name = "QueryRankSampleUniformIntLR"
+    #     method_name = "QueryRankSampleUniformIntLREstimate"
     #     n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
     #     os.system(
     #         f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} " +
@@ -84,7 +84,7 @@ def run():
     #     )
     #
     #     dataset_name = 'yelp'
-    #     method_name = "QueryRankSampleMinMaxIntLR"
+    #     method_name = "QueryRankSampleMinMaxIntLREstimate"
     #     n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name, memory_capacity)
     #     os.system(
     #         f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} " +
