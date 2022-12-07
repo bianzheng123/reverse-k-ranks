@@ -16,7 +16,8 @@ namespace ReverseMIPS {
 
         virtual void FinishPreprocess() = 0;
 
-        virtual void SaveIndex(const char *index_basic_dir, const char *dataset_name) = 0;
+        virtual void SaveIndex(const char *index_basic_dir, const char *dataset_name, const size_t &n_sample_query,
+                               const size_t &sample_topk) = 0;
 
     };
 }

@@ -146,9 +146,9 @@ def run():
 
         # 'GridIndex',
         # 'LinearModel',
-        # 'QueryRankSampleDirectIntLR',
-        # 'QueryRankSampleGlobalIntLR',
-        # 'QueryRankSampleLeastSquareIntLR',
+        'QueryRankSampleDirectIntLR',
+        'QueryRankSampleGlobalIntLR',
+        'QueryRankSampleLeastSquareIntLR',
         'QueryRankSampleMinMaxIntLR',
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
@@ -190,12 +190,12 @@ def run():
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
-        # run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
+        run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
         run_sample_method('QueryRankSampleMinMaxIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
                           sample_topk)
         # run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,

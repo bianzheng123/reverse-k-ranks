@@ -286,7 +286,7 @@ namespace ReverseMIPS::QueryRankSampleUniformIntLR {
                               n_sample, true, true,
                               n_sample_query, sample_topk);
 
-        UniformLinearRegression rank_bound_ins(index_basic_dir, dataset_name, n_sample);
+        UniformLinearRegression rank_bound_ins(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
 
         //disk index
         ReadAllDirectIO disk_ins(n_user, n_data_item, disk_index_path);

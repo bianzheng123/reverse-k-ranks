@@ -286,7 +286,7 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLR {
                               n_sample, true, true,
                               n_sample_query, sample_topk);
 
-        MinMaxLinearRegression rank_bound_ins(index_basic_dir, dataset_name, n_sample);
+        MinMaxLinearRegression rank_bound_ins(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
 
         //disk index
         ReadAllDirectIO disk_ins(n_user, n_data_item, disk_index_path);

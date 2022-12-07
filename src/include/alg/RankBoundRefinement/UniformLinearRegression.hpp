@@ -58,13 +58,15 @@ namespace ReverseMIPS {
         }
 
         inline UniformLinearRegression(const char *index_basic_dir, const char *dataset_name,
-                                       const size_t &n_sample) {
-            LoadIndex(index_basic_dir, dataset_name, n_sample);
+                                       const size_t &n_sample, const size_t &n_sample_query,
+                                       const size_t &sample_topk) {
+            LoadIndex(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
         }
 
         inline UniformLinearRegression(const char *index_basic_dir, const char *dataset_name,
-                                       const size_t &n_sample, const bool &is_uniform_rank) {
-            LoadIndex(index_basic_dir, dataset_name, n_sample, is_uniform_rank);
+                                       const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk,
+                                       const bool &is_uniform_rank) {
+            LoadIndex(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk, is_uniform_rank);
         }
 
         void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) override {
@@ -247,16 +249,17 @@ namespace ReverseMIPS {
             }
         }
 
-        void SaveIndex(const char *index_basic_dir, const char *dataset_name) override {
+        void SaveIndex(const char *index_basic_dir, const char *dataset_name, const size_t &n_sample_query,
+                       const size_t &sample_topk) override {
             char index_path[256];
             if (method_name_ == "QueryRankSampleUniformIntLR") {
                 sprintf(index_path,
-                        "%s/memory_index/UniformLinearRegression-%s-n_sample_%d.index",
-                        index_basic_dir, dataset_name, n_sample_rank_);
+                        "%s/memory_index/UniformLinearRegression-%s-n_sample_%d-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample_rank_, n_sample_query, sample_topk);
             } else {
                 sprintf(index_path,
-                        "%s/memory_index/UniformLinearRegression-QueryRankSampleSearchUniformRankUniformIntLR-%s-n_sample_%d.index",
-                        index_basic_dir, dataset_name, n_sample_rank_);
+                        "%s/memory_index/UniformLinearRegression-QueryRankSampleSearchUniformRankUniformIntLR-%s-n_sample_%d-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample_rank_, n_sample_query, sample_topk);
             }
 
 
@@ -280,16 +283,17 @@ namespace ReverseMIPS {
         }
 
         void LoadIndex(const char *index_basic_dir, const char *dataset_name,
-                       const size_t &n_sample, const bool &is_uniform_rank = false) {
+                       const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk,
+                       const bool &is_uniform_rank = false) {
             char index_path[256];
             if (is_uniform_rank) {
                 sprintf(index_path,
-                        "%s/memory_index/UniformLinearRegression-QueryRankSampleSearchUniformRankUniformIntLR-%s-n_sample_%ld.index",
-                        index_basic_dir, dataset_name, n_sample);
+                        "%s/memory_index/UniformLinearRegression-QueryRankSampleSearchUniformRankUniformIntLR-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
             } else {
                 sprintf(index_path,
-                        "%s/memory_index/UniformLinearRegression-%s-n_sample_%ld.index",
-                        index_basic_dir, dataset_name, n_sample);
+                        "%s/memory_index/UniformLinearRegression-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                        index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
             }
             spdlog::info("index path {}", index_path);
 

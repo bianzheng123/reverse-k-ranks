@@ -232,18 +232,18 @@ namespace ReverseMIPS {
         std::vector<SimpferData> user_sd_l_;
         std::vector<SimpferData> data_item_sd_l_;
         std::vector<SimpferBlock> block_l_;
-        SIRPrune sir_prune_;
+//        SIRPrune sir_prune_;
 
         inline SimpferOnlyIndex() = default;
 
         inline SimpferOnlyIndex(std::vector<SimpferData> &user_sd_l,
                                 std::vector<SimpferData> &data_item_sd_l,
                                 std::vector<SimpferBlock> &block_l,
-                                SIRPrune &&sirPrune,
+//                                SIRPrune &&sirPrune,
                                 const int &k_max,
                                 const int &n_user, const int &n_data_item, const int &vec_dim)
                 : user_sd_l_(std::move(user_sd_l)), data_item_sd_l_(std::move(data_item_sd_l)),
-                  block_l_(std::move(block_l)), sir_prune_(std::move(sirPrune)) {
+                  block_l_(std::move(block_l)) {
             this->n_user_ = n_user;
             this->n_data_item_ = n_data_item;
             this->vec_dim_ = vec_dim;
@@ -314,34 +314,34 @@ namespace ReverseMIPS {
             assert(result_size <= n_user_);
         }
 
-        void ComputeByBruteforce(const SimpferData &query_item, const Matrix &user_matrix,
-                                 const int &rtk_topk,
-                                 std::vector<int> &result_userID_l,
-                                 size_t &ip_count,
-                                 int &result_size) {
-
-            std::vector<VectorElement> topk_res_l(n_user_);
-
-            sir_prune_.topK(user_matrix, rtk_topk, topk_res_l, ip_count);
-
-//#pragma omp parallel for default(none) reduction(+:result_size) shared(topk_res_l, query_item, user_matrix)
-            for (int64_t userID = 0; userID < n_user_; userID++) {
-                double topk_IP = topk_res_l[userID].data;
-                const double queryIP = InnerProduct(query_item.vec_.data(), user_matrix.getRowPtr(userID),
-                                                    (int) vec_dim_);
-
-                if (queryIP > topk_IP) {
-                    result_size++;
-                    result_userID_l.push_back((int) userID);
-                }
-
-            }
-            ip_count += n_user_;
-        }
+//        void ComputeByBruteforce(const SimpferData &query_item, const Matrix &user_matrix,
+//                                 const int &rtk_topk,
+//                                 std::vector<int> &result_userID_l,
+//                                 size_t &ip_count,
+//                                 int &result_size) {
+//
+//            std::vector<VectorElement> topk_res_l(n_user_);
+//
+//            sir_prune_.topK(user_matrix, rtk_topk, topk_res_l, ip_count);
+//
+////#pragma omp parallel for default(none) reduction(+:result_size) shared(topk_res_l, query_item, user_matrix)
+//            for (int64_t userID = 0; userID < n_user_; userID++) {
+//                double topk_IP = topk_res_l[userID].data;
+//                const double queryIP = InnerProduct(query_item.vec_.data(), user_matrix.getRowPtr(userID),
+//                                                    (int) vec_dim_);
+//
+//                if (queryIP > topk_IP) {
+//                    result_size++;
+//                    result_userID_l.push_back((int) userID);
+//                }
+//
+//            }
+//            ip_count += n_user_;
+//        }
 
 
         // main operation
-        void RTopKRetrieval(const SimpferData &query_item, Matrix &user_matrix, const int &rtk_topk,
+        void RTopKRetrieval(const SimpferData &query_item, const int &rtk_topk,
                             std::vector<int> &result_userID_l,
                             int &n_block_prune, int &sample_prune, int &norm_prune, size_t &ip_count,
                             int &result_size) {

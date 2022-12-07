@@ -138,7 +138,7 @@ void BuildLocalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
     for (int rsID = 0; rsID < n_rs_ins; rsID++) {
         lr_l[rsID]->FinishPreprocess();
-        lr_l[rsID]->SaveIndex(basic_index_dir, dataset_name);
+        lr_l[rsID]->SaveIndex(basic_index_dir, dataset_name, n_sample_query, sample_topk);
     }
 
 }

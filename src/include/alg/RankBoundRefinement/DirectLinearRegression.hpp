@@ -47,8 +47,8 @@ namespace ReverseMIPS {
         }
 
         inline DirectLinearRegression(const char *index_basic_dir, const char *dataset_name,
-                                      const size_t &n_sample) {
-            LoadIndex(index_basic_dir, dataset_name, n_sample);
+                                      const size_t &n_sample, const size_t& n_sample_query, const size_t& sample_topk) {
+            LoadIndex(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
         }
 
         void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) override {
@@ -247,11 +247,12 @@ namespace ReverseMIPS {
             }
         }
 
-        void SaveIndex(const char *index_basic_dir, const char *dataset_name) override {
+        void SaveIndex(const char *index_basic_dir, const char *dataset_name,
+                       const size_t &n_sample_query, const size_t &sample_topk) override {
             char index_path[256];
             sprintf(index_path,
-                    "%s/memory_index/DirectLinearRegression-%s-n_sample_%d.index",
-                    index_basic_dir, dataset_name, n_sample_rank_);
+                    "%s/memory_index/DirectLinearRegression-%s-n_sample_%d-n_sample_query_%ld-sample_topk_%ld.index",
+                    index_basic_dir, dataset_name, n_sample_rank_, n_sample_query, sample_topk);
 
             std::ofstream out_stream_ = std::ofstream(index_path, std::ios::binary | std::ios::out);
             if (!out_stream_) {
@@ -273,11 +274,11 @@ namespace ReverseMIPS {
         }
 
         void LoadIndex(const char *index_basic_dir, const char *dataset_name,
-                       const size_t &n_sample) {
+                       const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk) {
             char index_path[256];
             sprintf(index_path,
-                    "%s/memory_index/DirectLinearRegression-%s-n_sample_%ld.index",
-                    index_basic_dir, dataset_name, n_sample);
+                    "%s/memory_index/DirectLinearRegression-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
+                    index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
 
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
             if (!index_stream) {
