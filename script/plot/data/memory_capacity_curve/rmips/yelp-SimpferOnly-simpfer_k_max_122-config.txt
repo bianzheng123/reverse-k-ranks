@@ -1,0 +1,5 @@
+number of query item 100
+build index time 172.288s
+Estimated memory 0.000GB, Peak memory 27.147GB, Current memory 26.610GB
+top50 retrieval:
+	total IP cost 542849061, total time 1327.200s

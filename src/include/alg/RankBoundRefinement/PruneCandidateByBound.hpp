@@ -76,7 +76,8 @@ namespace ReverseMIPS {
                         n_prune_user++;
                     }
                 }
-                break;
+                refine_user_size = 0;
+                return;
             }
 
             const int &tmp_ub = rank_ub_l[userID];
