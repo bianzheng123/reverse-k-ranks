@@ -187,6 +187,13 @@ namespace ReverseMIPS::QueryRankSampleUniformIntLREstimate {
                                       refine_seq_l_, refine_user_size,
                                       n_result_user, n_prune_user,
                                       prune_l_, result_l_);
+                int tmp_refine_user_size = 0;
+                for (int userID = 0; userID < n_user_; userID++) {
+                    if (prune_l_[userID] || result_l_[userID]) {
+                        continue;
+                    }
+                    tmp_refine_user_size++;
+                }
                 const double tmp_prune_user_time2 = prune_user_record_.get_elapsed_time_second();
                 prune_user_time_ += tmp_prune_user_time2;
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
@@ -195,6 +202,7 @@ namespace ReverseMIPS::QueryRankSampleUniformIntLREstimate {
                 //read disk and fine binary search
                 size_t io_cost = 0;
                 double read_disk_time = 0;
+                size_t pred_io_cost = 0;
                 if (refine_user_size <= n_user_ / 4) {
                     disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
                                       refine_seq_l_, refine_user_size, topk - n_result_user,
@@ -204,7 +212,6 @@ namespace ReverseMIPS::QueryRankSampleUniformIntLREstimate {
                     rank_prune_ratio_ += 1.0 * (n_user_ - disk_ins_.n_read_disk_user_) / n_user_;
 
                 } else {
-                    size_t pred_io_cost = 0;
                     for (int refineID = 0; refineID < refine_user_size; refineID++) {
                         const int userID = refine_seq_l_[refineID];
                         pred_io_cost += (rank_lb_l_[userID] - rank_ub_l_[userID]);
@@ -237,6 +244,11 @@ namespace ReverseMIPS::QueryRankSampleUniformIntLREstimate {
                                                                       ip_cost, io_cost,
                                                                       total_time,
                                                                       memory_index_time, read_disk_time);
+                if(pred_io_cost != 0){
+                    spdlog::info(
+                            "queryID {}, n_prune_user {}, n_result_user {}, total_predicite_IO_cost {}, tmp_refine_user_size {}",
+                            queryID, n_prune_user, n_result_user, total_predict_io_cost_, tmp_refine_user_size);
+                }
             }
             disk_ins_.FinishRetrieval();
 

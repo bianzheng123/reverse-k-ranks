@@ -202,6 +202,7 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
                 //read disk and fine binary search
                 size_t io_cost = 0;
                 double read_disk_time = 0;
+                size_t pred_io_cost = 0;
                 if (refine_user_size <= n_user_ / 4) {
                     disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
                                       refine_seq_l_, refine_user_size, topk - n_result_user,
@@ -210,7 +211,6 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
                     total_refine_user_ += disk_ins_.n_read_disk_user_;
                     rank_prune_ratio_ += 1.0 * (n_user_ - disk_ins_.n_read_disk_user_) / n_user_;
                 } else {
-                    size_t pred_io_cost = 0;
                     for (int refineID = 0; refineID < refine_user_size; refineID++) {
                         const int userID = refine_seq_l_[refineID];
                         pred_io_cost += (rank_lb_l_[userID] - rank_ub_l_[userID]);
@@ -243,9 +243,11 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
                                                                       ip_cost, io_cost,
                                                                       total_time,
                                                                       memory_index_time, read_disk_time);
-                spdlog::info(
-                        "queryID {}, n_prune_user {}, n_result_user {}, total_predicite_IO_cost {}, tmp_refine_user_size {}",
-                        queryID, n_prune_user, n_result_user, total_predict_io_cost_, tmp_refine_user_size);
+                if(pred_io_cost != 0){
+                    spdlog::info(
+                            "queryID {}, n_prune_user {}, n_result_user {}, total_predicite_IO_cost {}, tmp_refine_user_size {}",
+                            queryID, n_prune_user, n_result_user, total_predict_io_cost_, tmp_refine_user_size);
+                }
             }
             disk_ins_.FinishRetrieval();
 
