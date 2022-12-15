@@ -31,7 +31,7 @@ def plot_figure(*, fname: str, dataset: str, set_log: bool, ylim: list, labelpad
         y_name = key + name_m['csv_y']
         x_l = np.arange(len(topk_l))
         y_l = df[y_name]
-        if name_m['csv_y'] == 'RunningTime' or name_m['csv_y'] == 'IPCost':
+        if name_m['csv_y'] == 'RunningTime' or name_m['csv_y'] == 'IPCost' or name_m['csv_y'] == "MemoryIndexTime":
             y_l = y_l / 1000
         elif name_m['csv_y'] == 'IOCost':
             y_l = y_l / 1000 * 8 / 1024
@@ -157,40 +157,59 @@ if __name__ == "__main__":
     #                 name_m=name_m, method_m=method_m,
     #                 result_fname_prefix=result_fname_prefix, is_test=is_test)
 
-    fname_l = ['./data/k_curve/Yahoomusic.csv',
-               './data/k_curve/Yelp.csv']
+    # fname_l = ['./data/k_curve/Yahoomusic.csv',
+    #            './data/k_curve/Yelp.csv']
+    # dataset_l = ['1_Yahoomusic', '2_Yelp']
+    # set_log_l = [False, False]
+    # ylim_l = [[0, 24], [0, 37]]
+    # # ylim_l = [None, None, None, None]
+    # labelpad_l = [0, 0]
+    #
+    # name_m = {'csv_x': 'topk', 'fig_x': r'k',
+    #           'csv_y': 'IOCost', 'fig_y': 'Disk Read (KB)'}
+    # method_m = {'QRS': 'QS', 'QRSDLR': 'QS-DT', 'QRSMinMax': 'QSRO'}
+    # result_fname_prefix = 'k_io_cost_component_performance_bar'
+    # for fname, dataset, set_log, ylim, labelpad in zip(fname_l, dataset_l,
+    #                                                                set_log_l, ylim_l,
+    #                                                                labelpad_l):
+    #     plot_figure(fname=fname, dataset=dataset, set_log=set_log, ylim=ylim, labelpad=labelpad,
+    #                 name_m=name_m, method_m=method_m,
+    #                 result_fname_prefix=result_fname_prefix, is_test=is_test)
+    #
+    # fname_l = ['./data/k_curve/Yahoomusic.csv',
+    #            './data/k_curve/Yelp.csv']
+    # dataset_l = ['1_Yahoomusic', '2_Yelp']
+    # set_log_l = [True, True]
+    # ylim_l = [[1e4, 4e6], [1e4, 5e6]]
+    # # ylim_l = [None, None, None, None]
+    # labelpad_l = [0, 0]
+    #
+    # name_m = {'csv_x': 'topk', 'fig_x': r'k',
+    #           'csv_y': 'IPCost', 'fig_y': '# Score Computation'}
+    # method_m = {'QRS': 'QS', 'QRSDLR': 'QS-DT', 'QRSMinMax': 'QSRO'}
+    # result_fname_prefix = 'k_ip_cost_component_performance_bar'
+    # for fname, dataset, set_log, ylim, labelpad in zip(fname_l, dataset_l,
+    #                                                                set_log_l, ylim_l,
+    #                                                                labelpad_l):
+    #     plot_figure(fname=fname, dataset=dataset, set_log=set_log, ylim=ylim, labelpad=labelpad,
+    #                 name_m=name_m, method_m=method_m,
+    #                 result_fname_prefix=result_fname_prefix, is_test=is_test)
+
+    fname_l = ['./data/k_curve/Yahoomusic_memory_index_time.csv',
+               './data/k_curve/Yelp_memory_index_time.csv']
     dataset_l = ['1_Yahoomusic', '2_Yelp']
     set_log_l = [False, False]
-    ylim_l = [[0, 24], [0, 37]]
-    # ylim_l = [None, None, None, None]
+    ylim_l = [[0.0, 0.7], [0, 0.8]]
+    # ylim_l = [None, None]
     labelpad_l = [0, 0]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
-              'csv_y': 'IOCost', 'fig_y': 'Disk Read (KB)'}
-    method_m = {'QRS': 'QS', 'QRSDLR': 'QS-DT', 'QRSMinMax': 'QSRO'}
-    result_fname_prefix = 'k_io_cost_component_performance_bar'
+              'csv_y': 'MemoryIndexTime', 'fig_y': 'Memory Index Time (Second)'}
+    method_m = {'QS': 'QS', 'QSDT': 'QS-DT', 'QSRO': 'QSRO'}
+    result_fname_prefix = 'k_memory_index_time_component_performance_bar'
     for fname, dataset, set_log, ylim, labelpad in zip(fname_l, dataset_l,
-                                                                   set_log_l, ylim_l,
-                                                                   labelpad_l):
-        plot_figure(fname=fname, dataset=dataset, set_log=set_log, ylim=ylim, labelpad=labelpad,
-                    name_m=name_m, method_m=method_m,
-                    result_fname_prefix=result_fname_prefix, is_test=is_test)
-
-    fname_l = ['./data/k_curve/Yahoomusic.csv',
-               './data/k_curve/Yelp.csv']
-    dataset_l = ['1_Yahoomusic', '2_Yelp']
-    set_log_l = [True, True]
-    ylim_l = [[1e4, 4e6], [1e4, 5e6]]
-    # ylim_l = [None, None, None, None]
-    labelpad_l = [0, 0]
-
-    name_m = {'csv_x': 'topk', 'fig_x': r'k',
-              'csv_y': 'IPCost', 'fig_y': '# Score Computation'}
-    method_m = {'QRS': 'QS', 'QRSDLR': 'QS-DT', 'QRSMinMax': 'QSRO'}
-    result_fname_prefix = 'k_ip_cost_component_performance_bar'
-    for fname, dataset, set_log, ylim, labelpad in zip(fname_l, dataset_l,
-                                                                   set_log_l, ylim_l,
-                                                                   labelpad_l):
+                                                       set_log_l, ylim_l,
+                                                       labelpad_l):
         plot_figure(fname=fname, dataset=dataset, set_log=set_log, ylim=ylim, labelpad=labelpad,
                     name_m=name_m, method_m=method_m,
                     result_fname_prefix=result_fname_prefix, is_test=is_test)

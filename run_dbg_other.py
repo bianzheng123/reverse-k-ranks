@@ -12,6 +12,19 @@ def run():
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
+    for method_name, dataset_name, n_sample in [('MinMaxLinearRegression', 'yahoomusic_big', 588),
+                                                ('UniformLinearRegression', 'yelp', 490)]:
+        n_sample_query = 5000
+        for sample_topk in [10, 50, 100, 150, 200, 300, 400, 500, 600]:
+            os.system(
+                f'cd index/memory_index && '
+                f'{method_name}-{dataset_name}-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index '
+                f'{method_name}-{dataset_name}_more_query-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index')
+            os.system(
+                f'cd index/memory_index && '
+                f'{method_name}-{dataset_name}-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index '
+                f'QueryRankSampleSearchKthRank-{dataset_name}_more_query-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index')
+
     dataset_name = "yahoomusic_big"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen
     k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 0.5)
     os.system(

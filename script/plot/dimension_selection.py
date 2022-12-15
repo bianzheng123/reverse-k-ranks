@@ -60,7 +60,7 @@ if __name__ == "__main__":
     result_fname_l = ['1_lastfm', '2_movielens-1m']
     ylim_l = [[0.2, 0.6], None]
 
-    name_m = {'csv_x': 'dimension', 'fig_x': 'Dimension',
+    name_m = {'csv_x': 'dimension', 'fig_x': 'Dimensionality',
               'csv_y': '', 'fig_y': 'Hitting Ratio'}
     method_m = {'HR@200': 'HR@200', 'HR@100': 'HR@100', 'HR@50': 'HR@50'}
     is_test = False

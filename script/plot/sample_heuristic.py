@@ -43,7 +43,7 @@ def plot_curve(*, x_l_l: list, y_l_l: list, label_l: list,
 
 
 if __name__ == "__main__":
-    is_test = True
+    is_test = False
     label_l = ['Kth Candidate Rank', 'Uniform Candidate Rank']
 
     yahoomusic_l = pd.read_csv('./data/sample_heuristic/Yahoomusic.csv')
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     plot_curve(x_l_l=x_l_l, y_l_l=y_l_l, label_l=label_l,
                xlabel='Top-k', ylabel='Query Time (Second)',
-               ylim=[0, 1.4], log=False, is_test=is_test, fname_suffix='1_yahoomusic_big')
+               ylim=[0, 1.25], log=False, is_test=is_test, fname_suffix='1_yahoomusic_big')
 
     yelp_l = pd.read_csv('./data/sample_heuristic/Yelp.csv')
     yelp_kth_l = yelp_l['QRSKthIntLR']
@@ -67,4 +67,4 @@ if __name__ == "__main__":
 
     plot_curve(x_l_l=x_l_l, y_l_l=y_l_l, label_l=label_l,
                xlabel='Top-k', ylabel='Query Time (Second)',
-               ylim=[0, 1.2], log=False, is_test=is_test, fname_suffix='2_yelp')
+               ylim=[0, 1.25], log=False, is_test=is_test, fname_suffix='2_yelp')

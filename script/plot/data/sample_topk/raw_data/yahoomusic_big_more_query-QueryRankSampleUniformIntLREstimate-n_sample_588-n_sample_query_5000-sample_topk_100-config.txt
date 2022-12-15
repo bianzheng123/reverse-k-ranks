@@ -1,0 +1,21 @@
+number of query item 1000
+build index time 6.048s
+Estimated memory 9.074GB, Peak memory 11.373GB, Current memory 11.373GB
+top10 retrieval time: total 153.761s, total predict 153.761s
+	inner product 93.071s, rank bound 23.476s, prune user 17.731s, read disk 18.171s, compute rank 0.000s
+	total ip cost 4824293, total predict io cost 0, total refine io cost 361984, total refine user 1658, IP bound prune ratio 0.9974, rank prune ratio 1.0000
+top50 retrieval time: total 197.510s, total predict 197.510s
+	inner product 96.849s, rank bound 24.538s, prune user 18.412s, read disk 56.376s, compute rank 0.002s
+	total ip cost 8489891, total predict io cost 0, total refine io cost 1722880, total refine user 5906, IP bound prune ratio 0.9953, rank prune ratio 1.0000
+top100 retrieval time: total 202.941s, total predict 202.941s
+	inner product 97.480s, rank bound 25.032s, prune user 18.857s, read disk 60.244s, compute rank 0.002s
+	total ip cost 11124455, total predict io cost 0, total refine io cost 538368, total refine user 6678, IP bound prune ratio 0.9939, rank prune ratio 1.0000
+top150 retrieval time: total 555.658s, total predict 555.658s
+	inner product 102.338s, rank bound 25.952s, prune user 19.271s, read disk 406.562s, compute rank 0.087s
+	total ip cost 13147888, total predict io cost 0, total refine io cost 1789563392, total refine user 50244, IP bound prune ratio 0.9928, rank prune ratio 1.0000
+top200 retrieval time: total 966.491s, total predict 966.491s
+	inner product 103.660s, rank bound 26.325s, prune user 19.608s, read disk 815.142s, compute rank 0.206s
+	total ip cost 14881819, total predict io cost 0, total refine io cost 4215061760, total refine user 102564, IP bound prune ratio 0.9918, rank prune ratio 0.9999
+top250 retrieval time: total 1582.904s, total predict 1582.904s
+	inner product 106.871s, rank bound 26.858s, prune user 19.943s, read disk 1427.153s, compute rank 0.386s
+	total ip cost 16382588, total predict io cost 0, total refine io cost 7934585280, total refine user 180088, IP bound prune ratio 0.9910, rank prune ratio 0.9999

@@ -1,0 +1,21 @@
+number of query item 1000
+build index time 6.220s
+Estimated memory 9.298GB, Peak memory 12.051GB, Current memory 12.051GB
+top10 retrieval time: total 315.894s, total predict 315.894s
+	inner product 138.207s, rank bound 140.429s, prune user 28.107s, read disk 7.619s, compute rank 0.000s
+	total ip cost 117920495, total predict io cost 0, total refine io cost 62464, total refine user 873, IP bound prune ratio 0.9461, rank prune ratio 1.0000
+top50 retrieval time: total 377.774s, total predict 3032571.535s
+	inner product 152.350s, rank bound 143.553s, prune user 30.650s, read disk 49.610s, compute rank 0.006s
+	total ip cost 149931007, total predict io cost 337806815262, total refine io cost 5526848, total refine user 6696, IP bound prune ratio 0.9315, rank prune ratio 0.9950
+top100 retrieval time: total 421.188s, total predict 3159451.468s
+	inner product 159.960s, rank bound 145.683s, prune user 31.880s, read disk 82.024s, compute rank 0.010s
+	total ip cost 162734046, total predict io cost 405367227888, total refine io cost 10525312, total refine user 11261, IP bound prune ratio 0.9257, rank prune ratio 0.9940
+top150 retrieval time: total 460.629s, total predict 4180659.831s
+	inner product 165.019s, rank bound 146.471s, prune user 32.796s, read disk 114.670s, compute rank 0.014s
+	total ip cost 169369485, total predict io cost 608041954728, total refine io cost 16679616, total refine user 16240, IP bound prune ratio 0.9226, rank prune ratio 0.9910
+top200 retrieval time: total 492.693s, total predict 4494340.774s
+	inner product 166.689s, rank bound 147.038s, prune user 33.450s, read disk 143.823s, compute rank 0.018s
+	total ip cost 176143593, total predict io cost 675598201524, total refine io cost 21622080, total refine user 20390, IP bound prune ratio 0.9195, rank prune ratio 0.9900
+top250 retrieval time: total 533.119s, total predict 3963423.229s
+	inner product 167.664s, rank bound 147.620s, prune user 34.112s, read disk 182.023s, compute rank 0.026s
+	total ip cost 185839464, total predict io cost 675598201524, total refine io cost 31031488, total refine user 26100, IP bound prune ratio 0.9151, rank prune ratio 0.9900

@@ -11,6 +11,17 @@ def run():
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
+    dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp']
+    for ds in dataset_l:
+        os.system(
+            'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --test_topk {} --method_name {}'.format(
+                dataset_dir, ds, index_dir, 'false', 'GridIndex'))
+
+    dataset_name = 'amazon-home-kitchen'
+    os.system(
+        'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --test_topk {} --method_name {}'.format(
+            dataset_dir, dataset_name, index_dir, 'false', 'GridIndex'))
+
     '''rmips'''
     # dataset_name = "yahoomusic_big"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen
     # for memory_capacity in [32]:

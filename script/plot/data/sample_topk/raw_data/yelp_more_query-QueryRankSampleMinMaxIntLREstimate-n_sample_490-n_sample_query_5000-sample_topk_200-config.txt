@@ -1,0 +1,21 @@
+number of query item 1000
+build index time 6.467s
+Estimated memory 9.298GB, Peak memory 12.052GB, Current memory 12.052GB
+top10 retrieval time: total 311.336s, total predict 311.336s
+	inner product 129.039s, rank bound 138.344s, prune user 26.192s, read disk 16.203s, compute rank 0.001s
+	total ip cost 75592809, total predict io cost 0, total refine io cost 755328, total refine user 2014, IP bound prune ratio 0.9655, rank prune ratio 1.0000
+top50 retrieval time: total 365.074s, total predict 365.074s
+	inner product 143.867s, rank bound 141.798s, prune user 28.522s, read disk 49.283s, compute rank 0.005s
+	total ip cost 104720835, total predict io cost 0, total refine io cost 3109568, total refine user 6572, IP bound prune ratio 0.9522, rank prune ratio 1.0000
+top100 retrieval time: total 417.541s, total predict 417.541s
+	inner product 154.683s, rank bound 144.625s, prune user 30.689s, read disk 85.916s, compute rank 0.010s
+	total ip cost 130478068, total predict io cost 0, total refine io cost 6910976, total refine user 11806, IP bound prune ratio 0.9404, rank prune ratio 1.0000
+top150 retrieval time: total 451.225s, total predict 451.225s
+	inner product 156.842s, rank bound 144.833s, prune user 31.581s, read disk 116.320s, compute rank 0.014s
+	total ip cost 143807512, total predict io cost 0, total refine io cost 8630080, total refine user 16240, IP bound prune ratio 0.9343, rank prune ratio 1.0000
+top200 retrieval time: total 430.280s, total predict 430.280s
+	inner product 155.963s, rank bound 145.290s, prune user 32.022s, read disk 95.387s, compute rank 0.009s
+	total ip cost 149907039, total predict io cost 0, total refine io cost 1836800, total refine user 13278, IP bound prune ratio 0.9315, rank prune ratio 1.0000
+top250 retrieval time: total 559.099s, total predict 775885.244s
+	inner product 162.735s, rank bound 146.190s, prune user 32.904s, read disk 215.555s, compute rank 0.038s
+	total ip cost 155249518, total predict io cost 92745048088, total refine io cost 25784896, total refine user 32134, IP bound prune ratio 0.9291, rank prune ratio 0.9980

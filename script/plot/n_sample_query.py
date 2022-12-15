@@ -18,7 +18,7 @@ def sample_query_curve(*, n_sample_query_l: list,
     subplot_str = int('111')
     ax1 = fig.add_subplot(subplot_str)
     ax2 = ax1.twinx()
-    ax1.bar(x=n_sample_query_l, height=build_index_l, label='Index construction time', width=400,
+    ax1.bar(x=n_sample_query_l, height=build_index_l, label='Index Construction Time', width=400,
             hatch='///', color='#ffffff', edgecolor='#000000')
     ax2.plot(n_sample_query_l, query_time_top50_l / 1000,
              color='#000000', linewidth=2.5, linestyle='-',
@@ -43,7 +43,7 @@ def sample_query_curve(*, n_sample_query_l: list,
 
 
 if __name__ == "__main__":
-    is_test = True
+    is_test = False
     n_sample_query_l = [1000, 2000, 3000, 4000, 5000]
 
     # yahoomusic
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     yelp_df = pd.read_csv('./data/n_sample_query/yelp.csv')
     fname_sufix = '2_yelp'
     y1lim = [0, 25]
-    ylim = [0, 0.7]
+    ylim = [0, 2.0]
     # y1lim = None
     # ylim = None
     sample_query_curve(n_sample_query_l=n_sample_query_l,

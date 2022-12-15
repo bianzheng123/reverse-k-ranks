@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -61,9 +63,10 @@ def plot_figure(*, method_name: str, total_time_l: list,
     # print(counts)
     # assert 1000 - 0.1 <= np.sum(counts) <= 1000 + 0.1
     # ax.stairs(counts, bins, color='#828487', fill=True)
-    ax.hist(total_time_l, bins=n_bin, weights=np.ones(len(total_time_l)) * weight, color='#828487', density=False)
+    # print(np.logspace(2, 5, num=100))
+    ax.hist(total_time_l, bins=np.logspace(math.log10(0.01), math.log10(15000), num=n_bin), weights=np.ones(len(total_time_l)) * weight, color='#828487', density=False)
 
-    ax.plot(np.ones(3000) * time95, np.arange(3000),
+    ax.plot(np.ones(len(np.arange(1, 10002, 20))) * time95, np.arange(1, 10002, 20),
             color='#ee1c25', linewidth=1, linestyle='dotted')
     # ax.plot(time95)
 
@@ -81,6 +84,38 @@ def plot_figure(*, method_name: str, total_time_l: list,
     else:
         plt.savefig("query_time_{}.pdf".format(method_name), bbox_inches='tight')
 
+# def plot_figure(*, method_name: str, total_time_l: list,
+#                 xlim: list, ylim: list, n_bin: int, time95: float,
+#                 weight: float,
+#                 name_m: dict, is_test: bool):
+#     # fig = plt.figure(figsize=(25, 4))
+#     fig = plt.figure(figsize=(6, 4))
+#     subplot_str = 111
+#     ax = fig.add_subplot(subplot_str)
+#     # counts, bins = np.histogram(total_time_l, bins=n_bin, weights=np.ones(len(total_time_l)) * weight)
+#     # print(counts)
+#     # assert 1000 - 0.1 <= np.sum(counts) <= 1000 + 0.1
+#     # ax.stairs(counts, bins, color='#828487', fill=True)
+#     ax.hist(total_time_l, bins=n_bin, weights=np.ones(len(total_time_l)) * weight, color='#828487', density=False)
+#
+#     ax.plot(np.ones(len(np.arange(1, 10002, 20))) * time95, np.arange(1, 10002, 20),
+#             color='#ee1c25', linewidth=1, linestyle='dotted')
+#     # ax.plot(time95)
+#
+#     ax.set_xscale('log')
+#     ax.set_yscale('log')
+#     ax.set_xlabel(name_m['fig_x'])
+#     ax.set_ylabel(name_m['fig_y'])
+#     if xlim:
+#         ax.set_xlim(xlim)
+#     if ylim:
+#         ax.set_ylim(ylim)
+#
+#     if is_test:
+#         plt.savefig("query_time_{}.jpg".format(method_name), bbox_inches='tight')
+#     else:
+#         plt.savefig("query_time_{}.pdf".format(method_name), bbox_inches='tight')
+
 
 def count_percentile(running_time_l, percentile):
     sorted_time_l = np.sort(running_time_l)
@@ -89,7 +124,7 @@ def count_percentile(running_time_l, percentile):
 
 
 if __name__ == '__main__':
-    result_query_l = compile_rmips(fname='./data/single_query_performance/previous_raw_data/rmips-movielens-27m.log',
+    result_query_l = compile_rmips(fname='./data/single_query_performance/previous_data/rmips-movielens-27m.log',
                                    require_topk=50)
     rmips_running_time_l = scale_time_by_ip_cost(result_query_l=result_query_l)
 
@@ -105,7 +140,7 @@ if __name__ == '__main__':
     data_l.append(rmips_running_time_l)
 
     xlim = [0.01, 1.5e4]
-    ylim = [0.5, 1e3]
+    ylim = [8, 1e4]
     time95_l = [count_percentile(_, 0.95) for _ in data_l]
 
     # method_name_l = ['1_uniform_sample', '2_query_aware_sample_regression_optimization']
@@ -113,8 +148,8 @@ if __name__ == '__main__':
     # weights_l = [1, 1, 1000 / 659]
 
     method_name_l = ['1_uniform_sample', '2_query_aware_sample_regression_optimization', '3_rmips']
-    bins_l = [5000, 250, 10000]
-    weights_l = [1, 1, 1000 / 659]
+    bins_l = [50, 30, 30]
+    weights_l = [1 * 10, 1 * 10, 1000 / 659 * 10]
 
     name_m = {'csv_x': 'total_time', 'fig_x': 'Running Time (Second)',
               'fig_y': 'Frequency'}

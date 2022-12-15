@@ -35,7 +35,7 @@ def plot_figure(*, fname: str, test: bool):
     subplot_str = 111
     fig = plt.figure(figsize=(6, 4))
     ax = fig.add_subplot(subplot_str)
-    ax.scatter(df['equal_dim'], binary_search_run_time_l, label='Binary Search', c='#000000', s=50,
+    ax.scatter(df['equal_dim'], binary_search_run_time_l, label='Rank Bound Computation', c='#000000', s=50,
                marker=marker_l[0])
     ax.scatter(df['equal_dim'], score_computation_run_time_l, label='Score Computation', c='#000000', s=50,
                marker=marker_l[1])

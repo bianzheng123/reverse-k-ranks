@@ -333,6 +333,10 @@ int main(int argc, char **argv) {
     } else if (method_name == "Simpfer" || method_name == "SimpferOnly" || method_name == "SimpferFEXIPROOnly") {
         topk_l = {50};
         n_execute_query = 100;
+    } else if (method_name == "GridIndex") {
+        topk_l = {10};
+        n_execute_query = 10;
+
     } else {
         topk_l = {100, 50, 10};
     }

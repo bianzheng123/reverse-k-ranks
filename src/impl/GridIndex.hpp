@@ -32,6 +32,7 @@ namespace ReverseMIPS::GridIndex {
             inner_product_time_ = 0;
             inner_product_bound_time_ = 0;
             early_prune_ratio_ = 0;
+            total_ip_cost_ = 0;
         }
 
         std::unique_ptr<Grid> ip_bound_ins_;
@@ -40,6 +41,7 @@ namespace ReverseMIPS::GridIndex {
         int vec_dim_, n_data_item_, n_user_;
         double total_retrieval_time_, inner_product_time_, inner_product_bound_time_;
         TimeRecord total_retrieval_record_, inner_product_record_, inner_product_bound_record_;
+        size_t total_ip_cost_;
         double early_prune_ratio_;
     public:
 
@@ -84,6 +86,7 @@ namespace ReverseMIPS::GridIndex {
                 exit(-1);
             }
 
+            const int report_every = 10000;
             //coarse binary search
             const int n_query_item = n_execute_query;
 
@@ -102,6 +105,7 @@ namespace ReverseMIPS::GridIndex {
                     queryIP_l_[userID] = queryIP;
                 }
                 inner_product_time_ += inner_product_record_.get_elapsed_time_second();
+                total_ip_cost_ += n_user_;
 
                 //rank search
                 inner_product_bound_record_.reset();
@@ -109,7 +113,8 @@ namespace ReverseMIPS::GridIndex {
                 std::vector<UserRankElement> &rank_max_heap = query_heap_l[queryID];
                 for (int userID = 0; userID < topk; userID++) {
                     const double *user_vecs = user_.getVector(userID);
-                    int rank = GetRank(queryIP_l_[userID], n_data_item_ + 1, userID, user_vecs, data_item_);
+                    int rank = GetRank(queryIP_l_[userID], n_data_item_ + 1, userID, user_vecs, data_item_,
+                                       total_ip_cost_);
 
                     assert(rank != -1);
                     rank_max_heap[userID] = UserRankElement(userID, rank, queryIP_l_[userID]);
@@ -120,11 +125,18 @@ namespace ReverseMIPS::GridIndex {
                 UserRankElement heap_ele = rank_max_heap.front();
                 for (int userID = topk; userID < n_user_; userID++) {
                     const double *user_vecs = user_.getVector(userID);
-                    int rank = GetRank(queryIP_l_[userID], heap_ele.rank_, userID, user_vecs, data_item_);
+                    int rank = GetRank(queryIP_l_[userID], heap_ele.rank_, userID, user_vecs, data_item_,
+                                       total_ip_cost_);
 
                     if (rank == -1) {
                         early_prune_candidate++;
                         continue;
+                    }
+
+                    if (userID % report_every == 0) {
+                        spdlog::info("queryID {}, userID {}, ip_cost {}, time_used {}s",
+                                     queryID, userID, total_ip_cost_,
+                                     inner_product_bound_record_.get_elapsed_time_second());
                     }
 
                     UserRankElement element(userID, rank, queryIP_l_[userID]);
@@ -150,7 +162,7 @@ namespace ReverseMIPS::GridIndex {
         }
 
         int GetRank(const double &queryIP, const int &min_rank, const int &userID, const double *user_vecs,
-                    const VectorMatrix &item) {
+                    const VectorMatrix &item, size_t &total_ip_cost) {
             int rank = 1;
             int n_cand_ = 0;
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
@@ -176,6 +188,7 @@ namespace ReverseMIPS::GridIndex {
                 const int itemID = item_cand_l_[candID];
                 const double *item_vecs = item.getVector(itemID);
                 const double IP = InnerProduct(user_vecs, item_vecs, vec_dim_);
+                total_ip_cost++;
                 if (IP > queryIP) {
                     rank++;
                     if (rank > min_rank) {
@@ -200,10 +213,10 @@ namespace ReverseMIPS::GridIndex {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tearly prune ratio %.4f",
+                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tearly prune ratio %.4f, total IP cost %ld",
                     topk, total_retrieval_time_,
                     inner_product_time_, inner_product_bound_time_,
-                    early_prune_ratio_);
+                    early_prune_ratio_, total_ip_cost_);
             std::string str(buff);
             return str;
         }

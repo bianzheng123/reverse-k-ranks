@@ -1,0 +1,21 @@
+number of query item 1000
+build index time 6.066s
+Estimated memory 9.074GB, Peak memory 11.373GB, Current memory 11.373GB
+top10 retrieval time: total 153.477s, total predict 153.477s
+	inner product 92.601s, rank bound 23.470s, prune user 18.610s, read disk 17.475s, compute rank 0.000s
+	total ip cost 5326385, total predict io cost 0, total refine io cost 231680, total refine user 1568, IP bound prune ratio 0.9971, rank prune ratio 1.0000
+top50 retrieval time: total 198.673s, total predict 198.673s
+	inner product 97.201s, rank bound 24.617s, prune user 19.345s, read disk 56.161s, compute rank 0.002s
+	total ip cost 9371609, total predict io cost 0, total refine io cost 1497856, total refine user 5908, IP bound prune ratio 0.9949, rank prune ratio 1.0000
+top100 retrieval time: total 237.233s, total predict 237.233s
+	inner product 100.439s, rank bound 25.430s, prune user 19.855s, read disk 90.145s, compute rank 0.005s
+	total ip cost 12226524, total predict io cost 0, total refine io cost 2560512, total refine user 10071, IP bound prune ratio 0.9933, rank prune ratio 1.0000
+top150 retrieval time: total 266.793s, total predict 266.793s
+	inner product 101.987s, rank bound 25.978s, prune user 20.204s, read disk 117.243s, compute rank 0.008s
+	total ip cost 14378656, total predict io cost 0, total refine io cost 3723840, total refine user 13693, IP bound prune ratio 0.9921, rank prune ratio 1.0000
+top200 retrieval time: total 245.763s, total predict 245.763s
+	inner product 100.745s, rank bound 26.231s, prune user 20.509s, read disk 96.923s, compute rank 0.005s
+	total ip cost 16242986, total predict io cost 0, total refine io cost 997440, total refine user 11470, IP bound prune ratio 0.9911, rank prune ratio 1.0000
+top250 retrieval time: total 756.140s, total predict 756.140s
+	inner product 104.520s, rank bound 26.786s, prune user 20.810s, read disk 602.364s, compute rank 0.141s
+	total ip cost 17877719, total predict io cost 0, total refine io cost 2676945024, total refine user 76938, IP bound prune ratio 0.9902, rank prune ratio 1.0000
