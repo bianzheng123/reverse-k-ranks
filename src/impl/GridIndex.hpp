@@ -39,6 +39,7 @@ namespace ReverseMIPS::GridIndex {
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
+        size_t stop_time_;
         double total_retrieval_time_, inner_product_time_, inner_product_bound_time_;
         TimeRecord total_retrieval_record_, inner_product_record_, inner_product_bound_record_;
         size_t total_ip_cost_;
@@ -55,7 +56,8 @@ namespace ReverseMIPS::GridIndex {
                 std::unique_ptr<Grid> &ip_bound_ins,
                 //general retrieval
                 VectorMatrix &data_item,
-                VectorMatrix &user
+                VectorMatrix &user,
+                const size_t &stop_time
         ) {
             this->ip_bound_ins_ = std::move(ip_bound_ins);
 
@@ -64,6 +66,7 @@ namespace ReverseMIPS::GridIndex {
             this->user_ = std::move(user);
             this->vec_dim_ = this->user_.vec_dim_;
             this->n_user_ = this->user_.n_vector_;
+            this->stop_time_ = stop_time;
 
             //retrieval variable
             queryIP_l_.resize(n_user_);
@@ -134,7 +137,7 @@ namespace ReverseMIPS::GridIndex {
                     }
 
                     if (userID % report_every == 0) {
-                        spdlog::info("queryID {}, userID {}, ip_cost {}, time_used {}s",
+                        spdlog::info("queryID {}, userID {}, ip_cost {}, time_used {:.2f}s",
                                      queryID, userID, total_ip_cost_,
                                      inner_product_bound_record_.get_elapsed_time_second());
                     }
@@ -154,6 +157,14 @@ namespace ReverseMIPS::GridIndex {
                 inner_product_bound_time_ += inner_product_bound_record_.get_elapsed_time_second();
                 total_retrieval_time_ += total_retrieval_record_.get_elapsed_time_second();
                 early_prune_ratio_ += early_prune_candidate * 1.0 / n_user_;
+
+                spdlog::info(
+                        "queryID {}, query_time {:.2f}s, total_ip_cost {}, total_retrieval_time {:.2f}s",
+                        queryID, inner_product_bound_time_, total_ip_cost_, total_retrieval_time_);
+                if (total_retrieval_time_ > (double) stop_time_) {
+                    spdlog::info("total retrieval time larger than stop time, retrieval exit");
+                    break;
+                }
             }
 
             early_prune_ratio_ /= n_query_item;
@@ -234,7 +245,7 @@ namespace ReverseMIPS::GridIndex {
      */
 
     std::unique_ptr<Index>
-    BuildIndex(VectorMatrix &data_item, VectorMatrix &user) {
+    BuildIndex(VectorMatrix &data_item, VectorMatrix &user, const size_t &stop_time) {
         user.vectorNormalize();
         assert(user.vec_dim_ == data_item.vec_dim_);
 
@@ -254,7 +265,7 @@ namespace ReverseMIPS::GridIndex {
         IPbound_ptr = std::make_unique<Grid>(n_user, n_data_item, vec_dim, n_codeword);
         IPbound_ptr->Preprocess(user, data_item);
 
-        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(IPbound_ptr, data_item, user);
+        std::unique_ptr<Index> index_ptr = std::make_unique<Index>(IPbound_ptr, data_item, user, stop_time);
         return index_ptr;
     }
 

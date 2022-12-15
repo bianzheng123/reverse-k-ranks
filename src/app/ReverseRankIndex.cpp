@@ -120,8 +120,9 @@ int main(int argc, char **argv) {
     char parameter_name[256] = "";
     if (method_name == "GridIndex") {
         ///Online
-        spdlog::info("input parameter: none");
-        index = GridIndex::BuildIndex(data_item, user);
+        const size_t stop_time = para.stop_time;
+        spdlog::info("input parameter: stop_time {}s", stop_time);
+        index = GridIndex::BuildIndex(data_item, user, stop_time);
 
     } else if (method_name == "LinearModel") {
         spdlog::info("input parameter: none");
@@ -335,7 +336,7 @@ int main(int argc, char **argv) {
         n_execute_query = 100;
     } else if (method_name == "GridIndex") {
         topk_l = {10};
-        n_execute_query = 10;
+        n_execute_query = 100;
 
     } else {
         topk_l = {100, 50, 10};
