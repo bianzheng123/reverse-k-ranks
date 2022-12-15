@@ -12,34 +12,39 @@ def run():
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
-    for method_name, dataset_name, n_sample in [('MinMaxLinearRegression', 'yahoomusic_big', 588),
-                                                ('UniformLinearRegression', 'yelp', 490)]:
-        n_sample_query = 5000
-        for sample_topk in [10, 50, 100, 150, 200, 300, 400, 500, 600]:
-            os.system(
-                f'cd index/memory_index && '
-                f'{method_name}-{dataset_name}-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index '
-                f'{method_name}-{dataset_name}_more_query-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index')
-            os.system(
-                f'cd index/memory_index && '
-                f'{method_name}-{dataset_name}-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index '
-                f'QueryRankSampleSearchKthRank-{dataset_name}_more_query-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index')
-
-    dataset_name = "yahoomusic_big"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen
-    k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 0.5)
+    dataset_name = 'movielens-27m'
     os.system(
-        f"cd build && ./rtk --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
-        f"--test_topk {'false'} --method_name {'SimpferFEXIPROOnly'} --simpfer_k_max {k_max} --stop_time {70000} "
-        f"--test_reverse_topk {64}"
-    )
+        'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --test_topk {} --method_name {} --stop_time {}'.format(
+            dataset_dir, dataset_name, index_dir, 'false', 'GridIndex', 9000))
 
-    dataset_name = "yelp"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen
-    k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 0.5)
-    os.system(
-        f"cd build && ./rtk --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
-        f"--test_topk {'false'} --method_name {'SimpferFEXIPROOnly'} --simpfer_k_max {k_max} --stop_time {70000} "
-        f"--test_reverse_topk {32}"
-    )
+    # for method_name, dataset_name, n_sample in [('MinMaxLinearRegression', 'yahoomusic_big', 588),
+    #                                             ('UniformLinearRegression', 'yelp', 490)]:
+    #     n_sample_query = 5000
+    #     for sample_topk in [10, 50, 100, 150, 200, 300, 400, 500, 600]:
+    #         os.system(
+    #             f'cd index/memory_index && '
+    #             f'{method_name}-{dataset_name}-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index '
+    #             f'{method_name}-{dataset_name}_more_query-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index')
+    #         os.system(
+    #             f'cd index/memory_index && '
+    #             f'{method_name}-{dataset_name}-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index '
+    #             f'QueryRankSampleSearchKthRank-{dataset_name}_more_query-n_sample_{n_sample}-n_sample_query_{n_sample_query}-sample_topk_{sample_topk}.index')
+    #
+    # dataset_name = "yahoomusic_big"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen
+    # k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 0.5)
+    # os.system(
+    #     f"cd build && ./rtk --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
+    #     f"--test_topk {'false'} --method_name {'SimpferFEXIPROOnly'} --simpfer_k_max {k_max} --stop_time {70000} "
+    #     f"--test_reverse_topk {64}"
+    # )
+    #
+    # dataset_name = "yelp"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen
+    # k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 0.5)
+    # os.system(
+    #     f"cd build && ./rtk --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
+    #     f"--test_topk {'false'} --method_name {'SimpferFEXIPROOnly'} --simpfer_k_max {k_max} --stop_time {70000} "
+    #     f"--test_reverse_topk {32}"
+    # )
 
     # n_sample_item = 5000
     # dataset_name = 'yelp'  # yelp, yahoomusic_big

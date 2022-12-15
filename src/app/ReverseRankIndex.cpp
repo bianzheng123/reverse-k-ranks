@@ -335,7 +335,7 @@ int main(int argc, char **argv) {
         topk_l = {50};
         n_execute_query = 100;
     } else if (method_name == "GridIndex") {
-        topk_l = {10};
+        topk_l = {200, 150, 100, 50, 10};
         n_execute_query = 100;
 
     } else {
