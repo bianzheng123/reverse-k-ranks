@@ -35,7 +35,7 @@ void LoadOptions(int argc, char **argv, Parameter &para) {
             ("dataset_name, dn", po::value<std::string>(&para.dataset_name)->default_value("fake-normal"),
              "dataset_name")
             // reverse top-k adaption
-            ("simpfer_k_max, skm", po::value<int>(&para.simpfer_k_max)->default_value(25),
+            ("simpfer_k_max, skm", po::value<int>(&para.simpfer_k_max)->default_value(300),
              "k_max in simpfer");
 
     po::variables_map vm;
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     spdlog::info("finish preprocess and save the index");
 
     vector<int> topk_l;
-    topk_l = {200, 100, 50, 20, 10};
+    topk_l = {200};
 //    topk_l = {10};
 
     vector<vector<int>> result_rank_l;
