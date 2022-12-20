@@ -11,16 +11,16 @@ def run():
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
-    dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp']
+    dataset_l = ['movielens-27m']
     for ds in dataset_l:
         os.system(
             'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --test_topk {} --method_name {} --stop_time {}'.format(
-                dataset_dir, ds, index_dir, 'false', 'GridIndex', 9000))
+                dataset_dir, ds, index_dir, 'false', 'GridIndex', 18000))
 
-    dataset_name = 'amazon-home-kitchen'
-    os.system(
-        'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --test_topk {} --method_name {} --stop_time {}'.format(
-            dataset_dir, dataset_name, index_dir, 'false', 'GridIndex', 9000))
+    # dataset_name = 'amazon-home-kitchen'
+    # os.system(
+    #     'cd build && ./rri --dataset_dir {} --dataset_name {} --index_dir {} --test_topk {} --method_name {} --stop_time {}'.format(
+    #         dataset_dir, dataset_name, index_dir, 'false', 'GridIndex', 9000))
 
     '''rmips'''
     # dataset_name = "yahoomusic_big"  # movielens-27m yahoomusic_big yelp amazon-home-kitchen

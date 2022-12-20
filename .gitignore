@@ -43,3 +43,5 @@ cmake-build-release/
 /motivation/dimensionality_curse/saved/
 /script/plot/sample_topk_1_Yahoomusic.png
 /script/plot/sample_topk_2_Yelp.png
+/ReverseTopK/build/*
+

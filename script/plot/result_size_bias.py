@@ -10,11 +10,12 @@ color_l = ['#3D0DFF', '#6BFF00', '#00E8E2', '#EB0225', '#FF9E03']
 marker_l = ['x', "v", "o", "D", "s"]
 markersize = 15
 
-matplotlib.rcParams.update({'font.size': 20})
+matplotlib.rcParams.update({'font.size': 25})
 
 
 def plot_figure(*, reuslt_size_l: list,
-                xlim: list, ylim: list, n_bin: int,
+                xlim: list, ylim: list, x_ticks: list, n_bin: int,
+                fname_sufix: str,
                 name_m: dict, is_test: bool):
     # fig = plt.figure(figsize=(25, 4))
     fig = plt.figure(figsize=(6, 4))
@@ -26,7 +27,8 @@ def plot_figure(*, reuslt_size_l: list,
     # ax.stairs(counts, bins, color='#828487', fill=True)
     # print(np.logspace(2, 5, num=100))
     ax.hist(reuslt_size_l, bins=n_bin,
-            color='#828487', density=False)
+            color='#828487')
+    ax.ticklabel_format(style='sci', scilimits=(0, 0), axis='x')
 
     # ax.set_xscale('log')
     ax.set_yscale('log')
@@ -36,27 +38,45 @@ def plot_figure(*, reuslt_size_l: list,
         ax.set_xlim(xlim)
     if ylim:
         ax.set_ylim(ylim)
+    if x_ticks:
+        ax.set_xticks(x_ticks)
 
     if is_test:
-        plt.savefig("result_size_bias.jpg", bbox_inches='tight')
+        plt.savefig(f"ResultSizeBias_{fname_sufix}.jpg", bbox_inches='tight')
     else:
-        plt.savefig("result_size_bias.pdf", bbox_inches='tight')
+        plt.savefig(f"ResultSizeBias_{fname_sufix}.pdf", bbox_inches='tight')
 
 
-def transform_data(topk: int):
+def transform_data(ds: str, topk: int, simpfer_k_max: int):
     result_size_l = np.loadtxt(
-        'data/result_size_bias/movielens-27m-top{}-simpfer_k_max_1000-n_cand.txt'.format(topk), dtype=np.int32)
+        f'data/result_size_bias/{ds}-top{topk}-simpfer_k_max_{simpfer_k_max}-n_cand.txt', dtype=np.int32)
     return result_size_l
 
 
 if __name__ == "__main__":
     dataset_l = ['Movielens', 'Yahoomusic', 'Yelp']
+    origin_dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp']
+    xlim_l = [[0, 160000], [0, 240000], [0, 350000]]
+    # xlim_l = [[0, 500], [0, 500], [0, 500]]
+    ylim_l = [[0.9, 3000], [0.9, 3000], [0.9, 3000]]
+    x_ticks_l = [None, [0, 100000, 200000], None]
+    # x_ticks_l = [None, None, None]
+    n_bin_l = [50, 50, 40]
+    # n_bin_l = [2000, 2000, 2000]
+    simpfer_k_max_l = [1000, 300, 300]
     name_m = {'fig_x': 'Result Size',
               'fig_y': 'Frequency'}
-    result_fname = 'ResultSizeBias'
-    is_test = False
-    reuslt_size_l = transform_data(200)
-    print(f"min result size {np.min(reuslt_size_l)}, max result size {np.max(reuslt_size_l)}")
-    plot_figure(reuslt_size_l=reuslt_size_l,
-                xlim=[0, 160000], ylim=[0.9, 3000], n_bin=50,
-                name_m=name_m, is_test=is_test)
+    is_test = True
+    for dataset_name_fig, dataset_name_file, xlim, ylim, x_ticks, n_bin, simpfer_k_max in zip(dataset_l,
+                                                                                              origin_dataset_l, xlim_l,
+                                                                                              ylim_l, x_ticks_l,
+                                                                                              n_bin_l, simpfer_k_max_l):
+        reuslt_size_l = transform_data(dataset_name_file, 200, simpfer_k_max)
+        # reuslt_size_l = np.where(reuslt_size_l < 1000)
+        print(
+            f"min result size {np.min(reuslt_size_l)}, max result size {np.max(reuslt_size_l)}, "
+            f"0 result size count {len(np.argwhere(reuslt_size_l == 0))}")
+        plot_figure(reuslt_size_l=reuslt_size_l,
+                    xlim=xlim, ylim=ylim, x_ticks=x_ticks, n_bin=n_bin,
+                    fname_sufix=dataset_name_fig,
+                    name_m=name_m, is_test=is_test)

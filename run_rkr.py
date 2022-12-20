@@ -146,8 +146,7 @@ def run():
         # 'DiskBruteForce',
         'MemoryBruteForce',
 
-        # 'GridIndex',
-        'GridIndexParallel',
+        'GridIndex',
         # 'LinearModel',
         # 'QueryRankSampleDirectIntLR',
         # 'QueryRankSampleGlobalIntLR',
@@ -182,8 +181,7 @@ def run():
 
         # os.system('cd build && ./bst --dataset_name {}'.format(ds))
 
-        # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'GridIndex'))
-        os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'GridIndexParallel'))
+        os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true', 'GridIndex'))
         # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'LinearModel'))
 
         n_sample_item = 150

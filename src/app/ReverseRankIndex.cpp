@@ -104,8 +104,8 @@ int main(int argc, char **argv) {
     spdlog::info("index_dir {}", index_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector<VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                         vec_dim);
+    vector <VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                          vec_dim);
     VectorMatrix &user = data[0];
     VectorMatrix &data_item = data[1];
     VectorMatrix &query_item = data[2];
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    unique_ptr<BaseIndex> index;
+    unique_ptr <BaseIndex> index;
     char parameter_name[256] = "";
     if (method_name == "GridIndex") {
         ///Online
@@ -336,20 +336,20 @@ int main(int argc, char **argv) {
         n_execute_query = 100;
     } else if (method_name == "GridIndex") {
         topk_l = {200, 150, 100, 50, 10};
-        n_execute_query = 100;
+//        n_execute_query = 1000;
 
     } else {
         topk_l = {100, 50, 10};
     }
 
     RetrievalResult config;
-    vector<vector<vector<UserRankElement>>> result_rank_l;
-    vector<vector<SingleQueryPerformance>> query_performance_topk_l;
+    vector < vector < vector < UserRankElement>>> result_rank_l;
+    vector <vector<SingleQueryPerformance>> query_performance_topk_l;
 
     for (int topk: topk_l) {
-        vector<SingleQueryPerformance> query_performance_l(n_execute_query);
-        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,
-                                                                     query_performance_l);
+        vector <SingleQueryPerformance> query_performance_l(n_execute_query);
+        vector <vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,
+                                                                      query_performance_l);
 
         string performance_str = index->PerformanceStatistics(topk);
         config.AddRetrievalInfo(performance_str);

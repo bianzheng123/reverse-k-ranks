@@ -33,6 +33,7 @@ namespace ReverseMIPS::GridIndex {
             inner_product_bound_time_ = 0;
             early_prune_ratio_ = 0;
             total_ip_cost_ = 0;
+            total_appr_ip_cost_ = 0;
         }
 
         std::unique_ptr<Grid> ip_bound_ins_;
@@ -42,7 +43,7 @@ namespace ReverseMIPS::GridIndex {
         size_t stop_time_;
         double total_retrieval_time_, inner_product_time_, inner_product_bound_time_;
         TimeRecord total_retrieval_record_, inner_product_record_, inner_product_bound_record_;
-        size_t total_ip_cost_;
+        size_t total_ip_cost_, total_appr_ip_cost_;
         double early_prune_ratio_;
     public:
 
@@ -89,17 +90,21 @@ namespace ReverseMIPS::GridIndex {
                 exit(-1);
             }
 
-            const int report_every = 10000;
+            const int report_every = 5000;
             //coarse binary search
             const int n_query_item = n_execute_query;
 
             std::vector<std::vector<UserRankElement>> query_heap_l(n_query_item, std::vector<UserRankElement>(topk));
+            int n_proc_query = 0;
 
             for (int queryID = 0; queryID < n_query_item; queryID++) {
+                n_proc_query++;
                 total_retrieval_record_.reset();
                 double *query_vecs = query_ptr_.get();
                 ip_bound_ins_->PreprocessQuery(query_item.getVector(queryID), vec_dim_, query_vecs);
 
+                size_t this_ip_cost = 0;
+                size_t this_appr_ip_cost = 0;
                 //calculate IP
                 inner_product_record_.reset();
                 for (int userID = 0; userID < n_user_; userID++) {
@@ -108,7 +113,7 @@ namespace ReverseMIPS::GridIndex {
                     queryIP_l_[userID] = queryIP;
                 }
                 inner_product_time_ += inner_product_record_.get_elapsed_time_second();
-                total_ip_cost_ += n_user_;
+                this_ip_cost += n_user_;
 
                 //rank search
                 inner_product_bound_record_.reset();
@@ -117,7 +122,7 @@ namespace ReverseMIPS::GridIndex {
                 for (int userID = 0; userID < topk; userID++) {
                     const double *user_vecs = user_.getVector(userID);
                     int rank = GetRank(queryIP_l_[userID], n_data_item_ + 1, userID, user_vecs, data_item_,
-                                       total_ip_cost_);
+                                       this_ip_cost, this_appr_ip_cost);
 
                     assert(rank != -1);
                     rank_max_heap[userID] = UserRankElement(userID, rank, queryIP_l_[userID]);
@@ -129,17 +134,18 @@ namespace ReverseMIPS::GridIndex {
                 for (int userID = topk; userID < n_user_; userID++) {
                     const double *user_vecs = user_.getVector(userID);
                     int rank = GetRank(queryIP_l_[userID], heap_ele.rank_, userID, user_vecs, data_item_,
-                                       total_ip_cost_);
+                                       this_ip_cost, this_appr_ip_cost);
+
+                    if (userID % report_every == 0) {
+                        spdlog::info(
+                                "queryID {}, userID {}, query_ip_cost {}, query_appr_ip_cost {}, time_used {:.2f}s",
+                                queryID, userID, this_ip_cost, this_appr_ip_cost,
+                                inner_product_bound_record_.get_elapsed_time_second());
+                    }
 
                     if (rank == -1) {
                         early_prune_candidate++;
                         continue;
-                    }
-
-                    if (userID % report_every == 0) {
-                        spdlog::info("queryID {}, userID {}, ip_cost {}, time_used {:.2f}s",
-                                     queryID, userID, total_ip_cost_,
-                                     inner_product_bound_record_.get_elapsed_time_second());
                     }
 
                     UserRankElement element(userID, rank, queryIP_l_[userID]);
@@ -154,31 +160,40 @@ namespace ReverseMIPS::GridIndex {
                 }
                 std::make_heap(rank_max_heap.begin(), rank_max_heap.end(), std::less());
                 std::sort_heap(rank_max_heap.begin(), rank_max_heap.end(), std::less());
-                inner_product_bound_time_ += inner_product_bound_record_.get_elapsed_time_second();
-                total_retrieval_time_ += total_retrieval_record_.get_elapsed_time_second();
-                early_prune_ratio_ += early_prune_candidate * 1.0 / n_user_;
+                const double this_query_inner_product_time = inner_product_bound_record_.get_elapsed_time_second();
+                inner_product_bound_time_ += this_query_inner_product_time;
+                const double this_query_retrieval_time = total_retrieval_record_.get_elapsed_time_second();
+                total_retrieval_time_ += this_query_retrieval_time;
+                const double this_query_prune_ratio = early_prune_candidate * 1.0 / n_user_;
+                early_prune_ratio_ += this_query_prune_ratio;
+
+                total_ip_cost_ += this_ip_cost;
+                total_appr_ip_cost_ += this_appr_ip_cost;
 
                 spdlog::info(
-                        "queryID {}, query_time {:.2f}s, total_ip_cost {}, total_retrieval_time {:.2f}s",
-                        queryID, inner_product_bound_time_, total_ip_cost_, total_retrieval_time_);
+                        "queryID {}, query_time {:.2f}s, total_retrieval_time {:.2f}s, early_prune_ratio {:.2f}, total_ip_cost {}, total_appr_ip_cost {}",
+                        queryID, this_query_inner_product_time, this_query_retrieval_time,
+                        this_query_prune_ratio,
+                        total_ip_cost_, total_appr_ip_cost_);
                 if (total_retrieval_time_ > (double) stop_time_) {
                     spdlog::info("total retrieval time larger than stop time, retrieval exit");
                     break;
                 }
             }
 
-            early_prune_ratio_ /= n_query_item;
+            early_prune_ratio_ /= n_proc_query;
 
             return query_heap_l;
         }
 
         int GetRank(const double &queryIP, const int &min_rank, const int &userID, const double *user_vecs,
-                    const VectorMatrix &item, size_t &total_ip_cost) {
+                    const VectorMatrix &item, size_t &total_ip_cost, size_t &total_appr_ip_cost) {
             int rank = 1;
             int n_cand_ = 0;
             for (int itemID = 0; itemID < n_data_item_; itemID++) {
                 const double *item_vecs = item.getVector(itemID);
                 const double IP_lb = ip_bound_ins_->IPLowerBound(user_vecs, userID, item_vecs, itemID);
+                total_appr_ip_cost++;
                 assert(IP_lb <= InnerProduct(user_vecs, item_vecs, vec_dim_));
                 if (queryIP < IP_lb) {
                     rank++;
@@ -187,6 +202,7 @@ namespace ReverseMIPS::GridIndex {
                     }
                 } else {
                     const double IP_ub = ip_bound_ins_->IPUpperBound(user_vecs, userID, item_vecs, itemID);
+                    total_appr_ip_cost++;
                     assert(InnerProduct(user_vecs, item_vecs, vec_dim_) <= IP_ub);
                     if (IP_lb <= queryIP && queryIP <= IP_ub) {
                         item_cand_l_[n_cand_] = itemID;
@@ -224,10 +240,10 @@ namespace ReverseMIPS::GridIndex {
             char buff[1024];
 
             sprintf(buff,
-                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tearly prune ratio %.4f, total IP cost %ld",
+                    "top%d retrieval time: total %.3fs\n\tinner product time %.3fs, inner product bound time %.3fs\n\tearly prune ratio %.4f, total IP cost %ld, total appr IP cost %ld",
                     topk, total_retrieval_time_,
                     inner_product_time_, inner_product_bound_time_,
-                    early_prune_ratio_, total_ip_cost_);
+                    early_prune_ratio_, total_ip_cost_, total_appr_ip_cost_);
             std::string str(buff);
             return str;
         }
