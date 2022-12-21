@@ -1,0 +1,54 @@
+nohup: ignoring input
+[2022-12-18 11:44:49.239] [info] GridIndex dataset_name yahoomusic_big, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-12-18 11:44:49.239] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-12-18 11:44:57.988] [info] n_data_item 135736, n_query_item 1000, n_user 1823179, vec_dim 150
+[2022-12-18 11:44:57.988] [info] input parameter: stop_time 9000s
+[2022-12-18 11:44:58.134] [info] GridIndex min_codeword 41, codeword 64
+[2022-12-18 11:45:00.792] [info] finish preprocess and save the index
+[2022-12-18 16:10:35.745] [info] queryID 0, query_time 15934.17s, total_ip_cost 36308476, total_retrieval_time 15934.95s
+[2022-12-18 16:10:35.745] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-18 16:10:35.745] [info] finish top-200
+[2022-12-18 16:10:35.745] [info] top200 retrieval time: total 15934.953s
+	inner product time 0.782s, inner product bound time 15934.171s
+	early prune ratio 0.0100, total IP cost 36308476
+[2022-12-18 20:09:47.062] [info] queryID 0, query_time 14350.37s, total_ip_cost 27973152, total_retrieval_time 14351.32s
+[2022-12-18 20:09:47.062] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-18 20:09:47.062] [info] finish top-150
+[2022-12-18 20:09:47.062] [info] top150 retrieval time: total 14351.317s
+	inner product time 0.942s, inner product bound time 14350.374s
+	early prune ratio 0.0100, total IP cost 27973152
+[2022-12-18 23:39:07.034] [info] queryID 0, query_time 12558.94s, total_ip_cost 19490954, total_retrieval_time 12559.97s
+[2022-12-18 23:39:07.034] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-18 23:39:07.034] [info] finish top-100
+[2022-12-18 23:39:07.034] [info] top100 retrieval time: total 12559.971s
+	inner product time 1.035s, inner product bound time 12558.936s
+	early prune ratio 0.0100, total IP cost 19490954
+[2022-12-19 02:25:43.670] [info] queryID 0, query_time 9995.62s, total_ip_cost 10834003, total_retrieval_time 9996.64s
+[2022-12-19 02:25:43.670] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-19 02:25:43.670] [info] finish top-50
+[2022-12-19 02:25:43.670] [info] top50 retrieval time: total 9996.636s
+	inner product time 1.012s, inner product bound time 9995.625s
+	early prune ratio 0.0100, total IP cost 10834003
+[2022-12-19 04:04:48.718] [info] queryID 0, query_time 5944.01s, total_ip_cost 3777432, total_retrieval_time 5945.05s
+[2022-12-19 05:01:44.675] [info] queryID 1, query_time 9358.94s, total_ip_cost 6507701, total_retrieval_time 9361.00s
+[2022-12-19 05:01:44.675] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-19 05:01:44.675] [info] finish top-10
+[2022-12-19 05:01:44.675] [info] top10 retrieval time: total 9361.005s
+	inner product time 2.068s, inner product bound time 9358.937s
+	early prune ratio 0.0200, total IP cost 6507701
+[2022-12-19 05:01:44.675] [info] build index time: total 2.803707743s
+top200 retrieval time: total 15934.953s
+	inner product time 0.782s, inner product bound time 15934.171s
+	early prune ratio 0.0100, total IP cost 36308476
+top150 retrieval time: total 14351.317s
+	inner product time 0.942s, inner product bound time 14350.374s
+	early prune ratio 0.0100, total IP cost 27973152
+top100 retrieval time: total 12559.971s
+	inner product time 1.035s, inner product bound time 12558.936s
+	early prune ratio 0.0100, total IP cost 19490954
+top50 retrieval time: total 9996.636s
+	inner product time 1.012s, inner product bound time 9995.625s
+	early prune ratio 0.0100, total IP cost 10834003
+top10 retrieval time: total 9361.005s
+	inner product time 2.068s, inner product bound time 9358.937s
+	early prune ratio 0.0200, total IP cost 6507701

@@ -1,0 +1,58 @@
+nohup: ignoring input
+[2022-12-15 20:33:19.334] [info] GridIndex dataset_name yelp, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-12-15 20:33:19.335] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-12-15 20:33:25.553] [info] n_data_item 159585, n_query_item 1000, n_user 2189457, vec_dim 150
+[2022-12-15 20:33:25.553] [info] input parameter: stop_time 9000s
+[2022-12-15 20:33:25.695] [info] GridIndex min_codeword 41, codeword 64
+[2022-12-15 20:33:29.711] [info] finish preprocess and save the index
+[2022-12-16 01:18:04.689] [info] queryID 0, query_time 17074.32s, total_ip_cost 46216482, total_retrieval_time 17074.98s
+[2022-12-16 01:18:04.689] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-16 01:18:04.699] [info] finish top-200
+[2022-12-16 01:18:04.699] [info] top200 retrieval time: total 17074.978s
+	inner product time 0.662s, inner product bound time 17074.315s
+	early prune ratio 0.0100, total IP cost 46216482
+[2022-12-16 05:25:13.860] [info] queryID 0, query_time 14828.23s, total_ip_cost 35564015, total_retrieval_time 14829.16s
+[2022-12-16 05:25:13.860] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-16 05:25:13.860] [info] finish top-150
+[2022-12-16 05:25:13.860] [info] top150 retrieval time: total 14829.161s
+	inner product time 0.932s, inner product bound time 14828.229s
+	early prune ratio 0.0100, total IP cost 35564015
+[2022-12-16 08:45:59.434] [info] queryID 0, query_time 12044.63s, total_ip_cost 24684905, total_retrieval_time 12045.57s
+[2022-12-16 08:45:59.434] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-16 08:45:59.434] [info] finish top-100
+[2022-12-16 08:45:59.434] [info] top100 retrieval time: total 12045.573s
+	inner product time 0.941s, inner product bound time 12044.633s
+	early prune ratio 0.0100, total IP cost 24684905
+[2022-12-16 11:04:21.806] [info] queryID 0, query_time 8301.43s, total_ip_cost 13327640, total_retrieval_time 8302.37s
+[2022-12-16 11:42:53.422] [info] queryID 1, query_time 10612.11s, total_ip_cost 24182401, total_retrieval_time 10613.99s
+[2022-12-16 11:42:53.422] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-16 11:42:53.422] [info] finish top-50
+[2022-12-16 11:42:53.422] [info] top50 retrieval time: total 10613.988s
+	inner product time 1.876s, inner product bound time 10612.113s
+	early prune ratio 0.0200, total IP cost 24182401
+[2022-12-16 12:17:58.852] [info] queryID 0, query_time 2104.51s, total_ip_cost 4288378, total_retrieval_time 2105.43s
+[2022-12-16 12:30:49.437] [info] queryID 1, query_time 2874.16s, total_ip_cost 8067968, total_retrieval_time 2876.01s
+[2022-12-16 12:54:25.820] [info] queryID 2, query_time 4289.66s, total_ip_cost 12277356, total_retrieval_time 4292.40s
+[2022-12-16 14:02:39.035] [info] queryID 3, query_time 8381.95s, total_ip_cost 16543151, total_retrieval_time 8385.61s
+[2022-12-16 14:23:20.950] [info] queryID 4, query_time 9622.93s, total_ip_cost 20467701, total_retrieval_time 9627.53s
+[2022-12-16 14:23:20.950] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-16 14:23:20.951] [info] finish top-10
+[2022-12-16 14:23:20.951] [info] top10 retrieval time: total 9627.528s
+	inner product time 4.597s, inner product bound time 9622.931s
+	early prune ratio 0.0500, total IP cost 20467701
+[2022-12-16 14:23:20.951] [info] build index time: total 4.158327759s
+top200 retrieval time: total 17074.978s
+	inner product time 0.662s, inner product bound time 17074.315s
+	early prune ratio 0.0100, total IP cost 46216482
+top150 retrieval time: total 14829.161s
+	inner product time 0.932s, inner product bound time 14828.229s
+	early prune ratio 0.0100, total IP cost 35564015
+top100 retrieval time: total 12045.573s
+	inner product time 0.941s, inner product bound time 12044.633s
+	early prune ratio 0.0100, total IP cost 24684905
+top50 retrieval time: total 10613.988s
+	inner product time 1.876s, inner product bound time 10612.113s
+	early prune ratio 0.0200, total IP cost 24182401
+top10 retrieval time: total 9627.528s
+	inner product time 4.597s, inner product bound time 9622.931s
+	early prune ratio 0.0500, total IP cost 20467701

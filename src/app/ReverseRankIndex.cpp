@@ -332,7 +332,7 @@ int main(int argc, char **argv) {
         topk_l = {30, 20, 10};
 //        topk_l = {10};
     } else if (method_name == "Simpfer" || method_name == "SimpferOnly" || method_name == "SimpferFEXIPROOnly") {
-        topk_l = {50};
+        topk_l = {200};
         n_execute_query = 100;
     } else if (method_name == "GridIndex") {
         topk_l = {200, 150, 100, 50, 10};

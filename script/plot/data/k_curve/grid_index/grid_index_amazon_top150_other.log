@@ -1,0 +1,17 @@
+nohup: ignoring input
+[2022-12-17 20:06:31.359] [info] GridIndex dataset_name amazon-home-kitchen, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-12-17 20:06:31.359] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-12-17 20:06:39.000] [info] n_data_item 409243, n_query_item 1000, n_user 2511610, vec_dim 150
+[2022-12-17 20:06:39.000] [info] input parameter: stop_time 9000s
+[2022-12-17 20:06:39.138] [info] GridIndex min_codeword 41, codeword 64
+[2022-12-17 20:06:41.659] [info] finish preprocess and save the index
+[2022-12-20 04:43:07.397] [info] queryID 0, query_time 203785.26s, total_ip_cost 143528750, total_retrieval_time 203785.74s
+[2022-12-20 04:43:07.397] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-20 04:43:07.398] [info] finish top-150
+[2022-12-20 04:43:07.398] [info] top150 retrieval time: total 203785.738s
+	inner product time 0.476s, inner product bound time 203785.262s
+	early prune ratio 0.0100, total IP cost 143528750
+[2022-12-20 04:43:07.398] [info] build index time: total 2.659603763s
+top150 retrieval time: total 203785.738s
+	inner product time 0.476s, inner product bound time 203785.262s
+	early prune ratio 0.0100, total IP cost 143528750
