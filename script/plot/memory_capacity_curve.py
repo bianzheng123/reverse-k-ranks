@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     name_m = {'csv_x': 'MemoryCapacity', 'fig_x': 'Memory Capacity (GB)',
               'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
-    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMaxLR': 'QSRO'}
+    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMaxLR': 'QSRP'}
     fname_l = ['./data/memory_capacity_curve/Yahoomusic.csv',
                './data/memory_capacity_curve/Yelp.csv']
     dataset_name_l = ['1_yahoomusic_query_time', '2_yelp_query_time']
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     name_m = {'csv_x': 'MemoryCapacity', 'fig_x': 'Memory Capacity (GB)',
               'csv_y': 'BuildIndex', 'fig_y': 'Build Index Time (Hour)'}
-    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMaxLR': 'QSRO'}
+    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMaxLR': 'QSRP'}
     fname_l = ['./data/memory_capacity_curve/Yahoomusic_build_index.csv',
                './data/memory_capacity_curve/Yelp_build_index.csv']
     dataset_name_l = ['1_yahoomusic_build_index', '2_yelp_build_index']
