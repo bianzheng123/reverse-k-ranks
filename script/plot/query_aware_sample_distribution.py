@@ -1,19 +1,21 @@
+import os.path
 import struct
 import matplotlib.pyplot as plt
 import matplotlib
+import numpy as np
 
 matplotlib.rcParams.update({'font.size': 35})
 hatch = ['--', '+', 'x', '\\']
 width = 0.35  # the width of the bars: can also be len(x) sequence
 
 
-def get_sample_ip_l(*, dir_name: str, file_name: str, userid_l: list):
+def get_sample_ip_l(*, file_name: str, userid_l: list):
     sizeof_size_t = 8
     sizeof_int = 4
     sizeof_double = 8
 
     f = open(
-        '{}/{}.index'.format(dir_name, file_name),
+        file_name,
         'rb')
 
     n_sample_b = f.read(sizeof_size_t)
@@ -51,29 +53,16 @@ dataset_m = {'movielens-27m': [52889, 1000, 283228],
              'yelp_more_query': [159585, 1000, 2189457], }
 
 
-def get_score_table_ip_l(*, dir_name: str, file_name: str,
+def get_score_table_ip_l(*, file_name: str,
                          dataset_name: str,
                          userid_l: list):
-    # sizeof_size_t = 8
-    # sizeof_int = 4
     sizeof_double = 8
 
-    f = open(
-        '{}/{}.index'.format(dir_name, file_name),
-        'rb')
+    f = open(file_name, 'rb')
     n_user = dataset_m[dataset_name][2]
     n_data_item = dataset_m[dataset_name][0]
 
-    # n_sample_b = f.read(sizeof_size_t)
-    # n_data_item_b = f.read(sizeof_size_t)
-    # n_user_b = f.read(sizeof_size_t)
-
-    # n_sample = struct.unpack("N", n_sample_b)[0]
-    # n_data_item = struct.unpack("N", n_data_item_b)[0]
-    # n_user = struct.unpack("N", n_user_b)[0]
-    # print(n_sample)
     print(n_data_item, n_user)
-
     sample_arr_m = {}
 
     for userID in userid_l:
@@ -101,8 +90,8 @@ def plot_figure(*, method_name: str,
     ax.set_ylabel('Frequency')
     # ax.legend(frameon=False, bbox_to_anchor=(0.5, 1), loc="center", ncol=len(dataset_l), borderaxespad=5)
     # ax.set_xticks(np.arange(n_dataset), dataset_l)
-    ax.set_xlim([0, 2.5])
-    ax.set_ylim([0, 32])
+    ax.set_xlim([-0.35, 2.5])
+    # ax.set_ylim([0, 32])
 
     ax.margins(y=0.3)
     # fig.tight_layout(rect=(0.01, -0.07, 1.02, 1.05))
@@ -112,35 +101,50 @@ def plot_figure(*, method_name: str,
         plt.savefig("query_aware_sample_distribution_{}.pdf".format(method_name), bbox_inches='tight')
 
 
-# yahoomusic_qrs_m = get_sample_ip_l(
-#     '/home/zhengbian/reverse-k-ranks/index/memory_index',
-#     'QueryRankSampleSearchKthRank-yelp-n_sample_490-n_sample_query_5000-sample_topk_600',
-#     [3])
-# yahoomusic_rs_m = get_sample_ip_l(
-#     '/home/zhengbian/reverse-k-ranks/index/memory_index',
-#     'RankSample-yelp-n_sample_490',
-#     [3])
+def run_local(*, is_test: bool, userID: int):
+    dir_name = '/home/bianzheng/reverse-k-ranks/index/memory_index_important'
+    file_name = os.path.join(dir_name,
+                             'QueryRankSampleSearchKthRank-yelp-n_sample_490-n_sample_query_5000-sample_topk_600.index')
+    yelp_qrs_m = get_sample_ip_l(
+        file_name=file_name,
+        userid_l=[userID])
 
-dir_name = '/home/zhengbian/reverse-k-ranks/index/memory_index'
-yelp_qrs_m = get_sample_ip_l(
-    dir_name=dir_name,
-    file_name='QueryRankSampleSearchKthRank-yelp-n_sample_490-n_sample_query_5000-sample_topk_600',
-    userid_l=[7])
-yelp_rs_m = get_sample_ip_l(
-    dir_name=dir_name,
-    file_name='RankSample-yelp-n_sample_490',
-    userid_l=[7])
+    file_name = os.path.join(dir_name,
+                             'RankSample-yelp-n_sample_490.index')
+    yelp_rs_m = get_sample_ip_l(
+        file_name=file_name,
+        userid_l=[userID])
 
-dir_name = '/home/zhengbian/reverse-k-ranks/index'
-yelp_score_table_m = get_score_table_ip_l(
-    dir_name=dir_name,
-    file_name='yelp',
-    dataset_name='yelp', userid_l=[7])
+    yelp_score_table_l = np.loadtxt(os.path.join(dir_name, f'yelp_score_table_userID_{userID}.txt'))
 
-score_l_l = [yelp_score_table_m[7], yelp_rs_m[7], yelp_qrs_m[7]]
-# score_l_l = [yahoomusic_qrs_m[3], yahoomusic_rs_m[3]]
-# title_l = ['Yahoomusic QAS', 'Yahoomusic US', 'Yelp QAS', 'Yelp US']
-method_l = ['query_aware_sample', 'uniform_sample']
-is_test = True
-for score_l, method_name in zip(score_l_l, method_l):
+    score_l_l = [yelp_score_table_l, yelp_rs_m[userID], yelp_qrs_m[userID]]
+
+    print(np.min(score_l_l[0]), np.min(score_l_l[1]), np.min(score_l_l[2]))
+    print(np.max(score_l_l[0]), np.max(score_l_l[1]), np.max(score_l_l[2]))
+    # score_l_l = [yahoomusic_qrs_m[3], yahoomusic_rs_m[3]]
+    # title_l = ['Yahoomusic QAS', 'Yahoomusic US', 'Yelp QAS', 'Yelp US']
+    method_l = ['score_table', 'uniform_sample', 'query_aware_sample']
+    for score_l, method_name in zip(score_l_l, method_l):
+        plot_figure(method_name=method_name, score_l=score_l, is_test=is_test)
+
+
+def run_dbg_host(*, userID: int):
+    dir_name = '/home/zhengbian/reverse-k-ranks/index'
+    file_name = os.path.join(dir_name, 'yelp.index')
+    yelp_score_table_m = get_score_table_ip_l(
+        file_name=file_name,
+        dataset_name='yelp', userid_l=[userID])
+
+    score_l = yelp_score_table_m[userID]
+    print(f"min score {np.min(score_l)}, max score {np.max(score_l)}")
+    method_name = 'score_table'
     plot_figure(method_name=method_name, score_l=score_l, is_test=is_test)
+    np.savetxt(f'yelp_score_table_userID_{userID}.txt', score_l)
+
+
+if __name__ == '__main__':
+    is_test = False
+
+    userID = 7
+    run_dbg_host(userID=userID)
+    # run_local(is_test=is_test, userID=userID)

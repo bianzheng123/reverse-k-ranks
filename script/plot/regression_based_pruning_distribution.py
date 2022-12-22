@@ -1,5 +1,7 @@
+import os
 import struct
 import matplotlib.pyplot as plt
+import query_aware_sample_distribution
 import numpy as np
 import matplotlib
 import scipy.stats as stats
@@ -8,93 +10,13 @@ matplotlib.rcParams.update({'font.size': 35})
 hatch = ['--', '+', 'x', '\\']
 width = 0.35  # the width of the bars: can also be len(x) sequence
 
-dataset_m = {'movielens-27m': [52889, 1000, 283228],
-             'netflix': [16770, 1000, 480189],
-             'yahoomusic_big': [135736, 1000, 1823179],
-             'yahoomusic': [97213, 1000, 1948882],
-             'yelp': [159585, 1000, 2189457],
-             'goodreads': [2359650, 1000, 876145],
-             'amazon-home-kitchen': [409243, 1000, 2511610],
-             'yahoomusic_big_more_query': [135736, 1000, 1823179],
-             'yelp_more_query': [159585, 1000, 2189457], }
 
-
-def get_score_table_ip_l(*, dir_name: str, file_name: str,
-                         dataset_name: str,
-                         userid_l: list):
-    # sizeof_size_t = 8
-    # sizeof_int = 4
-    sizeof_double = 8
-
-    f = open(
-        '{}/{}.index'.format(dir_name, file_name),
-        'rb')
-    n_user = dataset_m[dataset_name][2]
-    n_data_item = dataset_m[dataset_name][0]
-
-    # n_sample_b = f.read(sizeof_size_t)
-    # n_data_item_b = f.read(sizeof_size_t)
-    # n_user_b = f.read(sizeof_size_t)
-
-    # n_sample = struct.unpack("N", n_sample_b)[0]
-    # n_data_item = struct.unpack("N", n_data_item_b)[0]
-    # n_user = struct.unpack("N", n_user_b)[0]
-    # print(n_sample)
-    print(n_data_item, n_user)
-
-    sample_arr_m = {}
-
-    for userID in userid_l:
-        f.seek(userID * n_data_item * sizeof_double, 0)
-        sample_ip_l_b = f.read(n_data_item * sizeof_double)
-        sample_ip_l = struct.unpack("d" * n_data_item, sample_ip_l_b)
-        sample_arr_m[userID] = sample_ip_l
-
-    f.close()
-    return sample_arr_m
-
-
-def get_sample_ip_l(dir_name, file_name, userid_l):
+def get_sample_lr(*, file_name: str, userid_l: list):
     sizeof_size_t = 8
     sizeof_int = 4
     sizeof_double = 8
 
-    f = open(
-        '{}/{}.index'.format(dir_name, file_name),
-        'rb')
-
-    n_sample_b = f.read(sizeof_size_t)
-    n_data_item_b = f.read(sizeof_size_t)
-    n_user_b = f.read(sizeof_size_t)
-
-    n_sample = struct.unpack("N", n_sample_b)[0]
-    n_data_item = struct.unpack("N", n_data_item_b)[0]
-    n_user = struct.unpack("N", n_user_b)[0]
-    print(n_sample)
-    print(n_data_item, n_user)
-
-    # userid_l = np.random.choice(n_user, 20, replace=False)
-
-    sample_arr_m = {}
-
-    for userID in userid_l:
-        f.seek(sizeof_size_t * 3 + sizeof_int * n_sample + userID * n_sample * sizeof_double, 0)
-        sample_ip_l_b = f.read(n_sample * sizeof_double)
-        sample_ip_l = struct.unpack("d" * n_sample, sample_ip_l_b)
-        sample_arr_m[userID] = sample_ip_l
-
-    f.close()
-    return sample_arr_m
-
-
-def get_sample_lr(dir_name, file_name, userid_l):
-    sizeof_size_t = 8
-    sizeof_int = 4
-    sizeof_double = 8
-
-    f = open(
-        '{}/{}.index'.format(dir_name, file_name),
-        'rb')
+    f = open(file_name, 'rb')
 
     n_data_item_b = f.read(sizeof_size_t)
     n_user_b = f.read(sizeof_size_t)
@@ -160,8 +82,8 @@ def plot_hist_figure(*, method_name: str,
 
 
 def plot_figure(*, method_name: str,
-                score_l_l: list,
-                rank_l_l: list,
+                score_l: list,
+                rank_l: list,
                 ylim_l: list,
                 legend_loc: list,
                 is_test: bool):
@@ -171,13 +93,9 @@ def plot_figure(*, method_name: str,
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
 
-    # ax.scatter(x=score_l_l[0], y=rank_l_l[0], s=2, label='sampled score')
-    ax.plot(score_l_l[0], rank_l_l[0], color='#000000', linestyle='dashed', linewidth=3)
+    ax.plot(score_l, rank_l, color='#000000', linestyle='solid', linewidth=3)
 
-    ax.legend(frameon=False, loc=legend_loc[0], bbox_to_anchor=legend_loc[1])
-
-    # for score_l, rank_l, i in zip(score_l_l, rank_l_l, np.arange(len(score_l_l))):
-    #     ax.plot(score_l, rank_l, color='#b2b2b2', marker=marker_l[i], fillstyle='none', markersize=markersize)
+    # ax.legend(frameon=False, loc=legend_loc[0], bbox_to_anchor=legend_loc[1])
 
     ax.set_xlabel('Score')
     ax.set_ylabel('Rank')
@@ -189,50 +107,44 @@ def plot_figure(*, method_name: str,
     # ax.margins(y=0.3)
     # fig.tight_layout(rect=(0.01, -0.07, 1.02, 1.05))
     if is_test:
-        plt.savefig("regression_based_pruning_fitting_{}.jpg".format(method_name), bbox_inches='tight', dpi=600)
+        plt.savefig("regression_based_pruning_{}.jpg".format(method_name), bbox_inches='tight', dpi=600)
     else:
-        plt.savefig("regression_based_pruning_fitting_{}.pdf".format(method_name), bbox_inches='tight')
+        plt.savefig("regression_based_pruning_{}.pdf".format(method_name), bbox_inches='tight')
 
 
-userID = 1200
-dir_name = '/home/zhengbian/reverse-k-ranks/index'
-yelp_score_table_m = get_score_table_ip_l(
-    dir_name=dir_name,
-    file_name='yelp',
-    dataset_name='yelp', userid_l=[userID])
+def run_local(*, userID: int, is_test: bool):
+    dir_name = '/home/bianzheng/reverse-k-ranks/index/memory_index_important'
 
-score_l_l = [yelp_score_table_m[userID]]
-method_l = ['1_Yelp']
-is_test = True
-for score_l, method_name in zip(score_l_l, method_l):
-    plot_hist_figure(method_name=method_name, score_l=score_l, is_test=is_test)
+    # score_table_l = np.loadtxt(os.path.join(dir_name, f'yelp_score_table_userID_{userID}.txt'))
+    # method_name = 'score_table'
+    # plot_hist_figure(method_name=method_name, score_l=score_table_l, is_test=is_test)
 
-dir_name = '/home/zhengbian/reverse-k-ranks/index/memory_index'
+    file_name = os.path.join(dir_name,
+                             'QueryRankSampleIntLR-yelp-n_sample_405-n_sample_query_5000-sample_topk_600.index')
+    yelp_qrs_m = query_aware_sample_distribution.get_sample_ip_l(
+        file_name=file_name, userid_l=[userID])
 
-yelp_pre_m = get_sample_lr(dir_name, 'MinMaxLinearRegression-yelp-n_sample_405',
-                           [userID])
-yelp_qrs_m = get_sample_ip_l(
-    dir_name,
-    'QueryRankSampleIntLR-yelp-n_sample_405-n_sample_query_5000-sample_topk_600',
-    [userID])
+    score_l = yelp_qrs_m[userID]
+    rank_l = np.arange(len(score_l))
 
-score_l_l = [yelp_qrs_m[userID]]
-method_l = ['before_transformation', 'after_transformation']
+    method_name = 'before_transformation'
+    ylim_l = [0, 420]
+    legend_loc = ['upper right', (1.05, 1.05)]
+    plot_figure(method_name=method_name, score_l=score_l, rank_l=rank_l,
+                ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
 
-score_l = score_l_l[0]
-method_name = method_l[0]
-rank_l = np.arange(len(score_l))
-yelp_pre = yelp_pre_m[userID]
-ylim_l = [0, 420]
-print("second error {}".format(yelp_pre[2]))
-rank_pred_l = [
-    yelp_pre[0][0] * stats.norm.cdf((_ - yelp_pre[1][0]) / yelp_pre[1][1]) + yelp_pre[0][1]
-    for _ in score_l
-]
-# rank_pred_error_l = [
-#     yelp_pre[0][0] * stats.norm.cdf((_ - yelp_pre[1][0]) / yelp_pre[1][1]) + yelp_pre[0][1] + yelp_pre[2][0]
-#     for _ in score_l
-# ]
-legend_loc = ['upper right', (1.05, 1.05)]
-plot_figure(method_name=method_name, score_l_l=[score_l, rank_pred_l], rank_l_l=[rank_l, rank_l],
-            ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
+    method_name = 'after_transformation'
+    mu = np.average(score_l)
+    sigma = np.std(score_l)
+    transform_score_l = [stats.norm.cdf((x - mu) / sigma) for x in score_l]
+    legend_loc = ['upper right', (1.05, 1.05)]
+    plot_figure(method_name=method_name, score_l=transform_score_l, rank_l=rank_l,
+                ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
+
+
+if __name__ == '__main__':
+    userID = 8993
+    is_test = True
+
+    run_local(userID=userID, is_test=is_test)
+    # query_aware_sample_distribution.run_dbg_host(userID=userID)
