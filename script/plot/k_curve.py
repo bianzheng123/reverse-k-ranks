@@ -158,7 +158,7 @@ def plot_figure(*, fname: str, dataset: str, set_log: bool, ylim: list, legend_l
     '''
 
 if __name__ == "__main__":
-    is_test = True
+    is_test = False
 
     fname_l = ['./data/k_curve/Movielens.csv',
                './data/k_curve/Yahoomusic.csv',
@@ -168,15 +168,15 @@ if __name__ == "__main__":
     set_log_l = [True, True, True, True]
     # ylim_l = [[0.01, 1], [0.1, 100], [0.1, 100], [1, 100001]]
     # ylim_l = [[0.01, 3000], [0.1, 100000], [0.1, 300000], [1, 5e7]] # for not grid index
-    ylim_l = [[0.01, 1e4], [0.1, 100000], [0.1, 300000], [1, 1e6]]
+    ylim_l = [[0.01, 100000], [0.1, 100000], [0.1, 300000], [1, 5e7]]
     # ylim_l = [None, None, None, None]
-    legend_loc_l = [('best', None), ('center right', (1, 0.6)), ('center right', (1, 0.6)), ('center right', (1, 0.6))]
+    legend_loc_l = [('best', None), ('center right', (1, 0.6)), ('center right', (1, 0.6)), ('center right', (1, 0.5))]
     labelpad_l = [0, -5, -5, 0]
     # labelpad_l = [0, 0, 0, 0]
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
-    method_m = {'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMax': 'QSRP'}
+    method_m = {'RMIPS': 'RMIPS', 'Grid': 'Grid', 'RS': 'US', 'QRSMinMax': 'QSRP'}
     result_fname_prefix = 'k_running_time_overall_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,

@@ -43,6 +43,7 @@ namespace ReverseMIPS::Simpfer {
 
     public:
         SimpferIndex simpfer_index_;
+        Matrix user_matrix_;
 
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
@@ -52,10 +53,10 @@ namespace ReverseMIPS::Simpfer {
         size_t total_ip_cost_;
 
         Index(
-                SimpferIndex &&simpfer_index,
+                SimpferIndex &&simpfer_index, Matrix &&user_matrix,
                 //general retrieval
                 VectorMatrix &user, VectorMatrix &data_item, const size_t &stop_time)
-                : simpfer_index_(std::move(simpfer_index)) {
+                : simpfer_index_(std::move(simpfer_index)), user_matrix_(std::move(user_matrix)) {
             //index for reverseMIPS
             //general retrieval
             this->n_user_ = user.n_vector_;
@@ -101,7 +102,7 @@ namespace ReverseMIPS::Simpfer {
                 int result_size = 0;
 
                 while (rtk_topk < n_data_item_) {
-                    simpfer_index_.RTopKRetrieval(query_sd_l[queryID], rtk_topk,
+                    simpfer_index_.RTopKRetrieval(query_sd_l[queryID], user_matrix_, rtk_topk,
                                                   result_userID_l,
                                                   n_block_prune, n_sample_prune, n_norm_prune, ip_count, result_size);
                     const double accu_retrieval_time = total_retrieval_record_.get_elapsed_time_second();
@@ -195,12 +196,24 @@ namespace ReverseMIPS::Simpfer {
         Blocking(user_sd_l, block_l,
                  n_user, simpfer_k_max);
 
+        //transform the input
+        const int scaling_value = 1000;
+        const double SIGMA = 0.7;
+
+        Matrix data_item_matrix, user_matrix;
+        data_item_matrix.init(data_item);
+        user_matrix.init(user);
+
+        SIRPrune sirPrune(scaling_value, SIGMA, &data_item_matrix);
+
         SimpferIndex simpfer_index(user_sd_l, data_item_sd_l, block_l,
+                                   std::move(sirPrune),
                                    simpfer_k_max,
                                    n_user, n_data_item, vec_dim);
 
         std::unique_ptr<Index> index_ptr = std::make_unique<Index>(
                 std::move(simpfer_index),
+                std::move(user_matrix),
                 //general retrieval
                 user, data_item,
                 stop_time);
