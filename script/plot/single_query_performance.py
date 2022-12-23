@@ -34,14 +34,17 @@ def compile_rmips(*, fname: str, require_topk: int):
                 continue
             else:
                 if result_size > require_topk:
-                    result_query_l.append((queryID, result_size, accu_ip_cost, accu_query_time))
+                    result_query_l.append((queryID, result_size, accu_ip_cost, accu_query_time, rtk_topk))
                     skip_queryID = queryID
         # else:
         #     print("No match!!")
     total_ip = np.sum([_[2] for _ in result_query_l])
     total_time = np.sum([_[3] for _ in result_query_l])
+    require_topk = np.average([_[4] for _ in result_query_l])
     # print(np.setdiff1d(np.arange(670), np.array([_[0] for _ in result_query_l])))
-    print("No.total query {}, total IP {}, total time {}s".format(len(result_query_l), total_ip, total_time))
+    print(
+        "No.total query {}, total IP {}, total time {}s, average require top-k {}".format(len(result_query_l), total_ip,
+                                                                                          total_time, require_topk))
     return result_query_l
 
 

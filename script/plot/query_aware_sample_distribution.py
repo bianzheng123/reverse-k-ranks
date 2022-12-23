@@ -84,16 +84,16 @@ def plot_figure(*, method_name: str,
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
 
-    ax.hist(score_l, color='#b2b2b2', bins=50, width=0.1)
+    ax.hist(score_l, color='#b2b2b2', bins=50, density=True)
 
     ax.set_xlabel('Score')
-    ax.set_ylabel('Frequency')
+    ax.set_ylabel('Density')
     # ax.legend(frameon=False, bbox_to_anchor=(0.5, 1), loc="center", ncol=len(dataset_l), borderaxespad=5)
     # ax.set_xticks(np.arange(n_dataset), dataset_l)
-    ax.set_xlim([-0.35, 2.5])
-    # ax.set_ylim([0, 32])
+    ax.set_xlim([-0.45, 2.3])
+    ax.set_ylim([0, 1.75])
 
-    ax.margins(y=0.3)
+    # ax.margins(y=0.3)
     # fig.tight_layout(rect=(0.01, -0.07, 1.02, 1.05))
     if is_test:
         plt.savefig("query_aware_sample_distribution_{}.jpg".format(method_name), bbox_inches='tight', dpi=600)
@@ -119,8 +119,7 @@ def run_local(*, is_test: bool, userID: int):
 
     score_l_l = [yelp_score_table_l, yelp_rs_m[userID], yelp_qrs_m[userID]]
 
-    print(np.min(score_l_l[0]), np.min(score_l_l[1]), np.min(score_l_l[2]))
-    print(np.max(score_l_l[0]), np.max(score_l_l[1]), np.max(score_l_l[2]))
+    print(f'min score {np.min(yelp_score_table_l)}, max score {np.max(yelp_score_table_l)}')
     # score_l_l = [yahoomusic_qrs_m[3], yahoomusic_rs_m[3]]
     # title_l = ['Yahoomusic QAS', 'Yahoomusic US', 'Yelp QAS', 'Yelp US']
     method_l = ['score_table', 'uniform_sample', 'query_aware_sample']
@@ -130,6 +129,7 @@ def run_local(*, is_test: bool, userID: int):
 
 def run_dbg_host(*, userID: int):
     dir_name = '/home/zhengbian/reverse-k-ranks/index'
+    is_test = True
     file_name = os.path.join(dir_name, 'yelp.index')
     yelp_score_table_m = get_score_table_ip_l(
         file_name=file_name,
@@ -145,6 +145,6 @@ def run_dbg_host(*, userID: int):
 if __name__ == '__main__':
     is_test = False
 
-    userID = 7
-    run_dbg_host(userID=userID)
-    # run_local(is_test=is_test, userID=userID)
+    userID = 8993
+    # run_dbg_host(userID=userID)
+    run_local(is_test=is_test, userID=userID)

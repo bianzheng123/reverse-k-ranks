@@ -44,7 +44,7 @@ def plot_curve(*, x_l_l: list, y_l_l: list, label_l: list,
 
 if __name__ == "__main__":
     is_test = False
-    label_l = ['Kth Candidate Rank', 'Uniform Candidate Rank']
+    label_l = ['Top-k Candidate', 'Uniform Candidate']
 
     yahoomusic_l = pd.read_csv('./data/sample_heuristic/Yahoomusic.csv')
     topk_l = yahoomusic_l['topk']

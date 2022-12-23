@@ -1,0 +1,82 @@
+nohup: ignoring input
+[2022-12-21 15:30:31.947] [info] Simpfer dataset_name amazon-home-kitchen, dataset_dir /home/zhengbian/Dataset/ReverseMIPS
+[2022-12-21 15:30:31.947] [info] index_dir /home/zhengbian/reverse-k-ranks/index
+[2022-12-21 15:30:51.268] [info] n_data_item 409243, n_query_item 1000, n_user 2511610, vec_dim 150
+[2022-12-21 15:30:51.268] [info] input parameter: simpfer_k_max 213, stop_time 43200s
+[2022-12-21 15:38:28.780] [info] finish preprocess and save the index
+[2022-12-21 15:39:22.377] [info] queryID 0, result_size 0, rtk_topk 1, accu_ip_cost 336, accu_query_time 53.60s,
+[2022-12-21 15:39:22.437] [info] queryID 0, result_size 0, rtk_topk 2, accu_ip_cost 1260, accu_query_time 53.66s,
+[2022-12-21 15:39:22.496] [info] queryID 0, result_size 0, rtk_topk 4, accu_ip_cost 2226, accu_query_time 53.72s,
+[2022-12-21 15:39:22.562] [info] queryID 0, result_size 0, rtk_topk 8, accu_ip_cost 5208, accu_query_time 53.78s,
+[2022-12-21 15:39:22.636] [info] queryID 0, result_size 0, rtk_topk 16, accu_ip_cost 9660, accu_query_time 53.86s,
+[2022-12-21 15:39:22.772] [info] queryID 0, result_size 0, rtk_topk 32, accu_ip_cost 20496, accu_query_time 53.99s,
+[2022-12-21 15:39:22.919] [info] queryID 0, result_size 0, rtk_topk 64, accu_ip_cost 47544, accu_query_time 54.14s,
+[2022-12-21 15:39:23.311] [info] queryID 0, result_size 0, rtk_topk 128, accu_ip_cost 160440, accu_query_time 54.53s,
+[2022-12-21 15:40:44.587] [info] queryID 0, result_size 0, rtk_topk 256, accu_ip_cost 1022225270, accu_query_time 135.81s,
+[2022-12-21 15:42:30.596] [info] queryID 0, result_size 0, rtk_topk 512, accu_ip_cost 1665197430, accu_query_time 241.82s,
+[2022-12-21 15:45:04.062] [info] queryID 0, result_size 0, rtk_topk 1024, accu_ip_cost 2951141750, accu_query_time 395.28s,
+[2022-12-21 15:49:22.320] [info] queryID 0, result_size 0, rtk_topk 2048, accu_ip_cost 5523030390, accu_query_time 653.54s,
+[2022-12-21 15:56:59.306] [info] queryID 0, result_size 0, rtk_topk 4096, accu_ip_cost 10666807670, accu_query_time 1110.53s,
+[2022-12-21 16:11:14.060] [info] queryID 0, result_size 0, rtk_topk 8192, accu_ip_cost 20954362230, accu_query_time 1965.28s,
+[2022-12-21 16:46:22.526] [info] queryID 0, result_size 0, rtk_topk 16384, accu_ip_cost 41529471350, accu_query_time 4073.75s,
+[2022-12-21 17:46:00.294] [info] queryID 0, result_size 0, rtk_topk 32768, accu_ip_cost 82679689590, accu_query_time 7651.51s,
+[2022-12-21 19:46:55.243] [info] queryID 0, result_size 31, rtk_topk 65536, accu_ip_cost 164980126070, accu_query_time 14906.46s,
+[2022-12-21 23:12:57.671] [info] queryID 0, result_size 474, rtk_topk 131072, accu_ip_cost 329580999030, accu_query_time 27268.89s,
+[2022-12-21 23:12:57.671] [info] queryID 0, result_size 474, rtk_topk 131072, ip_cost 329580999030, query_time 27268.89s, total_ip_cost 329580999030, total_retrieval_time 27268.89s
+[2022-12-21 23:12:57.908] [info] queryID 1, result_size 0, rtk_topk 1, accu_ip_cost 6888, accu_query_time 0.24s,
+[2022-12-21 23:12:58.016] [info] queryID 1, result_size 0, rtk_topk 2, accu_ip_cost 13020, accu_query_time 0.35s,
+[2022-12-21 23:12:58.154] [info] queryID 1, result_size 0, rtk_topk 4, accu_ip_cost 24192, accu_query_time 0.48s,
+[2022-12-21 23:12:58.329] [info] queryID 1, result_size 0, rtk_topk 8, accu_ip_cost 41286, accu_query_time 0.66s,
+[2022-12-21 23:12:58.586] [info] queryID 1, result_size 0, rtk_topk 16, accu_ip_cost 73290, accu_query_time 0.92s,
+[2022-12-21 23:12:58.990] [info] queryID 1, result_size 0, rtk_topk 32, accu_ip_cost 132426, accu_query_time 1.32s,
+[2022-12-21 23:12:59.706] [info] queryID 1, result_size 0, rtk_topk 64, accu_ip_cost 250320, accu_query_time 2.04s,
+[2022-12-21 23:13:01.286] [info] queryID 1, result_size 0, rtk_topk 128, accu_ip_cost 574961, accu_query_time 3.62s,
+[2022-12-21 23:14:08.666] [info] queryID 1, result_size 0, rtk_topk 256, accu_ip_cost 1022225270, accu_query_time 71.00s,
+[2022-12-21 23:15:51.880] [info] queryID 1, result_size 0, rtk_topk 512, accu_ip_cost 1665197430, accu_query_time 174.21s,
+[2022-12-21 23:18:27.103] [info] queryID 1, result_size 0, rtk_topk 1024, accu_ip_cost 2951141750, accu_query_time 329.43s,
+[2022-12-21 23:22:47.464] [info] queryID 1, result_size 0, rtk_topk 2048, accu_ip_cost 5523030390, accu_query_time 589.79s,
+[2022-12-21 23:30:27.201] [info] queryID 1, result_size 14, rtk_topk 4096, accu_ip_cost 10666807670, accu_query_time 1049.53s,
+[2022-12-21 23:44:56.345] [info] queryID 1, result_size 136, rtk_topk 8192, accu_ip_cost 20954362230, accu_query_time 1918.67s,
+[2022-12-22 00:20:29.758] [info] queryID 1, result_size 867, rtk_topk 16384, accu_ip_cost 41529471350, accu_query_time 4052.09s,
+[2022-12-22 00:20:29.758] [info] queryID 1, result_size 867, rtk_topk 16384, ip_cost 41529471350, query_time 4052.09s, total_ip_cost 371110470380, total_retrieval_time 31320.98s
+[2022-12-22 00:20:30.227] [info] queryID 2, result_size 0, rtk_topk 1, accu_ip_cost 1512, accu_query_time 0.47s,
+[2022-12-22 00:20:30.297] [info] queryID 2, result_size 0, rtk_topk 2, accu_ip_cost 3192, accu_query_time 0.54s,
+[2022-12-22 00:20:30.386] [info] queryID 2, result_size 0, rtk_topk 4, accu_ip_cost 6594, accu_query_time 0.63s,
+[2022-12-22 00:20:30.495] [info] queryID 2, result_size 0, rtk_topk 8, accu_ip_cost 11298, accu_query_time 0.74s,
+[2022-12-22 00:20:30.682] [info] queryID 2, result_size 0, rtk_topk 16, accu_ip_cost 22554, accu_query_time 0.92s,
+[2022-12-22 00:20:31.011] [info] queryID 2, result_size 0, rtk_topk 32, accu_ip_cost 45024, accu_query_time 1.25s,
+[2022-12-22 00:20:31.642] [info] queryID 2, result_size 0, rtk_topk 64, accu_ip_cost 98112, accu_query_time 1.88s,
+[2022-12-22 00:20:33.637] [info] queryID 2, result_size 0, rtk_topk 128, accu_ip_cost 286860, accu_query_time 3.88s,
+[2022-12-22 00:21:40.818] [info] queryID 2, result_size 0, rtk_topk 256, accu_ip_cost 1022225270, accu_query_time 71.06s,
+[2022-12-22 00:23:25.111] [info] queryID 2, result_size 0, rtk_topk 512, accu_ip_cost 1665197430, accu_query_time 175.35s,
+[2022-12-22 00:26:02.127] [info] queryID 2, result_size 0, rtk_topk 1024, accu_ip_cost 2951141750, accu_query_time 332.37s,
+[2022-12-22 00:30:21.243] [info] queryID 2, result_size 0, rtk_topk 2048, accu_ip_cost 5523030390, accu_query_time 591.49s,
+[2022-12-22 00:38:00.253] [info] queryID 2, result_size 0, rtk_topk 4096, accu_ip_cost 10666807670, accu_query_time 1050.49s,
+[2022-12-22 00:52:42.931] [info] queryID 2, result_size 0, rtk_topk 8192, accu_ip_cost 20954362230, accu_query_time 1933.17s,
+[2022-12-22 01:29:10.789] [info] queryID 2, result_size 21, rtk_topk 16384, accu_ip_cost 41529471350, accu_query_time 4121.03s,
+[2022-12-22 02:29:34.113] [info] queryID 2, result_size 972, rtk_topk 32768, accu_ip_cost 82679689590, accu_query_time 7744.36s,
+[2022-12-22 02:29:34.113] [info] queryID 2, result_size 972, rtk_topk 32768, ip_cost 82679689590, query_time 7744.36s, total_ip_cost 453790159970, total_retrieval_time 39065.33s
+[2022-12-22 02:29:34.455] [info] queryID 3, result_size 0, rtk_topk 1, accu_ip_cost 34188, accu_query_time 0.34s,
+[2022-12-22 02:29:34.653] [info] queryID 3, result_size 0, rtk_topk 2, accu_ip_cost 55314, accu_query_time 0.54s,
+[2022-12-22 02:29:34.950] [info] queryID 3, result_size 0, rtk_topk 4, accu_ip_cost 95844, accu_query_time 0.84s,
+[2022-12-22 02:29:35.341] [info] queryID 3, result_size 0, rtk_topk 8, accu_ip_cost 150486, accu_query_time 1.23s,
+[2022-12-22 02:29:35.911] [info] queryID 3, result_size 0, rtk_topk 16, accu_ip_cost 239526, accu_query_time 1.80s,
+[2022-12-22 02:29:36.761] [info] queryID 3, result_size 0, rtk_topk 32, accu_ip_cost 380016, accu_query_time 2.65s,
+[2022-12-22 02:29:38.089] [info] queryID 3, result_size 0, rtk_topk 64, accu_ip_cost 612654, accu_query_time 3.98s,
+[2022-12-22 02:29:40.322] [info] queryID 3, result_size 0, rtk_topk 128, accu_ip_cost 1077048, accu_query_time 6.21s,
+[2022-12-22 02:30:49.793] [info] queryID 3, result_size 0, rtk_topk 256, accu_ip_cost 1022225270, accu_query_time 75.68s,
+[2022-12-22 02:32:33.469] [info] queryID 3, result_size 0, rtk_topk 512, accu_ip_cost 1665197430, accu_query_time 179.36s,
+[2022-12-22 02:35:16.099] [info] queryID 3, result_size 0, rtk_topk 1024, accu_ip_cost 2951141750, accu_query_time 341.99s,
+[2022-12-22 02:39:34.349] [info] queryID 3, result_size 0, rtk_topk 2048, accu_ip_cost 5523030390, accu_query_time 600.24s,
+[2022-12-22 02:47:17.435] [info] queryID 3, result_size 0, rtk_topk 4096, accu_ip_cost 10666807670, accu_query_time 1063.32s,
+[2022-12-22 03:01:53.317] [info] queryID 3, result_size 3, rtk_topk 8192, accu_ip_cost 20954362230, accu_query_time 1939.20s,
+[2022-12-22 03:37:09.710] [info] queryID 3, result_size 171, rtk_topk 16384, accu_ip_cost 41529471350, accu_query_time 4055.60s,
+[2022-12-22 04:38:37.914] [info] queryID 3, result_size 1779, rtk_topk 32768, accu_ip_cost 82679689590, accu_query_time 7743.80s,
+[2022-12-22 04:38:37.915] [info] queryID 3, result_size 1779, rtk_topk 32768, ip_cost 82679689590, query_time 7743.80s, total_ip_cost 536469849560, total_retrieval_time 46809.13s
+[2022-12-22 04:38:37.915] [info] total retrieval time larger than stop time, retrieval exit
+[2022-12-22 04:38:37.915] [info] finish top-200
+[2022-12-22 04:38:37.915] [info] top200 retrieval:
+	total IP cost 536469849560, total time 46809.134s
+[2022-12-22 04:38:37.915] [info] build index time: total 457.51104176s
+top200 retrieval:
+	total IP cost 536469849560, total time 46809.134s

@@ -63,22 +63,24 @@ def plot_hist_figure(*, method_name: str,
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
 
-    ax.hist(score_l, color='#b2b2b2', bins=50, width=0.1)
+    ax.hist(score_l, color='#b2b2b2', bins=50, density=False)
 
     ax.set_xlabel('Score')
     ax.set_ylabel('Frequency')
     # ax.legend(frameon=False, bbox_to_anchor=(0.5, 1), loc="center", ncol=len(dataset_l), borderaxespad=5)
     # ax.set_xticks(np.arange(n_dataset), dataset_l)
-    ax.set_xlim([0, 2.5])
-    ax.set_ylim([0, 32])
+    # ax.set_xlim([-0.45, 2.3])
+    # ax.set_ylim([0, 1.75])
+    ax.get_yaxis().set_major_formatter(
+        matplotlib.ticker.FuncFormatter(lambda x, p: str(int(x/1000)) + 'k'))
+    # plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
-    ax.margins(y=0.3)
+    # ax.margins(y=0.3)
     # fig.tight_layout(rect=(0.01, -0.07, 1.02, 1.05))
     if is_test:
-        plt.savefig("regression_based_pruning_score_distribution_{}.jpg".format(method_name), bbox_inches='tight',
-                    dpi=600)
+        plt.savefig("regression_based_pruning_{}.jpg".format(method_name), bbox_inches='tight', dpi=600)
     else:
-        plt.savefig("regression_based_pruning_score_distribution_{}.pdf".format(method_name), bbox_inches='tight')
+        plt.savefig("regression_based_pruning_{}.pdf".format(method_name), bbox_inches='tight')
 
 
 def plot_figure(*, method_name: str,
@@ -115,9 +117,9 @@ def plot_figure(*, method_name: str,
 def run_local(*, userID: int, is_test: bool):
     dir_name = '/home/bianzheng/reverse-k-ranks/index/memory_index_important'
 
-    # score_table_l = np.loadtxt(os.path.join(dir_name, f'yelp_score_table_userID_{userID}.txt'))
-    # method_name = 'score_table'
-    # plot_hist_figure(method_name=method_name, score_l=score_table_l, is_test=is_test)
+    score_table_l = np.loadtxt(os.path.join(dir_name, f'yelp_score_table_userID_{userID}.txt'))
+    method_name = 'score_table'
+    plot_hist_figure(method_name=method_name, score_l=score_table_l, is_test=is_test)
 
     file_name = os.path.join(dir_name,
                              'QueryRankSampleIntLR-yelp-n_sample_405-n_sample_query_5000-sample_topk_600.index')
@@ -128,7 +130,7 @@ def run_local(*, userID: int, is_test: bool):
     rank_l = np.arange(len(score_l))
 
     method_name = 'before_transformation'
-    ylim_l = [0, 420]
+    ylim_l = [-10, 420]
     legend_loc = ['upper right', (1.05, 1.05)]
     plot_figure(method_name=method_name, score_l=score_l, rank_l=rank_l,
                 ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
@@ -144,7 +146,7 @@ def run_local(*, userID: int, is_test: bool):
 
 if __name__ == '__main__':
     userID = 8993
-    is_test = True
+    is_test = False
 
     run_local(userID=userID, is_test=is_test)
-    # query_aware_sample_distribution.run_dbg_host(userID=userID)
+    # query_aware_sample_distribution.run_dbg_host(userID=userID, is_test=is_test)

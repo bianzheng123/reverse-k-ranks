@@ -49,13 +49,13 @@ if __name__ == "__main__":
     set_log_l = [False, True]
     # ylim_l = [[0, 0.64], [0, 0.75]]
     # ylim_l = [[0, 0.7], [0, 0.8]]
-    ylim_l = [[0, 1.2], [0.1, 1200]]
+    ylim_l = [[0, 1.6], [0.1, 1400]]
     legend_loc_l = [('upper right', None), ('upper right', (1.01, 1.02))]
     labelpad_l = [0, 0]
 
     name_m = {'csv_x': 'train_topk', 'fig_x': r'Train Top-k',
               'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
-    method_m = {'200': 'k@200', '100': 'k@100', '10': 'k@10'}
+    method_m = {'200': 'Query Top-k=200', '100': 'Query Top-k=100', '10': 'Query Top-k=10'}
     result_fname_prefix = 'sample_topk'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,

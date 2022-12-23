@@ -88,10 +88,6 @@ add_executable(rri src/app/ReverseRankIndex.cpp)
 target_include_directories(rri PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(rri PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} fexiprolib)
 
-add_executable(rtk src/app/ReverseTopk.cpp)
-target_include_directories(rtk PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(rtk PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} fexiprolib)
-
 add_executable(qdi src/app/build-index/QueryDistributionIndex.cpp)
 target_include_directories(qdi PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
 target_link_libraries(qdi PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)

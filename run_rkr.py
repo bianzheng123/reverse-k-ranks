@@ -227,7 +227,6 @@ def run():
         #     f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
         # )
         # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true', 'RTree'))
 
     # send_email.send('test complete')
 

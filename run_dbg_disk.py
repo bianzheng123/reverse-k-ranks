@@ -11,12 +11,14 @@ def run():
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
-    '''remember to disable multithread'''
-    dataset_name = 'amazon-home-kitchen'
-    k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 8)
-    os.system(
-        f'cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} '
-        f'--test_topk {"false"} --method_name {"Simpfer"} --simpfer_k_max {k_max} --stop_time {43200}')
+    '''memory_capacity: 1, 2, 4, 8, 16'''
+    dataset_l = ['movielens-27m', 'yahoomusic_big', 'yelp', 'amazon-home-kitchen']
+    memory_capacity = 4
+    for dataset_name in dataset_l:
+        k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, memory_capacity)
+        os.system(
+            f'cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} '
+            f'--test_topk {"false"} --method_name {"Simpfer"} --simpfer_k_max {k_max} --stop_time {43200} --only_one_topk {"false"}')
 
     # dataset_name = 'amazon-home-kitchen'
     # os.system(
