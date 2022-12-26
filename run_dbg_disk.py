@@ -11,6 +11,32 @@ def run():
     # dataset_l = ['amazon-home-kitchen']
     # dataset_l = ['netflix', 'movielens-27m']
 
+    dataset_name = 'yelp'
+    method_name = 'QueryRankSampleMinMaxIntLR'
+    memory_capacity = 8
+    n_sample = polyu.compute_n_sample_by_memory_index_sample_only(dataset_name=dataset_name,
+                                                                  memory_capacity=memory_capacity)
+    n_sample_item = 5000
+    sample_topk = 250
+    # os.system(
+    #     f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+    # )
+    os.system(
+        f"cd build && ./bsibs --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
+        f"--method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+    # os.system(
+    #     f"cd build && ./bsibc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+
+
+    os.system(
+        f"cd build && ./bilrbc --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
+        f"--method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}")
+
+    os.system(
+        f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {dataset_name} --index_dir {index_dir} "
+        f"--test_topk {'false'} --method_name {method_name} --n_sample {n_sample} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+    )
+
     '''remember to disable multithread'''
     dataset_name = 'amazon-home-kitchen'
     k_max = polyu.compute_k_max_in_reverse_mips(dataset_name, 8)

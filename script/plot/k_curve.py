@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
     name_m = {'csv_x': 'topk', 'fig_x': r'k',
               'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
-    method_m = {'RMIPS': 'RMIPS', 'Grid': 'Grid', 'RS': 'US', 'QRSMinMax': 'QSRP'}
+    method_m = {'Grid': 'Grid', 'RMIPS': 'RMIPS', 'RS': 'US', 'QRSMinMax': 'QSRP'}
     result_fname_prefix = 'k_running_time_overall_performance'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,

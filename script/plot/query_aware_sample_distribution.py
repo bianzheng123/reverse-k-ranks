@@ -77,6 +77,7 @@ def get_score_table_ip_l(*, file_name: str,
 
 def plot_figure(*, method_name: str,
                 score_l: list,
+                set_yformatter: bool,
                 is_test: bool):
     # fig = plt.figure(figsize=(25, 4))
     fig = plt.figure(figsize=(6, 4))
@@ -84,14 +85,17 @@ def plot_figure(*, method_name: str,
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
 
-    ax.hist(score_l, color='#b2b2b2', bins=50, width=0.1)
+    ax.hist(score_l, color='#b2b2b2', bins=50)
 
     ax.set_xlabel('Score')
     ax.set_ylabel('Frequency')
     # ax.legend(frameon=False, bbox_to_anchor=(0.5, 1), loc="center", ncol=len(dataset_l), borderaxespad=5)
     # ax.set_xticks(np.arange(n_dataset), dataset_l)
-    ax.set_xlim([-0.35, 2.5])
+    ax.set_xlim([-0.43, 2.3])
     # ax.set_ylim([0, 32])
+    if set_yformatter:
+        ax.get_yaxis().set_major_formatter(
+            matplotlib.ticker.FuncFormatter(lambda x, p: 0 if x == 0 else str(int(x / 1000)) + 'k'))
 
     ax.margins(y=0.3)
     # fig.tight_layout(rect=(0.01, -0.07, 1.02, 1.05))
@@ -118,14 +122,15 @@ def run_local(*, is_test: bool, userID: int):
     yelp_score_table_l = np.loadtxt(os.path.join(dir_name, f'yelp_score_table_userID_{userID}.txt'))
 
     score_l_l = [yelp_score_table_l, yelp_rs_m[userID], yelp_qrs_m[userID]]
+    set_yformatter_l = [True, False, False]
 
     print(np.min(score_l_l[0]), np.min(score_l_l[1]), np.min(score_l_l[2]))
     print(np.max(score_l_l[0]), np.max(score_l_l[1]), np.max(score_l_l[2]))
     # score_l_l = [yahoomusic_qrs_m[3], yahoomusic_rs_m[3]]
     # title_l = ['Yahoomusic QAS', 'Yahoomusic US', 'Yelp QAS', 'Yelp US']
     method_l = ['score_table', 'uniform_sample', 'query_aware_sample']
-    for score_l, method_name in zip(score_l_l, method_l):
-        plot_figure(method_name=method_name, score_l=score_l, is_test=is_test)
+    for score_l, method_name, set_yformatter in zip(score_l_l, method_l, set_yformatter_l):
+        plot_figure(method_name=method_name, score_l=score_l, set_yformatter=set_yformatter, is_test=is_test)
 
 
 def run_dbg_host(*, userID: int):
@@ -145,6 +150,6 @@ def run_dbg_host(*, userID: int):
 if __name__ == '__main__':
     is_test = False
 
-    userID = 7
-    run_dbg_host(userID=userID)
-    # run_local(is_test=is_test, userID=userID)
+    userID = 8993
+    # run_dbg_host(userID=userID)
+    run_local(is_test=is_test, userID=userID)
