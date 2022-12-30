@@ -227,13 +227,29 @@ def run():
         #     f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
         # )
         # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true', 'RTree'))
+        os.system(
+            'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true',
+                                                                                                           'RTree'))
 
     # send_email.send('test complete')
 
     # topk_l = [10, 20, 30, 40, 50]
     topk_l = [10, 20, 30]
     cmp_file_all('BatchDiskBruteForce', method_name_l, dataset_l, topk_l)
+
+
+def cmp_file_count(file1, file2):
+    method1_result_l = np.loadtxt(file1, delimiter=',')
+    method2_result_l = np.loadtxt(file2, delimiter=',')
+
+    assert len(method1_result_l) == len(method2_result_l)
+    count = 0
+
+    for i in range(len(method1_result_l)):
+        intersect = set(method1_result_l[i]).intersection(set(method2_result_l[i]))
+        if len(intersect) != len(method1_result_l[i]):
+            count += 1
+    return count
 
 
 if __name__ == '__main__':
@@ -253,4 +269,20 @@ if __name__ == '__main__':
     #     f"cd build/attribution && ./cc"
     # )
 
-    run()
+    print(cmp_file_count(
+        './rank/yelp-QueryRankSampleMinMaxIntLR-top10-n_sample_490-n_sample_query_5000-sample_topk_600-userID.csv',
+        './rank/yelp-RankSample-top10-n_sample_3923-userID.csv'))
+
+    print(cmp_file_count(
+        './rank/yelp-QueryRankSampleMinMaxIntLR-top200-n_sample_6743-n_sample_query_5000-sample_topk_600-userID.csv',
+        './rank/yelp-RankSample-top200-n_sample_3923-userID.csv'))
+
+    print(cmp_file_count(
+        './rank/yelp-QueryRankSampleUniformIntLR-top200-n_sample_405-n_sample_query_5000-sample_topk_600-userID.csv',
+        './rank/yelp-RankSample-top200-n_sample_3923-userID.csv'))
+
+    print(cmp_file_count(
+        './rank/yahoomusic_big-QueryRankSampleUniformIntLR-top200-n_sample_588-n_sample_query_5000-sample_topk_600-userID.csv',
+        './rank/yahoomusic_big-RankSample-top200-n_sample_4711-userID.csv'))
+
+    # run()

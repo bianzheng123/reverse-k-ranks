@@ -40,6 +40,7 @@ def plot_figure(*, reuslt_size_l: list,
         ax.set_ylim(ylim)
     if x_ticks:
         ax.set_xticks(x_ticks)
+    ax.set_yticks([1e0, 1e1, 1e2, 1e3])
 
     if is_test:
         plt.savefig(f"ResultSizeBias_{fname_sufix}.jpg", bbox_inches='tight')
@@ -66,7 +67,7 @@ if __name__ == "__main__":
     simpfer_k_max_l = [1000, 300, 300]
     name_m = {'fig_x': 'Result Size',
               'fig_y': 'Frequency'}
-    is_test = True
+    is_test = False
     for dataset_name_fig, dataset_name_file, xlim, ylim, x_ticks, n_bin, simpfer_k_max in zip(dataset_l,
                                                                                               origin_dataset_l, xlim_l,
                                                                                               ylim_l, x_ticks_l,

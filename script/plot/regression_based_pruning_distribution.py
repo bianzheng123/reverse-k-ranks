@@ -72,7 +72,7 @@ def plot_hist_figure(*, method_name: str,
     # ax.set_xlim([-0.45, 2.3])
     # ax.set_ylim([0, 1.75])
     ax.get_yaxis().set_major_formatter(
-        matplotlib.ticker.FuncFormatter(lambda x, p: str(int(x/1000)) + 'k'))
+        matplotlib.ticker.FuncFormatter(lambda x, p: str(int(x / 1000)) + 'k'))
     # plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 
     # ax.margins(y=0.3)
@@ -96,6 +96,38 @@ def plot_figure(*, method_name: str,
     ax = fig.add_subplot(subplot_str)
 
     ax.plot(score_l, rank_l, color='#000000', linestyle='solid', linewidth=3)
+
+    # ax.legend(frameon=False, loc=legend_loc[0], bbox_to_anchor=legend_loc[1])
+
+    ax.set_xlabel('Score')
+    ax.set_ylabel('Rank')
+    # ax.legend(frameon=False, bbox_to_anchor=(0.5, 1), loc="center", ncol=len(dataset_l), borderaxespad=5)
+    # ax.set_xticks(np.arange(n_dataset), dataset_l)
+    # ax.set_xlim([0, 2.5])
+    ax.set_ylim(ylim_l)
+
+    # ax.margins(y=0.3)
+    # fig.tight_layout(rect=(0.01, -0.07, 1.02, 1.05))
+    if is_test:
+        plt.savefig("regression_based_pruning_{}.jpg".format(method_name), bbox_inches='tight', dpi=600)
+    else:
+        plt.savefig("regression_based_pruning_{}.pdf".format(method_name), bbox_inches='tight')
+
+
+def joint_plot_figure(*, method_name: str,
+                      score_l: list,
+                      rank_l: list,
+                      ylim_l: list,
+                      legend_loc: list,
+                      is_test: bool):
+    # fig = plt.figure(figsize=(25, 4))
+    fig = plt.figure(figsize=(6, 4))
+
+    subplot_str = 111
+    ax = fig.add_subplot(subplot_str)
+
+    ax.plot(score_l[0], rank_l[0], color='#000000', linestyle='solid', linewidth=3, label='Before')
+    ax.plot(score_l[1], rank_l[1], color='#000000', linestyle='dashed', linewidth=3, label="After")
 
     # ax.legend(frameon=False, loc=legend_loc[0], bbox_to_anchor=legend_loc[1])
 
@@ -143,10 +175,14 @@ def run_local(*, userID: int, is_test: bool):
     plot_figure(method_name=method_name, score_l=transform_score_l, rank_l=rank_l,
                 ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
 
+    method_name = 'joint_transformation'
+    joint_plot_figure(method_name=method_name, score_l=[score_l, transform_score_l], rank_l=[rank_l, rank_l],
+                      ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
+
 
 if __name__ == '__main__':
     userID = 8993
-    is_test = False
+    is_test = True
 
     run_local(userID=userID, is_test=is_test)
     # query_aware_sample_distribution.run_dbg_host(userID=userID, is_test=is_test)

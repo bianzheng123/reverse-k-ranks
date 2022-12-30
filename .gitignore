@@ -45,3 +45,4 @@ cmake-build-release/
 /script/plot/sample_topk_2_Yelp.png
 /ReverseTopK/build/*
 
+/rank/

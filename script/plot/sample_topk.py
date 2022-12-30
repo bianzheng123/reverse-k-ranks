@@ -47,10 +47,10 @@ if __name__ == "__main__":
     fname_l = ['./data/sample_topk/Yahoomusic_bias.csv',
                './data/sample_topk/Yelp_bias.csv']
     dataset_l = ['1_Yahoomusic', '2_Yelp']
-    set_log_l = [False, True]
-    # ylim_l = [[0, 0.64], [0, 0.75]]
-    # ylim_l = [[0, 0.7], [0, 0.8]]
-    ylim_l = [[0, 1.2], [0.1, 1200]]
+    set_log_l = [True, True]
+    # set_log_l = [False, True]
+    ylim_l = [[0.1, 3], [0.1, 1200]]
+    # ylim_l = [[0, 1.2], [0.1, 1200]]
     legend_loc_l = [('upper right', None), ('upper right', (1.01, 1.02))]
     labelpad_l = [0, 0]
 
@@ -65,23 +65,45 @@ if __name__ == "__main__":
                     name_m=name_m, method_m=method_m,
                     result_fname_prefix=result_fname_prefix, test=is_test)
 
-    fname_l = ['./data/sample_topk/Yahoomusic_no_bias.csv',
-               './data/sample_topk/Yelp_no_bias.csv']
-    dataset_l = ['1_Yahoomusic', '2_Yelp']
-    set_log_l = [False, True]
-    # set_log_l = [False, False]
-    ylim_l = [[0, 1.2], [0.1, 1200]]
-    # ylim_l = [[0, 1.2], [0, 1.2]]
-    legend_loc_l = [('upper right', None), ('upper right', (1.01, 1.02))]
-    labelpad_l = [0, 0]
+    # fname_l = ['./data/sample_topk/Yahoomusic_no_bias.csv',
+    #            './data/sample_topk/Yelp_no_bias.csv']
+    # dataset_l = ['1_Yahoomusic', '2_Yelp']
+    # set_log_l = [False, True]
+    # # set_log_l = [False, False]
+    # ylim_l = [[0, 1.2], [0.1, 1200]]
+    # # ylim_l = [[0, 1.2], [0, 1.2]]
+    # legend_loc_l = [('upper right', None), ('upper right', (1.01, 1.02))]
+    # labelpad_l = [0, 0]
+    #
+    # name_m = {'csv_x': 'train_topk', 'fig_x': r'Train Top-k',
+    #           'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
+    # method_m = {'200': 'Query Top-k=200', '100': 'Query Top-k=100', '10': 'Query Top-k=10'}
+    # result_fname_prefix = 'sample_topk_no_bias'
+    # for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
+    #                                                                set_log_l, ylim_l, legend_loc_l,
+    #                                                                labelpad_l):
+    #     plot_figure(fname=fname, dataset=dataset, set_log=set_log, ylim=ylim, legend_loc=legend_loc, labelpad=labelpad,
+    #                 name_m=name_m, method_m=method_m,
+    #                 result_fname_prefix=result_fname_prefix, test=is_test)
 
-    name_m = {'csv_x': 'train_topk', 'fig_x': r'Train Top-k',
-              'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
-    method_m = {'200': 'Query Top-k=200', '100': 'Query Top-k=100', '10': 'Query Top-k=10'}
-    result_fname_prefix = 'sample_topk_no_bias'
-    for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
-                                                                   set_log_l, ylim_l, legend_loc_l,
-                                                                   labelpad_l):
-        plot_figure(fname=fname, dataset=dataset, set_log=set_log, ylim=ylim, legend_loc=legend_loc, labelpad=labelpad,
-                    name_m=name_m, method_m=method_m,
-                    result_fname_prefix=result_fname_prefix, test=is_test)
+    # fname_l = ['./data/sample_topk/Yahoomusic_bias.csv',
+    #            './data/sample_topk/Yelp_bias.csv']
+    # dataset_l = ['1_Yahoomusic', '2_Yelp']
+    # set_log_l = [False, False]
+    # # ylim_l = [[0, 0.64], [0, 0.75]]
+    # # ylim_l = [[0, 0.7], [0, 0.8]]
+    # ylim_l = [[0, 1.2], [-10, 160]]
+    # legend_loc_l = [('upper right', None), ('upper right', (1.01, 1.02))]
+    # labelpad_l = [0, 0]
+    #
+    # name_m = {'csv_x': 'train_topk', 'fig_x': r'Train Top-k',
+    #           'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
+    # method_m = {'200': 'Query Top-k=200', '100': 'Query Top-k=100', '10': 'Query Top-k=10'}
+    # result_fname_prefix = 'sample_topk_bias'
+    # for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
+    #                                                                set_log_l, ylim_l, legend_loc_l,
+    #                                                                labelpad_l):
+    #     plot_figure(fname=fname, dataset=dataset, set_log=set_log, ylim=ylim, legend_loc=legend_loc, labelpad=labelpad,
+    #                 name_m=name_m, method_m=method_m,
+    #                 result_fname_prefix=result_fname_prefix, test=is_test)
+
