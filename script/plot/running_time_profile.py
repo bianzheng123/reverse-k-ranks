@@ -44,7 +44,7 @@ def plot_figure(*, dataset_l: list,
                          hatch='//', label='CPU Time')
     io_time_ins = ax.bar(position_l, io_time_perc_l, width - 0.1, bottom=ip_time_perc_l, color='#ffffff',
                          edgecolor='#000000',
-                         hatch='', label='IO Time')
+                         hatch='', label='I/O Time')
     ax.set_ylim([0, 1.49])
     # ax.set_xlabel(dataset_l[fig_i])
     # ax.set_ylabel('')
@@ -54,7 +54,7 @@ def plot_figure(*, dataset_l: list,
     ax.set_xticks(np.arange(n_dataset), dataset_l)
     ax.set_yticks([0, 0.5, 1.0])
 
-    ax.bar_label(io_time_ins, labels=['Top-10', 'Top-100', 'Top-10', 'Top-100'], padding=7)
+    ax.bar_label(io_time_ins, labels=['k=10', 'k=100', 'k=10', 'k=100'], padding=7)
 
     ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1.0, decimals=0))
     # ax.margins(y=50)
@@ -114,7 +114,7 @@ def plot_figure_component(*, dataset_l: list,
                          bottom=score_compute_time_perc_l + rank_bound_compute_time_perc_l + rank_compute_time_perc_l,
                          color='#ffffff',
                          edgecolor='#000000',
-                         hatch='', label='I/O')
+                         hatch='', label='I/O ')
     ax.set_ylim([0, 1.55])
     # ax.set_xlabel(dataset_l[fig_i])
     # ax.set_ylabel('')
@@ -124,7 +124,7 @@ def plot_figure_component(*, dataset_l: list,
     ax.set_xticks(np.arange(n_dataset), dataset_l)
     ax.set_yticks([0, 0.5, 1.0])
 
-    ax.bar_label(io_time_ins, labels=['Top-10', 'Top-100', 'Top-10', 'Top-100'], padding=7)
+    ax.bar_label(io_time_ins, labels=[r'k=10', 'k=100', 'k=10', 'k=100'], padding=7)
 
     ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1.0, decimals=0))
     # ax.margins(y=50)
@@ -154,15 +154,15 @@ if __name__ == "__main__":
                 is_test=is_test)
 
     # after advanced sampling solution
-    # io_time_l = [24.197, 105.543,
-    #              23.604, 108.599]
-    # ip_time_l = [263.429 + 259.692 + 0.002, 271.123 + 261.595 + 0.018,
-    #              318.403 + 304.638 + 0.003, 323.632 + 305.373 + 0.022]
-    # result_fname = 'RunningTimeProfileAfterAdvanced'
-    # plot_figure(dataset_l=dataset_l,
-    #             fig_y=fig_y, result_fname=result_fname,
-    #             io_time_l=io_time_l, ip_time_l=ip_time_l,
-    #             is_test=is_test)
+    io_time_l = [24.197, 105.543,
+                 23.604, 108.599]
+    ip_time_l = [263.429 + 259.692 + 0.002, 271.123 + 261.595 + 0.018,
+                 318.403 + 304.638 + 0.003, 323.632 + 305.373 + 0.022]
+    result_fname = 'RunningTimeProfileAfterAdvanced'
+    plot_figure(dataset_l=dataset_l,
+                fig_y=fig_y, result_fname=result_fname,
+                io_time_l=io_time_l, ip_time_l=ip_time_l,
+                is_test=is_test)
 
     io_time_l = [24.197, 105.543,
                  23.604, 108.599]

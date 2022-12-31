@@ -28,8 +28,8 @@ def transform_data(*, dataset: str, dim_l: list, base_dir: str):
 
 
 def plot_figure(*, dataset_name: str, result_fname: str, base_dir: str,
-                name_m: dict, method_m: dict, ylim: list, dim_l: list,
-                set_log: bool, test: bool):
+                name_m: dict, method_m: dict, ylim: list, dim_l: list, legend_pos: list,
+                xlog: bool, test: bool):
     # fig = plt.figure(figsize=(25, 4))
     fig = plt.figure(figsize=(6, 4))
     subplot_str = 111
@@ -46,10 +46,14 @@ def plot_figure(*, dataset_name: str, result_fname: str, base_dir: str,
 
     ax.set_xlabel(name_m['fig_x'])
     ax.set_ylabel(name_m['fig_y'])
-    ax.legend(frameon=False, loc='best', borderaxespad=-0)
-    if set_log:
-        ax.set_yscale('log')
+    if legend_pos:
+        ax.legend(frameon=False, loc=legend_pos[0], borderaxespad=legend_pos[1])
+    else:
+        ax.legend(frameon=False, loc='best', borderaxespad=-0)
     ax.set_xticks(dim_l)
+    if xlog:
+        ax.set_xscale('log', base=2)
+    ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
     # fig.tight_layout(rect=(0, 0.1, 1, 1))
     if test:
@@ -59,30 +63,21 @@ def plot_figure(*, dataset_name: str, result_fname: str, base_dir: str,
 
 
 if __name__ == "__main__":
-    is_test = True
+    is_test = False
 
     dataset_name_l = ['lastfm', 'ml-1m']
-    ylim_l = [[0.2, 0.6], None]
+    ylim_l = [[0.19, 0.63], [0.19, 0.79]]
     name_m = {'csv_x': 'dimension', 'fig_x': 'Dimensionality',
               'csv_y': '', 'fig_y': 'Hitting Ratio'}
     method_m = {'HR@200': 'HR@200', 'HR@100': 'HR@100', 'HR@50': 'HR@50'}
 
     dim_l = [8, 16, 32, 64, 128, 256]
     base_dir = './data/dimension_selection/raw_data/2base'
-    result_fname_l = ['1_lastfm_2base', '2_movielens-1m_2base']
-    for dataset_name, result_fname, ylim in zip(dataset_name_l, result_fname_l, ylim_l):
+    result_fname_l = ['1_lastfm', '2_movielens-1m']
+    legend_pos_l = [('lower right', 0), None]
+    for dataset_name, result_fname, ylim, legend_pos in zip(dataset_name_l, result_fname_l, ylim_l, legend_pos_l):
         plot_figure(dataset_name=dataset_name, result_fname=result_fname,
                     base_dir=base_dir,
                     name_m=name_m, method_m=method_m,
-                    ylim=ylim, dim_l=dim_l,
-                    test=is_test)
-
-    dim_l = [10, 50, 100, 150, 200, 250]
-    base_dir = './data/dimension_selection/raw_data/10base'
-    result_fname_l = ['1_lastfm_10base', '2_movielens-1m_10base']
-    for dataset_name, result_fname, ylim in zip(dataset_name_l, result_fname_l, ylim_l):
-        plot_figure(dataset_name=dataset_name, result_fname=result_fname,
-                    base_dir=base_dir,
-                    name_m=name_m, method_m=method_m,
-                    ylim=ylim, dim_l=dim_l,
-                    set_log=False,test=is_test)
+                    ylim=ylim, dim_l=dim_l, legend_pos=legend_pos,
+                    xlog=True, test=is_test)

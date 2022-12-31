@@ -44,7 +44,7 @@ def plot_curve(*, x_l_l: list, y_l_l: list, label_l: list,
 
 if __name__ == "__main__":
     is_test = False
-    label_l = ['Kth Candidate Rank', 'Uniform Candidate Rank']
+    label_l = ['Kth Candidate', 'Uniform Candidate']
 
     yahoomusic_l = pd.read_csv('./data/sample_heuristic/Yahoomusic.csv')
     topk_l = yahoomusic_l['topk']
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     y_l_l = [yahoomsuic_kth_l, yahoomusic_uniform]
 
     plot_curve(x_l_l=x_l_l, y_l_l=y_l_l, label_l=label_l,
-               xlabel='Top-k', ylabel='Query Time (Second)',
+               xlabel='k', ylabel='Query Time (Second)',
                ylim=[0, 1.25], log=False, is_test=is_test, fname_suffix='1_yahoomusic_big')
 
     yelp_l = pd.read_csv('./data/sample_heuristic/Yelp.csv')
@@ -66,5 +66,17 @@ if __name__ == "__main__":
     y_l_l = [yelp_kth_l, yelp_uniform]
 
     plot_curve(x_l_l=x_l_l, y_l_l=y_l_l, label_l=label_l,
-               xlabel='Top-k', ylabel='Query Time (Second)',
+               xlabel='k', ylabel='Query Time (Second)',
                ylim=[0, 1.25], log=False, is_test=is_test, fname_suffix='2_yelp')
+
+    label_l = ['Kth Candidate', 'All Candidate']
+    movielens_l = pd.read_csv('./data/sample_heuristic/MovieLens_no_heuristic.csv')
+    movielens_kth_l = movielens_l['heuristic']
+    movielens_all_l = movielens_l['noheuristic']
+
+    x_l_l = [topk_l, topk_l]
+    y_l_l = [movielens_kth_l, movielens_all_l]
+
+    plot_curve(x_l_l=x_l_l, y_l_l=y_l_l, label_l=label_l,
+               xlabel='k', ylabel='Query Time (Second)',
+               ylim=[0.6, 1.7], log=False, is_test=is_test, fname_suffix='3_movielens')
