@@ -54,10 +54,10 @@ if __name__ == "__main__":
     legend_loc_l = [('upper right', None), ('upper right', (1.01, 1.02))]
     labelpad_l = [0, 0]
 
-    name_m = {'csv_x': 'train_topk', 'fig_x': r'Train Top-k',
+    name_m = {'csv_x': 'train_topk', 'fig_x': r'k Index',
               'csv_y': 'RunningTime', 'fig_y': 'Query Time (Second)'}
-    method_m = {'200': 'Query Top-k=200', '100': 'Query Top-k=100', '10': 'Query Top-k=10'}
-    result_fname_prefix = 'sample_topk_bias'
+    method_m = {'200': 'k Query=200', '100': 'k Query=100', '10': 'k Query=10'}
+    result_fname_prefix = 'sample_topk'
     for fname, dataset, set_log, ylim, legend_loc, labelpad in zip(fname_l, dataset_l,
                                                                    set_log_l, ylim_l, legend_loc_l,
                                                                    labelpad_l):

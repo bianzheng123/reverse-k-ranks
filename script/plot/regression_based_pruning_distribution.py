@@ -95,6 +95,14 @@ def plot_figure(*, method_name: str,
     subplot_str = 111
     ax = fig.add_subplot(subplot_str)
 
+    p_1 = (np.min(score_l), np.max(rank_l))
+    p_2 = (np.max(score_l), np.min(rank_l))
+    slope = (p_1[1] - p_2[1]) / (p_1[0] - p_2[0])
+    intersect = p_1[1] - slope * p_1[0]
+    arr = np.linspace(np.min(score_l), np.max(score_l), 1000)
+    arry = arr * slope + intersect
+
+    ax.plot(arr, arry, color='#ff0000', linestyle='dotted', linewidth=3)
     ax.plot(score_l, rank_l, color='#000000', linestyle='solid', linewidth=3)
 
     # ax.legend(frameon=False, loc=legend_loc[0], bbox_to_anchor=legend_loc[1])
@@ -175,14 +183,14 @@ def run_local(*, userID: int, is_test: bool):
     plot_figure(method_name=method_name, score_l=transform_score_l, rank_l=rank_l,
                 ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
 
-    method_name = 'joint_transformation'
-    joint_plot_figure(method_name=method_name, score_l=[score_l, transform_score_l], rank_l=[rank_l, rank_l],
-                      ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
+    # method_name = 'joint_transformation'
+    # joint_plot_figure(method_name=method_name, score_l=[score_l, transform_score_l], rank_l=[rank_l, rank_l],
+    #                   ylim_l=ylim_l, legend_loc=legend_loc, is_test=is_test)
 
 
 if __name__ == '__main__':
     userID = 8993
-    is_test = True
+    is_test = False
 
     run_local(userID=userID, is_test=is_test)
     # query_aware_sample_distribution.run_dbg_host(userID=userID, is_test=is_test)

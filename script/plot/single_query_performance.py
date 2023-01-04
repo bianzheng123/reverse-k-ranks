@@ -70,11 +70,11 @@ def plot_figure(*, method_name: str, total_time_l: list,
             weights=np.ones(len(total_time_l)) * weight, color='#828487', density=False)
 
     ax.plot(np.ones(len(np.arange(1, 10002, 20))) * time95, np.arange(1, 10002, 20),
-            color='#ee1c25', linewidth=1, linestyle='dotted')
+            color='#ee1c25', linewidth=3, linestyle='solid')
     ax.plot(np.ones(len(np.arange(1, 10002, 20))) * time_median, np.arange(1, 10002, 20),
-            color='#0000ff', linewidth=1, linestyle='dotted')
+            color='#0000ff', linewidth=3, linestyle='solid')
     ax.plot(np.ones(len(np.arange(1, 10002, 20))) * time_max, np.arange(1, 10002, 20),
-            color='#00ff00', linewidth=1, linestyle='dotted')
+            color='#00ff00', linewidth=3, linestyle='solid')
     # ax.plot(time95)
 
     ax.set_xscale('log')
