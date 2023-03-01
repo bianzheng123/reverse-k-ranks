@@ -79,7 +79,7 @@ set_target_properties(pgmindexlib PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(pgmindexlib PRIVATE OpenMP::OpenMP_CXX)
 #target_include_directories(pgmindexlib INTERFACE include/)
 
-set(USE_CUDA OFF)
+set(USE_CUDA ON)
 
 if (USE_CUDA)
     set(CMAKE_CUDA_STANDARD 17)
@@ -87,11 +87,12 @@ if (USE_CUDA)
 
     add_definitions(-DUSE_GPU)
     enable_language(CUDA)
-#    find_package(CUDAToolkit)
+    #    find_package(CUDAToolkit)
 
-    set(CMAKE_CUDA_COMPILER /home/bianzheng/software/anaconda3/bin/nvcc)
-    set(Thrust_DIR /home/bianzheng/software/anaconda3/lib/cmake/thrust)
-#    set(Thrust_DIR /mnt/c/ProgramData/Anaconda3/lib/cmake/thrust)
+    #    set(CMAKE_CUDA_ARCHITECTURES 86)
+    #    set(CMAKE_CUDA_COMPILER /usr/local/cuda-11.8/bin/nvcc)
+    #    set(Thrust_DIR /usr/include/thrust)
+    set(Thrust_DIR /mnt/c/ProgramData/Anaconda3/lib/cmake/thrust)
     find_package(Thrust REQUIRED CONFIG)
     thrust_create_target(Thrust)
 
