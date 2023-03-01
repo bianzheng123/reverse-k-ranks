@@ -164,8 +164,6 @@ void BuildGlobalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
     //Compute Score Table
     ComputeScoreTable cst(user, data_item);
-    cst.compute_time_ = 0;
-    cst.sort_time_ = 0;
     std::vector<double> distance_l(n_data_item);
 
     for (int userID = 0; userID < n_user; userID++) {

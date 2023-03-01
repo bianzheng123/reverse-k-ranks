@@ -2,8 +2,8 @@
 // Created by BianZheng on 2022/7/9.
 //
 
-#ifndef REVERSE_KRANKS_GPUSCORETABLE_HPP
-#define REVERSE_KRANKS_GPUSCORETABLE_HPP
+#ifndef REVERSE_KRANKS_GPUCOMPUTE_HPP
+#define REVERSE_KRANKS_GPUCOMPUTE_HPP
 
 #include <cublas_v2.h>
 #include <algorithm>
@@ -38,7 +38,7 @@ namespace ReverseMIPS {
         } \
     } while (0)
 
-    class GPUScoreTable {
+    class GPUCompute {
 
         uint64_t n_user_, n_data_item_, vec_dim_;
         const double *user_cpu_ptr_;
@@ -48,10 +48,10 @@ namespace ReverseMIPS {
         std::vector<double> ip_cache_;
         cublasHandle_t handle_;
     public:
-        GPUScoreTable() = default;
+        GPUCompute() = default;
 
-        inline GPUScoreTable(const double *user, const double *data_item,
-                             const uint64_t n_user, const uint64_t n_data_item, const uint64_t vec_dim) {
+        inline GPUCompute(const double *user, const double *data_item,
+                          const uint64_t n_user, const uint64_t n_data_item, const uint64_t vec_dim) {
             this->user_cpu_ptr_ = user;
             n_user_ = n_user;
             n_data_item_ = n_data_item;
@@ -115,4 +115,4 @@ namespace ReverseMIPS {
     };
 
 }
-#endif //REVERSE_KRANKS_GPUSCORETABLE_HPP
+#endif //REVERSE_KRANKS_GPUCOMPUTE_HPP

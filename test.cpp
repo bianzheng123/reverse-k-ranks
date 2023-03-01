@@ -1,12 +1,29 @@
-#include <random>
-#include <cstdint>
+
+// CPP program to initialize a vector from
+// an array.
 #include <iostream>
+#include <vector>
+
+using namespace std;
 
 int main() {
-    std::seed_seq seq{1, 2, 3, 4, 5};
-    std::vector<std::uint32_t> seeds(5);
-    seq.generate(seeds.begin(), seeds.end());
-    for (std::uint32_t n: seeds) {
-        std::cout << n << '\n';
+    int arr[] = {10, 20, 30};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    vector<int> vect(arr, arr + n);
+
+    arr[0] = 0;
+    cout << "arr: ";
+    for (int i = 0; i < n; i++) {
+        cout << arr[i] << " ";
     }
+    cout << endl;
+
+    cout << "vect: ";
+    for (int x: vect)
+        cout << x << " ";
+    cout << endl;
+
+
+    return 0;
 }

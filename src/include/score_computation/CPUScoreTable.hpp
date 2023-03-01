@@ -40,6 +40,22 @@ namespace ReverseMIPS {
             }
         }
 
+        void ComputeList(const int &start_userID, const int &batch_n_user, double *distance_l) {
+            assert(0 <= start_userID && start_userID + batch_n_user <= n_user_);
+
+#pragma omp parallel for default(none) shared(batch_n_user, distance_l, start_userID)
+            for (int batch_userID = 0; batch_userID < batch_n_user; batch_userID++) {
+                const double *tmp_user_vecs = user_vecs_ + (start_userID + batch_userID) * vec_dim_;
+
+                for (int itemID = 0; itemID < n_data_item_; itemID++) {
+                    const double *tmp_data_item_vecs = data_item_vecs_ + itemID * vec_dim_;
+                    const double ip = InnerProduct(tmp_user_vecs, tmp_data_item_vecs, (int) vec_dim_);
+                    distance_l[itemID + batch_userID * n_data_item_] = ip;
+                }
+            }
+
+        }
+
         void FinishCompute() {}
     };
 

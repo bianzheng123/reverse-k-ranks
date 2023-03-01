@@ -59,6 +59,7 @@ def cmp_file(file1, file2):
     for i in range(len(method1_result_l)):
         intersect = set(method1_result_l[i]).intersection(set(method2_result_l[i]))
         if len(intersect) != len(method1_result_l[i]):
+            print(f"line {i}")
             return False
     return True
 
@@ -160,10 +161,10 @@ def run():
         # 'QueryRankSampleSearchUniformRank',
         # 'QueryRankSampleSearchUniformRankMinMaxIntLR',
         # 'QueryRankSampleSearchUniformRankUniformIntLR',
-        # 'QueryRankSampleUniformIntLR',
+        'QueryRankSampleUniformIntLR',
         # 'QueryRankSampleUniformIntLREstimate',
         # 'RankSample',
-        'RTree',
+        # 'RTree',
     ]
 
     os.system('cd result/rank && rm *')
@@ -180,7 +181,7 @@ def run():
         # os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'DiskBruteForce'))
         os.system('cd build && ./progress --dataset_name {} --method_name {}'.format(ds, 'MemoryBruteForce'))
 
-        # os.system('cd build && ./bst --dataset_name {}'.format(ds))
+        os.system('cd build && ./bst --dataset_name {}'.format(ds))
 
         # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true', 'GridIndex'))
         # os.system('cd build && ./rri --dataset_name {} --test_topk {} --method_name {}'.format(ds, 'true', 'LinearModel'))
@@ -190,10 +191,10 @@ def run():
         n_data_item = dataset_m[ds][0]
         n_user = dataset_m[ds][2]
         n_sample = 20
-        # os.system(
-        #     "cd build && ./qdi --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
-        #         index_dir, dataset_dir, ds, n_sample_item, sample_topk
-        #     ))
+        os.system(
+            "cd build && ./qdi --index_dir {} --dataset_dir {} --dataset_name {} --n_sample_item {} --sample_topk {}".format(
+                index_dir, dataset_dir, ds, n_sample_item, sample_topk
+            ))
 
         # run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)
@@ -220,16 +221,16 @@ def run():
         #                   n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleSearchUniformRankUniformIntLR', ds, n_sample, n_data_item, n_user,
         #                   n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleUniformIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleUniformIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # os.system(
         #     f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
         #     f"--method_name {'QueryRankSampleUniformIntLREstimate'} --n_sample {n_sample} "
         #     f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
         # )
         # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        os.system(
-            'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true',
-                                                                                                           'RTree'))
+        # os.system(
+        #     'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true',
+        #                                                                                                    'RTree'))
 
     # send_email.send('test complete')
 
@@ -255,34 +256,11 @@ def cmp_file_count(file1, file2):
 if __name__ == '__main__':
     index_dir = "/home/bianzheng/reverse-k-ranks/index"
     dataset_dir = "/home/bianzheng/Dataset/ReverseMIPS"
-    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
     # dataset_l = ['fake-normal-tiny', 'fake-uniform-tiny']
     # dataset_l = ['fake-uniform-tiny']
-    dataset_l = ['fake-normal']
+    # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
+    dataset_l = ['fake-normal', 'fake-uniform']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 
-    # os.system(
-    #     f"cd build/attribution && ./bsc"
-    # )
-    # os.system(
-    #     f"cd build/attribution && ./cc"
-    # )
-
-    print(cmp_file_count(
-        './rank/yelp-QueryRankSampleMinMaxIntLR-top10-n_sample_490-n_sample_query_5000-sample_topk_600-userID.csv',
-        './rank/yelp-RankSample-top10-n_sample_3923-userID.csv'))
-
-    print(cmp_file_count(
-        './rank/yelp-QueryRankSampleMinMaxIntLR-top200-n_sample_6743-n_sample_query_5000-sample_topk_600-userID.csv',
-        './rank/yelp-RankSample-top200-n_sample_3923-userID.csv'))
-
-    print(cmp_file_count(
-        './rank/yelp-QueryRankSampleUniformIntLR-top200-n_sample_405-n_sample_query_5000-sample_topk_600-userID.csv',
-        './rank/yelp-RankSample-top200-n_sample_3923-userID.csv'))
-
-    print(cmp_file_count(
-        './rank/yahoomusic_big-QueryRankSampleUniformIntLR-top200-n_sample_588-n_sample_query_5000-sample_topk_600-userID.csv',
-        './rank/yahoomusic_big-RankSample-top200-n_sample_4711-userID.csv'))
-
-    # run()
+    run()

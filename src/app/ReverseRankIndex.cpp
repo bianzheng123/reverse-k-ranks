@@ -9,7 +9,6 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "GridIndex.hpp"
-#include "LinearModel.hpp"
 #include "QueryRankSampleDirectIntLR.hpp"
 #include "QueryRankSampleGlobalIntLR.hpp"
 #include "QueryRankSampleMinMaxIntLR.hpp"
@@ -123,10 +122,6 @@ int main(int argc, char **argv) {
         const size_t stop_time = para.stop_time;
         spdlog::info("input parameter: stop_time {}s", stop_time);
         index = GridIndex::BuildIndex(data_item, user, stop_time);
-
-    } else if (method_name == "LinearModel") {
-        spdlog::info("input parameter: none");
-        index = LinearModel::BuildIndex(data_item, user, index_path);
 
     } else if (method_name == "QueryRankSampleDirectIntLR") {
         const int n_sample = para.n_sample;

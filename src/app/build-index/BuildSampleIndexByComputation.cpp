@@ -84,8 +84,6 @@ void BuildIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
     //Compute Score Table
     ComputeScoreTable cst(user, data_item);
-    cst.compute_time_ = 0;
-    cst.sort_time_ = 0;
 
     const int report_every = 10000;
     TimeRecord record;

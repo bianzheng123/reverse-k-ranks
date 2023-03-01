@@ -1,5 +1,5 @@
 //
-// Created by BianZheng on 2022/9/20.
+// Created by bianzheng on 2023/2/28.
 //
 
 #include "util/VectorIO.hpp"
@@ -8,7 +8,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "alg/DiskIndex/ReadAll.hpp"
-#include "score_computation/ComputeScoreTable.hpp"
+#include "score_computation/ComputeScoreTableBatch.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>
@@ -60,29 +60,34 @@ void BuildScoreTable(VectorMatrix &user, VectorMatrix &data_item,
     ReadAll disk_ins(n_user, n_data_item, index_path);
     disk_ins.BuildIndexPreprocess();
 
-    //Compute Score Table
-    ComputeScoreTable cst(user, data_item);
-
-    TimeRecord batch_record, operation_record;
-    batch_record.reset();
-
     total_compute_sort_time = 0;
     total_save_index_time = 0;
-
-    const std::uint32_t report_every = 30000;
 
     double batch_compute_sort_time = 0;
     double batch_save_index_time = 0;
 
-    std::vector<DistancePair> distance_l(n_data_item);
-    for (int userID = 0; userID < n_user; userID++) {
+    const uint64_t batch_n_user = 10;
+    //Compute Score Table
+    ComputeScoreTableBatch cstb(user, data_item, batch_n_user);
 
+    const int remainder = n_user % batch_n_user == 0 ? 0 : 1;
+    const int n_batch = n_user / (int) batch_n_user + remainder;
+    std::vector<DistancePair> batch_distance_l(batch_n_user * n_data_item);
+
+    const uint32_t report_every = 30;
+
+    TimeRecord batch_record, operation_record;
+    batch_record.reset();
+
+    for (int batchID = 0; batchID < n_batch; batchID++) {
         operation_record.reset();
-        cst.ComputeSortItems(userID, distance_l.data());
+        const int start_userID = (int) batch_n_user * batchID;
+        const int n_user_batch = n_user - start_userID > batch_n_user ? (int) batch_n_user : n_user - start_userID;
+        cstb.ComputeSortItemsBatch(start_userID, n_user_batch, batch_distance_l.data());
         const double tmp_compute_sort_time = operation_record.get_elapsed_time_second();
 
         operation_record.reset();
-        disk_ins.BuildIndexLoop(distance_l.data());
+        disk_ins.BuildIndexLoop(batch_distance_l.data(), n_user_batch);
         const double tmp_save_index_time = operation_record.get_elapsed_time_second();
 
         total_compute_sort_time += tmp_compute_sort_time;
@@ -91,10 +96,10 @@ void BuildScoreTable(VectorMatrix &user, VectorMatrix &data_item,
         batch_compute_sort_time += tmp_compute_sort_time;
         batch_save_index_time += tmp_save_index_time;
 
-        if (userID % report_every == 0) {
+        if (batchID % report_every == 0) {
             spdlog::info(
                     "preprocessed {:.1f}%, Mem: {} Mb, {} s/iter, compute sort time {}s, process index time {}s",
-                    userID / (0.01 * n_user), get_current_RSS() / 1000000,
+                    batchID / (0.01 * n_batch), get_current_RSS() / 1000000,
                     batch_record.get_elapsed_time_second(),
                     batch_compute_sort_time, batch_save_index_time);
             batch_compute_sort_time = 0;
@@ -102,7 +107,7 @@ void BuildScoreTable(VectorMatrix &user, VectorMatrix &data_item,
             batch_record.reset();
         }
     }
-    cst.FinishCompute();
+    cstb.FinishCompute();
     disk_ins.FinishBuildIndex();
 }
 
