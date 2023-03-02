@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
 
 #ifdef USE_GPU
     config.WritePerformance(dataset_name, "BuildIndex", "GPU");
-#elif
+#else
     config.WritePerformance(dataset_name, "BuildIndex", "CPU");
 #endif
     return 0;

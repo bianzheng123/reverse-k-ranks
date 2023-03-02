@@ -79,7 +79,7 @@ set_target_properties(pgmindexlib PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(pgmindexlib PRIVATE OpenMP::OpenMP_CXX)
 #target_include_directories(pgmindexlib INTERFACE include/)
 
-set(USE_CUDA ON)
+set(USE_CUDA OFF)
 
 if (USE_CUDA)
     set(CMAKE_CUDA_STANDARD 17)

@@ -5,7 +5,7 @@
 #ifndef REVERSE_KRANKS_PGMSEARCH_HPP
 #define REVERSE_KRANKS_PGMSEARCH_HPP
 
-#include "pgm/pgm_index.hpp"
+#include "pgm_index.hpp"
 #include "struct/DistancePair.hpp"
 #include <iostream>
 #include <memory>
