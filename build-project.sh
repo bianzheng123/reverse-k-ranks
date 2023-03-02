@@ -15,5 +15,6 @@ sudo apt-get install libopenblas-dev
 sudo apt-get install libeigen3-dev
 sudo apt-get install libarmadillo-dev
 # install spdlog in the github, should compile by it self
+# current spdlog is 1.10
 # upgrade the gcc / g++ version to 9.4.0
 # install boost-1.80
