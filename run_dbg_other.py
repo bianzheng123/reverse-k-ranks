@@ -16,6 +16,7 @@ class CMDcolors:
     UNDERLINE = '\033[4m'
 
 
+'''n_item, n_query, n_user'''
 dataset_m = {'movielens-27m': [52889, 1000, 283228],
              'netflix': [16770, 1000, 480189],
              'yahoomusic_big': [135736, 1000, 1823179],

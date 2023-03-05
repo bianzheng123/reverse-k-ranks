@@ -9,6 +9,7 @@
 #include "struct/VectorMatrix.hpp"
 
 #include "GridIndex.hpp"
+#include "QueryRankSampleComputeAll.hpp"
 #include "QueryRankSampleDirectIntLR.hpp"
 #include "QueryRankSampleGlobalIntLR.hpp"
 #include "QueryRankSampleMinMaxIntLR.hpp"
@@ -121,6 +122,17 @@ int main(int argc, char **argv) {
         const size_t stop_time = para.stop_time;
         spdlog::info("input parameter: stop_time {}s", stop_time);
         index = GridIndex::BuildIndex(data_item, user, stop_time);
+
+    } else if (method_name == "QueryRankSampleComputeAll") {
+        const int n_sample = para.n_sample;
+        const int n_sample_query = para.n_sample_query;
+        const int sample_topk = para.sample_topk;
+        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
+                     n_sample, n_sample_query, sample_topk);
+        index = QueryRankSampleComputeAll::BuildIndex(data_item, user, index_path, dataset_name,
+                                                      n_sample, n_sample_query, sample_topk, index_dir);
+        sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
+                n_sample, n_sample_query, sample_topk);
 
     } else if (method_name == "QueryRankSampleDirectIntLR") {
         const int n_sample = para.n_sample;
