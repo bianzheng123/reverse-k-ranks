@@ -45,7 +45,7 @@ namespace ReverseMIPS {
             n_compute = 0;
             int n_candidate = 0;
             exact_rank_refinement_record_.reset();
-//#pragma omp parallel for default(none) shared(user, userID, data_item, queryIP, base_rank)
+#pragma omp parallel for default(none) shared(user, prune_l, result_l, queryIP_l, data_item, n_compute, n_candidate)
             for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID] || result_l[userID]) {
                     continue;
@@ -56,19 +56,19 @@ namespace ReverseMIPS {
                 for (int itemID = 0; itemID < n_data_item_; itemID++) {
                     const double *item_vecs = data_item.getVector(itemID);
                     const double ip = InnerProduct(user_vecs, item_vecs, vec_dim_);
-//#pragma omp critical
                     if (ip > queryIP) {
                         base_rank++;
                     }
 
                 }
-                if (queryID == 0 && userID == 790) {
-                    spdlog::error("found userID 790, rank {}", base_rank);
-                }
 
-                n_compute += n_data_item_;
-                user_topk_cache_l_[n_candidate] = UserRankElement(userID, base_rank, queryIP);
-                n_candidate++;
+#pragma omp critical
+                {
+                    n_compute += n_data_item_;
+                    user_topk_cache_l_[n_candidate] = UserRankElement(userID, base_rank, queryIP);
+                    n_candidate++;
+                };
+
             }
             exact_rank_refinement_time_ += exact_rank_refinement_record_.get_elapsed_time_second();
 
