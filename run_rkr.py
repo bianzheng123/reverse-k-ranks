@@ -147,20 +147,20 @@ def run():
         'MemoryBruteForce',
 
         # 'GridIndex',
-        # 'QueryRankSampleDirectIntLR',
-        # 'QueryRankSampleGlobalIntLR',
-        # 'QueryRankSampleLeastSquareIntLR',
-        # 'QueryRankSampleMinMaxIntLR',
-        # 'QueryRankSampleMinMaxIntLREstimate',
+        'QueryRankSampleDirectIntLR',
+        'QueryRankSampleGlobalIntLR',
+        'QueryRankSampleLeastSquareIntLR',
+        'QueryRankSampleMinMaxIntLR',
+        'QueryRankSampleMinMaxIntLREstimate',
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
         # 'QueryRankSampleSearchBruteForce',
         # 'QueryRankSampleSearchKthRank',
         # 'QueryRankSampleSearchUniformRank',
-        # 'QueryRankSampleSearchUniformRankMinMaxIntLR',
-        # 'QueryRankSampleSearchUniformRankUniformIntLR',
+        'QueryRankSampleSearchUniformRankMinMaxIntLR',
+        'QueryRankSampleSearchUniformRankUniformIntLR',
         'QueryRankSampleUniformIntLR',
-        # 'QueryRankSampleUniformIntLREstimate',
+        'QueryRankSampleUniformIntLREstimate',
         # 'RankSample',
         # 'RTree',
     ]
@@ -256,7 +256,7 @@ if __name__ == '__main__':
     # dataset_l = ['fake-normal-tiny', 'fake-uniform-tiny']
     # dataset_l = ['fake-uniform-tiny']
     # dataset_l = ['fake-normal', 'fake-uniform', 'fakebig', 'netflix-small']
-    dataset_l = ['fake-normal', 'fake-uniform']
+    dataset_l = ['fake-normal']
     # dataset_l = ['fake-normal-query-distribution', 'fake-uniform-query-distribution',
     #              'netflix-small-query-distribution', 'movielens-27m-small-query-distribution']
 

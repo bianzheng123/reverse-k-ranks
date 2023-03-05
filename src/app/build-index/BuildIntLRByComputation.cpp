@@ -8,13 +8,13 @@
 #include "struct/VectorMatrix.hpp"
 #include "NameTranslation.hpp"
 
-#include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
-#include "alg/RankBoundRefinement/DirectLinearRegression.hpp"
-#include "alg/RankBoundRefinement/GlobalLinearRegression.hpp"
-#include "alg/RankBoundRefinement/LeastSquareLinearRegression.hpp"
-#include "alg/RankBoundRefinement/MinMaxLinearRegression.hpp"
+#include "alg/RegressionPruning/BaseLinearRegression.hpp"
+#include "alg/RegressionPruning/DirectLinearRegression.hpp"
+#include "alg/RegressionPruning/GlobalLinearRegression.hpp"
+#include "alg/RegressionPruning/LeastSquareLinearRegression.hpp"
+#include "alg/RegressionPruning/MinMaxLinearRegression.hpp"
 #include "alg/RankBoundRefinement/SampleSearch.hpp"
-#include "alg/RankBoundRefinement/UniformLinearRegression.hpp"
+#include "alg/RegressionPruning/UniformLinearRegression.hpp"
 
 #include "score_computation/ComputeScoreTable.hpp"
 

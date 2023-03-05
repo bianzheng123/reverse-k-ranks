@@ -8,11 +8,11 @@
 #include "struct/DistancePair.hpp"
 #include "util/MathUtil.hpp"
 #include "sdlp/sdlp.hpp"
-#include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
+#include "BaseLinearRegression.hpp"
 
 #include <iostream>
 #include <memory>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {

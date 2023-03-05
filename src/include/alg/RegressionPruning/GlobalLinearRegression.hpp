@@ -1,25 +1,24 @@
 //
-// Created by BianZheng on 2022/12/3.
+// Created by BianZheng on 2022/11/11.
 //
 
-#ifndef REVERSE_K_RANKS_UNIFORMLINEARREGRESSION_HPP
-#define REVERSE_K_RANKS_UNIFORMLINEARREGRESSION_HPP
+#ifndef REVERSE_K_RANKS_GLOBALLINEARREGRESSION_HPP
+#define REVERSE_K_RANKS_GLOBALLINEARREGRESSION_HPP
 
+#include "BaseLinearRegression.hpp"
 #include "struct/DistancePair.hpp"
 #include "util/MathUtil.hpp"
 #include "sdlp/sdlp.hpp"
-#include "alg/RankBoundRefinement/BaseLinearRegression.hpp"
 
 #include <iostream>
 #include <memory>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
 
-    class UniformLinearRegression : public BaseLinearRegression {
+    class GlobalLinearRegression {
 
-        std::string method_name_ = "QueryRankSampleUniformIntLR";
         size_t n_data_item_, n_user_;
         static constexpr int n_predict_parameter_ = 2; // (a, b) for linear estimation
         static constexpr int n_distribution_parameter_ = 2; // mu, sigma
@@ -36,9 +35,9 @@ namespace ReverseMIPS {
         double *preprocess_cache_c_; // 3, objective coefficients
     public:
 
-        inline UniformLinearRegression() {}
+        inline GlobalLinearRegression() {}
 
-        inline UniformLinearRegression(const int &n_data_item, const int &n_user) {
+        inline GlobalLinearRegression(const int &n_data_item, const int &n_user) {
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
             this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
@@ -47,36 +46,20 @@ namespace ReverseMIPS {
             static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
         }
 
-        inline UniformLinearRegression(const int &n_data_item, const int &n_user, const std::string &method_name) {
-            method_name_ = method_name;
-            this->n_data_item_ = n_data_item;
-            this->n_user_ = n_user;
-            this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
-            this->distribution_para_l_ = std::make_unique<double[]>(n_user * n_distribution_parameter_);
-            this->error_l_ = std::make_unique<int[]>(n_user);
-            static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
+        inline GlobalLinearRegression(const char *index_basic_dir, const char *dataset_name,
+                                      const size_t &n_sample) {
+            LoadIndex(index_basic_dir, dataset_name, n_sample);
         }
 
-        inline UniformLinearRegression(const char *index_basic_dir, const char *dataset_name,
-                                       const size_t &n_sample, const size_t &n_sample_query,
-                                       const size_t &sample_topk) {
-            LoadIndex(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
-        }
-
-        inline UniformLinearRegression(const char *index_basic_dir, const char *dataset_name,
-                                       const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk,
-                                       const bool &is_uniform_rank) {
-            LoadIndex(index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk, is_uniform_rank);
-        }
-
-        void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) override {
+        void StartPreprocess() {
+            const int n_sample_rank = n_data_item_;
             this->n_sample_rank_ = n_sample_rank;
             this->sample_rank_l_ = std::make_unique<int[]>(n_sample_rank);
             this->preprocess_cache_A_ = new double[(2 * n_sample_rank) * (n_predict_parameter_ + 1)];
             this->preprocess_cache_b_ = new double[2 * n_sample_rank];
             this->preprocess_cache_c_ = new double[3];
             for (int sampleID = 0; sampleID < n_sample_rank; sampleID++) {
-                sample_rank_l_[sampleID] = sample_rank_l[sampleID];
+                sample_rank_l_[sampleID] = sampleID;
 
                 preprocess_cache_b_[2 * sampleID] = -sampleID;
                 preprocess_cache_b_[2 * sampleID + 1] = sampleID;
@@ -88,24 +71,63 @@ namespace ReverseMIPS {
 
         }
 
-
-        void LoopPreprocess(const double *sampleIP_l, const int &userID) override {
-            const int high_score_quantile_idx = (int) (n_sample_rank_ * 0.05);
-            const int low_score_quantile_idx = (int) (n_sample_rank_ * 0.95);
-            const double high_score = sampleIP_l[high_score_quantile_idx];
-            const double low_score = sampleIP_l[low_score_quantile_idx];
-            const double score_diff = high_score - low_score;
-            distribution_para_l_[userID * n_distribution_parameter_] = low_score;
-            distribution_para_l_[userID * n_distribution_parameter_ + 1] = score_diff;
-
-#pragma omp parallel for default(none) shared(sampleIP_l, low_score, score_diff)
+        double ComputeAverage(const double *sampleIP_l) const {
+            double average = 0;
             for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
-                const double input_x = (sampleIP_l[sampleID] - low_score) / score_diff;
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1)] = -input_x;
+                average += sampleIP_l[sampleID];
+            }
+            return average / n_sample_rank_;
+        }
+
+        double ComputeStd(const double *sampleIP_l, const double average) const {
+            double sigma = 0;
+            for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
+                const double minus = sampleIP_l[sampleID] - average;
+                const double term = minus * minus;
+                sigma += term;
+            }
+            sigma /= n_sample_rank_;
+            return std::sqrt(sigma);
+        }
+
+        double CDFPhi(double x) const {
+            // constants
+            constexpr double a1 = 0.254829592;
+            constexpr double a2 = -0.284496736;
+            constexpr double a3 = 1.421413741;
+            constexpr double a4 = -1.453152027;
+            constexpr double a5 = 1.061405429;
+            constexpr double p = 0.3275911;
+
+            // Save the sign of x
+            int sign = 1;
+            if (x < 0)
+                sign = -1;
+            x = fabs(x) / sqrt_2_;
+
+            // A&S formula 7.1.26
+            double t = 1.0 / (1.0 + p * x);
+            double y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * exp(-x * x);
+
+            return 0.5 * (1.0 + sign * y);
+        }
+
+        void LoopPreprocess(const double *sampleIP_l, const int &userID) {
+            //compute average, std
+            const double mu = ComputeAverage(sampleIP_l);
+            const double sigma = ComputeStd(sampleIP_l, mu);
+            distribution_para_l_[userID * n_distribution_parameter_] = mu;
+            distribution_para_l_[userID * n_distribution_parameter_ + 1] = sigma;
+
+#pragma omp parallel for default(none) shared(sampleIP_l, mu, sigma)
+            for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
+                const double normal_num = (sampleIP_l[sampleID] - mu) / sigma;
+                const double cdf = CDFPhi(normal_num);
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1)] = -cdf;
                 preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 1] = -1;
                 preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 2] = -1;
 
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 3] = input_x;
+                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 3] = cdf;
                 preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 4] = 1;
                 preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 5] = -1;
 
@@ -125,7 +147,7 @@ namespace ReverseMIPS {
                                                                              n_predict_parameter_ + 1);
             Eigen::Matrix<double, n_predict_parameter_ + 1, 1> x;
 
-            sdlp::linprog<3>(c, A, b, x);
+            double min_obj = sdlp::linprog<3>(c, A, b, x);
 
             assert(x.rows() == n_predict_parameter_ + 1);
 //            printf("res rows %ld, cols %ld\n", res.rows(), res.cols());
@@ -154,7 +176,7 @@ namespace ReverseMIPS {
             assert(-1 < error && error < n_sample_rank_);
         }
 
-        void FinishPreprocess() override {
+        void FinishPreprocess() {
             delete[] preprocess_cache_A_;
             delete[] preprocess_cache_b_;
             delete[] preprocess_cache_c_;
@@ -168,9 +190,10 @@ namespace ReverseMIPS {
                          int &rank_lb, int &rank_ub, const int &queryID) const {
 
             const size_t distribution_pos = userID * n_distribution_parameter_;
-            const double low_score = distribution_para_l_[distribution_pos];
-            const double score_diff = distribution_para_l_[distribution_pos + 1];
-            const double input_x = (queryIP - low_score) / score_diff;
+            const double mu = distribution_para_l_[distribution_pos];
+            const double sigma = distribution_para_l_[distribution_pos + 1];
+            const double normalize_x = (queryIP - mu) / sigma;
+            const double input_x = CDFPhi(normalize_x);
 
             const size_t pred_pos = userID * n_predict_parameter_;
             const double pred_rank = input_x * predict_para_l_[pred_pos] + predict_para_l_[pred_pos + 1];
@@ -243,25 +266,22 @@ namespace ReverseMIPS {
                 rank_lb_l[userID] = qIP_lb_tmp_lower_rank;
                 rank_ub_l[userID] = qIP_ub_tmp_upper_rank;
 
+//                if (queryID == 3 && userID == 865) {
+//                    printf("queryID %d, userID %d, queryIP_lb %.3f, queryIP_ub %.3f, rank_lb %d, rank_ub %d\n",
+//                           queryID, userID, queryIP_lb, queryIP_ub, rank_lb_l[userID], rank_ub_l[userID]);
+//                }
+
                 assert(qIP_lb_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
                 assert(qIP_ub_tmp_upper_rank <= qIP_ub_tmp_lower_rank);
                 assert(qIP_ub_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
             }
         }
 
-        void SaveIndex(const char *index_basic_dir, const char *dataset_name, const size_t &n_sample_query,
-                       const size_t &sample_topk) override {
+        void SaveIndex(const char *index_basic_dir, const char *dataset_name) {
             char index_path[256];
-            if (method_name_ == "QueryRankSampleUniformIntLR") {
-                sprintf(index_path,
-                        "%s/memory_index/UniformLinearRegression-%s-n_sample_%d-n_sample_query_%ld-sample_topk_%ld.index",
-                        index_basic_dir, dataset_name, n_sample_rank_, n_sample_query, sample_topk);
-            } else {
-                sprintf(index_path,
-                        "%s/memory_index/UniformLinearRegression-QueryRankSampleSearchUniformRankUniformIntLR-%s-n_sample_%d-n_sample_query_%ld-sample_topk_%ld.index",
-                        index_basic_dir, dataset_name, n_sample_rank_, n_sample_query, sample_topk);
-            }
-
+            sprintf(index_path,
+                    "%s/memory_index/GlobalLinearRegression-%s-n_sample_%d.index",
+                    index_basic_dir, dataset_name, n_sample_rank_);
 
             std::ofstream out_stream_ = std::ofstream(index_path, std::ios::binary | std::ios::out);
             if (!out_stream_) {
@@ -283,18 +303,11 @@ namespace ReverseMIPS {
         }
 
         void LoadIndex(const char *index_basic_dir, const char *dataset_name,
-                       const size_t &n_sample, const size_t &n_sample_query, const size_t &sample_topk,
-                       const bool &is_uniform_rank = false) {
+                       const size_t &n_sample) {
             char index_path[256];
-            if (is_uniform_rank) {
-                sprintf(index_path,
-                        "%s/memory_index/UniformLinearRegression-QueryRankSampleSearchUniformRankUniformIntLR-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
-                        index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
-            } else {
-                sprintf(index_path,
-                        "%s/memory_index/UniformLinearRegression-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
-                        index_basic_dir, dataset_name, n_sample, n_sample_query, sample_topk);
-            }
+            sprintf(index_path,
+                    "%s/memory_index/GlobalLinearRegression-%s-n_sample_%ld.index",
+                    index_basic_dir, dataset_name, n_sample);
             spdlog::info("index path {}", index_path);
 
             std::ifstream index_stream = std::ifstream(index_path, std::ios::binary | std::ios::in);
@@ -334,4 +347,4 @@ namespace ReverseMIPS {
 
     };
 }
-#endif //REVERSE_K_RANKS_UNIFORMLINEARREGRESSION_HPP
+#endif //REVERSE_K_RANKS_GLOBALLINEARREGRESSION_HPP

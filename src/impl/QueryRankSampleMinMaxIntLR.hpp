@@ -10,7 +10,7 @@
 #include "alg/DiskIndex/ReadAll.hpp"
 #include "alg/DiskIndex/ReadAllDirectIO.hpp"
 #include "alg/QueryIPBound/FullInt.hpp"
-#include "alg/RankBoundRefinement/MinMaxLinearRegression.hpp"
+#include "alg/RegressionPruning/MinMaxLinearRegression.hpp"
 #include "alg/RankBoundRefinement/PruneCandidateByBound.hpp"
 #include "alg/RankBoundRefinement/SampleSearch.hpp"
 
