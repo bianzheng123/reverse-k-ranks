@@ -85,12 +85,12 @@ void BuildLocalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
         const int n_sample = (int) n_sample_l[rsID];
         const string index_name = IndexName(method_name);
 
-        if (index_name == "QueryRankSampleUniformRankIntLR") {
-            rs_ins_l[rsID] = SampleSearch(basic_index_dir, dataset_name, "QueryRankSampleUniformRankIntLR",
+        if (index_name == "QueryRankSampleSearchUniformRank") {
+            rs_ins_l[rsID] = SampleSearch(basic_index_dir, dataset_name, "QueryRankSampleSearchUniformRank",
                                           n_sample, load_sample_score, is_query_distribution,
                                           n_sample_query, sample_topk);
-        } else if (index_name == "QueryRankSampleIntLR") {
-            rs_ins_l[rsID] = SampleSearch(basic_index_dir, dataset_name, "QueryRankSampleIntLR",
+        } else if (index_name == "QueryRankSampleSearchKthRank") {
+            rs_ins_l[rsID] = SampleSearch(basic_index_dir, dataset_name, "QueryRankSampleSearchKthRank",
                                           n_sample, load_sample_score, is_query_distribution,
                                           n_sample_query, sample_topk);
         }else{

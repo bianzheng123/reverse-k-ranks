@@ -43,11 +43,11 @@ namespace ReverseMIPS {
 
         }
 
-        inline SampleSearch(const char *index_path, const char *dataset_name, const char *method_name,
+        inline SampleSearch(const char *index_path, const char *dataset_name, const char *index_name,
                             const size_t &n_sample,
                             const bool &load_sample_score, const bool &is_query_distribution,
                             const size_t &n_sample_query = 0, const size_t &sample_topk = 0) {
-            LoadIndex(index_path, dataset_name, method_name,
+            LoadIndex(index_path, dataset_name, index_name,
                       n_sample,
                       load_sample_score, is_query_distribution,
                       n_sample_query, sample_topk);
@@ -279,7 +279,7 @@ namespace ReverseMIPS {
         }
 
         void LoadIndex(const char *index_basic_dir, const char *dataset_name,
-                       const char *method_name,
+                       const char *index_name,
                        const size_t &n_sample,
                        const bool &load_sample_score, const bool &is_query_distribution,
                        const size_t &n_sample_query = 0, const size_t &sample_topk = 0) {
@@ -294,11 +294,11 @@ namespace ReverseMIPS {
             if (is_query_distribution) {
                 sprintf(index_path,
                         "%s/%s-%s-n_sample_%ld-n_sample_query_%ld-sample_topk_%ld.index",
-                        index_abs_dir, method_name, dataset_name, n_sample, n_sample_query, sample_topk);
+                        index_abs_dir, index_name, dataset_name, n_sample, n_sample_query, sample_topk);
             } else {
                 sprintf(index_path,
                         "%s/%s-%s-n_sample_%ld.index",
-                        index_abs_dir, method_name, dataset_name, n_sample);
+                        index_abs_dir, index_name, dataset_name, n_sample);
             }
             spdlog::info("index path {}", index_path);
 

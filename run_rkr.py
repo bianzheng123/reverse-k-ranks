@@ -193,19 +193,19 @@ def run():
                 index_dir, dataset_dir, ds, n_sample_item, sample_topk
             ))
 
-        # run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # run_sample_method('QueryRankSampleMinMaxIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # os.system(
-        #     f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
-        #     f"--method_name {'QueryRankSampleMinMaxIntLREstimate'} --n_sample {n_sample} "
-        #     f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-        # )
+        run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleLeastSquareIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleMinMaxIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        os.system(
+            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
+            f"--method_name {'QueryRankSampleMinMaxIntLREstimate'} --n_sample {n_sample} "
+            f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+        )
 
         # run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)
@@ -214,16 +214,16 @@ def run():
         #                   sample_topk)
         # run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleSearchUniformRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleSearchUniformRankMinMaxIntLR', ds, n_sample, n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleSearchUniformRankUniformIntLR', ds, n_sample, n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchUniformRankMinMaxIntLR', ds, n_sample, n_data_item, n_user,
+                          n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchUniformRankUniformIntLR', ds, n_sample, n_data_item, n_user,
+                          n_sample_item, sample_topk)
         run_sample_method('QueryRankSampleUniformIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        # os.system(
-        #     f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
-        #     f"--method_name {'QueryRankSampleUniformIntLREstimate'} --n_sample {n_sample} "
-        #     f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-        # )
+        os.system(
+            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
+            f"--method_name {'QueryRankSampleUniformIntLREstimate'} --n_sample {n_sample} "
+            f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+        )
         # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # os.system(
         #     'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true',

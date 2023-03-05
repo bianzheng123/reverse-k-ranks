@@ -11,7 +11,7 @@
 #include "Progress/BatchDiskBruteForce.hpp"
 #include "Progress/DiskBruteForce.hpp"
 #include "Progress/MemoryBruteForce.hpp"
-#include "QueryRankSampleSearchBruteForce.hpp"
+#include "Progress/QueryRankSampleSearchBruteForce.hpp"
 
 #include <spdlog/spdlog.h>
 #include <boost/program_options.hpp>

@@ -152,11 +152,6 @@ namespace ReverseMIPS::QueryRankSampleSearchBruteForce {
                 assert(n_result_user + n_prune_user + refine_user_size == n_user_);
                 assert(0 <= n_result_user && n_result_user <= topk);
                 sample_refine_user_ += refine_user_size;
-                if (queryID == 1) {
-                    const int userID = 9;
-                    printf("queryID %d, userID %d, rank_lb %d, rank_ub %d\n", queryID, userID, rank_lb_l_[userID],
-                           rank_ub_l_[userID]);
-                }
 
                 //read disk and fine binary search
                 size_t io_cost = 0;

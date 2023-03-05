@@ -282,7 +282,7 @@ namespace ReverseMIPS::QueryRankSampleSearchUniformRankMinMaxIntLR {
         ip_bound_ins.Preprocess(user, data_item);
 
         //rank search
-        SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleUniformRankIntLR",
+        SampleSearch rank_ins(index_basic_dir, dataset_name, "QueryRankSampleSearchUniformRank",
                               n_sample, true, true,
                               n_sample_query, sample_topk);
 

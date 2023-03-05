@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
     const char *dataset_name = para.dataset_name.c_str();
     const char *dataset_dir = para.dataset_dir.c_str();
     string index_dir = para.index_dir;
-    spdlog::info("dataset_name {}, dataset_dir {}", dataset_name, dataset_dir);
+    spdlog::info("BuildScoreTable dataset_name {}, dataset_dir {}", dataset_name, dataset_dir);
     spdlog::info("index_dir {}", index_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;

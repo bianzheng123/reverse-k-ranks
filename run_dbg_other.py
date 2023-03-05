@@ -2,7 +2,6 @@ import os
 import filecmp
 import numpy as np
 from script.data_convert import vecs_io
-import run_polyuhost as polyu
 
 
 class CMDcolors:

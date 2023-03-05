@@ -10,21 +10,19 @@
 
 namespace ReverseMIPS {
     std::string IndexName(const std::string &method_name) {
-        if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR" ||
+        if (method_name == "QueryRankSampleSearchKthRank" ||
+            method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR" ||
             method_name == "QueryRankSampleDirectIntLR" || method_name == "QueryRankSampleGlobalIntLR" ||
             method_name == "QueryRankSampleUniformIntLR") {
-            return "QueryRankSampleIntLR";
-        } else if (method_name == "QueryRankSampleSearchUniformRankMinMaxIntLR" ||
+            return "QueryRankSampleSearchKthRank";
+        } else if (method_name == "QueryRankSampleSearchUniformRank" ||
+                   method_name == "QueryRankSampleSearchUniformRankMinMaxIntLR" ||
                    method_name == "QueryRankSampleSearchUniformRankUniformIntLR") {
-            return "QueryRankSampleUniformRankIntLR";
+            return "QueryRankSampleSearchUniformRank";
         } else if (method_name == "QueryRankSampleScoreDistribution") {
             return "QueryRankSampleScoreDistribution";
         } else if (method_name == "QueryRankSampleSearchAllRank") {
             return "QueryRankSampleSearchAllRank";
-        } else if (method_name == "QueryRankSampleSearchKthRank") {
-            return "QueryRankSampleSearchKthRank";
-        } else if (method_name == "QueryRankSampleSearchUniformRank") {
-            return "QueryRankSampleSearchUniformRank";
         } else if (method_name == "RankSample") {
             return "RankSample";
         } else if (method_name == "QueryRankSampleSearchBruteForce") {
