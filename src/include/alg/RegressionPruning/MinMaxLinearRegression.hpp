@@ -28,11 +28,11 @@ namespace ReverseMIPS {
         std::unique_ptr<int[]> sample_rank_l_; // n_sample_rank
         std::unique_ptr<double[]> predict_para_l_; // n_user_ * n_predict_parameter
         std::unique_ptr<double[]> distribution_para_l_; // n_user_ * n_distribution_parameter
-        std::unique_ptr<int[]> error_l_; //n_user_
+        std::unique_ptr<double[]> error_l_; //n_user_
 
         //used for loading
-        double *preprocess_cache_A_; // (2 * n_sample_rank) * (n_predict_parameter_ + 1), constraint matrix
-        double *preprocess_cache_b_; // (2 * n_sample_rank), constraint bound
+        double *preprocess_cache_A_; // (4 * n_sample_rank) * (n_predict_parameter_ + 1), constraint matrix
+        double *preprocess_cache_b_; // (4 * n_sample_rank), constraint bound
         double *preprocess_cache_c_; // 3, objective coefficients
     public:
 
@@ -43,7 +43,7 @@ namespace ReverseMIPS {
             this->n_user_ = n_user;
             this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
             this->distribution_para_l_ = std::make_unique<double[]>(n_user * n_distribution_parameter_);
-            this->error_l_ = std::make_unique<int[]>(n_user);
+            this->error_l_ = std::make_unique<double[]>(n_user);
             static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
         }
 
@@ -53,7 +53,7 @@ namespace ReverseMIPS {
             this->n_user_ = n_user;
             this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
             this->distribution_para_l_ = std::make_unique<double[]>(n_user * n_distribution_parameter_);
-            this->error_l_ = std::make_unique<int[]>(n_user);
+            this->error_l_ = std::make_unique<double[]>(n_user);
             static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
         }
 
@@ -71,15 +71,22 @@ namespace ReverseMIPS {
         void StartPreprocess(const int *sample_rank_l, const int &n_sample_rank) override {
             this->n_sample_rank_ = n_sample_rank;
             this->sample_rank_l_ = std::make_unique<int[]>(n_sample_rank);
-            this->preprocess_cache_A_ = new double[(2 * n_sample_rank) * (n_predict_parameter_ + 1)];
-            this->preprocess_cache_b_ = new double[2 * n_sample_rank];
+            this->preprocess_cache_A_ = new double[(4 * n_sample_rank) * (n_predict_parameter_ + 1)];
+            this->preprocess_cache_b_ = new double[4 * n_sample_rank];
             this->preprocess_cache_c_ = new double[3];
-            for (int sampleID = 0; sampleID < n_sample_rank; sampleID++) {
+            for (int sampleID = 0; sampleID < n_sample_rank_ - 1; sampleID++) {
                 sample_rank_l_[sampleID] = sample_rank_l[sampleID];
 
-                preprocess_cache_b_[2 * sampleID] = -sampleID;
-                preprocess_cache_b_[2 * sampleID + 1] = sampleID;
+                preprocess_cache_b_[4 * sampleID] = -sampleID - 1;
+                preprocess_cache_b_[4 * sampleID + 1] = sampleID + 1;
+                preprocess_cache_b_[4 * sampleID + 2] = -sampleID - 1;
+                preprocess_cache_b_[4 * sampleID + 3] = sampleID + 1;
             }
+            preprocess_cache_b_[4 * (n_sample_rank_ - 1) + 0] = -n_sample_rank_;
+            preprocess_cache_b_[4 * (n_sample_rank_ - 1) + 1] = n_sample_rank_;
+            preprocess_cache_b_[4 * (n_sample_rank_ - 1) + 2] = 0;
+            preprocess_cache_b_[4 * (n_sample_rank_ - 1) + 3] = 0;
+            sample_rank_l_[n_sample_rank_ - 1] = sample_rank_l[n_sample_rank_ - 1];
 
             preprocess_cache_c_[0] = 0;
             preprocess_cache_c_[1] = 0;
@@ -136,20 +143,61 @@ namespace ReverseMIPS {
             distribution_para_l_[userID * n_distribution_parameter_ + 1] = sigma;
 
 #pragma omp parallel for default(none) shared(sampleIP_l, mu, sigma)
-            for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
-                const double normal_num = (sampleIP_l[sampleID] - mu) / sigma;
-                const double cdf = CDFPhi(normal_num);
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1)] = -cdf;
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 1] = -1;
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 2] = -1;
+            for (int sampleID = 0; sampleID < n_sample_rank_ - 1; sampleID++) {
+                const double input_next_x = sampleIP_l[sampleID + 1];
+                const double normal_num = (input_next_x - mu) / sigma;
+                const double next_cdf = CDFPhi(normal_num);
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1)] = -next_cdf;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 1] = -1;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 2] = -1;
 
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 3] = cdf;
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 4] = 1;
-                preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 5] = -1;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 3] = next_cdf;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 4] = 1;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 5] = -1;
+
+                const double input_x = sampleIP_l[sampleID];
+                const double normal_num2 = (input_x - mu) / sigma;
+                const double cdf = CDFPhi(normal_num2);
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 6] = -cdf;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 7] = -1;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 8] = -1;
+
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 9] = cdf;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 10] = 1;
+                preprocess_cache_A_[(4 * sampleID) * (n_predict_parameter_ + 1) + 11] = -1;
 
             }
+
+            {
+                const int sampleID = n_sample_rank_ - 1;
+                const double input_x = sampleIP_l[sampleID];
+                const double normal_num2 = (input_x - mu) / sigma;
+                const double cdf = CDFPhi(normal_num2);
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 0] = -cdf;
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 1] = -1;
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 2] = -1;
+
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 3] = cdf;
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 4] = 1;
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 5] = -1;
+            }
+
+            {
+                const int sampleID = 0;
+                const double input_x = sampleIP_l[sampleID];
+                const double normal_num2 = (input_x - mu) / sigma;
+                const double cdf = CDFPhi(normal_num2);
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 6] = -cdf;
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 7] = -1;
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 8] = -1;
+
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 9] = cdf;
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 10] = 1;
+                preprocess_cache_A_[(4 * (n_sample_rank_ - 1)) * (n_predict_parameter_ + 1) + 11] = -1;
+            }
+
             using RowMatrixXd = Eigen::Matrix<double, Eigen::Dynamic, n_predict_parameter_ + 1, Eigen::RowMajor>;
-            Eigen::Map<RowMatrixXd> A(preprocess_cache_A_, 2 * n_sample_rank_, (int64_t) n_predict_parameter_ + 1);
+            Eigen::Map<RowMatrixXd> A(preprocess_cache_A_, 4 * n_sample_rank_, (int64_t) n_predict_parameter_ + 1);
 
 //    printf("%.3f %.3f %.3f %.3f\n", X_cache[0], X_cache[1], X_cache[2], X_cache[3]);
 //    std::cout << X.row(1) << std::endl;
@@ -157,7 +205,7 @@ namespace ReverseMIPS {
 //    printf("X rows %ld, cols %ld\n", X.MapBase<Eigen::Map<Eigen::Matrix<double, -1, -1, 1>, 0>, 0>::rows(),
 //           X.MapBase<Eigen::Map<Eigen::Matrix<double, -1, -1, 1>, 0>, 0>::cols());
 
-            Eigen::Map<Eigen::VectorXd> b(preprocess_cache_b_, 2 * n_sample_rank_);
+            Eigen::Map<Eigen::VectorXd> b(preprocess_cache_b_, 4 * n_sample_rank_);
 
             Eigen::Map<Eigen::Matrix<double, n_predict_parameter_ + 1, 1>> c(preprocess_cache_c_,
                                                                              n_predict_parameter_ + 1);
@@ -175,16 +223,52 @@ namespace ReverseMIPS {
             }
 
             //assign error
-            int error = -1;
-#pragma omp parallel for default(none) shared(userID, error)
-            for (int sampleID = 0; sampleID < n_sample_rank_; sampleID++) {
+            double error = -1;
+#pragma omp parallel for default(none) shared(userID, error, sampleIP_l, mu, sigma)
+            for (int sampleID = 0; sampleID < n_sample_rank_ - 1; sampleID++) {
+                const double input_x = sampleIP_l[sampleID];
+                const double normal_num2 = (input_x - mu) / sigma;
+                const double cdf = CDFPhi(normal_num2);
+
+                const double input_next_x = sampleIP_l[sampleID + 1];
+                const double normal_num = (input_next_x - mu) / sigma;
+                const double next_cdf = CDFPhi(normal_num);
+
                 const double tmp_a = predict_para_l_[userID * n_predict_parameter_];
                 const double tmp_b = predict_para_l_[userID * n_predict_parameter_ + 1];
-                const double tmp_x = preprocess_cache_A_[(2 * sampleID) * (n_predict_parameter_ + 1) + 3];
-                double pred_rank = tmp_x * tmp_a + tmp_b;
+                const double pred_rank1 = next_cdf * tmp_a + tmp_b;
+                const double pred_rank2 = cdf * tmp_a + tmp_b;
                 const int real_rank = sampleID;
-                const int tmp_error = std::abs(std::floor(pred_rank) - real_rank);
+                const double tmp_error1 = std::abs((sampleID + 1) - pred_rank1);
+                const double tmp_error2 = std::abs((sampleID + 1) - pred_rank2);
+                const double tmp_error = std::max(tmp_error1, tmp_error2) + 0.1;
 #pragma omp critical
+                error = std::max(tmp_error, error);
+            }
+
+            {
+                const int sampleID = n_sample_rank_ - 1;
+                const double input_x = sampleIP_l[sampleID];
+                const double normal_num2 = (input_x - mu) / sigma;
+                const double cdf = CDFPhi(normal_num2);
+
+                const double tmp_a = predict_para_l_[userID * n_predict_parameter_];
+                const double tmp_b = predict_para_l_[userID * n_predict_parameter_ + 1];
+                const double pred_rank2 = cdf * tmp_a + tmp_b;
+                const double tmp_error = std::abs((sampleID + 1) - pred_rank2) + 0.01;
+                error = std::max(tmp_error, error);
+            }
+
+            {
+                const int sampleID = 0;
+                const double input_x = sampleIP_l[sampleID];
+                const double normal_num2 = (input_x - mu) / sigma;
+                const double cdf = CDFPhi(normal_num2);
+
+                const double tmp_a = predict_para_l_[userID * n_predict_parameter_];
+                const double tmp_b = predict_para_l_[userID * n_predict_parameter_ + 1];
+                const double pred_rank2 = cdf * tmp_a + tmp_b;
+                const double tmp_error = std::abs(sampleID - pred_rank2) + 0.01;
                 error = std::max(tmp_error, error);
             }
 
@@ -213,9 +297,8 @@ namespace ReverseMIPS {
 
             const size_t pred_pos = userID * n_predict_parameter_;
             const double pred_rank = input_x * predict_para_l_[pred_pos] + predict_para_l_[pred_pos + 1];
-            const int pred_int_rank = std::floor(pred_rank);
-            const int pred_sample_rank_lb = pred_int_rank + error_l_[userID];
-            const int pred_sample_rank_ub = pred_int_rank - error_l_[userID];
+            const int pred_sample_rank_lb = std::ceil(pred_rank + error_l_[userID]);
+            const int pred_sample_rank_ub = std::floor(pred_rank - error_l_[userID]);
 
 //            if (queryID == 3 && userID == 865) {
 //                printf("queryID %d, userID %d, queryIP %.3f, pred_int_rank %d, error %d, pred_sample_rank_lb %d, pred_sample_rank_ub %d\n",
@@ -321,7 +404,7 @@ namespace ReverseMIPS {
                               (int64_t) (n_user_ * n_predict_parameter_ * sizeof(double)));
             out_stream_.write((char *) distribution_para_l_.get(),
                               (int64_t) (n_user_ * n_distribution_parameter_ * sizeof(double)));
-            out_stream_.write((char *) error_l_.get(), (int64_t) (n_user_ * sizeof(int)));
+            out_stream_.write((char *) error_l_.get(), (int64_t) (n_user_ * sizeof(double)));
 
             out_stream_.close();
         }
@@ -362,9 +445,9 @@ namespace ReverseMIPS {
             index_stream.read((char *) distribution_para_l_.get(),
                               (int64_t) (sizeof(double) * n_user_ * n_distribution_parameter_));
 
-            error_l_ = std::make_unique<int[]>(n_user_);
+            error_l_ = std::make_unique<double[]>(n_user_);
             index_stream.read((char *) error_l_.get(),
-                              (int64_t) (sizeof(int) * n_user_));
+                              (int64_t) (sizeof(double) * n_user_));
 
             index_stream.close();
         }

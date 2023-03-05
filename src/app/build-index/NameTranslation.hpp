@@ -10,8 +10,7 @@
 
 namespace ReverseMIPS {
     std::string IndexName(const std::string &method_name) {
-        if (method_name == "QueryRankSampleSearchKthRank" ||
-            method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR" ||
+        if (method_name == "QueryRankSampleSearchKthRank" || method_name == "QueryRankSampleMinMaxIntLR" ||
             method_name == "QueryRankSampleDirectIntLR" || method_name == "QueryRankSampleGlobalIntLR" ||
             method_name == "QueryRankSampleUniformIntLR") {
             return "QueryRankSampleSearchKthRank";
@@ -34,7 +33,7 @@ namespace ReverseMIPS {
     }
 
     std::string SampleName(const std::string &method_name) {
-        if (method_name == "QueryRankSampleLeastSquareIntLR" || method_name == "QueryRankSampleMinMaxIntLR" ||
+        if (method_name == "QueryRankSampleMinMaxIntLR" ||
             method_name == "QueryRankSampleScoreDistribution" || method_name == "QueryRankSampleSearchKthRank" ||
             method_name == "QueryRankSampleDirectIntLR" || method_name == "QueryRankSampleGlobalIntLR" ||
             method_name == "QueryRankSampleUniformIntLR") {

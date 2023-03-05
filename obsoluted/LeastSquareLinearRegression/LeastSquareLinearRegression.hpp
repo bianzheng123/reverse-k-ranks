@@ -5,7 +5,7 @@
 #ifndef REVERSE_K_RANKS_HEADLINEARREGRESSION_HPP
 #define REVERSE_K_RANKS_HEADLINEARREGRESSION_HPP
 
-#include "BaseLinearRegression.hpp"
+#include "alg/RegressionPruning/BaseLinearRegression.hpp"
 #include "struct/DistancePair.hpp"
 #include "util/MathUtil.hpp"
 

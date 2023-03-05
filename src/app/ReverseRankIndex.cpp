@@ -13,7 +13,6 @@
 #include "QueryRankSampleGlobalIntLR.hpp"
 #include "QueryRankSampleMinMaxIntLR.hpp"
 #include "QueryRankSampleMinMaxIntLREstimate.hpp"
-#include "QueryRankSampleLeastSquareIntLR.hpp"
 #include "QueryRankSampleScoreDistribution.hpp"
 #include "QueryRankSampleSearchAllRank.hpp"
 #include "QueryRankSampleSearchKthRank.hpp"
@@ -103,8 +102,8 @@ int main(int argc, char **argv) {
     spdlog::info("index_dir {}", index_dir);
 
     int n_data_item, n_query_item, n_user, vec_dim;
-    vector <VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
-                                          vec_dim);
+    vector<VectorMatrix> data = readData(dataset_dir, dataset_name, n_data_item, n_query_item, n_user,
+                                         vec_dim);
     VectorMatrix &user = data[0];
     VectorMatrix &data_item = data[1];
     VectorMatrix &query_item = data[2];
@@ -115,7 +114,7 @@ int main(int argc, char **argv) {
 
     TimeRecord record;
     record.reset();
-    unique_ptr <BaseIndex> index;
+    unique_ptr<BaseIndex> index;
     char parameter_name[256] = "";
     if (method_name == "GridIndex") {
         ///Online
@@ -142,17 +141,6 @@ int main(int argc, char **argv) {
                      n_sample, n_sample_query, sample_topk);
         index = QueryRankSampleGlobalIntLR::BuildIndex(data_item, user, index_path, dataset_name,
                                                        n_sample, n_sample_query, sample_topk, index_dir);
-        sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
-                n_sample, n_sample_query, sample_topk);
-
-    } else if (method_name == "QueryRankSampleLeastSquareIntLR") {
-        const int n_sample = para.n_sample;
-        const int n_sample_query = para.n_sample_query;
-        const int sample_topk = para.sample_topk;
-        spdlog::info("input parameter: n_sample {} n_sample_query {} sample_topk {}",
-                     n_sample, n_sample_query, sample_topk);
-        index = QueryRankSampleLeastSquareIntLR::BuildIndex(data_item, user, index_path, dataset_name,
-                                                            n_sample, n_sample_query, sample_topk, index_dir);
         sprintf(parameter_name, "n_sample_%d-n_sample_query_%d-sample_topk_%d",
                 n_sample, n_sample_query, sample_topk);
 
@@ -338,13 +326,13 @@ int main(int argc, char **argv) {
     }
 
     RetrievalResult config;
-    vector < vector < vector < UserRankElement>>> result_rank_l;
-    vector <vector<SingleQueryPerformance>> query_performance_topk_l;
+    vector<vector<vector<UserRankElement>>> result_rank_l;
+    vector<vector<SingleQueryPerformance>> query_performance_topk_l;
 
     for (int topk: topk_l) {
-        vector <SingleQueryPerformance> query_performance_l(n_execute_query);
-        vector <vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,
-                                                                      query_performance_l);
+        vector<SingleQueryPerformance> query_performance_l(n_execute_query);
+        vector<vector<UserRankElement>> result_rk = index->Retrieval(query_item, topk, n_execute_query,
+                                                                     query_performance_l);
 
         string performance_str = index->PerformanceStatistics(topk);
         config.AddRetrievalInfo(performance_str);

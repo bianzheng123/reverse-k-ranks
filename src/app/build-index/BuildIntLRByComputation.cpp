@@ -11,7 +11,6 @@
 #include "alg/RegressionPruning/BaseLinearRegression.hpp"
 #include "alg/RegressionPruning/DirectLinearRegression.hpp"
 #include "alg/RegressionPruning/GlobalLinearRegression.hpp"
-#include "alg/RegressionPruning/LeastSquareLinearRegression.hpp"
 #include "alg/RegressionPruning/MinMaxLinearRegression.hpp"
 #include "alg/RankBoundRefinement/SampleSearch.hpp"
 #include "alg/RegressionPruning/UniformLinearRegression.hpp"
@@ -100,9 +99,6 @@ void BuildLocalIndex(const VectorMatrix &data_item, const VectorMatrix &user,
 
         if (method_name == "QueryRankSampleDirectIntLR") {
             lr_l.push_back(std::make_unique<DirectLinearRegression>(n_data_item, n_user));
-
-        } else if (method_name == "QueryRankSampleLeastSquareIntLR") {
-            lr_l.push_back(std::make_unique<LeastSquareLinearRegression>(n_data_item, n_user));
 
         } else if (method_name == "QueryRankSampleMinMaxIntLR" || method_name == "QueryRankSampleSearchUniformRankMinMaxIntLR") {
             lr_l.push_back(std::make_unique<MinMaxLinearRegression>(n_data_item, n_user, method_name));
