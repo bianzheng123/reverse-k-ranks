@@ -18,7 +18,7 @@
 
 #ifdef USE_GPU
 
-#include "score_computation/GPUComputeSort.hpp"
+#include "score_computation/GPUComputeSort_have_bug.hpp"
 
 #else
 

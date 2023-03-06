@@ -69,9 +69,9 @@ int ComputeBatchUser(const int &n_user, const int &n_data_item, const int &vec_d
     const uint64_t gpu_size = gpu_size_gb * 1000 * 1000 * 1000;
     const uint64_t batch_n_user = (gpu_size - dataset_size) / (sizeof(double) + sizeof(int)) / n_data_item;
     if (batch_n_user > n_user) {
-        return n_user;
+        return n_user / 10;
     }
-    return (int) batch_n_user > 2048 ? 2048 : batch_n_user;
+    return std::min((int) batch_n_user, 128);
 }
 
 void BuildScoreTable(VectorMatrix &user, VectorMatrix &data_item,

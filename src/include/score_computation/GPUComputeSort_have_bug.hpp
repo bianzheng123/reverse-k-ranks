@@ -59,7 +59,7 @@ namespace ReverseMIPS {
   }\
 }
 
-    class GPUComputeSort_have_bug {
+    class GPUComputeSort {
 
         uint64_t n_user_, n_data_item_, vec_dim_;
         int batch_n_user_;
@@ -80,11 +80,11 @@ namespace ReverseMIPS {
         int NUM_STREAMS_;
         std::vector<cudaStream_t> streams_;
     public:
-        GPUComputeSort_have_bug() = default;
+        GPUComputeSort() = default;
 
-        inline GPUComputeSort_have_bug(const double *user_ptr, const double *data_item_ptr,
-                                       const uint64_t n_user, const uint64_t n_data_item, const uint64_t vec_dim,
-                                       const int &batch_n_user) {
+        inline GPUComputeSort(const double *user_ptr, const double *data_item_ptr,
+                              const uint64_t n_user, const uint64_t n_data_item, const uint64_t vec_dim,
+                              const int &batch_n_user) {
             n_user_ = n_user;
             n_data_item_ = n_data_item;
             vec_dim_ = vec_dim;
@@ -100,12 +100,12 @@ namespace ReverseMIPS {
             resID_host_l_.resize(batch_n_user_ * n_data_item_);
             resIP_host_l_.resize(batch_n_user_ * n_data_item_);
 
-            asyncID_host_l_.resize(n_data_item_);
-            asyncIP_host_l_.resize(n_data_item_);
+            asyncID_host_l_.resize(batch_n_user_ * n_data_item_);
+            asyncIP_host_l_.resize(batch_n_user_ * n_data_item_);
 
-            CHECK(cudaHostRegister(asyncID_host_l_.data(), n_data_item_ * sizeof(int),
+            CHECK(cudaHostRegister(asyncID_host_l_.data(), batch_n_user_ * n_data_item_ * sizeof(int),
                                    cudaHostRegisterPortable));
-            CHECK(cudaHostRegister(asyncIP_host_l_.data(), n_data_item_ * sizeof(double),
+            CHECK(cudaHostRegister(asyncIP_host_l_.data(), batch_n_user_ * n_data_item_ * sizeof(double),
                                    cudaHostRegisterPortable));
 
 
@@ -195,31 +195,35 @@ namespace ReverseMIPS {
             for (int comp_userID = 0; comp_userID < n_compute_user; comp_userID++) {
                 thrust::device_ptr<double> sort_device_ptr = thrust::device_pointer_cast<double>(
                         resIP_device_ptr_ + comp_userID * n_data_item_);
-                thrust::sort(thrust::cuda::par.on(streams_[comp_userID % NUM_STREAMS_]),
+                thrust::sort(thrust::cuda::par.on(streams_[comp_userID]),
                              sort_device_ptr,
                              sort_device_ptr + n_data_item_,
                              thrust::greater<double>());
-                CHECK(cudaMemcpyAsync(asyncIP_host_l_.data(),
+            }
+            for (int comp_userID = 0; comp_userID < n_compute_user; comp_userID++) {
+                CHECK(cudaMemcpyAsync(asyncIP_host_l_.data() + comp_userID * n_data_item_,
                                       resIP_device_ptr_ + comp_userID * n_data_item_,
                                       n_data_item_ * sizeof(double),
-                                      cudaMemcpyDeviceToHost, streams_[comp_userID % NUM_STREAMS_]));
+                                      cudaMemcpyDeviceToHost, streams_[comp_userID]));
+            }
+            for (int comp_userID = 0; comp_userID < n_compute_user; comp_userID++) {
                 CHECK(cudaMemcpyAsync(distance_l + comp_userID * n_data_item_,
-                                      asyncIP_host_l_.data(),
+                                      asyncIP_host_l_.data() + comp_userID * n_data_item_,
                                       n_data_item_ * sizeof(double),
-                                      cudaMemcpyHostToHost, streams_[comp_userID % NUM_STREAMS_]));
+                                      cudaMemcpyHostToHost, streams_[comp_userID]));
 
             }
 
 //            thrust::copy(resIP_device_ptr_, resIP_device_ptr_ + n_compute_user * n_data_item_,
 //                         distance_l);
 
-            for (int i = 0; i < NUM_STREAMS_; i++) {
+            for (int i = 0; i < n_compute_user; i++) {
                 CHECK(cudaStreamSynchronize(streams_[i]));
             }
             CHECK(cudaDeviceSynchronize());
             const double sort_memcpy_time = record.get_elapsed_time_second();
 
-            memcpy(distance_l, resIP_host_l_.data(), n_compute_user * n_data_item_ * sizeof(double));
+//            memcpy(distance_l, resIP_host_l_.data(), n_compute_user * n_data_item_ * sizeof(double));
 
             spdlog::info("compute batch time {}s, sort memcpy time {}s", compute_time, sort_memcpy_time);
 
@@ -284,6 +288,7 @@ namespace ReverseMIPS {
             CHECK(cudaHostUnregister(asyncIP_host_l_.data()));
             CHECK(cudaHostUnregister(asyncID_host_l_.data()));
             cublasCheckErrors(cublasDestroy(handle_));
+            cudaDeviceReset();
         }
     };
 
