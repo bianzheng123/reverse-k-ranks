@@ -9,6 +9,7 @@
 #include "struct/UserRankElement.hpp"
 
 #include <memory>
+#include <omp.h>
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
@@ -45,7 +46,8 @@ namespace ReverseMIPS {
             n_compute = 0;
             int n_candidate = 0;
             exact_rank_refinement_record_.reset();
-#pragma omp parallel for default(none) shared(user, prune_l, result_l, queryIP_l, data_item, n_compute, n_candidate)
+            const int n_thread = omp_get_num_procs();
+#pragma omp parallel for default(none) shared(user, prune_l, result_l, queryIP_l, data_item, n_compute, n_candidate) num_threads(n_thread)
             for (int userID = 0; userID < n_user_; userID++) {
                 if (prune_l[userID] || result_l[userID]) {
                     continue;

@@ -18,7 +18,7 @@ def run():
         n_sample = dbg.compute_n_sample_by_memory_index_sample_only(dataset_name=dataset_name,
                                                                     memory_capacity=memory_capacity)
         n_sample_item = 5000
-        sample_topk = 500
+        sample_topk = 600
         method_name = 'QueryRankSampleSearchKthRank'
         os.system(
             f"cd build && ./fsr --index_dir {index_dir} --dataset_name {dataset_name} --method_name {method_name} --n_sample {n_sample} --n_data_item {n_data_item} --n_user {n_user} --n_sample_query {n_sample_item} --sample_topk {sample_topk}"
