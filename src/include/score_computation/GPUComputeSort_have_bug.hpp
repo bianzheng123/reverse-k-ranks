@@ -225,7 +225,7 @@ namespace ReverseMIPS {
 
 //            memcpy(distance_l, resIP_host_l_.data(), n_compute_user * n_data_item_ * sizeof(double));
 
-            spdlog::info("compute batch time {}s, sort memcpy time {}s", compute_time, sort_memcpy_time);
+//            spdlog::info("compute batch time {}s, sort memcpy time {}s", compute_time, sort_memcpy_time);
 
 
         }
