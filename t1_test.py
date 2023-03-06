@@ -20,7 +20,7 @@ if __name__ == '__main__':
     cpu_single = np.fromfile(os.path.join(path, 'cpu_single/fake-normal.index'), dtype='float64').astype(np.float64)
     gpu_batch = np.fromfile(os.path.join(path, 'gpu_batch/fake-normal.index'), dtype='float64').astype(np.float64)
     gpu_single = np.fromfile(os.path.join(path, 'gpu_single/fake-normal.index'), dtype='float64').astype(np.float64)
-    cmp(cpu_batch, cpu_single, 'cpu_batch cpu_single')
-    cmp(cpu_single, gpu_single, 'cpu_single gpu_single')
+    # cmp(cpu_batch, cpu_single, 'cpu_batch cpu_single')
+    # cmp(cpu_single, gpu_single, 'cpu_single gpu_single')
     cmp(cpu_single, gpu_batch, 'cpu_single gpu_batch')
 

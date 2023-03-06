@@ -93,7 +93,7 @@ def run_sample_method(method_name, dataset_name, n_sample, n_data_item, n_user, 
 
 
 def test_build_score_table(dataset_name: str, eval_size_gb: int = 100):
-    username = 'bianzheng'
+    username = 'zhengbian'
     dataset_dir = f'/home/{username}/Dataset/ReverseMIPS'
     index_dir = f'/home/{username}/reverse-k-ranks/index'
     os.system(

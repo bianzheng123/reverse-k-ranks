@@ -79,7 +79,7 @@ set_target_properties(pgmindexlib PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(pgmindexlib PRIVATE OpenMP::OpenMP_CXX)
 #target_include_directories(pgmindexlib INTERFACE include/)
 
-set(USE_CUDA OFF)
+set(USE_CUDA ON)
 
 if (USE_CUDA)
     set(CMAKE_CUDA_STANDARD 17)
@@ -122,6 +122,18 @@ if (USE_CUDA)
     set_property(TARGET bstb PROPERTY CXX_STANDARD_REQUIRED ON)
     set_property(TARGET bstb PROPERTY CXX_EXTENSIONS OFF)
     set_target_properties(bstb PROPERTIES CUDA_ARCHITECTURES "35;50;72")
+
+    set_source_files_properties(test.cpp PROPERTIES LANGUAGE CUDA)
+    add_executable(t1 test.cpp)
+    target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    target_link_libraries(t1 PRIVATE armadillo BLAS::BLAS pthread gfortran OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} cublas)
+    set_target_properties(t1 PROPERTIES
+            POSITION_INDEPENDENT_CODE ON
+            )
+    set_property(TARGET t1 PROPERTY CXX_STANDARD "17")
+    set_property(TARGET t1 PROPERTY CXX_STANDARD_REQUIRED ON)
+    set_property(TARGET t1 PROPERTY CXX_EXTENSIONS OFF)
+    set_target_properties(t1 PROPERTIES CUDA_ARCHITECTURES "35;50;72")
 
 else () # not use cuda
 
@@ -169,6 +181,10 @@ else () # not use cuda
     target_include_directories(ti PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
     target_link_libraries(ti PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog ${Boost_LIBRARIES} fexiprolib)
 
+    add_executable(t1 test.cpp)
+    target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
+    target_link_libraries(t1 PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} fexiprolib)
+
     if (BUILD_PROGRESS)
         add_executable(progress src/app/Progress.cpp)
         target_include_directories(progress PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
@@ -198,9 +214,4 @@ endif ()
 #set_property(TARGET brtt PROPERTY CXX_STANDARD "17")
 #set_property(TARGET brtt PROPERTY CXX_STANDARD_REQUIRED ON)
 #set_property(TARGET brtt PROPERTY CXX_EXTENSIONS OFF)
-
-
-add_executable(t1 test.cpp)
-target_include_directories(t1 PRIVATE src/include src/impl ${armadillo_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS})
-target_link_libraries(t1 PRIVATE armadillo pthread OpenMP::OpenMP_CXX spdlog::spdlog Eigen3::Eigen ${Boost_LIBRARIES} fexiprolib)
 

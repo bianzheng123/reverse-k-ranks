@@ -1,9 +1,9 @@
 //
-// Created by bianzheng on 2023/2/28.
+// Created by bianzheng on 2023/3/6.
 //
 
-#ifndef REVERSE_KRANKS_GPUCOMPUTESORT_CPY_HPP
-#define REVERSE_KRANKS_GPUCOMPUTESORT_CPY_HPP
+#ifndef REVERSE_KRANKS_GPUCOMPUTESORT_HAVE_BUG_HPP
+#define REVERSE_KRANKS_GPUCOMPUTESORT_HAVE_BUG_HPP
 
 #include <cublas_v2.h>
 #include <algorithm>
@@ -59,7 +59,7 @@ namespace ReverseMIPS {
   }\
 }
 
-    class GPUComputeSort {
+    class GPUComputeSort_have_bug {
 
         uint64_t n_user_, n_data_item_, vec_dim_;
         int batch_n_user_;
@@ -72,32 +72,42 @@ namespace ReverseMIPS {
         std::vector<int> resID_host_l_;
         std::vector<double> resIP_host_l_;
 
-//        const double *tmp_user_ptr_;
-//        const double *tmp_item_ptr_;
+        std::vector<int> asyncID_host_l_;
+        std::vector<double> asyncIP_host_l_;
 
         cublasHandle_t handle_;
-    public:
-        GPUComputeSort() = default;
 
-        inline GPUComputeSort(const double *user_ptr, const double *data_item_ptr,
-                              const uint64_t n_user, const uint64_t n_data_item, const uint64_t vec_dim,
-                              const int &batch_n_user) {
+        int NUM_STREAMS_;
+        std::vector<cudaStream_t> streams_;
+    public:
+        GPUComputeSort_have_bug() = default;
+
+        inline GPUComputeSort_have_bug(const double *user_ptr, const double *data_item_ptr,
+                                       const uint64_t n_user, const uint64_t n_data_item, const uint64_t vec_dim,
+                                       const int &batch_n_user) {
             n_user_ = n_user;
             n_data_item_ = n_data_item;
             vec_dim_ = vec_dim;
             batch_n_user_ = batch_n_user;
-
-//            tmp_user_ptr_ = user_ptr;
-//            tmp_item_ptr_ = data_item_ptr;
 
             cudaMalloc((void **) &item_device_ptr_, n_data_item_ * vec_dim_ * sizeof(double));
             cudaMalloc((void **) &user_device_ptr_, n_user_ * vec_dim_ * sizeof(double));
             cudaMalloc((void **) &resID_device_ptr_, batch_n_user_ * n_data_item_ * sizeof(int));
             cudaMalloc((void **) &resIP_device_ptr_, batch_n_user_ * n_data_item_ * sizeof(double));
 
+            cudaCheckErrors("cuda malloc fail");
+
             resID_host_l_.resize(batch_n_user_ * n_data_item_);
             resIP_host_l_.resize(batch_n_user_ * n_data_item_);
-            cudaCheckErrors("cuda malloc fail");
+
+            asyncID_host_l_.resize(n_data_item_);
+            asyncIP_host_l_.resize(n_data_item_);
+
+            CHECK(cudaHostRegister(asyncID_host_l_.data(), n_data_item_ * sizeof(int),
+                                   cudaHostRegisterPortable));
+            CHECK(cudaHostRegister(asyncIP_host_l_.data(), n_data_item_ * sizeof(double),
+                                   cudaHostRegisterPortable));
+
 
             cublasCheckErrors(
                     cublasSetMatrix(vec_dim, n_data_item_, sizeof(double), (void *) data_item_ptr, vec_dim,
@@ -107,6 +117,14 @@ namespace ReverseMIPS {
                     cublasSetMatrix(vec_dim_, n_user_, sizeof(double), (void *) user_ptr, vec_dim,
                                     (void *) user_device_ptr_,
                                     vec_dim_));
+
+            NUM_STREAMS_ = batch_n_user_;
+            streams_.resize(NUM_STREAMS_);
+            // --- Create CUDA streams
+            spdlog::info("use GPU stream");
+            for (int i = 0; i < NUM_STREAMS_; i++) {
+                CHECK(cudaStreamCreate(&streams_[i]));
+            }
 
 //            std::vector<double> user_cpu_tran_vecs(n_user * vec_dim);
 //            CHECK(cudaMemcpy(user_cpu_tran_vecs.data(), user_device_ptr_, n_user * vec_dim * sizeof(double),
@@ -173,23 +191,39 @@ namespace ReverseMIPS {
             const double compute_time = record.get_elapsed_time_second();
 
             record.reset();
+            assert(NUM_STREAMS_ > n_compute_user);
             for (int comp_userID = 0; comp_userID < n_compute_user; comp_userID++) {
                 thrust::device_ptr<double> sort_device_ptr = thrust::device_pointer_cast<double>(
                         resIP_device_ptr_ + comp_userID * n_data_item_);
-                thrust::sort(thrust::device, sort_device_ptr, sort_device_ptr + n_data_item_,
+                thrust::sort(thrust::cuda::par.on(streams_[comp_userID % NUM_STREAMS_]),
+                             sort_device_ptr,
+                             sort_device_ptr + n_data_item_,
                              thrust::greater<double>());
+                CHECK(cudaMemcpyAsync(asyncIP_host_l_.data(),
+                                      resIP_device_ptr_ + comp_userID * n_data_item_,
+                                      n_data_item_ * sizeof(double),
+                                      cudaMemcpyDeviceToHost, streams_[comp_userID % NUM_STREAMS_]));
+                CHECK(cudaMemcpyAsync(distance_l + comp_userID * n_data_item_,
+                                      asyncIP_host_l_.data(),
+                                      n_data_item_ * sizeof(double),
+                                      cudaMemcpyHostToHost, streams_[comp_userID % NUM_STREAMS_]));
+
             }
 
 //            thrust::copy(resIP_device_ptr_, resIP_device_ptr_ + n_compute_user * n_data_item_,
 //                         distance_l);
-            const double sort_time = record.get_elapsed_time_second();
-            record.reset();
-            CHECK(cudaMemcpy(distance_l, resIP_device_ptr_, n_compute_user * n_data_item_ * sizeof(double),
-                             cudaMemcpyDeviceToHost));
-            const double memcpy_time = record.get_elapsed_time_second();
 
-            spdlog::info("compute batch time {}s, sort batch time {}s, memory copy time {}s", compute_time, sort_time,
-                         memcpy_time);
+            for (int i = 0; i < NUM_STREAMS_; i++) {
+                CHECK(cudaStreamSynchronize(streams_[i]));
+            }
+            CHECK(cudaDeviceSynchronize());
+            const double sort_memcpy_time = record.get_elapsed_time_second();
+
+            memcpy(distance_l, resIP_host_l_.data(), n_compute_user * n_data_item_ * sizeof(double));
+
+            spdlog::info("compute batch time {}s, sort memcpy time {}s", compute_time, sort_memcpy_time);
+
+
         }
 
         void ComputeSortListBatch(const int &start_userID, const int &n_compute_user, DistancePair *distance_l) {
@@ -244,9 +278,14 @@ namespace ReverseMIPS {
             if (resIP_device_ptr_ != nullptr) {
                 cudaFree(resIP_device_ptr_);
             }
+            for (int i = 0; i < NUM_STREAMS_; i++) {
+                CHECK(cudaStreamDestroy(streams_[i]));
+            }
+            CHECK(cudaHostUnregister(asyncIP_host_l_.data()));
+            CHECK(cudaHostUnregister(asyncID_host_l_.data()));
             cublasCheckErrors(cublasDestroy(handle_));
         }
     };
 
 }
-#endif //REVERSE_KRANKS_GPUCOMPUTESORT_CPY_HPP
+#endif //REVERSE_KRANKS_GPUCOMPUTESORT_HAVE_BUG_HPP

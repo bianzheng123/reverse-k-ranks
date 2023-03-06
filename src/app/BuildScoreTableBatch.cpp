@@ -68,7 +68,10 @@ int ComputeBatchUser(const int &n_user, const int &n_data_item, const int &vec_d
     const uint64_t dataset_size = sizeof(double) * (n_user + n_data_item) * vec_dim;
     const uint64_t gpu_size = gpu_size_gb * 1000 * 1000 * 1000;
     const uint64_t batch_n_user = (gpu_size - dataset_size) / (sizeof(double) + sizeof(int)) / n_data_item;
-    return (int) batch_n_user;
+    if (batch_n_user > n_user) {
+        return n_user;
+    }
+    return (int) batch_n_user > 2048 ? 2048 : batch_n_user;
 }
 
 void BuildScoreTable(VectorMatrix &user, VectorMatrix &data_item,
@@ -92,13 +95,13 @@ void BuildScoreTable(VectorMatrix &user, VectorMatrix &data_item,
     double batch_save_index_time = 0;
 
     const uint64_t batch_n_user = ComputeBatchUser(n_user, n_data_item, vec_dim, 11);
-    //Compute Score Table
-    ComputeScoreTableBatch cstb(user, data_item, (int) batch_n_user);
-
     const int remainder = n_user % batch_n_user == 0 ? 0 : 1;
     const int n_batch = n_user / (int) batch_n_user + remainder;
     spdlog::info("{} user per batch, n_batch {}", batch_n_user, n_batch);
-    std::vector<DistancePair> batch_distance_l(batch_n_user * n_data_item);
+    std::vector<double> batch_distance_l(batch_n_user * n_data_item);
+
+    //Compute Score Table
+    ComputeScoreTableBatch cstb(user, data_item, (int) batch_n_user);
 
     const uint32_t report_every = 30;
 
