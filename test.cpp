@@ -5,7 +5,7 @@
 #include <vector>
 #include <random>
 
-#include <cub/cub.cuh>
+//#include <cub/cub.cuh>
 
 using namespace std;
 

@@ -19,7 +19,6 @@ namespace ReverseMIPS {
     public:
         TimeRecord exact_rank_refinement_record_;
         double exact_rank_refinement_time_;
-        uint64_t n_refine_user_;
 
         std::vector<UserRankElement> user_topk_cache_l_;
 
@@ -34,16 +33,20 @@ namespace ReverseMIPS {
 
         void RetrievalPreprocess() {
             exact_rank_refinement_time_ = 0;
-            n_refine_user_ = 0;
         }
 
         void GetRank(const VectorMatrix &user, const VectorMatrix &data_item,
                      const std::vector<double> &queryIP_l,
                      const std::vector<bool> &prune_l, const std::vector<bool> &result_l,
-                     size_t &n_compute, const int &queryID) {
+                     const int &n_remain_result, size_t &n_compute, int &n_refine_user) {
 
             //read disk and fine binary search
             n_compute = 0;
+            n_refine_user = 0;
+            if (n_remain_result == 0) {
+                return;
+            }
+
             int n_candidate = 0;
             exact_rank_refinement_record_.reset();
             const int n_thread = omp_get_num_procs();
@@ -76,7 +79,7 @@ namespace ReverseMIPS {
 
             std::sort(user_topk_cache_l_.begin(), user_topk_cache_l_.begin() + n_candidate,
                       std::less());
-            n_refine_user_ = n_candidate;
+            n_refine_user = n_candidate;
         }
 
     };

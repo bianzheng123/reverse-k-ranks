@@ -156,10 +156,12 @@ namespace ReverseMIPS::QueryRankSampleComputeAll {
                 //read disk and fine binary search
                 size_t refine_ip_cost = 0;
                 double read_disk_time = 0;
-                disk_ins_.GetRank(user_, data_item_, queryIP_l_, prune_l_, result_l_, refine_ip_cost, queryID);
+                int n_refine_user = 0;
+                disk_ins_.GetRank(user_, data_item_, queryIP_l_, prune_l_, result_l_,
+                                  topk - n_result_user, refine_ip_cost, n_refine_user);
                 total_refine_ip_cost_ += refine_ip_cost;
-                total_refine_user_ += disk_ins_.n_refine_user_;
-                rank_prune_ratio_ += 1.0 * (double) (n_user_ - disk_ins_.n_refine_user_) / n_user_;
+                total_refine_user_ += n_refine_user;
+                rank_prune_ratio_ += 1.0 * (double) (n_user_ - n_refine_user) / n_user_;
 
                 int n_cand = 0;
                 for (int userID = 0; userID < n_user_; userID++) {
@@ -172,7 +174,7 @@ namespace ReverseMIPS::QueryRankSampleComputeAll {
                 for (int candID = n_cand; candID < topk; candID++) {
                     query_heap_l[queryID][candID] = disk_ins_.user_topk_cache_l_[candID - n_cand];
                 }
-                assert(n_cand + disk_ins_.n_refine_user_ >= topk);
+                assert(n_cand + n_refine_user >= topk);
                 assert(query_heap_l[queryID].size() == topk);
 
                 const double total_time =
@@ -181,7 +183,7 @@ namespace ReverseMIPS::QueryRankSampleComputeAll {
                 const double &memory_index_time = tmp_rank_bound_time + tmp_inner_product_time;
                 query_performance_l[queryID] = SingleQueryPerformance(queryID,
                                                                       n_prune_user, n_result_user,
-                                                                      (int) disk_ins_.n_refine_user_,
+                                                                      (int) n_refine_user,
                                                                       ip_cost + refine_ip_cost, 0,
                                                                       total_time,
                                                                       memory_index_time, read_disk_time);

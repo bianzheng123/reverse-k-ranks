@@ -146,7 +146,7 @@ def run():
         'MemoryBruteForce',
 
         # 'GridIndex',
-        'QueryRankSampleComputeAll'
+        'QueryRankSampleComputeAll',
 
         # 'QueryRankSampleDirectIntLR',
         # 'QueryRankSampleGlobalIntLR',
@@ -157,7 +157,7 @@ def run():
         # 'QueryRankSampleScoreDistribution',
         # 'QueryRankSampleSearchAllRank',
         # 'QueryRankSampleSearchBruteForce',
-        # 'QueryRankSampleSearchKthRank',
+        'QueryRankSampleSearchKthRank',
         # 'QueryRankSampleSearchUniformRank',
 
         # 'QueryRankSampleSearchUniformRankMinMaxIntLR',
@@ -222,7 +222,7 @@ def run():
         # run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleSearchBruteForce', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)
-        # run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleSearchUniformRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
         # run_sample_method('QueryRankSampleSearchUniformRankMinMaxIntLR', ds, n_sample, n_data_item, n_user,
