@@ -10,12 +10,15 @@
 #include <fstream>
 #include <memory>
 #include <cfloat>
+#include <omp.h>
 #include <spdlog/spdlog.h>
 
 namespace ReverseMIPS {
 
     class SampleSearch {
 
+        static constexpr int batch_n_user_ = 1024;
+        int n_batch_;
         size_t n_sample_, n_data_item_, n_user_;
         std::unique_ptr<double[]> bound_distance_table_; // n_user * n_sample_
     public:
@@ -28,6 +31,7 @@ namespace ReverseMIPS {
             this->n_sample_ = n_sample;
             this->n_data_item_ = n_data_item;
             this->n_user_ = n_user;
+            this->n_batch_ = (int) n_user_ / batch_n_user_ + (n_user_ % batch_n_user_ == 0 ? 0 : 1);
             known_rank_idx_l_ = std::make_unique<int[]>(n_sample_);
             bound_distance_table_ = std::make_unique<double[]>(n_user_ * n_sample_);
             if (n_sample <= 0 || n_sample >= n_data_item) {
@@ -51,6 +55,7 @@ namespace ReverseMIPS {
                       n_sample,
                       load_sample_score, is_query_distribution,
                       n_sample_query, sample_topk);
+            this->n_batch_ = (int) n_user_ / batch_n_user_ + (n_user_ % batch_n_user_ == 0 ? 0 : 1);
 
             for (int rankID = 0; rankID < n_sample_; rankID++) {
                 std::cout << known_rank_idx_l_[rankID] << " ";
@@ -74,28 +79,6 @@ namespace ReverseMIPS {
 
         const double *SampleData(const int &userID) const {
             return bound_distance_table_.get() + userID * n_sample_;
-        }
-
-        template<class Compare>
-        const double *lower_bound(const double *first, const double *last, const double &value, Compare comp) {
-
-            int count, step;
-            const double *it;
-            count = std::distance(first, last);
-
-            while (count > 0) {
-                it = first;
-                step = count / 2;
-                std::advance(it, step);
-
-                if (comp(*it, value)) {
-                    first = ++it;
-                    count -= step + 1;
-                } else
-                    count = step;
-            }
-
-            return first;
         }
 
         inline void
@@ -143,19 +126,26 @@ namespace ReverseMIPS {
             assert(result_l.size() == n_user_);
             assert(rank_lb_l.size() == n_user_);
             assert(rank_ub_l.size() == n_user_);
-            for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID] || result_l[userID]) {
-                    continue;
+
+#pragma omp parallel for default(none) shared(prune_l, result_l, queryIP_l, rank_lb_l, rank_ub_l) num_threads(omp_get_num_procs())
+            for (int batchID = 0; batchID < n_batch_; batchID++) {
+                const int start_userID = batchID * batch_n_user_;
+                const int end_userID = std::min((int) n_user_, (batchID + 1) * batch_n_user_);
+                for (int userID = start_userID; userID < end_userID; userID++) {
+                    if (prune_l[userID] || result_l[userID]) {
+                        continue;
+                    }
+                    int lower_rank, upper_rank;
+                    double queryIP = queryIP_l[userID];
+
+                    CoarseBinarySearch(queryIP, userID,
+                                       lower_rank, upper_rank);
+
+                    rank_lb_l[userID] = lower_rank;
+                    rank_ub_l[userID] = upper_rank;
                 }
-                int lower_rank, upper_rank;
-                double queryIP = queryIP_l[userID];
-
-                CoarseBinarySearch(queryIP, userID,
-                                   lower_rank, upper_rank);
-
-                rank_lb_l[userID] = lower_rank;
-                rank_ub_l[userID] = upper_rank;
             }
+
         }
 
         inline void
@@ -215,25 +205,31 @@ namespace ReverseMIPS {
             assert(bucketID_l.size() == n_user_);
             assert(rank_lb_l.size() == n_user_);
             assert(rank_ub_l.size() == n_user_);
-            for (int userID = 0; userID < n_user_; userID++) {
-                if (prune_l[userID] || result_l[userID]) {
-                    continue;
+
+#pragma omp parallel for default(none) shared(prune_l, result_l, queryIP_l, rank_lb_l, rank_ub_l, bucketID_l, queryIP_bound_l) num_threads(omp_get_num_procs())
+            for (int batchID = 0; batchID < n_batch_; batchID++) {
+                const int start_userID = batchID * batch_n_user_;
+                const int end_userID = std::min((int) n_user_, (batchID + 1) * batch_n_user_);
+                for (int userID = start_userID; userID < end_userID; userID++) {
+                    if (prune_l[userID] || result_l[userID]) {
+                        continue;
+                    }
+                    int lower_rank, upper_rank;
+                    double queryIP = queryIP_l[userID];
+
+                    double IP_lb, IP_ub;
+                    int bucketID;
+                    CoarseBinarySearch(queryIP, userID,
+                                       bucketID,
+                                       IP_lb, IP_ub,
+                                       lower_rank, upper_rank);
+
+                    bucketID_l[userID] = bucketID;
+                    queryIP_bound_l[userID] = std::make_pair(IP_lb, IP_ub);
+
+                    rank_lb_l[userID] = lower_rank;
+                    rank_ub_l[userID] = upper_rank;
                 }
-                int lower_rank, upper_rank;
-                double queryIP = queryIP_l[userID];
-
-                double IP_lb, IP_ub;
-                int bucketID;
-                CoarseBinarySearch(queryIP, userID,
-                                   bucketID,
-                                   IP_lb, IP_ub,
-                                   lower_rank, upper_rank);
-
-                bucketID_l[userID] = bucketID;
-                queryIP_bound_l[userID] = std::make_pair(IP_lb, IP_ub);
-
-                rank_lb_l[userID] = lower_rank;
-                rank_ub_l[userID] = upper_rank;
             }
         }
 

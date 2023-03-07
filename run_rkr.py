@@ -148,24 +148,23 @@ def run():
         # 'GridIndex',
         'QueryRankSampleComputeAll',
 
-        # 'QueryRankSampleDirectIntLR',
-        # 'QueryRankSampleGlobalIntLR',
-        # 'QueryRankSampleMinMaxIntLR',
-        # 'QueryRankSampleUniformIntLR',
-        # 'QueryRankSampleMinMaxIntLREstimate',
+        'QueryRankSampleDirectIntLR',
+        'QueryRankSampleGlobalIntLR',
+        'QueryRankSampleMinMaxIntLR',
+        'QueryRankSampleMinMaxIntLREstimate',
 
-        # 'QueryRankSampleScoreDistribution',
-        # 'QueryRankSampleSearchAllRank',
-        # 'QueryRankSampleSearchBruteForce',
+        'QueryRankSampleScoreDistribution',
+        'QueryRankSampleSearchAllRank',
         'QueryRankSampleSearchKthRank',
-        # 'QueryRankSampleSearchUniformRank',
+        # 'QueryRankSampleSearchBruteForce',
 
-        # 'QueryRankSampleSearchUniformRankMinMaxIntLR',
-        # 'QueryRankSampleSearchUniformRankUniformIntLR',
-        # 'QueryRankSampleUniformIntLREstimate',
+        'QueryRankSampleSearchUniformRank',
+        'QueryRankSampleSearchUniformRankMinMaxIntLR',
+        'QueryRankSampleSearchUniformRankUniformIntLR',
 
-        # 'RankSample',
-        # 'RTree',
+        'QueryRankSampleUniformIntLR',
+        'QueryRankSampleUniformIntLREstimate',
+        'RankSample',
     ]
 
     os.system('cd result/rank && rm *')
@@ -199,61 +198,45 @@ def run():
         run_sample_method('QueryRankSampleComputeAll', ds, n_sample, n_data_item, n_user, n_sample_item,
                           sample_topk)
 
-        # run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # run_sample_method('QueryRankSampleMinMaxIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # os.system(
-        #     f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
-        #     f"--method_name {'QueryRankSampleMinMaxIntLREstimate'} --n_sample {n_sample} "
-        #     f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-        # )
-        # run_sample_method('QueryRankSampleUniformIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        # os.system(
-        #     f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
-        #     f"--method_name {'QueryRankSampleUniformIntLREstimate'} --n_sample {n_sample} "
-        #     f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
-        # )
+        run_sample_method('QueryRankSampleDirectIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleGlobalIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleMinMaxIntLR', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        os.system(
+            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
+            f"--method_name {'QueryRankSampleMinMaxIntLREstimate'} --n_sample {n_sample} "
+            f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+        )
 
-        # run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,
-        #                   sample_topk)
-        # run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleScoreDistribution', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleSearchAllRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
         # run_sample_method('QueryRankSampleSearchBruteForce', ds, n_sample, n_data_item, n_user, n_sample_item,
         #                   sample_topk)
-        run_sample_method('QueryRankSampleSearchKthRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleSearchUniformRank', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
-        # run_sample_method('QueryRankSampleSearchUniformRankMinMaxIntLR', ds, n_sample, n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
-        # run_sample_method('QueryRankSampleSearchUniformRankUniformIntLR', ds, n_sample, n_data_item, n_user,
-        #                   n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchUniformRank', ds, n_sample, n_data_item, n_user, n_sample_item,
+                          sample_topk)
+        run_sample_method('QueryRankSampleSearchUniformRankMinMaxIntLR', ds, n_sample, n_data_item, n_user,
+                          n_sample_item, sample_topk)
+        run_sample_method('QueryRankSampleSearchUniformRankUniformIntLR', ds, n_sample, n_data_item, n_user,
+                          n_sample_item, sample_topk)
 
-        # run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
-        # os.system(
-        #     'cd build && ./rri --dataset_name {} --test_topk {} --method_name {} --stop_time 36000'.format(ds, 'true',
-        #                                                                                                    'RTree'))
+        run_sample_method('QueryRankSampleUniformIntLR', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
+        os.system(
+            f"cd build && ./rri --dataset_dir {dataset_dir} --dataset_name {ds} --index_dir {index_dir} --test_topk {'true'} "
+            f"--method_name {'QueryRankSampleUniformIntLREstimate'} --n_sample {n_sample} "
+            f"--n_sample_query {n_sample_item} --sample_topk {sample_topk}"
+        )
+        run_sample_method('RankSample', ds, n_sample, n_data_item, n_user, n_sample_item, sample_topk)
 
     # send_email.send('test complete')
 
     # topk_l = [10, 20, 30, 40, 50]
     topk_l = [10, 20, 30]
     cmp_file_all('BatchDiskBruteForce', method_name_l, dataset_l, topk_l)
-
-
-def cmp_file_count(file1, file2):
-    method1_result_l = np.loadtxt(file1, delimiter=',')
-    method2_result_l = np.loadtxt(file2, delimiter=',')
-
-    assert len(method1_result_l) == len(method2_result_l)
-    count = 0
-
-    for i in range(len(method1_result_l)):
-        intersect = set(method1_result_l[i]).intersection(set(method2_result_l[i]))
-        if len(intersect) != len(method1_result_l[i]):
-            count += 1
-    return count
 
 
 if __name__ == '__main__':

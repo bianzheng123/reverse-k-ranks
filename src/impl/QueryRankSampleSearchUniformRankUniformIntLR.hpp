@@ -56,6 +56,9 @@ namespace ReverseMIPS::QueryRankSampleSearchUniformRankUniformIntLR {
         //read disk
         ReadAllDirectIO disk_ins_;
 
+        static constexpr int batch_n_user_ = 1024;
+        int n_batch_;
+
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
         double total_retrieval_time_, inner_product_time_, rank_bound_time_, prune_user_time_, read_disk_time_, compute_rank_time_;
@@ -165,9 +168,15 @@ namespace ReverseMIPS::QueryRankSampleSearchUniformRankUniformIntLR {
 
                 //calculate IP
                 inner_product_record_.reset();
-                for (int refineID = 0; refineID < refine_user_size; refineID++) {
-                    const int userID = refine_seq_l_[refineID];
-                    queryIP_l_[userID] = InnerProduct(query_vecs, user_.getVector(userID), vec_dim_);
+                this->n_batch_ = refine_user_size / batch_n_user_ + (refine_user_size % batch_n_user_ == 0 ? 0 : 1);
+#pragma omp parallel for default(none) shared(refine_user_size, queryID, query_vecs) num_threads(omp_get_num_procs())
+                for (int batchID = 0; batchID < n_batch_; batchID++) {
+                    const int start_refineID = batchID * batch_n_user_;
+                    const int end_refineID = std::min((int) refine_user_size, (batchID + 1) * batch_n_user_);
+                    for (int refineID = start_refineID; refineID < end_refineID; refineID++) {
+                        const int userID = refine_seq_l_[refineID];
+                        queryIP_l_[userID] = InnerProduct(query_vecs, user_.getVector(userID), vec_dim_);
+                    }
                 }
                 const double tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
                 this->inner_product_time_ += tmp_inner_product_time;

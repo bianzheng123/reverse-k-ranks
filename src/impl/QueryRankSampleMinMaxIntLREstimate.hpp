@@ -57,6 +57,9 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
         //read disk
         ReadAllDirectIO disk_ins_;
 
+        static constexpr int batch_n_user_ = 1024;
+        int n_batch_;
+
         VectorMatrix user_;
         int vec_dim_, n_data_item_, n_user_;
         double total_retrieval_time_, inner_product_time_, rank_bound_time_, prune_user_time_, read_disk_time_, compute_rank_time_;
@@ -166,9 +169,15 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
 
                 //calculate IP
                 inner_product_record_.reset();
-                for (int refineID = 0; refineID < refine_user_size; refineID++) {
-                    const int userID = refine_seq_l_[refineID];
-                    queryIP_l_[userID] = InnerProduct(query_vecs, user_.getVector(userID), vec_dim_);
+                this->n_batch_ = refine_user_size / batch_n_user_ + (refine_user_size % batch_n_user_ == 0 ? 0 : 1);
+#pragma omp parallel for default(none) shared(refine_user_size, queryID, query_vecs) num_threads(omp_get_num_procs())
+                for (int batchID = 0; batchID < n_batch_; batchID++) {
+                    const int start_refineID = batchID * batch_n_user_;
+                    const int end_refineID = std::min((int) refine_user_size, (batchID + 1) * batch_n_user_);
+                    for (int refineID = start_refineID; refineID < end_refineID; refineID++) {
+                        const int userID = refine_seq_l_[refineID];
+                        queryIP_l_[userID] = InnerProduct(query_vecs, user_.getVector(userID), vec_dim_);
+                    }
                 }
                 const double tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
                 this->inner_product_time_ += tmp_inner_product_time;
@@ -203,7 +212,8 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
                 size_t io_cost = 0;
                 double read_disk_time = 0;
                 size_t pred_io_cost = 0;
-                if (refine_user_size <= n_user_ / 4) {
+                //TODO n_user_ / 4
+                if (refine_user_size <= n_user_) {
                     disk_ins_.GetRank(queryIP_l_, rank_lb_l_, rank_ub_l_,
                                       refine_seq_l_, refine_user_size, topk - n_result_user,
                                       io_cost, read_disk_time);
@@ -243,7 +253,7 @@ namespace ReverseMIPS::QueryRankSampleMinMaxIntLREstimate {
                                                                       ip_cost, io_cost,
                                                                       total_time,
                                                                       memory_index_time, read_disk_time);
-                if(pred_io_cost != 0){
+                if (pred_io_cost != 0) {
                     spdlog::info(
                             "queryID {}, n_prune_user {}, n_result_user {}, total_predicite_IO_cost {}, tmp_refine_user_size {}",
                             queryID, n_prune_user, n_result_user, total_predict_io_cost_, tmp_refine_user_size);

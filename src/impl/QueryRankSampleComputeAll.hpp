@@ -48,6 +48,9 @@ namespace ReverseMIPS::QueryRankSampleComputeAll {
         //read disk
         ComputeAll disk_ins_;
 
+        static constexpr int batch_n_user_ = 1024;
+        int n_batch_;
+
         VectorMatrix user_, data_item_;
         int vec_dim_, n_data_item_, n_user_;
         double total_retrieval_time_, inner_product_time_, rank_bound_time_, prune_user_time_, refine_user_time_;
@@ -82,6 +85,7 @@ namespace ReverseMIPS::QueryRankSampleComputeAll {
             this->vec_dim_ = this->user_.vec_dim_;
             this->n_user_ = this->user_.n_vector_;
             this->n_data_item_ = this->data_item_.n_vector_;
+            this->n_batch_ = n_user_ / batch_n_user_ + (n_user_ % batch_n_user_ == 0 ? 0 : 1);
 
             //retrieval variable
             this->prune_l_.resize(n_user_);
@@ -123,8 +127,13 @@ namespace ReverseMIPS::QueryRankSampleComputeAll {
 
                 //calculate IP
                 inner_product_record_.reset();
-                for (int userID = 0; userID < n_user_; userID++) {
-                    queryIP_l_[userID] = InnerProduct(query_vecs, user_.getVector(userID), vec_dim_);
+#pragma omp parallel for default(none) shared(queryIP_l_, query_vecs) num_threads(omp_get_num_procs())
+                for (int batchID = 0; batchID < n_batch_; batchID++) {
+                    const int start_userID = batchID * batch_n_user_;
+                    const int end_userID = std::min(n_user_, (batchID + 1) * batch_n_user_);
+                    for (int userID = start_userID; userID < end_userID; userID++) {
+                        queryIP_l_[userID] = InnerProduct(query_vecs, user_.getVector(userID), vec_dim_);
+                    }
                 }
                 const double tmp_inner_product_time = inner_product_record_.get_elapsed_time_second();
                 this->inner_product_time_ += tmp_inner_product_time;

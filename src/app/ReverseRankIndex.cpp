@@ -334,8 +334,8 @@ int main(int argc, char **argv) {
 //        n_execute_query = 1000;
 
     } else {
-//        topk_l = {100, 50, 10};
-        topk_l = {10};
+        topk_l = {200, 100, 10};
+//        topk_l = {10};
     }
 
     RetrievalResult config;

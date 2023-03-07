@@ -29,6 +29,9 @@ namespace ReverseMIPS {
         std::unique_ptr<double[]> distribution_para_l_; // n_user_ * n_distribution_parameter
         std::unique_ptr<double[]> error_l_; //n_user_
 
+        static constexpr int batch_n_user_ = 1024;
+        int n_batch_;
+
         //used for loading
         double *preprocess_cache_A_; // (4 * n_sample_rank) * (n_predict_parameter_ + 1), constraint matrix
         double *preprocess_cache_b_; // (4 * n_sample_rank), constraint bound
@@ -43,12 +46,14 @@ namespace ReverseMIPS {
             this->predict_para_l_ = std::make_unique<double[]>(n_user * n_predict_parameter_);
             this->distribution_para_l_ = std::make_unique<double[]>(n_user * n_distribution_parameter_);
             this->error_l_ = std::make_unique<double[]>(n_user);
+            this->n_batch_ = (int) n_user_ / batch_n_user_ + (n_user_ % batch_n_user_ == 0 ? 0 : 1);
             static_assert(n_predict_parameter_ == 2 && n_distribution_parameter_ == 2);
         }
 
         inline GlobalLinearRegression(const char *index_basic_dir, const char *dataset_name,
                                       const size_t &n_sample) {
             LoadIndex(index_basic_dir, dataset_name, n_sample);
+            this->n_batch_ = (int) n_user_ / batch_n_user_ + (n_user_ % batch_n_user_ == 0 ? 0 : 1);
         }
 
         void StartPreprocess() {
@@ -332,29 +337,29 @@ namespace ReverseMIPS {
 
         void RankBound(const std::vector<std::pair<double, double>> &queryIP_l,
                        std::vector<int> &rank_lb_l, std::vector<int> &rank_ub_l, const int &queryID) const {
-            for (int userID = 0; userID < n_user_; userID++) {
-                const double queryIP_lb = queryIP_l[userID].first;
-                int qIP_lb_tmp_lower_rank, qIP_lb_tmp_upper_rank;
+#pragma omp parallel for default(none) shared(queryIP_l, queryID, rank_lb_l, rank_ub_l) num_threads(omp_get_num_procs())
+            for (int batchID = 0; batchID < n_batch_; batchID++) {
+                const int start_userID = batchID * batch_n_user_;
+                const int end_userID = std::min((int) n_user_, (batchID + 1) * batch_n_user_);
+                for (int userID = start_userID; userID < end_userID; userID++) {
+                    const double queryIP_lb = queryIP_l[userID].first;
+                    int qIP_lb_tmp_lower_rank, qIP_lb_tmp_upper_rank;
 
-                ComputeRankBound(queryIP_lb, userID,
-                                 qIP_lb_tmp_lower_rank, qIP_lb_tmp_upper_rank, queryID);
+                    ComputeRankBound(queryIP_lb, userID,
+                                     qIP_lb_tmp_lower_rank, qIP_lb_tmp_upper_rank, queryID);
 
-                const double queryIP_ub = queryIP_l[userID].second;
-                int qIP_ub_tmp_lower_rank, qIP_ub_tmp_upper_rank;
-                ComputeRankBound(queryIP_ub, userID,
-                                 qIP_ub_tmp_lower_rank, qIP_ub_tmp_upper_rank, queryID);
+                    const double queryIP_ub = queryIP_l[userID].second;
+                    int qIP_ub_tmp_lower_rank, qIP_ub_tmp_upper_rank;
+                    ComputeRankBound(queryIP_ub, userID,
+                                     qIP_ub_tmp_lower_rank, qIP_ub_tmp_upper_rank, queryID);
 
-                rank_lb_l[userID] = qIP_lb_tmp_lower_rank;
-                rank_ub_l[userID] = qIP_ub_tmp_upper_rank;
+                    rank_lb_l[userID] = qIP_lb_tmp_lower_rank;
+                    rank_ub_l[userID] = qIP_ub_tmp_upper_rank;
 
-//                if (queryID == 3 && userID == 865) {
-//                    printf("queryID %d, userID %d, queryIP_lb %.3f, queryIP_ub %.3f, rank_lb %d, rank_ub %d\n",
-//                           queryID, userID, queryIP_lb, queryIP_ub, rank_lb_l[userID], rank_ub_l[userID]);
-//                }
-
-                assert(qIP_lb_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
-                assert(qIP_ub_tmp_upper_rank <= qIP_ub_tmp_lower_rank);
-                assert(qIP_ub_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
+                    assert(qIP_lb_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
+                    assert(qIP_ub_tmp_upper_rank <= qIP_ub_tmp_lower_rank);
+                    assert(qIP_ub_tmp_upper_rank <= qIP_lb_tmp_lower_rank);
+                }
             }
         }
 

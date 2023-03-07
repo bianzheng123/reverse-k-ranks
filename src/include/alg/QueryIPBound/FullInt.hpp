@@ -8,6 +8,7 @@
 #include <cassert>
 #include <memory>
 #include <vector>
+#include <omp.h>
 
 #include "alg/QueryIPBound/BaseQueryIPBound.hpp"
 #include "alg/SpaceInnerProduct.hpp"
@@ -26,6 +27,9 @@ namespace ReverseMIPS {
         double user_convert_coe_;
 
         double convert_coe_;
+
+        static constexpr int batch_n_user_ = 1024;
+        int n_batch_;
     public:
         FullInt() = default;
 
@@ -36,6 +40,8 @@ namespace ReverseMIPS {
             user_int_ptr_ = std::make_unique<int[]>(n_user_ * vec_dim_);
             user_int_sum_ptr_ = std::make_unique<int[]>(n_user_);
             query_int_ptr_ = std::make_unique<int[]>(vec_dim_);
+
+            this->n_batch_ = (int) n_user_ / batch_n_user_ + (n_user_ % batch_n_user_ == 0 ? 0 : 1);
         }
 
         //make bound from offset_dim to vec_dim
@@ -88,18 +94,23 @@ namespace ReverseMIPS {
                 query_int_sum += std::abs(query_int_vecs[dim]);
             }
 
-            for (int userID = 0; userID < n_user_; userID++) {
-                int *user_int_vecs = user_int_ptr_.get() + userID * vec_dim_;
-                int intIP = InnerProduct(user_int_vecs, query_int_vecs, vec_dim_);
-                int int_otherIP = user_int_sum_ptr_[userID] + query_int_sum;
-                int lb_part = intIP - int_otherIP;
-                int ub_part = intIP + int_otherIP;
+#pragma omp parallel for default(none) shared(ip_bound_l, query_int_vecs, query_int_sum) num_threads(omp_get_num_procs())
+            for (int batchID = 0; batchID < n_batch_; batchID++) {
+                const int start_userID = batchID * batch_n_user_;
+                const int end_userID = std::min((int) n_user_, (batchID + 1) * batch_n_user_);
+                for (int userID = start_userID; userID < end_userID; userID++) {
+                    int *user_int_vecs = user_int_ptr_.get() + userID * vec_dim_;
+                    int intIP = InnerProduct(user_int_vecs, query_int_vecs, vec_dim_);
+                    int int_otherIP = user_int_sum_ptr_[userID] + query_int_sum;
+                    int lb_part = intIP - int_otherIP;
+                    int ub_part = intIP + int_otherIP;
 
-                double lower_bound = convert_coe_ * lb_part;
-                double upper_bound = convert_coe_ * ub_part;
+                    double lower_bound = convert_coe_ * lb_part;
+                    double upper_bound = convert_coe_ * ub_part;
 
-                ip_bound_l[userID] = std::make_pair(lower_bound, upper_bound);
-                assert(lower_bound <= upper_bound);
+                    ip_bound_l[userID] = std::make_pair(lower_bound, upper_bound);
+                    assert(lower_bound <= upper_bound);
+                }
             }
 
         }
