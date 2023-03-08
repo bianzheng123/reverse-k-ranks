@@ -22,7 +22,7 @@ namespace ReverseMIPS {
             return "QueryRankSampleScoreDistribution";
         } else if (method_name == "QueryRankSampleSearchAllRank") {
             return "QueryRankSampleSearchAllRank";
-        } else if (method_name == "RankSample") {
+        } else if (method_name == "RankSample" || method_name == "RankSampleComputeAll") {
             return "RankSample";
         } else if (method_name == "QueryRankSampleSearchBruteForce") {
             return "QueryRankSampleSearchBruteForce";
@@ -44,7 +44,7 @@ namespace ReverseMIPS {
                    method_name == "QueryRankSampleSearchUniformRankMinMaxIntLR" ||
                    method_name == "QueryRankSampleSearchUniformRankUniformIntLR") {
             return "OptimalUniform";
-        } else if (method_name == "RankSample") {
+        } else if (method_name == "RankSample" || method_name == "RankSampleComputeAll") {
             return "Uniform";
         } else if (method_name == "QueryRankSampleSearchBruteForce") {
             return "OptimalBruteForce";
